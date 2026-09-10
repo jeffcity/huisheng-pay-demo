@@ -31,6 +31,8 @@ const DIST = 'file://' + process.argv[2];
       try {
         const inner = frame?.contentDocument;
         return Boolean(
+          // 首页也包含同名表格和原型 API，必须等到目标文档完成切换。
+          inner?.defaultView?.__UNIFIED_DEMO_HASH === 'wallets' &&
           inner?.querySelector('#tableBody tr') &&
           inner?.defaultView?.__HSPlatformPrototype?.getWalletRows
         );
