@@ -78,7 +78,7 @@
     .card-meta { color: var(--text-2); white-space: nowrap; }
     .table-wrap { width: 100%; overflow: auto; }
     table { width: 100%; min-width: 1280px; border-collapse: collapse; background: var(--surface); }
-    .message-table { min-width: 1480px; }
+    .message-table { min-width: 1200px; }
     th, td { padding: 10px 13px; border-bottom: 1px solid var(--border-light); text-align: left; vertical-align: middle; white-space: nowrap; }
     th { height: 42px; background: var(--surface-soft); color: var(--text-2); font-size: 13px; font-weight: 600; }
     tbody tr:hover td { background: #f5f7fa; }
@@ -164,7 +164,7 @@
 
     <div class="boundary-note">
       <span class="scope-dot" aria-hidden="true"></span>
-      <div><strong>平台通知边界</strong>本页只管理平台自有通知。商户自有系统通知补推仍由租户端有权限人员处理；平台只能查看相关摘要、进入来源业务或发起协同工单。</div>
+      <div><strong>平台通知边界</strong>本页只管理平台自有通知。商户自有系统通知补推仍由租户端有权限人员处理；平台可查看相关通知摘要。</div>
     </div>
 
     <nav class="tabs" role="tablist" aria-label="平台通知中心页签">
@@ -195,7 +195,7 @@
         </header>
         <div class="table-wrap">
           <table class="message-table">
-            <thead><tr><th>推送时间（UTC+8）</th><th>通知事件</th><th>租户</th><th>风险等级</th><th>目标与结果</th><th>推送内容</th><th>操作</th></tr></thead>
+            <thead><tr><th>推送时间（UTC+8）</th><th>通知事件</th><th>租户</th><th>风险等级</th><th>推送内容</th><th>操作</th></tr></thead>
             <tbody id="messageRows"></tbody>
           </table>
         </div>
@@ -236,7 +236,7 @@
     <div class="modal small">
       <header class="modal-head"><h3 id="detailTitle">通知详情</h3><button class="close" id="closeDetail" type="button" aria-label="关闭通知详情">×</button></header>
       <div class="modal-body" id="detailBody"></div>
-      <footer class="modal-actions"><button class="btn" id="openSource" type="button">进入来源业务</button><button class="btn primary" id="closeDetailFooter" type="button">关闭</button></footer>
+      <footer class="modal-actions"><button class="btn primary" id="closeDetailFooter" type="button">关闭</button></footer>
     </div>
   </div>
 
@@ -325,18 +325,19 @@
       );
     }
 
+    const hasTenant = item => Boolean(item.tenant && item.tenantNo && item.tenantNo !== "ALL");
+
     function renderMessages() {
       const rows = filteredMessages();
       el("messageRows").innerHTML = rows.length ? rows.map((item, index) => `
         <tr>
           <td class="mono">${escapeHtml(item.time)}</td>
-          <td><div class="stack"><strong>${escapeHtml(item.type)}</strong><span class="muted">来源：${escapeHtml(item.source)}</span></div></td>
-          <td><div class="stack"><strong>${escapeHtml(item.tenant)}</strong><span class="muted mono">${escapeHtml(item.tenantNo)}</span></div></td>
+          <td><strong>${escapeHtml(item.type)}</strong></td>
+          <td>${hasTenant(item) ? `<div class="stack"><strong>${escapeHtml(item.tenant)}</strong><span class="muted mono">${escapeHtml(item.tenantNo)}</span></div>` : "-"}</td>
           <td><span class="tag ${riskClass(item.risk)}">${escapeHtml(item.risk)}</span></td>
-          <td><div class="stack"><span class="mono">${escapeHtml(item.group)}</span><span class="tag ${item.result === "已发送" ? "green" : "red"}">${escapeHtml(item.result)}</span></div></td>
           <td><div class="message-copy" title="${escapeHtml(item.content)}">${escapeHtml(item.content.replaceAll("\n", " / "))}</div></td>
           <td><button class="link-btn" type="button" data-message-index="${messageData.indexOf(item)}">查看详情</button></td>
-        </tr>`).join("") : `<tr><td class="empty" colspan="7">暂无符合条件的平台通知记录</td></tr>`;
+        </tr>`).join("") : `<tr><td class="empty" colspan="6">暂无符合条件的平台通知记录</td></tr>`;
       el("messageCount").textContent = `共 ${rows.length} 条`;
       el("messagePagerText").textContent = `共 ${rows.length} 条`;
     }
@@ -388,11 +389,10 @@
       el("detailBody").innerHTML = `
         <dl class="detail-list">
           <dt>通知事件</dt><dd>${escapeHtml(item.type)}</dd>
-          <dt>租户范围</dt><dd>${escapeHtml(item.tenant)}（${escapeHtml(item.tenantNo)}）</dd>
+          <dt>租户范围</dt><dd>${hasTenant(item) ? `${escapeHtml(item.tenant)}（${escapeHtml(item.tenantNo)}）` : "-"}</dd>
           <dt>风险等级</dt><dd><span class="tag ${riskClass(item.risk)}">${escapeHtml(item.risk)}</span></dd>
-          <dt>发送目标</dt><dd>${escapeHtml(item.robot)} / <span class="mono">${escapeHtml(item.group)}</span></dd>
+          <dt>群 ID</dt><dd class="mono">${escapeHtml(item.group || "-")}</dd>
           <dt>发送结果</dt><dd><span class="tag ${item.result === "已发送" ? "green" : "red"}">${escapeHtml(item.result)}</span></dd>
-          <dt>来源业务</dt><dd>${escapeHtml(item.source)}</dd>
           <dt>推送时间</dt><dd class="mono">${escapeHtml(item.time)} · UTC+8</dd>
         </dl>
         <div class="message-detail">${escapeHtml(item.content)}</div>`;
@@ -519,11 +519,6 @@
     el("cancelConfig").addEventListener("click", closeConfigEditor);
     el("closeDetail").addEventListener("click", closeDetail);
     el("closeDetailFooter").addEventListener("click", closeDetail);
-    el("openSource").addEventListener("click", () => {
-      const source = state.selectedMessage?.source || "来源业务";
-      showToast(`已定位到${source}；通知本身不改变业务结果`);
-      closeDetail();
-    });
     [el("detailMask"), el("configMask")].forEach(mask => mask.addEventListener("click", event => {
       if (event.target === mask) mask.classList.remove("show");
     }));
