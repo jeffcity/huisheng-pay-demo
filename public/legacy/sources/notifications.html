@@ -79,6 +79,11 @@
     .table-wrap { width: 100%; overflow: auto; }
     table { width: 100%; min-width: 1280px; border-collapse: collapse; background: var(--surface); }
     .message-table { min-width: 1200px; }
+    .robot-table { min-width: 700px; }
+    .robot-filter { grid-template-columns: minmax(220px, 360px) auto; justify-content: start; }
+    .field-hint { margin: 7px 0 0; color: var(--text-3); font-size: 12px; line-height: 1.6; }
+    .label-row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+    .label-row .link-btn { min-height: 24px; font-size: 12px; }
     th, td { padding: 10px 13px; border-bottom: 1px solid var(--border-light); text-align: left; vertical-align: middle; white-space: nowrap; }
     th { height: 42px; background: var(--surface-soft); color: var(--text-2); font-size: 13px; font-weight: 600; }
     tbody tr:hover td { background: #f5f7fa; }
@@ -170,6 +175,7 @@
     <nav class="tabs" role="tablist" aria-label="平台通知中心页签">
       <button class="tab active" id="messagesTab" role="tab" type="button" aria-selected="true" aria-controls="messagesPanel" data-tab="messages">发送的消息 <span class="count-pill" id="messageTabCount">8</span></button>
       <button class="tab" id="configTab" role="tab" type="button" aria-selected="false" aria-controls="configPanel" data-tab="config">通知配置 <span class="count-pill" id="configTabCount">7</span></button>
+      <button class="tab" id="robotsTab" role="tab" type="button" aria-selected="false" aria-controls="robotsPanel" data-tab="robots">机器人配置 <span class="count-pill" id="robotTabCount">3</span></button>
     </nav>
 
     <section class="panel" id="messagesPanel" role="tabpanel" aria-labelledby="messagesTab">
@@ -211,7 +217,7 @@
       <section class="card filter-card config-filter" aria-label="平台通知配置筛选">
         <div class="field"><label for="configType">通知事件</label><select class="control" id="configType"><option value="">全部事件</option></select></div>
         <div class="field"><label for="configRisk">风险等级</label><select class="control" id="configRisk"><option value="">全部风险</option><option>高风险</option><option>中风险</option><option>低风险</option></select></div>
-        <div class="field"><label for="configRobot">通知机器人</label><select class="control" id="configRobot"><option value="">全部机器人</option><option>汇盛平台运营</option><option>汇盛平台资金</option><option>汇盛平台风控</option></select></div>
+        <div class="field"><label for="configRobot">通知机器人</label><select class="control" id="configRobot"><option value="">全部机器人</option></select></div>
         <div class="field"><label for="configStatus">状态</label><select class="control" id="configStatus"><option value="">全部状态</option><option value="on">启用</option><option value="off">停用</option></select></div>
         <div class="filter-actions"><button class="btn" id="resetConfigs" type="button">重置</button><button class="btn primary" id="searchConfigs" type="button">搜索</button></div>
       </section>
@@ -229,6 +235,25 @@
         </div>
         <footer class="pager"><span id="configPagerText">共 7 条</span><button class="page-btn active" type="button">1</button></footer>
       </section>
+    </section>
+    <section class="panel" id="robotsPanel" role="tabpanel" aria-labelledby="robotsTab" hidden>
+      <section class="card filter-card robot-filter" aria-label="机器人筛选">
+        <div class="field"><label for="robotKeyword">机器人名称</label><input class="control" id="robotKeyword" placeholder="请输入机器人名称"></div>
+        <div class="filter-actions"><button class="btn" id="resetRobots" type="button">重置</button><button class="btn primary" id="searchRobots" type="button">搜索</button></div>
+      </section>
+      <section class="card">
+        <header class="card-head">
+          <div><h2>机器人配置</h2><p>维护机器人名称及 TG Bot Token，保存后可在通知配置中选择。</p></div>
+          <div class="page-actions"><span class="card-meta" id="robotCount">共 3 条</span><button class="btn primary" id="addRobot" type="button">新增机器人</button></div>
+        </header>
+        <div class="table-wrap">
+          <table class="robot-table">
+            <thead><tr><th>机器人名称</th><th>TG Bot Token</th><th>关联通知配置</th><th>更新时间（UTC+8）</th><th>操作</th></tr></thead>
+            <tbody id="robotRows"></tbody>
+          </table>
+        </div>
+      </section>
+      <p class="field-hint">评审演示：请勿填写真实 Token。仅演示配置流程，不连接 Telegram；刷新或重新进入页面后恢复示例数据。</p>
     </section>
   </main>
 
@@ -248,7 +273,7 @@
           <div class="field"><label for="modalType">通知事件</label><select class="control" id="modalType"><option value="">请选择通知事件</option></select><span class="field-error" id="typeError">请选择通知事件</span></div>
           <div class="field"><label>风险等级</label><div class="readonly" id="modalRisk"><span class="tag gray">请选择通知事件</span></div></div>
           <div class="field"><label for="modalGroup">TG 群 ID</label><input class="control mono" id="modalGroup" placeholder="请输入平台运营 TG 群 ID"><span class="field-error" id="groupError">请输入 TG 群 ID</span></div>
-          <div class="field"><label for="modalRobot">通知机器人</label><select class="control" id="modalRobot"><option value="">请选择通知机器人</option><option>汇盛平台运营</option><option>汇盛平台资金</option><option>汇盛平台风控</option></select><span class="field-error" id="robotError">请选择通知机器人</span></div>
+          <div class="field"><div class="label-row"><label for="modalRobot">通知机器人</label><button class="link-btn" id="addRobotFromConfig" type="button">新增机器人</button></div><select class="control" id="modalRobot"><option value="">请选择通知机器人</option></select><span class="field-error" id="robotError">请选择通知机器人</span><p class="field-hint" id="robotSelectHint">选项来自「机器人配置」。</p></div>
           <div class="field full"><label>可用变量</label><div class="variables" id="modalVariables"><span class="muted">请选择通知事件</span></div></div>
           <div class="field full"><label for="modalTemplate">消息模板</label><textarea class="control" id="modalTemplate" placeholder="支持 ${变量名} 占位符"></textarea><span class="field-error" id="templateError">请输入模板并仅使用当前事件支持的变量</span></div>
           <div class="field full"><label>模板预览</label><div class="preview" id="modalPreview">请选择通知事件</div></div>
@@ -256,6 +281,17 @@
       </div>
       <footer class="modal-actions"><button class="btn" id="cancelConfig" type="button">取消</button><button class="btn primary" id="saveConfig" type="button">保存配置</button></footer>
     </div>
+  </div>
+
+  <div class="mask" id="robotMask" role="dialog" aria-modal="true" aria-labelledby="robotModalTitle">
+    <form class="modal small" id="robotForm" novalidate>
+      <header class="modal-head"><h3 id="robotModalTitle">新增机器人</h3><button class="close" id="closeRobot" type="button" aria-label="关闭机器人配置弹窗">×</button></header>
+      <div class="modal-body modal-grid">
+        <div class="field full"><label for="robotName">机器人名称</label><input class="control" id="robotName" placeholder="请输入机器人名称" required aria-describedby="robotNameError"><span class="field-error" id="robotNameError">请输入机器人名称</span></div>
+        <div class="field full"><label for="robotToken">TG Bot Token</label><input class="control mono" id="robotToken" type="password" autocomplete="new-password" spellcheck="false" placeholder="请输入演示 Token" aria-describedby="robotTokenHint robotTokenError"><span class="field-error" id="robotTokenError">请输入 TG Bot Token</span><p class="field-hint" id="robotTokenHint">仅用于评审演示，请勿填写真实 Token。</p></div>
+      </div>
+      <footer class="modal-actions"><button class="btn" id="cancelRobot" type="button">取消</button><button class="btn primary" id="saveRobot" type="submit">保存</button></footer>
+    </form>
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -294,10 +330,19 @@
       { id: 7, type: "租户协同工单待受理", risk: "低风险", group: "-5219001003", robot: "汇盛平台运营", enabled: false, template: eventMeta["租户协同工单待受理"].template, updated: "2026-08-28 11:07:55" }
     ];
 
-    const state = { activeTab: "messages", editingId: null, selectedMessage: null };
+    // 原型只保存配置状态，不保存 Token 明文，也不调用 Telegram。
+    let robotData = [
+      { id: 1, name: "汇盛平台运营", tokenConfigured: true, updated: "2026-09-02 09:00:00" },
+      { id: 2, name: "汇盛平台资金", tokenConfigured: true, updated: "2026-09-02 09:00:00" },
+      { id: 3, name: "汇盛平台风控", tokenConfigured: true, updated: "2026-09-02 09:00:00" }
+    ];
+    configData = configData.map(({ robot, ...config }) => ({ ...config, robotId: robotData.find(item => item.name === robot).id }));
+    const state = { activeTab: "messages", editingId: null, selectedMessage: null, editingRobotId: null, robotKeyword: "", robotFromConfig: false, robotTrigger: null };
     const el = id => document.getElementById(id);
     const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
     const riskClass = risk => risk === "高风险" ? "red" : risk === "中风险" ? "orange" : "blue";
+    const robotName = id => robotData.find(item => item.id === id)?.name || "-";
+    const currentTime = () => new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Shanghai", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }).format(new Date());
     const showToast = message => {
       el("toast").textContent = message;
       el("toast").classList.add("show");
@@ -310,6 +355,85 @@
       el("messageEvent").insertAdjacentHTML("beforeend", options);
       el("configType").insertAdjacentHTML("beforeend", options);
       el("modalType").insertAdjacentHTML("beforeend", options);
+      populateRobotOptions();
+    }
+
+    function populateRobotOptions() {
+      const options = robotData.map(robot => `<option value="${robot.id}">${escapeHtml(robot.name)}</option>`).join("");
+      for (const [id, placeholder] of [["configRobot", "全部机器人"], ["modalRobot", robotData.length ? "请选择通知机器人" : "请先新增机器人"]]) {
+        const selected = el(id).value;
+        el(id).innerHTML = `<option value="">${placeholder}</option>${options}`;
+        el(id).value = robotData.some(robot => String(robot.id) === selected) ? selected : "";
+      }
+      el("robotSelectHint").textContent = robotData.length ? "选项来自「机器人配置」。" : "暂无机器人，请先点击「新增机器人」。";
+    }
+
+    function renderRobots() {
+      const rows = robotData.filter(robot => robot.name.toLowerCase().includes(state.robotKeyword));
+      el("robotRows").innerHTML = rows.length ? rows.map(robot => `<tr>
+        <td><strong>${escapeHtml(robot.name)}</strong></td>
+        <td><span class="mono">••••••••</span><span class="muted"> 已配置</span></td>
+        <td>${configData.filter(config => config.robotId === robot.id).length} 条</td>
+        <td class="mono">${escapeHtml(robot.updated)}</td>
+        <td><button class="link-btn" type="button" data-edit-robot="${robot.id}">编辑</button></td>
+      </tr>`).join("") : `<tr><td class="empty" colspan="5">${robotData.length ? "暂无符合条件的机器人" : "暂无机器人，请点击「新增机器人」"}</td></tr>`;
+      el("robotCount").textContent = `共 ${rows.length} 条`;
+      el("robotTabCount").textContent = robotData.length;
+    }
+
+    function openRobotEditor(robot, fromConfig = false) {
+      state.editingRobotId = robot?.id || null;
+      state.robotFromConfig = fromConfig;
+      state.robotTrigger = document.activeElement;
+      el("robotModalTitle").textContent = robot ? "编辑机器人" : "新增机器人";
+      el("robotName").value = robot?.name || "";
+      el("robotToken").value = "";
+      el("robotToken").required = !robot;
+      el("robotToken").placeholder = robot ? "已配置，留空保持不变" : "请输入演示 Token";
+      el("robotTokenHint").textContent = robot ? "Token 不回显，留空保持不变；填写后替换。请勿填写真实 Token。" : "仅用于评审演示，请勿填写真实 Token。";
+      for (const id of ["robotName", "robotToken"]) {
+        el(id).classList.remove("invalid");
+        el(id).setAttribute("aria-invalid", "false");
+        el(`${id}Error`).classList.remove("show");
+      }
+      if (fromConfig) { el("configMask").inert = true; el("configMask").setAttribute("aria-hidden", "true"); }
+      el("robotMask").classList.add("show");
+      el("robotName").focus();
+    }
+
+    function closeRobotEditor() {
+      if (!el("robotMask").classList.contains("show")) return;
+      el("robotMask").classList.remove("show");
+      el("robotToken").value = "";
+      el("configMask").inert = false;
+      el("configMask").removeAttribute("aria-hidden");
+      const trigger = state.robotTrigger?.isConnected ? state.robotTrigger : el("robotRows").querySelector(`[data-edit-robot="${state.editingRobotId}"]`) || el("addRobot");
+      trigger.focus();
+    }
+
+    function saveRobot(event) {
+      event.preventDefault();
+      const name = el("robotName").value.trim();
+      const hasToken = Boolean(el("robotToken").value.trim());
+      const checks = [["robotName", Boolean(name)], ["robotToken", Boolean(state.editingRobotId) || hasToken]];
+      checks.forEach(([id, valid]) => {
+        el(id).classList.toggle("invalid", !valid);
+        el(id).setAttribute("aria-invalid", String(!valid));
+        el(`${id}Error`).classList.toggle("show", !valid);
+      });
+      const invalid = checks.find(([, valid]) => !valid);
+      if (invalid) { el(invalid[0]).focus(); return; }
+      const id = state.editingRobotId || Math.max(0, ...robotData.map(robot => robot.id)) + 1;
+      if (state.editingRobotId) robotData = robotData.map(robot => robot.id === id ? { ...robot, name, tokenConfigured: robot.tokenConfigured || hasToken, updated: currentTime() } : robot);
+      else robotData = [{ id, name, tokenConfigured: true, updated: currentTime() }, ...robotData];
+      state.robotKeyword = "";
+      el("robotKeyword").value = "";
+      populateRobotOptions();
+      if (state.robotFromConfig) el("modalRobot").value = String(id);
+      renderRobots();
+      renderConfigs();
+      closeRobotEditor();
+      showToast(state.editingRobotId ? "机器人已保存，关联通知配置同步显示名称" : "机器人已新增，可在通知配置中选择");
     }
 
     function filteredMessages() {
@@ -350,7 +474,7 @@
       return configData.filter(item =>
         (!type || item.type === type) &&
         (!risk || item.risk === risk) &&
-        (!robot || item.robot === robot) &&
+        (!robot || String(item.robotId) === robot) &&
         (!status || (status === "on" ? item.enabled : !item.enabled))
       );
     }
@@ -362,7 +486,7 @@
           <td><strong>${escapeHtml(item.type)}</strong></td>
           <td><span class="tag ${riskClass(item.risk)}">${escapeHtml(item.risk)}</span></td>
           <td class="mono">${escapeHtml(item.group)}</td>
-          <td>${escapeHtml(item.robot)}</td>
+          <td>${escapeHtml(robotName(item.robotId))}</td>
           <td><button class="switch ${item.enabled ? "on" : ""}" type="button" role="switch" aria-checked="${item.enabled}" aria-label="${item.enabled ? "停用" : "启用"} ${escapeHtml(item.type)}" data-toggle-config="${item.id}"></button><span class="switch-label">${item.enabled ? "启用" : "停用"}</span></td>
           <td><span class="message-copy" title="${escapeHtml(item.template)}">${escapeHtml(item.template.replaceAll("\n", " / "))}</span></td>
           <td class="mono">${escapeHtml(item.updated)}</td>
@@ -382,6 +506,8 @@
       });
       el("messagesPanel").hidden = tab !== "messages";
       el("configPanel").hidden = tab !== "config";
+      el("robotsPanel").hidden = tab !== "robots";
+      if (tab === "robots") renderRobots();
     }
 
     function openMessageDetail(item) {
@@ -434,7 +560,8 @@
       el("configModalTitle").textContent = config ? "编辑通知配置" : "新增通知配置";
       el("modalType").value = config?.type || "";
       el("modalGroup").value = config?.group || "";
-      el("modalRobot").value = config?.robot || "";
+      populateRobotOptions();
+      el("modalRobot").value = config?.robotId ? String(config.robotId) : "";
       el("modalTemplate").value = config?.template || "";
       ["modalType", "modalGroup", "modalRobot", "modalTemplate"].forEach(id => el(id).classList.remove("invalid"));
       document.querySelectorAll("#configMask .field-error").forEach(error => error.classList.remove("show"));
@@ -455,7 +582,7 @@
       const checks = [
         ["modalType", "typeError", Boolean(type)],
         ["modalGroup", "groupError", Boolean(group)],
-        ["modalRobot", "robotError", Boolean(robot)],
+        ["modalRobot", "robotError", robotData.some(item => String(item.id) === robot)],
         ["modalTemplate", "templateError", Boolean(template) && !invalidVariable]
       ];
       checks.forEach(([fieldId, errorId, valid]) => {
@@ -474,7 +601,7 @@
         type,
         risk: eventMeta[type].risk,
         group: el("modalGroup").value.trim(),
-        robot: el("modalRobot").value,
+        robotId: Number(el("modalRobot").value),
         enabled: true,
         template: el("modalTemplate").value.trim(),
         updated: now
@@ -519,16 +646,39 @@
     el("cancelConfig").addEventListener("click", closeConfigEditor);
     el("closeDetail").addEventListener("click", closeDetail);
     el("closeDetailFooter").addEventListener("click", closeDetail);
+    el("addRobot").addEventListener("click", () => openRobotEditor());
+    el("addRobotFromConfig").addEventListener("click", () => openRobotEditor(undefined, true));
+    el("robotRows").addEventListener("click", event => {
+      const button = event.target.closest("[data-edit-robot]");
+      if (button) openRobotEditor(robotData.find(robot => robot.id === Number(button.dataset.editRobot)));
+    });
+    el("robotForm").addEventListener("submit", saveRobot);
+    el("closeRobot").addEventListener("click", closeRobotEditor);
+    el("cancelRobot").addEventListener("click", closeRobotEditor);
+    el("robotMask").addEventListener("click", event => { if (event.target === el("robotMask")) closeRobotEditor(); });
+    el("searchRobots").addEventListener("click", () => { state.robotKeyword = el("robotKeyword").value.trim().toLowerCase(); renderRobots(); });
+    el("resetRobots").addEventListener("click", () => { state.robotKeyword = ""; el("robotKeyword").value = ""; renderRobots(); });
+    el("robotKeyword").addEventListener("keydown", event => { if (event.key === "Enter") el("searchRobots").click(); });
     [el("detailMask"), el("configMask")].forEach(mask => mask.addEventListener("click", event => {
       if (event.target === mask) mask.classList.remove("show");
     }));
     document.addEventListener("keydown", event => {
-      if (event.key === "Escape") { closeDetail(); closeConfigEditor(); }
+      if (event.key === "Escape") {
+        if (el("robotMask").classList.contains("show")) closeRobotEditor();
+        else { closeDetail(); closeConfigEditor(); }
+      }
+      if (event.key === "Tab" && el("robotMask").classList.contains("show")) {
+        const controls = [...el("robotMask").querySelectorAll("button, input")];
+        const first = controls[0], last = controls[controls.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+      }
     });
 
     populateOptions();
     renderMessages();
     renderConfigs();
+    renderRobots();
   </script>
 </body>
 </html>

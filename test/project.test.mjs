@@ -216,3 +216,19 @@ test("统一导航使用最新模块名称", async () => {
     assert.doesNotMatch(system, new RegExp(legacyLabel), `系统管理菜单元数据仍保留旧名称：${legacyLabel}`);
   }
 });
+
+test("平台通知中心提供机器人配置并与通知配置联动", async () => {
+  const page = await readFile(path.join(root, "public/legacy/sources/notifications.html"), "utf8");
+
+  for (const label of ["机器人配置", "机器人名称", "TG Bot Token", "关联通知配置", "新增机器人"]) {
+    assert.match(page, new RegExp(label), `机器人配置缺少：${label}`);
+  }
+  assert.match(page, /id="robotsTab"[\s\S]*data-tab="robots"/);
+  assert.match(page, /id="robotToken" type="password" autocomplete="new-password"/);
+  assert.match(page, /let robotData = \[/);
+  assert.match(page, /function populateRobotOptions\(\)/);
+  assert.match(page, /configData = configData\.map[\s\S]*robotId:/);
+  assert.match(page, /robotId: Number\(el\("modalRobot"\)\.value\)/);
+  assert.match(page, /if \(state\.robotFromConfig\) el\("modalRobot"\)\.value = String\(id\)/);
+  assert.doesNotMatch(page, /data-delete-robot|data-toggle-robot/);
+});
