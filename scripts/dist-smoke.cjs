@@ -1,8 +1,8 @@
 // dist 冒烟：React 壳加载 → 租户平台钱包渲染 → 钱包弹窗 → 流水时间切换。
 // 与当前统一导航和钱包 Demo 的构建产物保持一致。
 const puppeteer = require('puppeteer-core');
-const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-const DIST = 'file://' + process.argv[2];
+const CHROME = process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+const DIST = require('node:url').pathToFileURL(require('node:path').resolve(process.argv[2])).href;
 
 (async () => {
   let browser;
@@ -17,16 +17,18 @@ const DIST = 'file://' + process.argv[2];
     await page.setViewport({ width: 1440, height: 900 });
     await page.goto(DIST, { waitUntil: 'networkidle0', timeout: 30000 });
 
-    await page.waitForSelector('.arco-menu-item', { timeout: 10000 });
+    const shellElement = await page.waitForSelector('#surface-panel > iframe');
+    const app = await shellElement.contentFrame();
+    await app.waitForSelector('.arco-menu-item', { timeout: 10000 });
     console.log('SHELL_OK React+Arco 壳渲染');
 
-    const walletMenu = await page.waitForFunction(() => (
+    const walletMenu = await app.waitForFunction(() => (
       [...document.querySelectorAll('.arco-menu-item')]
         .find(item => item.textContent.includes('租户平台钱包')) || null
     ), { timeout: 10000 });
     await walletMenu.asElement().click();
 
-    await page.waitForFunction(() => {
+    await app.waitForFunction(() => {
       const frame = document.querySelector('iframe');
       try {
         const inner = frame?.contentDocument;
@@ -42,16 +44,16 @@ const DIST = 'file://' + process.argv[2];
     }, { timeout: 15000 });
     console.log('EMBED_OK 租户平台钱包经 embed 管线加载');
 
-    const walletCount = await page.evaluate(() => {
+    const walletCount = await app.evaluate(() => {
       const inner = document.querySelector('iframe').contentDocument;
       return inner.defaultView.__HSPlatformPrototype.getWalletRows().length;
     });
 
-    await page.evaluate(() => {
+    await app.evaluate(() => {
       document.querySelector('iframe').contentDocument
         .querySelector('#tableBody tr [data-detail]')?.click();
     });
-    await page.waitForFunction(() => {
+    await app.waitForFunction(() => {
       const inner = document.querySelector('iframe').contentDocument;
       return Boolean(
         inner.querySelector('#drawer.open.wallet-modal') &&
@@ -63,11 +65,11 @@ const DIST = 'file://' + process.argv[2];
     console.log('MODAL_OPEN 租户钱包详情弹窗');
 
     for (const period of ['today', 'yesterday']) {
-      await page.evaluate(selectedPeriod => {
+      await app.evaluate(selectedPeriod => {
         document.querySelector('iframe').contentDocument
           .querySelector(`[data-wallet-flow-period="${selectedPeriod}"]`)?.click();
       }, period);
-      await page.waitForFunction(selectedPeriod => {
+      await app.waitForFunction(selectedPeriod => {
         const inner = document.querySelector('iframe').contentDocument;
         const tab = inner.querySelector(`[data-wallet-flow-period="${selectedPeriod}"]`);
         return tab?.getAttribute('aria-selected') === 'true' &&
@@ -75,7 +77,7 @@ const DIST = 'file://' + process.argv[2];
       }, { timeout: 5000 }, period);
     }
 
-    const result = await page.evaluate(() => {
+    const result = await app.evaluate(() => {
       const inner = document.querySelector('iframe').contentDocument;
       return {
         title: inner.querySelector('#drawerTitle')?.textContent.trim(),

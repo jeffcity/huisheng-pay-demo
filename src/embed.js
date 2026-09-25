@@ -4,6 +4,11 @@
 const sourceCache = new Map();
 
 async function fetchSource(key) {
+  if (window.__HS_EMBEDDED_SOURCES__) {
+    const html = window.__HS_EMBEDDED_SOURCES__[key];
+    if (typeof html !== 'string') throw new Error(`页面来源缺失：${key}`);
+    return html;
+  }
   if (sourceCache.has(key)) return sourceCache.get(key);
   const res = await fetch(`./legacy/sources/${key}.html`);
   if (!res.ok) throw new Error(`页面来源缺失：${key}`);

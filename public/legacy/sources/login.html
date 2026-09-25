@@ -1250,7 +1250,6 @@
               <div class="field" data-field="password">
                 <div class="field-label">
                   <label for="password">密码</label>
-                  <button class="text-link" type="button" id="adminHelp">联系管理员</button>
                 </div>
                 <div class="input-wrap has-action">
                   <i data-lucide="lock" class="input-icon"></i>
@@ -1984,7 +1983,6 @@
       clearPlatformLoginRoute();
       setView("login");
     });
-    document.getElementById("adminHelp").addEventListener("click", () => showToast("联系管理员", "密码重置和 2FA 重置由系统管理处理。"));
     document.getElementById("exceptionHelp").addEventListener("click", () => showToast("联系管理员", "请通过平台内部支持渠道处理账号状态或访问权限。"));
 
     window.__HSPlatformLoginPrototype = Object.freeze({

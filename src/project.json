@@ -1,7 +1,7 @@
 {
   "id": "HS-PLATFORM",
-  "name": "汇盛支付平台端",
-  "title": "汇盛支付平台端整合 Demo",
+  "name": "汇盛支付统一 Demo",
+  "title": "汇盛支付统一 Demo",
   "framework": "react+arco",
   "sourcesDir": "public/legacy/sources",
   "modules": "src/legacy/modules.json"

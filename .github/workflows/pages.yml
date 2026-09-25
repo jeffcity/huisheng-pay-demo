@@ -1,4 +1,4 @@
-name: Deploy Huisheng payment platform demo
+name: Deploy Huisheng unified demo
 
 on:
   push:
@@ -33,6 +33,11 @@ jobs:
         run: npm ci
       - name: Build and check
         run: npm run check
+      - name: Verify three-surface single-file demo
+        run: |
+          chrome_path="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$chrome_path"
+          CHROME_PATH="$chrome_path" npm run smoke
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload Pages artifact
