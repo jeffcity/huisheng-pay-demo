@@ -1,35 +1,34 @@
-// 构建后一致性检查（npm run check 第三段）：
-// 1) dist/index.html 由 Vite 生成且引用相对资源（base './'）
-// 2) 16 个真实源文件随 dist 发布且无本机路径/外部脚本
-// 3) modules.json 每个模块都能落到存在的源文件
-import assert from "node:assert/strict";
-import { readFile, stat } from "node:fs/promises";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+import assert from 'node:assert/strict';
+import { readFile, readdir } from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const distIndex = await readFile(path.join(root, "dist/index.html"), "utf8");
-assert.match(distIndex, /<title>\s*汇盛支付平台端整合 Demo\s*<\/title>/, "dist 标题与项目配置不一致");
-assert.match(distIndex, /\bsrc="\.\/assets\//, "dist 必须使用相对资源路径（base './'）");
-assert.doesNotMatch(distIndex, /\/Users\/|file:\/\//i, "构建内容泄漏本机绝对路径");
-assert.doesNotMatch(distIndex, /<(?:script|link)\b[^>]+(?:src|href)=["']https?:/i, "React 壳不应依赖外部可执行脚本或样式");
-
-const modules = JSON.parse(await readFile(path.join(root, "src/legacy/modules.json"), "utf8"));
-const sourceKeys = new Set(Object.values(modules).map(m => m.sourceKey));
-// 15 个模块源 + 1 个共享 authGuard（不被任何模块直接引用）
-assert.equal(sourceKeys.size, 15, `模块源数量异常：${sourceKeys.size}`);
-await stat(path.join(root, "dist/legacy/sources/authGuard.html"));
-for (const key of [...sourceKeys]) {
-  const p = path.join(root, "dist/legacy/sources", `${key}.html`);
-  await stat(p);
-  if (key === "authGuard") continue;
-  const html = await readFile(p, "utf8");
-  assert.doesNotMatch(html, /\/Users\/|file:\/\//i, `${key}.html 泄漏本机绝对路径`);
-  // 注：channels/login/system/tenants 四个独立页历史上就引用 unpkg lucide 图标与
-  // Google Fonts（见 CONTEXT.md「已知外部依赖」）；迁移不改其运行时行为，
-  // 因此外部资源门禁只约束 React 壳与克隆家族页面。
-  if (!["channels", "login", "system", "tenants"].includes(key)) {
-    assert.doesNotMatch(html, /<(?:script|link)\b[^>]+(?:src|href)=["']https?:/i, `${key}.html 不应依赖外部可执行脚本或样式`);
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const html = await readFile(path.join(root, 'dist/index.html'), 'utf8');
+assert.deepEqual(await readdir(path.join(root, 'dist')), ['index.html'], '发布目录必须只有一个 HTML 文件');
+assert.equal(html, await readFile(path.join(root, 'index.html'), 'utf8'));
+assert.match(html, /<title>汇盛支付统一 Demo<\/title>/);
+assert.doesNotMatch(html, /\/Users\/|file:\/\//i, '不能包含本机绝对路径');
+assert.doesNotMatch(html, /<(?:script|link)\b[^>]+(?:src|href)=["'](?:https?:|\/|\.\/assets)/i, '统一壳不能请求外部构建资源');
+for (const id of ['platform', 'tenant', 'merchant']) {
+  const payload = html.match(new RegExp('<script id="surface-' + id + '" type="application/json">([\\s\\S]*?)<\\/script>'));
+  assert.ok(payload, '缺少 ' + id);
+  const document = JSON.parse(payload[1]);
+  assert.match(document, /<!doctype html>/i);
+  assert.doesNotMatch(document, /<(?:script|link)\b[^>]+(?:src|href)=["']\.\//i, id + ' 遗留本地资源依赖');
+  if (id !== 'merchant') {
+    const sources = JSON.parse(document.match(/window\.__HS_EMBEDDED_SOURCES__=([\s\S]*?);<\/script>/)[1]);
+    const base = id === 'platform' ? root : path.join(root, 'surfaces/tenant');
+    const modules = JSON.parse(await readFile(path.join(base, 'src/legacy/modules.json'), 'utf8'));
+    for (const module of Object.values(modules)) assert.equal(typeof sources[module.sourceKey], 'string');
+    for (const [key, source] of Object.entries(sources)) {
+      assert.equal(source, await readFile(path.join(base, 'public/legacy/sources', key + '.html'), 'utf8'), id + '/' + key + ' 不应偏离源码');
+      const legacy = id === 'platform' ? ['channels', 'login', 'system', 'tenants'] : ['system'];
+      if (!legacy.includes(key)) assert.doesNotMatch(source, /<(?:script|link)\b[^>]+(?:src|href)=["']https?:/i);
+    }
+  } else {
+    assert.equal(document, await readFile(path.join(root, 'surfaces/merchant/demo.html'), 'utf8'), '商户端打包内容必须与当前源码完全一致');
   }
 }
-console.log(`检查通过：dist 含 React 壳与 ${sourceKeys.size} 个真实源文件，无本机路径或外部可执行资源。`);
+assert.ok(Buffer.byteLength(html) < 50 * 1024 * 1024, '单文件超过项目大小门禁');
+console.log('检查通过：发布目录只有 index.html，三端源完整内联，无本机路径或跨项目构建依赖。');

@@ -1,14 +1,15 @@
 {
-  "name": "huisheng-payment-platform",
+  "name": "huisheng-pay-demo",
   "private": true,
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "node scripts/build-unified.mjs && vite",
     "preview": "vite preview",
-    "build": "vite build",
+    "build": "node scripts/build-unified.mjs",
     "test": "node --test",
-    "check": "vite build && node --test && node scripts/check.mjs"
+    "smoke": "node scripts/unified-smoke.cjs && node scripts/dist-smoke.cjs dist/index.html && node scripts/tenant-merchant-smoke.cjs dist/index.html && node scripts/tenant-login-system-smoke.cjs && node scripts/merchant-notification-smoke.cjs",
+    "check": "npm run build && node --test && node scripts/check.mjs"
   },
   "dependencies": {
     "@arco-design/web-react": "^2.66.16",
