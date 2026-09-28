@@ -37,10 +37,13 @@ async function bundleSurface(directory, title) {
   return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title><style>${assets.map(item => item.source).join('\n')}</style></head><body><div id="root"></div><script>window.__HS_EMBEDDED_SOURCES__=${json(sources)};</script><script>${script(chunks[0].code)}</script></body></html>`;
 }
 
+// Business source stays readable; only the delivery build embeds the document.
+const merchantSource = await readFile(path.join(root, 'surfaces/merchant/demo.html'), 'utf8');
+const merchantDocument = `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>汇盛支付商户端</title><style>html,body{height:100%;margin:0}iframe{display:block;width:100%;height:100%;border:0}</style></head><body><iframe id="demoFrame" title="汇盛支付商户端页面" referrerpolicy="no-referrer"></iframe><script id="merchant-source" type="application/json">${json(merchantSource)}</script><script>document.getElementById('demoFrame').srcdoc=JSON.parse(document.getElementById('merchant-source').textContent);</script></body></html>`;
 const documents = {
   platform: await bundleSurface(root, '汇盛支付平台端'),
   tenant: await bundleSurface(path.join(root, 'surfaces/tenant'), '汇盛支付租户端'),
-  merchant: await readFile(path.join(root, 'surfaces/merchant/demo.html'), 'utf8')
+  merchant: merchantDocument
 };
 const template = await readFile(path.join(root, 'src/unified.html'), 'utf8');
 const payload = Object.entries(documents).map(([id, html]) =>

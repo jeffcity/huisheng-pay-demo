@@ -28,4 +28,4 @@
 
 ## 历史外部依赖
 
-平台 channels / login / system / tenants 与租户 system 的 lucide 图标和 Google Fonts CDN 保持原样；离线时字体/图标回退。本次不改变支付接口、真实资金、权限或生产配置。需求资料继续使用原三端需求管理和顶层业务设计目录。
+平台 channels / login / system / tenants 与租户 system 的 lucide 图标和 Google Fonts CDN 保持原样；离线时字体/图标回退。本次不改变支付接口、真实资金、权限或生产配置。需求资料统一使用同级 `../需求文件夹/<需求名称>/`，且不得在需求目录复制 Demo。

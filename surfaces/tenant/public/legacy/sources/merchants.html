@@ -20344,6 +20344,7 @@
     }
 
     .modal-head {
+      flex-shrink: 0;
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
@@ -20377,15 +20378,18 @@
     }
 
     .modal-tabs {
+      flex-shrink: 0;
       display: flex;
       align-items: center;
       gap: 4px;
       padding: 10px 14px 0;
       border-bottom: 1px solid var(--border);
       overflow-x: auto;
+      overflow-y: hidden;
     }
 
     .modal-tab {
+      flex-shrink: 0;
       min-height: 34px;
       padding: 0 12px;
       border: 0;
@@ -20412,7 +20416,13 @@
       min-height: 0;
     }
 
+    /* 只有正文负责纵向滚动；内容卡片保留自然高度，避免被压缩后裁切。 */
+    .modal-body > * {
+      flex-shrink: 0;
+    }
+
     .modal-footer {
+      flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: flex-end;

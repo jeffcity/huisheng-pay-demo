@@ -1,6 +1,6 @@
 # 汇盛支付统一 Demo
 
-GitHub 仓库：[jeffcity/huisheng-pay-demo](https://github.com/jeffcity/huisheng-pay-demo)（原 huisheng-pay-platform）。在线评审：[汇盛支付统一 Demo](https://jeffcity.github.io/huisheng-pay-demo/)。仓库更名不改变本地项目目录；本地仍在原「平台端」目录维护三端源码，不另建副本。
+GitHub 仓库：[jeffcity/huisheng-pay-demo](https://github.com/jeffcity/huisheng-pay-demo)（原 huisheng-pay-platform）。在线评审：[汇盛支付统一 Demo](https://jeffcity.github.io/huisheng-pay-demo/)。本地唯一维护位置是 `work/汇盛支付/本地统一Demo/`，不在其他目录另建、同步或恢复维护副本。
 
 唯一评审入口：仓库根 `index.html`，本地预览 `http://127.0.0.1:4174/`。平台端、租户端、商户端在顶部切换，任一时刻只运行当前端；切换销毁前一端页面，未保存的表单不会保留。
 
@@ -24,7 +24,7 @@ GitHub 仓库：[jeffcity/huisheng-pay-demo](https://github.com/jeffcity/huishen
 | 商户端 | `surfaces/merchant/demo.html` |
 | 打包 / 校验 | `scripts/build-unified.mjs` / `scripts/check.mjs` |
 
-相邻旧独立项目保留作迁移前参考，后续三端 Demo 修改统一在本仓库进行，不再两处维护。
+旧独立项目若仍存在，只能作为迁移前历史参考；后续三端 Demo 修改统一在本仓库进行，不得编辑、构建、发布或回写旧副本。
 
 **2026-09-25：旧独立租户端、商户端 Demo 正式停止维护。** 包括 `raw/_delivery/huisheng-domain-20260814/{tenant,merchant}` 的旧工作副本。它们仅保留历史资料；本地旧端口和旧在线独立 Demo 不代表当前统一版。后续修改、测试、打包及发布全部从本仓库进行，不再向旧仓库双写或单独发布。
 
@@ -38,4 +38,4 @@ npm run check     # 重建、平台/租户测试、三端完整性门禁
 npm run smoke     # 本机 Chrome：单文件、切端、子目录和离线验证
 ```
 
-推送时提交本仓库源码、package-lock、构建脚本和生成的根 `index.html`。GitHub Actions 从当前仓库执行 npm ci → npm run check → npm run smoke，全部通过后发布 dist，不需要启动三个服务。dist 不提交。需求资料继续使用既有三端需求管理目录。
+推送时提交本仓库源码、package-lock、构建脚本和生成的根 `index.html`。GitHub Actions 从当前仓库执行 npm ci → npm run check → npm run smoke，全部通过后发布 dist，不需要启动三个服务。dist 不提交。需求资料统一放在同级 `../需求文件夹/<需求名称>/`；该目录不得保存 Demo 副本。
