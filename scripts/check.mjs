@@ -27,7 +27,9 @@ for (const id of ['platform', 'tenant', 'merchant']) {
       if (!legacy.includes(key)) assert.doesNotMatch(source, /<(?:script|link)\b[^>]+(?:src|href)=["']https?:/i);
     }
   } else {
-    assert.equal(document, await readFile(path.join(root, 'surfaces/merchant/demo.html'), 'utf8'), '商户端打包内容必须与当前源码完全一致');
+    const source = JSON.parse(document.match(/<script id="merchant-source" type="application\/json">([\s\S]*?)<\/script>/)[1]);
+    assert.equal(source, await readFile(path.join(root, 'surfaces/merchant/demo.html'), 'utf8'), '商户端打包内容必须与当前源码完全一致');
+    assert.doesNotMatch(source, /const modules = .*base64|function decodeBase64/);
   }
 }
 assert.ok(Buffer.byteLength(html) < 50 * 1024 * 1024, '单文件超过项目大小门禁');

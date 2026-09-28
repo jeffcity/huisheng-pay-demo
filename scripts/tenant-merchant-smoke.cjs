@@ -22,6 +22,23 @@ const puppeteer = require('puppeteer-core');
     await frame.$eval('#keyword', el => { el.value = ''; el.dispatchEvent(new Event('input', { bubbles: true })); });
     assert.equal(await frame.$$eval('#merchantRows tr', rows => rows.length), 5);
     await frame.click('[data-detail="MCH-1188"]');
+    // 详情卡片不能被 flex 压缩后由 overflow:hidden 静默裁切。
+    for (const [width, height] of [[1440, 900], [1124, 968], [1024, 768], [768, 800], [1124, 550]]) {
+      await page.setViewport({ width, height });
+      const clipped = await frame.$$eval('.modal-body > .sub-panel', panels => panels
+        .filter(el => el.scrollHeight > el.clientHeight + 2)
+        .map(el => ({ title: el.querySelector('h3')?.textContent, height: el.clientHeight, content: el.scrollHeight })));
+      assert.deepEqual(clipped, [], `详情卡片内容裁切 at ${width}x${height}`);
+      assert.equal(await frame.$eval('.modal-tabs', el => el.scrollHeight <= el.clientHeight + 1), true, '页签不能被纵向压缩');
+      assert.equal(await frame.$eval('.modal-body', el => {
+        el.scrollTop = el.scrollHeight;
+        const last = el.lastElementChild.getBoundingClientRect();
+        const body = el.getBoundingClientRect();
+        return last.bottom <= body.bottom + 1;
+      }), true, '必须能滚动到最后一张卡片底部');
+    }
+    await page.setViewport({ width: 1124, height: 968 });
+    console.log('MERCHANT_LAYOUT_PASS 详情卡片完整、页签不压缩、不同高度下可滚动到底部');
     await frame.click('[data-tab="跑量统计"]');
     assert.equal(await frame.$eval('[data-tab="跑量统计"]', el => el.getAttribute('aria-selected')), 'true');
     await frame.click('[data-tab="接入信息"]');
