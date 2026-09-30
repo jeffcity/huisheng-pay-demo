@@ -14,6 +14,15 @@ test("页面注册表包含 21 个页面", () => {
   assert.equal(modules.tickets, undefined);
 });
 
+test("登录安全页面只展示白名单登录记录", async () => {
+  const html = await readFile(path.join(root, "public/legacy/sources/system.html"), "utf8");
+  const securityView = html.slice(html.indexOf('<section class="view" id="view-security">'), html.indexOf('<section class="view" id="view-settings">'));
+  assert.match(securityView, /<h2>登录记录<\/h2>/);
+  assert.match(securityView, /<th>白名单<\/th><th>IP<\/th><th>登录时间<\/th>/);
+  assert.doesNotMatch(securityView, /状态|最近变更|操作|新增白名单|编辑|启用|停用/);
+  assert.match(html, /const loginRows=Object\.entries\(securityLoginRecords\)/);
+});
+
 test("商户管理保留 2026-09-25 已确认优化，不能退回旧版", async () => {
   const html = await readFile(path.join(root, 'public/legacy/sources/merchants.html'), 'utf8');
   assert.doesNotMatch(html, /id="businessView"/);
