@@ -20,7 +20,7 @@ const MODULE_ICON = {
   wallets: <IconStorage />, funds: <IconCalendarClock />, 'channel-vendors': <IconBranch />,
   'tenant-daily-report': <IconCalendar />, 'channel-daily-report': <IconCalendar />,
   ledger: <IconBook />, orders: <IconList />, audit: <IconSafe />,
-  tickets: <IconCommon />, 'system-accounts': <IconSettings />, 'system-roles': <IconSettings />,
+  'system-accounts': <IconSettings />, 'system-roles': <IconSettings />,
   'system-security': <IconSafe />, 'system-menus': <IconList />,
   'login-form': <IconSafe />, 'login-bind': <IconSafe />, 'login-exception': <IconSafe />,
 };

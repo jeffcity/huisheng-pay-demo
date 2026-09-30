@@ -807,7 +807,7 @@
     }
 
     .metrics.home-metrics {
-      grid-template-columns: repeat(3, minmax(180px, 1fr));
+      grid-template-columns: repeat(2, minmax(180px, 1fr));
     }
 
     .context-panel {
@@ -2002,7 +2002,7 @@
 
         <section class="home-extra" id="homeExtra"></section>
 
-        <section class="main-grid">
+        <section class="main-grid" id="mainGrid">
           <div class="panel">
             <div class="panel-head">
               <h2 class="panel-title" id="tableTitle"></h2>
@@ -6235,6 +6235,8 @@
       homeExtra.innerHTML = id === 'home' ? renderHomeExtra() : '';
       homeExtra.style.display = id === 'home' ? 'grid' : 'none';
 
+      document.getElementById('mainGrid').style.display = id === 'home' ? 'none' : 'grid';
+
       renderContextPanel(id);
 
       document.getElementById('tableTools').innerHTML = `
@@ -6480,11 +6482,7 @@
       const successRate = totals.terminalCount ? `${(totals.successCount / totals.terminalCount * 100).toFixed(2)}%` : '-';
       return [
         ['成功出账金额', formatReportCny(totals.successAmount), '退款独立统计；冲突不抹除原成功出账', 'blue'],
-        ['正式订单 / 成功率', `${totals.formalCount.toLocaleString('en-US')} / ${successRate}`, '处理中与异常不进分母', 'green'],
-        ['平台费用收入', rows.length && !totals.feeFormedRows ? '未形成' : formatReportCny(totals.platformFee), '仅统计已形成费用事实', 'blue'],
-        ['通道成本', formatReportCny(totals.channelCost), '按通道结果与成本更正入账', 'orange'],
-        ['平台利润', formatReportCny(totals.platformProfit), '费用收入减通道成本', totals.platformProfit < 0 ? 'red' : 'green'],
-        ['处理中 / 异常', `${totals.processingCount.toLocaleString('en-US')} / ${totals.exceptionCount.toLocaleString('en-US')}`, '仅统计订单处理态与异常态', 'red']
+        ['正式订单 / 成功率', `${totals.formalCount.toLocaleString('en-US')} / ${successRate}`, '处理中与异常不进分母', 'green']
       ];
     }
 
@@ -6508,7 +6506,7 @@
     }
 
     function platformHomeSubtitle() {
-      return `跨租户 CNY 交易、费用、通道、资金与审计总览 · ${platformHomeRangeLabel()} · 截止 ${platformHomeCutoffAt} UTC+8`;
+      return `跨租户 CNY 交易概览 · ${platformHomeRangeLabel()} · 截止 ${platformHomeCutoffAt} UTC+8`;
     }
 
     function platformHomeTableTitle() {
@@ -7345,8 +7343,8 @@
       const source = pageSourceContext[id];
       const sourceHtml = source ? `<div class="source-context"><div><strong>来源：${escapeHtml(source.from)}</strong><br>${source.items.map(item => `${escapeHtml(item.label)}：${escapeHtml(item.value)}`).join(' · ')} · 目标页已按当前权限重新校验</div><div class="page-actions"><button class="btn ghost" type="button" data-clear-page-source>清除来源条件</button>${source.returnPage && canAccessPlatformPage(source.returnPage) ? `<button class="btn" type="button" data-return-page-source>返回${escapeHtml(pages[source.returnPage]?.title || '来源页')}</button>` : ''}</div></div>` : '';
       if (id === 'home') {
-        panel.innerHTML = `${sourceHtml}<p class="context-note" style="margin:0">首页所有交易、费用、成本和利润模块共用租户整体报表事实与同一筛选快照。资金待办和低余额适用时间、租户条件，不适用业务方向；通道健康适用租户授权与业务方向，不适用日期范围；审计风险仅适用时间条件。数据截止 ${escapeHtml(platformHomeCutoffAt)} UTC+8，最近刷新 ${escapeHtml(platformHomeRefreshedAt)}。</p>`;
-        panel.classList.add('show');
+        panel.innerHTML = sourceHtml;
+        panel.classList.toggle('show', Boolean(sourceHtml));
         return;
       }
       if (id === 'funds') {
@@ -7419,13 +7417,6 @@
 
     function renderHomeExtra() {
       const reportRows = platformHomeReportRows();
-      const totals = platformHomeTotals(reportRows);
-      const trendWeights = [0.06, 0.08, 0.1, 0.17, 0.19, 0.16, 0.14, 0.1];
-      const trend = trendWeights.map((weight, index) => [
-        `${String(index * 3).padStart(2, '0')}:00`,
-        totals.successAmount ? Math.max(24, Math.round(weight / Math.max(...trendWeights) * 176)) : 12,
-        totals.successAmount * weight
-      ]);
       const directionTotals = reportRows.reduce((map, row) => {
         map.set(row[2], (map.get(row[2]) || 0) + platformReportMetaFor(row).successAmount);
         return map;
@@ -7453,42 +7444,10 @@
         String(index + 1),
         item.id
       ]);
-      const fundsCount = platformHomeFundsRows().length;
-      const walletRiskCount = platformHomeWalletRiskRows().length;
-      const auditRiskCount = platformHomeAuditRiskRows().length;
-      const channelRiskCount = platformHomeChannelRiskRows().length;
-      const orderRiskCount = totals.processingCount + totals.exceptionCount;
-      const alerts = [
-        ['订单处理中 / 异常', `${totals.processingCount} 项处理中，${totals.exceptionCount} 项异常`, orderRiskCount ? 'red' : 'green', 'orders', {}, '时间、方向、租户'],
-        ['资金待办', `${fundsCount} 项等待平台按来源处理`, fundsCount ? 'orange' : 'green', 'funds', {}, '时间、租户；业务方向不适用'],
-        ['低余额租户', `${walletRiskCount} 个租户需要财务关注`, walletRiskCount ? 'orange' : 'green', 'wallets', {}, '时间、租户；业务方向不适用'],
-        ['通道成功率预警', channelRiskCount ? platformHomeChannelRiskRows().map(row => `${row[1]} ${row[7]}`).join('；') : '当前授权范围无低于 95% 的通道', channelRiskCount ? 'red' : 'green', 'orders', channelRiskCount ? { 5: platformHomeChannelRiskRows()[0][1] } : {}, '当前通道健康；时间不适用，租户与方向按授权关系应用'],
-        ['审计高风险', `${auditRiskCount} 项高风险操作需要查看`, auditRiskCount ? 'red' : 'green', 'audit', { 6: '高风险' }, '仅时间；业务方向、租户不适用']
-      ];
       const reportFilters = platformHomeTargetFilters('report');
       return `
         ${platformHomeModuleNotice('metrics', '核心指标')}
         <div class="home-stack">
-          <section class="home-card ${platformHomeModuleClass('trend')}">
-            <div class="home-card-head">
-              <h2>交易趋势</h2>
-              <button class="link-btn" data-jump-page="report" data-jump-filters="${escapeHtml(JSON.stringify(reportFilters))}" data-jump-context="${escapeHtml(platformHomeContext('首页交易趋势'))}">查看来源</button>
-            </div>
-            ${platformHomeModuleNotice('trend', '交易趋势')}
-            ${reportRows.length ? `<div class="trend-chart">
-              ${trend.map(item => `
-                <div class="trend-col">
-                  <div class="trend-bar" style="height:${item[1]}px" title="${escapeHtml(formatReportCny(item[2]))}"></div>
-                  <small>${item[0]}</small>
-                </div>
-              `).join('')}
-            </div>` : '<div class="empty-state"><strong>当前范围暂无趋势数据</strong><span>交易模块已应用全部四项筛选条件。</span></div>'}
-            <div class="chart-legend">
-              <span><i class="legend-dot"></i>成功金额</span>
-              <span>同一报表事实 · ${escapeHtml(platformHomeRangeLabel())}</span>
-            </div>
-          </section>
-
           <section class="home-card ${platformHomeModuleClass('structure')}">
             <div class="home-card-head">
               <h2>业务结构</h2>
@@ -7523,23 +7482,6 @@
                 </div>
               `).join('')}
             </div>` : '<div class="empty-state"><strong>当前范围暂无租户排行</strong><span>排行与首页指标使用同一筛选快照。</span></div>'}
-          </section>
-
-          <section class="home-card ${platformHomeModuleClass('risk')}">
-            <div class="home-card-head">
-              <h2>风险待处理</h2>
-              <span>只读看板入口</span>
-            </div>
-            ${platformHomeModuleNotice('risk', '风险待处理')}
-            <div class="alert-list">
-              ${alerts.map(item => `
-                <div class="alert-row">
-                  <span class="pill ${item[2]}">${item[0]}</span>
-                  <span class="row-main"><strong>${item[1]}</strong><small>${item[5]}</small></span>
-                  <button class="link-btn" data-jump-page="${item[3]}" data-jump-filters="${escapeHtml(JSON.stringify(platformHomeTargetFilters(item[3], item[4])))}" data-jump-context="${escapeHtml(platformHomeContext('首页风险待处理', item[5]))}">查看</button>
-                </div>
-              `).join('')}
-            </div>
           </section>
         </div>
       `;
