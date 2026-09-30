@@ -309,16 +309,6 @@
   "initialHash": "exception",
   "navId": "login-exception"
  },
- "tickets": {
-  "label": "租户协同工单",
-  "code": "12-01",
-  "group": "12 租户协同工单",
-  "description": "工单状态、负责人、时间线与来源",
-  "sourceName": "平台端租户协同工单-demo.html",
-  "sourceKey": "tickets",
-  "initialHash": "tickets",
-  "navId": "tickets"
- },
  "notifications": {
   "label": "平台通知中心",
   "code": "14-01",

@@ -620,7 +620,7 @@
         <section class="page-head">
           <div>
             <h1>代收代付业务授权</h1>
-            <p>按租户、业务方向和币种配置独立费率与授权通道。一个授权可选择多个通道，租户只能看到并使用当前授权范围内的共享通道或指定租户专属通道。</p>
+            <p>配置租户的代收、代付费率与可用通道。</p>
           </div>
           <div class="page-actions">
             <button class="btn" id="exportButton" type="button">
@@ -634,11 +634,6 @@
           </div>
         </section>
 
-        <section class="scope-strip">
-          <strong>授权规则</strong>
-          <p>代收、代付分别按币种授权；租户费率在本授权中独立设置。通道参数、支持方向、币种和租户专属范围由通道管理维护。</p>
-        </section>
-
         <section class="metrics" aria-label="授权概览">
           <article class="metric"><label>当前授权</label><strong id="metricTotal">0</strong><small>按租户、方向和币种统计</small></article>
           <article class="metric"><label>已开通授权</label><strong id="metricEnabled">0</strong><small>可用于创建新订单</small></article>
@@ -648,7 +643,7 @@
 
         <section class="panel">
           <div class="panel-head">
-            <div><h2>租户业务授权列表</h2><span>费率与通道均以订单创建时的授权快照为准</span></div>
+            <div><h2>租户业务授权列表</h2></div>
           </div>
           <div class="filters">
             <label class="field"><span>租户名称 / 编号</span><input class="control" id="tenantFilter" type="search" placeholder="输入租户名称或编号"></label>

@@ -1,4 +1,4 @@
-// 页面注册表：23 个页面 → 5 个源文件 + hash 路由。
+// 页面注册表：21 个页面 → 5 个源文件 + hash 路由。
 import modules from './legacy/modules.json' with { type: 'json' };
 
 export const MODULES = modules;

@@ -19790,7 +19790,7 @@
 
     .metric-grid {
       display: grid;
-      grid-template-columns: repeat(6, minmax(0, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
       margin-bottom: 16px;
     }
@@ -19865,7 +19865,7 @@
 
     .layout-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 336px;
+      grid-template-columns: minmax(0, 1fr);
       gap: 16px;
       align-items: start;
     }
@@ -21063,7 +21063,7 @@
 
     @media (max-width: 1360px) {
       .metric-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
       .business-grid {
@@ -21544,7 +21544,7 @@
           </div>
         </section>
 
-        <section class="alert-strip" data-astryx="AlertBanner">
+        <section class="alert-strip" data-astryx="AlertBanner" hidden>
           <div class="alert-left">
             <i data-lucide="triangle-alert"></i>
             <span><strong>待处理 27 项：</strong>通知失败 11、商户代付余额不足 7、通道观察 3、其他业务异常 6。</span>
@@ -21557,7 +21557,7 @@
         <section class="metric-grid" id="metricGrid" data-astryx="KPIGrid"></section>
 
         <section class="layout-grid">
-          <div class="column">
+          <div class="column" hidden>
             <section class="panel data-panel" data-astryx="DataPanel">
               <div class="panel-header">
                 <div>
@@ -21665,7 +21665,7 @@
           </div>
 
           <aside class="column">
-            <section class="panel data-panel" data-astryx="ResourceList">
+            <section class="panel data-panel" data-astryx="ResourceList" hidden>
               <div class="panel-header">
                 <div>
                   <h2 class="panel-title">授权通道健康</h2>
@@ -21678,7 +21678,7 @@
               </div>
             </section>
 
-            <section class="panel data-panel" data-astryx="TaskList">
+            <section class="panel data-panel" data-astryx="TaskList" hidden>
               <div class="panel-header">
                 <div>
                   <h2 class="panel-title">待办队列</h2>
@@ -21703,13 +21703,12 @@
                   <div>CNY 代付可用</div><div class="mono">735,680.08</div>
                   <div>CNY 提款可用</div><div class="mono">300,000.00</div>
                   <div>平台服务费</div><div class="mono">CNY 29,880.42</div>
-                  <div>租户费用毛差</div><div class="mono">CNY 12,429.76</div>
                   <div>数据更新</div><div>UTC+8 · 1 分钟内，可手动刷新</div>
                 </div>
               </div>
             </section>
 
-            <section class="panel data-panel" data-astryx="Timeline">
+            <section class="panel data-panel" data-astryx="Timeline" hidden>
               <div class="panel-header">
                 <div>
                   <h2 class="panel-title">请求链路</h2>
@@ -27897,9 +27896,11 @@
     }
 
     function renderMetrics() {
-      const values = metrics[state.mode] || metrics.all;
+      const values = (metrics[state.mode] || metrics.all)
+        .map((item, index) => ({ item, index }))
+        .filter(({ item }) => !["当前业务待办", "当前异常", "租户费用毛差"].includes(item[0]));
       const notice = tenantHomeModuleNotice("metrics", "核心指标");
-      document.getElementById("metricGrid").innerHTML = notice + (state.homeHealth.metrics.status === "empty" ? "" : values.map((item, index) => `
+      document.getElementById("metricGrid").innerHTML = notice + (state.homeHealth.metrics.status === "empty" ? "" : values.map(({ item, index }) => `
         <article class="metric-card" data-astryx="KPIStatCard" data-action="metric-source" data-metric-index="${index}" data-source-target="${tenantHomeMetricTarget(index)}" role="button" tabindex="0" aria-label="查看${item[0]}来源">
           <div>
             <div class="metric-label"><span>${item[0]}</span><i data-lucide="${item[3]}"></i></div>

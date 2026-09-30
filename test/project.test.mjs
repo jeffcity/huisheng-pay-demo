@@ -9,8 +9,8 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const modules = JSON.parse(await readFile(path.join(root, "src/legacy/modules.json"), "utf8"));
 
-test("模块注册表包含 33 个统一入口", () => {
-  assert.equal(Object.keys(modules).length, 33);
+test("模块注册表包含 32 个统一入口", () => {
+  assert.equal(Object.keys(modules).length, 32);
 });
 
 test("每个模块的源文件存在于 public/legacy/sources", async () => {
@@ -128,7 +128,9 @@ test("平台通知中心归属协同运营并保持平台职责边界", async ()
 
   assert.equal(modules.notifications?.sourceKey, "notifications");
   assert.equal(modules.notifications?.navId, "notifications");
-  assert.match(moduleSource, /title: '协同运营'[\s\S]*module: 'tickets'[\s\S]*module: 'notifications', label: '平台通知中心'/);
+  assert.match(moduleSource, /title: '协同运营'[\s\S]*module: 'notifications', label: '平台通知中心'/);
+  assert.doesNotMatch(moduleSource, /module: 'tickets'|租户协同工单/);
+  assert.equal(modules.tickets, undefined);
   for (const label of ["发送的消息", "通知配置", "平台自有配置范围", "通知详情"]) {
     assert.match(page, new RegExp(label), `平台通知中心缺少：${label}`);
   }
