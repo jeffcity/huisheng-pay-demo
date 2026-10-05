@@ -9,9 +9,12 @@ const Content = Layout.Content;
 const MenuItem = Menu.Item;
 const ItemGroup = Menu.ItemGroup;
 
+// Retired report links resolve to the current merchant collection report.
+const resolvePageId = id => id === 'reports' ? 'merchant-collect-daily' : id === 'reconciliation' ? 'home' : id;
+
 export default function App() {
   const [activePage, setActivePage] = useState(() => {
-    const fromHash = window.location.hash.slice(1);
+    const fromHash = resolvePageId(window.location.hash.slice(1));
     return MODULES[fromHash] ? fromHash : 'home';
   });
   const [loading, setLoading] = useState(true);
@@ -20,6 +23,7 @@ export default function App() {
   const loadingRef = useRef(true);
 
   const openPage = useCallback(async (pageId, { updateHash = true } = {}) => {
+    pageId = resolvePageId(pageId);
     const config = MODULES[pageId] || MODULES.home;
     const resolved = MODULES[pageId] ? pageId : 'home';
     setActivePage(resolved);
@@ -50,7 +54,7 @@ export default function App() {
   useEffect(() => {
     const onMessage = (event) => {
       const data = event.data;
-      if (data?.type === 'hs-unified-open-page' && MODULES[data.pageId]) openPage(data.pageId);
+      if (data?.type === 'hs-unified-open-page' && MODULES[resolvePageId(data.pageId)]) openPage(data.pageId);
     };
     const onHashChange = () => openPage(window.location.hash.slice(1), { updateHash: false });
     window.addEventListener('message', onMessage);

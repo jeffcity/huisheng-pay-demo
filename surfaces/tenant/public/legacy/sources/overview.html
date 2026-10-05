@@ -21494,12 +21494,14 @@
           <button class="nav-button" type="button" data-nav="平台钱包"><i data-lucide="landmark"></i><span>平台钱包</span></button>
           <button class="nav-button" type="button" data-nav="资金划转"><i data-lucide="arrow-left-right"></i><span>资金划转</span></button>
           <button class="nav-button" type="button" data-nav="账户流水"><i data-lucide="list-tree"></i><span>账户流水</span></button>
-          <button class="nav-button" type="button" data-nav="日终报表"><i data-lucide="scale"></i><span>日终报表</span></button>
           <button class="nav-button" type="button" data-nav="导出任务"><i data-lucide="download"></i><span>导出任务</span></button>
         </div>
         <div class="nav-group">
           <div class="nav-group-title">运营中心</div>
-          <button class="nav-button" type="button" data-nav="经营报表"><i data-lucide="chart-no-axes-combined"></i><span>经营报表</span></button>
+          <button class="nav-button" type="button" data-nav="代付通道日终统计"><i data-lucide="chart-no-axes-combined"></i><span>代付通道日终统计</span></button>
+          <button class="nav-button" type="button" data-nav="代收通道日终统计"><i data-lucide="chart-no-axes-combined"></i><span>代收通道日终统计</span></button>
+          <button class="nav-button" type="button" data-nav="商户代收日终统计"><i data-lucide="chart-no-axes-combined"></i><span>商户代收日终统计</span></button>
+          <button class="nav-button" type="button" data-nav="商户代付日终统计"><i data-lucide="chart-no-axes-combined"></i><span>商户代付日终统计</span></button>
           <button class="nav-button" type="button" data-nav="全局订单追踪"><i data-lucide="scan-search"></i><span>全局订单追踪</span></button>
           <button class="nav-button" type="button" data-nav="业务待办"><i data-lucide="list-checks"></i><span>业务待办</span></button>
           <button class="nav-button" type="button" data-nav="工单协同"><i data-lucide="messages-square"></i><span>工单协同</span></button>
@@ -24922,7 +24924,6 @@
       ["通知失败", "1 条商户回调失败停止，进入通知中心处理", "tag-red", "通知中心"],
       ["代付余额不足", "7 条法币代付因商户代付钱包可用余额不足进入异常", "tag-orange", "业务待办"],
       ["通道观察", "3 条通道成功率低于本租户阈值", "tag-orange", "授权通道"],
-      ["日终报表差异", "1 个钱包存在订单、流水或通知差异", "tag-purple", "日终报表"]
     ];
 
     const modulePages = {
@@ -25966,7 +25967,6 @@
       { id: "TD-20260717-002", type: "代付订单处置", sourceId: "HS-P-260717-002134", sourceVersion: 2, actionableState: "待处理", target: "法币代付订单", party: "星河游戏", amount: "CNY 8,000.00", wait: "00:31:06", progress: "代付下单失败", permission: "可补单 / 重新下单", actionLabel: "处理订单", direction: "payout", enteredAt: "2026-07-17 10:29:00", current: true },
       { id: "TD-20260717-004", type: "异常订单", sourceId: "HS-P-260717-000251", sourceVersion: 4, actionableState: "异常待处理", target: "法币代付订单", party: "星河游戏", amount: "CNY 42,000.00", wait: "02:16:40", progress: "等待通道最终结果", permission: "进入来源订单页", actionLabel: "查看订单", direction: "payout", enteredAt: "2026-07-17 08:44:00", current: true },
       { id: "TD-20260717-005", type: "商户通知失败", sourceId: "EV-20260717-881902", sourceVersion: 10, actionableState: "失败停止", target: "通知中心", party: "星河游戏", amount: "CNY 4,520.00", wait: "00:22:18", progress: "自动重试 10 / 10 后失败停止", permission: "可人工补推原事件", actionLabel: "处理通知", direction: "collect", enteredAt: "2026-07-17 15:51:40", current: true },
-      { id: "TD-20260717-007", type: "日终报表差异", sourceId: "REC-20260717-PAYOUT", sourceVersion: 2, actionableState: "有差异", target: "日终报表", party: "CNY 代付钱包", amount: "CNY 2,000.00", wait: "01:09:12", progress: "双边流水差 1", permission: "只通知平台，不直接改账", actionLabel: "查看差异", direction: "general", enteredAt: "2026-07-17 14:42:00", current: true }
     ];
     const tenantTodoHistory = [];
     const tenantTodoSourceState = new Map(tenantTodoProjections.map((item) => [item.sourceId, { version: item.sourceVersion, actionable: true, state: item.actionableState, progress: item.progress }]));
@@ -27743,6 +27743,21 @@
       return true;
     }
 
+    const tenantDailyReportRoutes = {
+      "代付通道日终统计": "payout-channel-daily", "代收通道日终统计": "collect-channel-daily",
+      "商户代收日终统计": "merchant-collect-daily", "商户代付日终统计": "merchant-payout-daily"
+    };
+    function openTenantDailyReport(pageName) {
+      if (pageName === "日终报表") { showToast("该日终报表已移除"); return true; }
+      const target = pageName === "经营报表" ? (state.mode === "fiat-out" ? "商户代付日终统计" : "商户代收日终统计") : pageName;
+      const pageId = tenantDailyReportRoutes[target];
+      if (!pageId) return false;
+      if (!canAccessTenantPage(pageName)) { showToast("当前账号没有报表权限"); return true; }
+      if (window.parent !== window) window.parent.postMessage({ type: "hs-unified-open-page", pageId }, "*");
+      else window.location.href = "reports.html#" + pageId;
+      return true;
+    }
+
     const tenantHashPages = {
       home: "总览工作台",
       collect: "法币代收订单",
@@ -27752,9 +27767,13 @@
       wallets: "平台钱包",
       funds: "资金划转",
       ledger: "账户流水",
-      reconciliation: "日终报表",
+      reconciliation: "总览工作台",
       exports: "导出任务",
-      reports: "经营报表",
+      reports: "商户代收日终统计",
+      "payout-channel-daily": "代付通道日终统计",
+      "collect-channel-daily": "代收通道日终统计",
+      "merchant-collect-daily": "商户代收日终统计",
+      "merchant-payout-daily": "商户代付日终统计",
       "order-tracking": "全局订单追踪",
       todos: "业务待办",
       tickets: "工单协同",
@@ -27763,6 +27782,8 @@
     const tenantPageHashes = Object.fromEntries(Object.entries(tenantHashPages).map(([hash, page]) => [page, hash]));
 
     function renderNavPage(pageName) {
+      if (pageName === "日终报表") { showToast("该日终报表已移除"); return false; }
+      if (pageName === "经营报表" || tenantDailyReportRoutes[pageName]) { openTenantDailyReport(pageName); return; }
       if (!canAccessTenantPage(pageName)) {
         showToast("当前账号没有目标页面权限，未加载任何数据");
         return false;
@@ -28265,6 +28286,8 @@
     }
 
     function enterModuleWithSource(target, context, filterIndex = null, filterValue = "") {
+      if (target === "日终报表") { showToast("该日终报表已移除"); return 0; }
+      if (target === "经营报表" || tenantDailyReportRoutes[target]) { openTenantDailyReport(target); return 0; }
       if (!canAccessTenantPage(target)) {
         showToast("当前账号没有目标页面权限，未加载任何数据");
         return 0;
@@ -31368,6 +31391,7 @@
           showToast("当前账号没有该页面权限");
           return;
         }
+        if (openTenantDailyReport(navButton.dataset.nav)) return;
         if (openMerchantModule(navButton.dataset.nav)) return;
         if (openTenantSystemModule(navButton.dataset.nav)) return;
         const targetPage = navButton.dataset.nav;

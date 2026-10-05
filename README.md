@@ -39,3 +39,14 @@ npm run smoke     # 本机 Chrome：单文件、切端、子目录和离线验�
 ```
 
 推送时提交本仓库源码、package-lock、构建脚本和生成的根 `index.html`。GitHub Actions 从当前仓库执行 npm ci → npm run check → npm run smoke，全部通过后发布 dist，不需要启动三个服务。dist 不提交。需求资料统一放在同级 `../需求文件夹/<需求名称>/`；该目录不得保存 Demo 副本。
+
+## 租户端日终统计
+
+运营中心提供代付通道、代收通道、商户代收、商户代付四个日终统计入口。编辑源为 `surfaces/tenant/public/legacy/sources/reports.html`，通过模块注册表接入统一入口。商户钱包期初／期末余额在列表展示，冻结与可用在当前页只读明细弹窗展示；不提供流水跳转。当前按 CNY、USD、PHP、THB 展示分币种交互样例，正式币种以租户配置为准。
+
+2026-10-05 报表交互修订：四页币种Tab、移除序号、通道备注可编辑并浏览器本地保存；资金中心原日终报表入口已退场。
+
+
+## 报表需求交付资料
+
+[日终统计 PRD 与开发任务清单](docs/delivery/2026-10-05-tenant-daily-reports/README.md) 为本次 GitHub 只读交付快照。需求编辑源仍在同级需求文件夹，仓库不建立另一套活动需求；后续确认后从编辑源同步快照。
