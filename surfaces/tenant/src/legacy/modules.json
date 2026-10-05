@@ -79,21 +79,37 @@
     "sourceName": "00-总览 / 业务运营 / 资金中心 / 运营中心",
     "initialHash": "ledger"
   },
-  "reconciliation": {
-    "label": "日终报表",
-    "group": "资金中心",
-    "module": "overview",
-    "sourceKey": "overview",
-    "sourceName": "00-总览 / 业务运营 / 资金中心 / 运营中心",
-    "initialHash": "reconciliation"
-  },
-  "reports": {
-    "label": "经营报表",
+  "payout-channel-daily": {
+    "label": "代付通道日终统计",
     "group": "运营中心",
-    "module": "overview",
-    "sourceKey": "overview",
-    "sourceName": "00-总览 / 业务运营 / 资金中心 / 运营中心",
-    "initialHash": "reports"
+    "module": "reports",
+    "sourceKey": "reports",
+    "sourceName": "运营中心 / 日终统计",
+    "initialHash": "payout-channel-daily"
+  },
+  "collect-channel-daily": {
+    "label": "代收通道日终统计",
+    "group": "运营中心",
+    "module": "reports",
+    "sourceKey": "reports",
+    "sourceName": "运营中心 / 日终统计",
+    "initialHash": "collect-channel-daily"
+  },
+  "merchant-collect-daily": {
+    "label": "商户代收日终统计",
+    "group": "运营中心",
+    "module": "reports",
+    "sourceKey": "reports",
+    "sourceName": "运营中心 / 日终统计",
+    "initialHash": "merchant-collect-daily"
+  },
+  "merchant-payout-daily": {
+    "label": "商户代付日终统计",
+    "group": "运营中心",
+    "module": "reports",
+    "sourceKey": "reports",
+    "sourceName": "运营中心 / 日终统计",
+    "initialHash": "merchant-payout-daily"
   },
   "order-tracking": {
     "label": "全局订单追踪",

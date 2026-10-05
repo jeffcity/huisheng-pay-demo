@@ -29,3 +29,12 @@
 ## 历史外部依赖
 
 平台 channels / login / system / tenants 与租户 system 的 lucide 图标和 Google Fonts CDN 保持原样；离线时字体/图标回退。本次不改变支付接口、真实资金、权限或生产配置。需求资料统一使用同级 `../需求文件夹/<需求名称>/`，且不得在需求目录复制 Demo。
+
+## 2026-10-05 租户日终统计报表
+
+- 原运营中心经营报表入口由四个日终统计页面替代，统一业务源为surfaces/tenant/public/legacy/sources/reports.html；四个注册路由分别为payout-channel-daily、collect-channel-daily、merchant-collect-daily、merchant-payout-daily。
+- 通道报表删除服务费／代理费／利润，商户报表删除商户／通道服务费。商户列表仅对应钱包期初、期末总额，冻结／可用在只读弹窗，无流水跳转。
+- 当前按CNY、USD、PHP、THB独立币种Tab展示评审示例；统计公式由开发核对蓝盛，正式币种取租户配置，本期不新增退款统计。旧reports链接和首页旧经营报表入口进入相应商户报表；旧聚合夹具仅保留作历史测试数据，不再呈现旧报表页。
+- 需求记录位于同级需求文件夹/2026-10-05-租户端日终统计报表。新Wiki胶囊已登记，Graphify需要刷新，本轮未执行。
+
+2026-10-05 报表交互修订：四页币种Tab、移除序号、通道备注可编辑并浏览器本地保存；资金中心原日终报表入口已退场。

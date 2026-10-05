@@ -1,0 +1,22 @@
+{
+  "source_root": "work/汇盛支付/需求文件夹/2026-10-05-租户端日终统计报表",
+  "purpose": "read-only-github-delivery-snapshot",
+  "documents": [
+    {
+      "source": "PRD_租户端日终统计报表_20261005.md",
+      "sha256": "4573d9af333e3e9709587778f5a6dc6e1d9a591a928753216a123dde3b776561"
+    },
+    {
+      "source": "PRD_租户端日终统计报表_20261005_appendix.md",
+      "sha256": "8662354c68d6303b6a82a591ca85a0c0ea1afb9d4add385fafae525aa50859d2"
+    },
+    {
+      "source": "开发任务清单.md",
+      "sha256": "3a32e2ea4065232f60c0880cf676143bbe083515cd9863fcc2b19e78aa03af5b"
+    },
+    {
+      "source": "开发补充说明.md",
+      "sha256": "0083c716c29e17350af281f99a5793b2d9452cf175ebf3dde21ccadd88147405"
+    }
+  ]
+}
