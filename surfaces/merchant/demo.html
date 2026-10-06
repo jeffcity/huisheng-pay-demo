@@ -1244,7 +1244,6 @@
               <div class="tabs" role="tablist" aria-label="账号权限页面">
                 <button class="tab active" type="button" role="tab" aria-selected="true" data-tab-target="userList">用户管理</button>
                 <button class="tab" type="button" role="tab" aria-selected="false" data-tab-target="roleList">角色管理</button>
-                <button class="tab" type="button" role="tab" aria-selected="false" data-tab-target="personalSecurity">个人安全</button>
               </div>
               <div class="tab-pane" id="userList">
                 <div class="filter">
@@ -1256,9 +1255,9 @@
                   <div class="filter-actions"><button class="btn primary" type="button" data-filter>查询</button><button class="btn" type="button" data-reset>重置</button></div>
                 </div>
                 <div class="table-wrap"><table><thead><tr><th>登录账号</th><th>姓名</th><th>角色</th><th>Google 2FA</th><th>状态</th><th>最后登录</th><th>创建时间</th><th>操作</th></tr></thead><tbody id="userTableBody">
-                  <tr data-account-status="正常" data-session-version="4" data-permission-version="10" data-role-names="商户超级管理员" data-include-direct-children="true"><td class="mono">admin@xinghe</td><td>陈敏（当前账号）</td><td><div class="role-tags"><span class="tag info">商户超级管理员</span></div></td><td><span class="tag success">已绑定</span></td><td><span class="tag success">正常</span></td><td>07-17 16:20:12</td><td>07-01 09:00:00</td><td><div class="row-actions"><button class="btn link" data-detail="用户" data-id="admin@xinghe">详情</button><button class="btn link" disabled title="当前账号和最后一个可用超级管理员受保护">安全操作</button></div></td></tr>
-                  <tr data-account-status="正常" data-session-version="6" data-permission-version="6" data-role-names="商户财务|商户运营" data-include-direct-children="true"><td class="mono">finance.liu</td><td>刘晴</td><td><div class="role-tags"><span class="tag info">商户财务</span><span class="tag info">商户运营</span></div></td><td><span class="tag success">已绑定</span></td><td><span class="tag success">正常</span></td><td>07-17 09:22:31</td><td>07-02 10:18:40</td><td><div class="row-actions"><button class="btn link" data-detail="用户" data-id="finance.liu">详情</button><button class="btn link" data-user-edit="finance.liu">编辑</button><button class="btn link" data-user-security="finance.liu">安全操作</button></div></td></tr>
-                  <tr data-account-status="正常" data-session-version="1" data-permission-version="4" data-role-names="商户运营" data-include-direct-children="false"><td class="mono">ops.zhao</td><td>赵航</td><td><div class="role-tags"><span class="tag info">商户运营</span></div></td><td><span class="tag warning">待绑定</span></td><td><span class="tag success">正常</span></td><td>-</td><td>07-17 15:10:20</td><td><div class="row-actions"><button class="btn link" data-detail="用户" data-id="ops.zhao">详情</button><button class="btn link" data-user-edit="ops.zhao">编辑</button><button class="btn link" data-user-security="ops.zhao">安全操作</button></div></td></tr>
+                  <tr data-account-status="正常" data-session-version="4" data-permission-version="10" data-role-names="商户超级管理员" data-include-direct-children="true"><td class="mono">admin@xinghe</td><td>陈敏（当前账号）</td><td><div class="role-tags"><span class="tag info">商户超级管理员</span></div></td><td><span class="tag success">已绑定</span></td><td><span class="tag success">正常</span></td><td>07-17 16:20:12</td><td>07-01 09:00:00</td><td><div class="row-actions"><button class="btn link" data-detail="用户" data-id="admin@xinghe">详情</button><span class="tag info">当前超级管理员受保护</span></div></td></tr>
+                  <tr data-account-status="正常" data-session-version="6" data-permission-version="6" data-role-names="商户财务|商户运营" data-include-direct-children="true"><td class="mono">finance.liu</td><td>刘晴</td><td><div class="role-tags"><span class="tag info">商户财务</span><span class="tag info">商户运营</span></div></td><td><span class="tag success">已绑定</span></td><td><span class="tag success">正常</span></td><td>07-17 09:22:31</td><td>07-02 10:18:40</td><td><div class="row-actions"><button class="btn link" data-detail="用户" data-id="finance.liu">详情</button><button class="btn link" data-user-edit="finance.liu">编辑</button></div></td></tr>
+                  <tr data-account-status="正常" data-session-version="1" data-permission-version="4" data-role-names="商户运营" data-include-direct-children="false"><td class="mono">ops.zhao</td><td>赵航</td><td><div class="role-tags"><span class="tag info">商户运营</span></div></td><td><span class="tag warning">待绑定</span></td><td><span class="tag success">正常</span></td><td>-</td><td>07-17 15:10:20</td><td><div class="row-actions"><button class="btn link" data-detail="用户" data-id="ops.zhao">详情</button><button class="btn link" data-user-edit="ops.zhao">编辑</button></div></td></tr>
                 </tbody></table></div>
                 <div class="pagination"><span id="userCount">共 3 个用户</span><span>不提供批量账号安全操作</span></div>
               </div>
@@ -1268,13 +1267,6 @@
                   <div class="check-card" data-role-card="商户财务" data-role-code="MERCHANT_FINANCE" data-role-status="启用"><strong>商户财务</strong><p data-role-summary>余额与资金申请、完整敏感资料、导出、对接信息只读</p><p class="muted" data-role-meta>启用 · 1 名成员 · 当前参与有效权限计算</p><p class="row-actions" data-role-actions><button class="btn link" data-open="roleModal" data-role-name="商户财务">编辑权限</button><button class="btn link" data-role-action="members" data-role-code="MERCHANT_FINANCE">成员</button><button class="btn link" data-role-action="state" data-role-code="MERCHANT_FINANCE">停用</button><button class="btn link danger" data-role-action="delete" data-role-code="MERCHANT_FINANCE">删除</button></p></div>
                   <div class="check-card" data-role-card="商户运营" data-role-code="MERCHANT_OPS" data-role-status="启用"><strong>商户运营</strong><p data-role-summary>代收与退款、代付订单、对接信息只读、子商户数据只读</p><p class="muted" data-role-meta>启用 · 1 名成员 · 当前参与有效权限计算</p><p class="row-actions" data-role-actions><button class="btn link" data-open="roleModal" data-role-name="商户运营">编辑权限</button><button class="btn link" data-role-action="members" data-role-code="MERCHANT_OPS">成员</button><button class="btn link" data-role-action="state" data-role-code="MERCHANT_OPS">停用</button><button class="btn link danger" data-role-action="delete" data-role-code="MERCHANT_OPS">删除</button></p></div>
                 </div>
-              </div>
-              <div class="tab-pane" id="personalSecurity" hidden>
-                <div class="panel-body"><div class="check-grid">
-                  <div class="check-card"><strong>登录密码</strong><p id="passwordChangedAt">最近修改：2026-07-01 09:05:18</p><button class="btn" type="button" style="margin-top:12px" data-open="passwordModal">修改密码</button></div>
-                  <div class="check-card"><strong>Google 2FA</strong><p id="twoFactorStatus">已绑定，所有登录和敏感操作均需验证。</p><button class="btn" type="button" style="margin-top:12px" data-open="twoFactorModal">重新绑定</button></div>
-                  <div class="check-card"><strong>在线会话</strong><p>首版不限制时长、空闲时间或同时在线设备数。</p><button class="btn danger" type="button" style="margin-top:12px" data-open="logoutAllModal">退出所有设备</button></div>
-                </div></div>
               </div>
             </div>
           </div>
@@ -1352,19 +1344,7 @@
   </div>
 
   <div class="modal-backdrop" id="userSecurityModal" role="dialog" aria-modal="true" aria-labelledby="userSecurityTitle" hidden>
-    <form class="modal" id="userSecurityForm"><div class="modal-head"><h2 id="userSecurityTitle">逐账号安全操作</h2><button class="btn icon" type="button" data-close aria-label="关闭账号安全操作">×</button></div><div class="modal-body"><div class="summary-box"><div><span>目标账号</span><strong class="mono" id="securityTargetAccount">-</strong></div><div><span>当前状态</span><strong id="securityTargetStatus">-</strong></div><div><span>审计</span><strong>永久记录</strong></div></div><div class="form-grid" style="margin-top:14px"><div class="field"><label for="securityAction">安全操作</label><select class="control" id="securityAction" required></select></div><div class="field"><label for="securityReason">操作原因</label><input class="control" id="securityReason" required placeholder="请输入本次操作原因"></div></div><div class="notice danger" style="margin-top:14px">锁定或停用会让全部旧会话失效；启用或解锁只恢复后续登录资格，不恢复旧会话。重置密码和重置 2FA 不改变账号状态。</div></div><div class="modal-foot"><button class="btn" type="button" data-close>取消</button><button class="btn danger" type="submit">二次确认并执行</button></div></form>
-  </div>
-
-  <div class="modal-backdrop" id="passwordModal" role="dialog" aria-modal="true" aria-labelledby="passwordTitle" hidden>
-    <form class="modal" id="passwordForm" novalidate><div class="modal-head"><h2 id="passwordTitle">修改登录密码</h2><button class="btn icon" type="button" data-close aria-label="关闭修改密码">×</button></div><div class="modal-body"><div class="form-grid"><div class="field full"><label for="currentPassword">当前密码</label><input class="control" id="currentPassword" type="password" autocomplete="current-password" required></div><div class="field"><label for="newPassword">新密码</label><input class="control" id="newPassword" type="password" autocomplete="new-password" required minlength="10"></div><div class="field"><label for="confirmPassword">确认新密码</label><input class="control" id="confirmPassword" type="password" autocomplete="new-password" required minlength="10"></div><div class="field full"><label for="passwordOtp">Google 2FA 验证码</label><input class="control" id="passwordOtp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" required></div></div><div class="notice" style="margin-top:14px">修改成功后其他在线会话全部失效，当前页面保持登录。</div><div class="login-error" id="passwordFormError" role="alert" hidden></div></div><div class="modal-foot"><button class="btn" type="button" data-close>取消</button><button class="btn primary" type="submit">确认修改</button></div></form>
-  </div>
-
-  <div class="modal-backdrop" id="twoFactorModal" role="dialog" aria-modal="true" aria-labelledby="twoFactorTitle" hidden>
-    <form class="modal" id="twoFactorForm" novalidate><div class="modal-head"><h2 id="twoFactorTitle">重新绑定 Google 2FA</h2><button class="btn icon" type="button" data-close aria-label="关闭重新绑定 2FA">×</button></div><div class="modal-body"><div class="summary-box"><div><span>新密钥摘要</span><strong class="mono">JBSW **** 7K9P</strong></div><div><span>绑定账号</span><strong class="mono">admin@xinghe</strong></div><div><span>会话影响</span><strong>其他会话失效</strong></div></div><div class="form-grid" style="margin-top:14px"><div class="field"><label for="twoFactorPassword">当前密码</label><input class="control" id="twoFactorPassword" type="password" autocomplete="current-password" required></div><div class="field"><label for="currentOtp">当前验证码</label><input class="control" id="currentOtp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" required></div><div class="field full"><label for="newOtp">新验证器验证码</label><input class="control" id="newOtp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" required></div></div><div class="notice" style="margin-top:14px">首版不提供恢复码。确认后旧 2FA 立即失效，新验证器用于之后所有登录和敏感操作。</div><div class="login-error" id="twoFactorFormError" role="alert" hidden></div></div><div class="modal-foot"><button class="btn" type="button" data-close>取消</button><button class="btn primary" type="submit">确认重新绑定</button></div></form>
-  </div>
-
-  <div class="modal-backdrop" id="logoutAllModal" role="dialog" aria-modal="true" aria-labelledby="logoutAllTitle" hidden>
-    <form class="modal" id="logoutAllForm" novalidate><div class="modal-head"><h2 id="logoutAllTitle">退出所有设备</h2><button class="btn icon" type="button" data-close aria-label="关闭退出所有设备确认">×</button></div><div class="modal-body"><div class="notice danger">确认后当前账号全部在线会话立即失效，包括当前页面；完成后返回登录步骤，账号仍可重新登录。</div><div class="field" style="margin-top:14px"><label for="logoutAllOtp">Google 2FA 验证码</label><input class="control" id="logoutAllOtp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" required></div><div class="login-error" id="logoutAllFormError" role="alert" hidden></div></div><div class="modal-foot"><button class="btn" type="button" data-close>取消</button><button class="btn danger" type="submit">确认退出所有设备</button></div></form>
+    <form class="modal" id="userSecurityForm"><div class="modal-head"><h2 id="userSecurityTitle">逐账号安全操作</h2><button class="btn icon" type="button" data-close aria-label="关闭账号安全操作">×</button></div><div class="modal-body"><div class="summary-box"><div><span>目标账号</span><strong class="mono" id="securityTargetAccount">-</strong></div><div><span>当前状态</span><strong id="securityTargetStatus">-</strong></div><div><span>审计</span><strong>永久记录</strong></div></div><div class="form-grid" style="margin-top:14px"><div class="field"><label for="securityAction">安全操作</label><input id="securityAction" type="hidden"><div class="control" id="securityActionLabel"></div></div><div class="field"><label for="securityReason">操作原因</label><input class="control" id="securityReason" required placeholder="请输入本次操作原因"></div></div><div class="notice danger" id="securityActionImpact" style="margin-top:14px"></div></div><div class="modal-foot"><button class="btn" type="button" data-close>取消</button><button class="btn danger" type="submit">二次确认并执行</button></div></form>
   </div>
 
   <div class="modal-backdrop" id="integrationModal" role="dialog" aria-modal="true" aria-labelledby="integrationTitle" hidden>
@@ -2015,30 +1995,6 @@
       return false;
     }
 
-    const securityFormFields = {
-      passwordModal: ['currentPassword', 'newPassword', 'confirmPassword', 'passwordOtp'],
-      twoFactorModal: ['twoFactorPassword', 'currentOtp', 'newOtp'],
-      logoutAllModal: ['logoutAllOtp']
-    };
-
-    function clearSecurityForm(modalId) {
-      (securityFormFields[modalId] || []).forEach(id => {
-        const field = document.getElementById(id);
-        if (field) field.value = '';
-      });
-      const error = document.getElementById(`${modalId.replace('Modal', '')}FormError`);
-      if (error) error.hidden = true;
-    }
-
-    function showSecurityFormError(modalId, message) {
-      const error = document.getElementById(`${modalId.replace('Modal', '')}FormError`);
-      if (!error) return;
-      error.textContent = message;
-      error.hidden = false;
-      const field = (securityFormFields[modalId] || []).map(id => document.getElementById(id)).find(Boolean);
-      window.HSFormFeedback?.report(message, field, error);
-    }
-
     function showMerchantFormError(form, message, fieldOrId = '') {
       const field = typeof fieldOrId === 'string'
         ? document.getElementById(fieldOrId)
@@ -2152,6 +2108,7 @@
 
     function applyMerchantPermissions() {
       syncMerchantHomeFacts();
+      refreshAllMerchantUserActions();
       document.querySelectorAll('[data-page]').forEach(button => { button.hidden = !canAccessMerchantPage(button.dataset.page); });
       document.querySelectorAll('[data-home-source]').forEach(button => {
         const moduleKey = button.closest('[data-home-module]')?.dataset.homeModule;
@@ -2512,7 +2469,6 @@
       if (!modal) return;
       if (modal.id === 'loginModal' && loginRequired && !force) return;
       if (modal.id === 'businessDetailModal') resetBusinessSensitiveDetail();
-      clearSecurityForm(modal.id);
       modal.querySelectorAll('input[type="file"]').forEach(input => { input.value = ''; });
       modal.querySelectorAll('input[type="password"], input[autocomplete="one-time-code"]').forEach(input => { input.value = ''; });
       if (modal.id === 'userCreatedModal') document.getElementById('createdUserPassword').textContent = '已清除';
@@ -2711,9 +2667,35 @@
     let merchantExportSecurityAuditSequence = 1;
     let activeMerchantExportTaskId = null;
 
+    function merchantUserIsProtected(row) {
+      if (!row) return true;
+      if (row.cells[0].textContent.trim() === currentMerchantAccount.account) return true;
+      const isUsableAdmin = (row.dataset.accountStatus || row.cells[4].textContent.trim()) === '正常' && merchantUserRoleNames(row).includes('商户超级管理员');
+      return isUsableAdmin && ![...document.querySelectorAll('#userTableBody tr')].some(other => other !== row && (other.dataset.accountStatus || other.cells[4].textContent.trim()) === '正常' && merchantUserRoleNames(other).includes('商户超级管理员'));
+    }
+
+    function merchantUserSecurityActions(row) {
+      if (merchantUserIsProtected(row)) return [];
+      const status = row.dataset.accountStatus || row.cells[4].textContent.trim();
+      const common = [['重置密码', '重置密码'], ['重置 2FA', '重置 2FA']];
+      if (status === '停用') return [...common, ['启用', '启用']];
+      if (status === '锁定') return [...common, ['解锁', '解锁'], ['停用', '停用']];
+      return [...common, ['锁定', '锁定'], ['停用', '停用'], ['强制下线', '下线']];
+    }
+
     function merchantUserActions(row) {
-      const account = row.cells[0].textContent.trim();
-      return `<div class="row-actions"><button class="btn link" data-detail="用户" data-id="${escapeHtml(account)}">详情</button><button class="btn link" data-user-edit="${escapeHtml(account)}">编辑</button><button class="btn link" data-user-security="${escapeHtml(account)}">安全操作</button></div>`;
+      const account = escapeHtml(row.cells[0].textContent.trim());
+      const detail = `<button class="btn link" data-detail="用户" data-id="${account}">详情</button>`;
+      if (merchantUserIsProtected(row)) {
+        const label = row.cells[0].textContent.trim() === currentMerchantAccount.account ? '当前账号受保护' : '最后一个可用超级管理员受保护';
+        return `<div class="row-actions">${detail}<span class="tag info">${label}</span></div>`;
+      }
+      const actions = merchantUserSecurityActions(row).map(([action, label]) => `<button class="btn link" type="button" data-user-security="${account}" data-security-action="${action}">${label}</button>`).join('');
+      return `<div class="row-actions">${detail}<button class="btn link" data-user-edit="${account}">编辑</button>${actions}</div>`;
+    }
+
+    function refreshAllMerchantUserActions() {
+      document.querySelectorAll('#userTableBody tr').forEach(refreshMerchantUserActions);
     }
 
     function refreshMerchantUserActions(row) {
@@ -2782,17 +2764,22 @@
       if (summary) summary.textContent = `已选 ${selected.length} 个角色，其中 ${effective} 个启用角色参与权限合并`;
     }
 
-    function prepareMerchantUserSecurity(row) {
-      const status = row.dataset.accountStatus || row.cells[4].textContent.trim();
-      document.getElementById('securityTargetStatus').textContent = status;
-      const stateOptions = status === '正常'
-        ? [['锁定', '锁定账号'], ['停用', '停用账号']]
-        : status === '锁定'
-          ? [['解锁', '解锁账号'], ['停用', '停用账号']]
-          : [['启用', '启用账号']];
-      const common = [['重置密码', '重置密码'], ['重置 2FA', '重置 Google 2FA']];
-      const session = status === '正常' ? [['强制下线', '强制下线全部设备']] : [];
-      document.getElementById('securityAction').innerHTML = [...stateOptions, ...common, ...session].map(([value, label]) => `<option value="${value}">${label}</option>`).join('');
+    function prepareMerchantUserSecurity(row, action) {
+      document.getElementById('securityTargetStatus').textContent = row.dataset.accountStatus || row.cells[4].textContent.trim();
+      document.getElementById('securityAction').value = action;
+      const label = action === '强制下线' ? '强制下线' : action;
+      document.getElementById('userSecurityTitle').textContent = `${label}确认`;
+      document.getElementById('securityActionLabel').textContent = label;
+      const impacts = {
+        '重置密码': '确认后全部旧会话立即失效，生成 24 小时有效的一次性密码，仅展示一次；下次登录必须修改密码。账号状态、角色和数据范围保持不变。',
+        '重置 2FA': '确认后全部旧会话立即失效，2FA 状态变为待重新绑定；下次登录须绑定新的 Google 2FA。账号状态、角色和数据范围保持不变。',
+        '锁定': '确认后账号锁定，全部旧会话立即失效。',
+        '停用': '确认后账号停用，全部旧会话立即失效。',
+        '启用': '只恢复后续登录资格，不恢复旧会话。',
+        '解锁': '只恢复后续登录资格，不恢复旧会话。',
+        '强制下线': '确认后目标账号全部在线会话立即失效；账号状态保持不变，可以重新登录。'
+      };
+      document.getElementById('securityActionImpact').textContent = impacts[action];
     }
 
     function prepareMerchantUserForm(row = null) {
@@ -4485,7 +4472,6 @@
         loginRequired = true;
         resetLoginFlow(false);
       }
-      if (securityFormFields[button.dataset.open]) clearSecurityForm(button.dataset.open);
       if (button.dataset.open === 'integrationModal' && button.dataset.configType) {
         document.getElementById('configType').value = button.dataset.configType;
         syncIntegrationType();
@@ -4550,9 +4536,15 @@
       const userSecurityButton = event.target.closest('[data-user-security]');
       if (userSecurityButton) {
         securityTargetRow = userSecurityButton.closest('tr');
+        const action = userSecurityButton.dataset.securityAction;
+        if (!merchantUserSecurityActions(securityTargetRow).some(([value]) => value === action)) {
+          securityTargetRow = null;
+          showToast('当前账号受保护或账号状态已变化，请重新查看列表');
+          return;
+        }
         document.getElementById('securityTargetAccount').textContent = userSecurityButton.dataset.userSecurity;
         document.getElementById('securityReason').value = '';
-        prepareMerchantUserSecurity(securityTargetRow);
+        prepareMerchantUserSecurity(securityTargetRow, action);
         openModal('userSecurityModal', userSecurityButton);
         return;
       }
@@ -4560,6 +4552,7 @@
       const userEditButton = event.target.closest('[data-user-edit]');
       if (userEditButton) {
         const row = userEditButton.closest('tr');
+        if (merchantUserIsProtected(row)) { showToast('当前账号和最后一个可用超级管理员受保护'); return; }
         prepareMerchantUserForm(row);
         openModal('userModal', userEditButton);
         return;
@@ -4916,6 +4909,7 @@
           return;
         }
         if (editingUserRow) {
+          if (merchantUserIsProtected(editingUserRow)) { showMerchantFormError(form, '当前账号和最后一个可用超级管理员受保护'); return; }
           const oldRoles = merchantUserRoleNames(editingUserRow);
           const newlyAssigned = selectedRoles.filter(roleName => !oldRoles.includes(roleName));
           const invalidNewRole = newlyAssigned.find(roleName => merchantRoleByName(roleName)?.status !== '启用');
@@ -4965,10 +4959,11 @@
           return;
         }
         document.getElementById('userTableBody').insertAdjacentHTML('beforeend', `
-          <tr data-created="user" data-account-status="正常" data-session-version="1" data-permission-version="1" data-include-direct-children="${includeDirectChildren}"><td class="mono">${escapeHtml(account)}</td><td>${escapeHtml(name)}</td><td></td><td><span class="tag warning">待绑定</span></td><td><span class="tag success">正常</span></td><td>-</td><td>${formatNow()}</td><td><div class="row-actions"><button class="btn link" data-detail="用户" data-id="${escapeHtml(account)}">详情</button><button class="btn link" data-user-edit="${escapeHtml(account)}">编辑</button><button class="btn link" data-user-security="${escapeHtml(account)}">安全操作</button></div></td></tr>
+          <tr data-created="user" data-account-status="正常" data-session-version="1" data-permission-version="1" data-include-direct-children="${includeDirectChildren}"><td class="mono">${escapeHtml(account)}</td><td>${escapeHtml(name)}</td><td></td><td><span class="tag warning">待绑定</span></td><td><span class="tag success">正常</span></td><td>-</td><td>${formatNow()}</td><td><div class="row-actions"><button class="btn link" data-detail="用户" data-id="${escapeHtml(account)}">详情</button><button class="btn link" data-user-edit="${escapeHtml(account)}">编辑</button></div></td></tr>
         `);
         const createdRow = document.querySelector('#userTableBody tr:last-child');
         setMerchantUserRoles(createdRow, selectedRoles);
+        refreshAllMerchantUserActions();
         selectedRoles.forEach(roleName => {
           const assignedRole = merchantRoleByName(roleName);
           if (assignedRole) refreshMerchantRoleCard(assignedRole);
@@ -5348,6 +5343,13 @@
       if (!securityTargetRow) return;
       const account = securityTargetRow.cells[0].textContent.trim();
       const action = document.getElementById('securityAction').value;
+      const form = event.target;
+      if (!merchantUserSecurityActions(securityTargetRow).some(([value]) => value === action)) {
+        showMerchantFormError(form, '当前账号受保护或账号状态已变化，本次操作未执行');
+        return;
+      }
+      const reason = document.getElementById('securityReason').value.trim();
+      if (!reason) { showMerchantFormError(form, '请填写本次操作原因', 'securityReason'); return; }
       const previousStatus = securityTargetRow.dataset.accountStatus || securityTargetRow.cells[4].textContent.trim();
       let sessionVersion = Number(securityTargetRow.dataset.sessionVersion || 1);
       if (action === '停用') { securityTargetRow.dataset.accountStatus = '停用'; securityTargetRow.cells[4].innerHTML = '<span class="tag neutral">停用</span>'; sessionVersion += 1; }
@@ -5356,7 +5358,8 @@
       if (action === '重置 2FA') { securityTargetRow.cells[3].innerHTML = '<span class="tag warning">待重新绑定</span>'; sessionVersion += 1; }
       if (action === '重置密码' || action === '强制下线') sessionVersion += 1;
       securityTargetRow.dataset.sessionVersion = String(sessionVersion);
-      refreshMerchantUserActions(securityTargetRow);
+      refreshAllMerchantUserActions();
+      recordMerchantFact({ title: `账号已执行${action}`, object: account, status: `账号状态 ${previousStatus} → ${securityTargetRow.dataset.accountStatus || previousStatus} · 会话版本 ${sessionVersion} · ${reason}`, target: 'access', action });
       closeModal(document.getElementById('userSecurityModal'));
       if (action === '重置密码') {
         document.getElementById('createdUserAccount').textContent = account;
@@ -5373,78 +5376,6 @@
         showToast(message);
       }
       securityTargetRow = null;
-    });
-
-    document.getElementById('passwordForm').addEventListener('submit', event => {
-      event.preventDefault();
-      const currentPassword = document.getElementById('currentPassword').value;
-      const nextPassword = document.getElementById('newPassword').value;
-      const confirmPassword = document.getElementById('confirmPassword').value;
-      const otp = document.getElementById('passwordOtp').value;
-      if (!currentPassword || nextPassword.length < 10 || !confirmPassword || !/^\d{6}$/.test(otp)) {
-        clearSecurityForm('passwordModal');
-        showSecurityFormError('passwordModal', '请完整填写当前密码、至少 10 位的新密码和 6 位验证码。');
-        return;
-      }
-      if (currentPassword !== currentAccountPassword || otp !== currentOtpCode) {
-        clearSecurityForm('passwordModal');
-        showSecurityFormError('passwordModal', '当前密码或 Google 2FA 验证码不正确，请重新输入。');
-        return;
-      }
-      if (nextPassword === currentPassword || nextPassword !== confirmPassword) {
-        clearSecurityForm('passwordModal');
-        showSecurityFormError('passwordModal', '新密码不能与当前密码相同，且两次输入必须一致。');
-        return;
-      }
-      const now = new Intl.DateTimeFormat('zh-CN', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(new Date()).replaceAll('/', '-');
-      document.getElementById('passwordChangedAt').textContent = `最近修改：${now}`;
-      currentAccountPassword = nextPassword;
-      clearSecurityForm('passwordModal');
-      closeModal(document.getElementById('passwordModal'));
-      showToast('登录密码已修改，其他在线会话已失效，当前页面保持登录');
-    });
-
-    document.getElementById('twoFactorForm').addEventListener('submit', event => {
-      event.preventDefault();
-      const password = document.getElementById('twoFactorPassword').value;
-      const currentOtp = document.getElementById('currentOtp').value;
-      const newOtp = document.getElementById('newOtp').value;
-      if (!password || !/^\d{6}$/.test(currentOtp) || !/^\d{6}$/.test(newOtp)) {
-        clearSecurityForm('twoFactorModal');
-        showSecurityFormError('twoFactorModal', '请输入当前密码、6 位当前验证码和 6 位新验证码。');
-        return;
-      }
-      if (password !== currentAccountPassword || currentOtp !== currentOtpCode) {
-        clearSecurityForm('twoFactorModal');
-        showSecurityFormError('twoFactorModal', '当前密码或原 Google 2FA 验证码不正确，请重新输入。');
-        return;
-      }
-      if (newOtp === currentOtpCode) {
-        clearSecurityForm('twoFactorModal');
-        showSecurityFormError('twoFactorModal', '新验证器验证码不能与当前验证码相同。');
-        return;
-      }
-      document.getElementById('twoFactorStatus').textContent = `已重新绑定 · ${formatNow()}；所有登录和敏感操作均需验证。`;
-      currentOtpCode = newOtp;
-      clearSecurityForm('twoFactorModal');
-      closeModal(document.getElementById('twoFactorModal'));
-      const route = completeMerchantLoginFromLatestFact(currentMerchantAccount.account, 'rebind');
-      showToast(route.ok ? `Google 2FA 已重新绑定，已按最新权限进入${pageNames[route.targetPage]}` : 'Google 2FA 已重新绑定，但当前账号没有可访问页面');
-    });
-
-    document.getElementById('logoutAllForm').addEventListener('submit', event => {
-      event.preventDefault();
-      const otp = document.getElementById('logoutAllOtp').value;
-      if (!/^\d{6}$/.test(otp) || otp !== currentOtpCode) {
-        clearSecurityForm('logoutAllModal');
-        showSecurityFormError('logoutAllModal', /^\d{6}$/.test(otp) ? 'Google 2FA 验证码不正确，请重新输入。' : '请输入完整的 6 位 Google 2FA 验证码。');
-        return;
-      }
-      clearSecurityForm('logoutAllModal');
-      closeModal(document.getElementById('logoutAllModal'));
-      resetLoginFlow(false);
-      enforceMerchantLoginGate();
-      showToast('全部在线会话已退出，请重新登录');
     });
 
     let loginStep = 1;
@@ -6198,6 +6129,7 @@
     });
 
     document.querySelectorAll('#userTableBody tr').forEach(row => setMerchantUserRoles(row, merchantUserRoleNames(row)));
+    refreshAllMerchantUserActions();
     merchantRoles.forEach(role => refreshMerchantRoleCard(role));
     syncMerchantRoleOptions();
     applyIntegrationDeliveryFilters({ announce: false });
