@@ -1,0 +1,14 @@
+{
+  "source_root": "work/汇盛支付/需求文件夹/2026-10-06-平台通道操作移植",
+  "purpose": "read-only-github-delivery-snapshot",
+  "documents": [
+    {
+      "source": "PRD_平台通道操作移植_20261006.md",
+      "sha256": "d2ec84854088d99a114ce51dfa1c616e4e27a3581dbb3bea46ed6648c5757457"
+    },
+    {
+      "source": "开发任务清单.md",
+      "sha256": "723b860be18c94ca5f2297596162f5a8755047e89ebd7ab29e086a74fbe2c43a"
+    }
+  ]
+}
