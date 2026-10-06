@@ -1046,6 +1046,16 @@
       text-overflow: ellipsis;
     }
 
+    .collection-type-action-line {
+      overflow: visible;
+    }
+
+    .collection-type-action-line .action-menu {
+      position: fixed;
+      right: auto;
+      z-index: 100;
+    }
+
     .collection-type-name {
       color: var(--color-text-tertiary);
       font-size: 11px;
@@ -1622,6 +1632,9 @@
       background: #f4f7fb;
       color: var(--color-text-secondary);
     }
+
+    .payout-development-form textarea { min-height: 58px; }
+    .payout-development-form .radio-line input { width: 16px; }
 
     .blue-inline {
       display: flex;
@@ -2306,7 +2319,7 @@
                 <div class="rule-item"><span class="rule-dot"></span><span>通道进入生产使用前，必须已由后端 / 技术侧完成接入和上线确认。</span></div>
                 <div class="rule-item"><span class="rule-dot"></span><span>租户使用范围由业务开通模块授权；授权后由租户人工选择和切换。</span></div>
                 <div class="rule-item"><span class="rule-dot"></span><span>通道商代收、代付钱包与租户钱包分账；代付前同时校验同币种租户余额、通道开启状态和通道商代付钱包余额。</span></div>
-                <div class="rule-item"><span class="rule-dot"></span><span>接口类型可作为运营枚举，接口地址、签名、回调和密钥字段不在本页展示。</span></div>
+                <div class="rule-item"><span class="rule-dot"></span><span>代付接入信息通过开发配置维护；代收按三方编码提供出码测试。</span></div>
               </div>
             </section>
           </aside>
@@ -2607,7 +2620,7 @@
         return `<div style="display:flex;align-items:center;gap:8px"><div class="health-bar ${cls}"><span style="width:${Math.max(8, Math.min(100, n))}%"></span></div><span class="mono">${value}</span></div>`;
       }
       if (["vendorNo", "typeNo", "channelNo", "thirdCode", "productNo", "monitorNo"].includes(key)) {
-        return `<span class="mono">${value}</span>`;
+        return `<span class="mono">${key === "thirdCode" ? escapeHtml(String(value || "")) : value}</span>`;
       }
       return value || '<span class="muted">-</span>';
     }
@@ -2772,7 +2785,7 @@
         if (key === "rate") return `<span class="collection-type-line mono">${escapeHtml(item.rate ?? "-")}</span>`;
         if (key === "receiptRule") return `<span class="collection-type-line mono">${escapeHtml(item.rule ?? "-")}</span>`;
         if (key === "typeStatus") return `<span class="collection-type-line">${collectionSwitchCell(row, "typeStatus", item.status === "开启", index)}</span>`;
-        if (key === "typeActions") return `<span class="collection-type-line"><button class="cell-link" data-action="detail" data-id="${row.id}">更多 <i data-lucide="chevron-down"></i></button></span>`;
+        if (key === "typeActions") return `<span class="collection-type-line collection-type-action-line"><details class="action-more"><summary aria-label="${escapeHtml(item.code || item.name)} 更多">更多 <i data-lucide="chevron-down"></i></summary><span class="action-menu"><button class="icon-link" data-action="collectionCodeTest" data-id="${row.id}" data-type-index="${index}"><i data-lucide="flask-conical"></i>出码测试</button><button class="icon-link" data-action="detail" data-id="${row.id}"><i data-lucide="info"></i>通道详情</button></span></details></span>`;
         return "";
       }).join("")}</span>`;
     }
@@ -3018,7 +3031,7 @@
     function channelActionPermission(action) {
       const byAction = {
         export: 'platform.channel.export', editVendor: 'platform.channel.vendor.manage', editChannel: 'platform.channel.manage',
-        devDocs: 'platform.channel.sandbox.generate', channelTest: 'platform.channel.sandbox.generate',
+        devDocs: 'platform.channel.sandbox.generate', payoutDevConfig: 'platform.channel.sandbox.generate', savePayoutDevConfig: 'platform.channel.sandbox.generate', channelTest: 'platform.channel.sandbox.generate', collectionCodeTest: 'platform.channel.sandbox.generate', runCollectionCodeTest: 'platform.channel.sandbox.generate',
         editProduct: 'platform.channel.product.manage', bindProductChannels: 'platform.channel.product.manage', deleteProductPreview: 'platform.channel.product.manage',
         vendorFunds: 'platform.channel.funds.view', fundAccountDetail: 'platform.channel.funds.view',
         fundAdjust: 'platform.channel.funds.increase.submit', vendorAmountAdjust: 'platform.channel.funds.adjust.submit', vendorSettlement: 'platform.channel.funds.settlement.submit',
@@ -3129,7 +3142,7 @@
         return `<span class="row-actions"><details class="action-more"><summary><i data-lucide="ellipsis"></i>更多</summary><div class="action-menu"><button class="icon-link" data-action="editChannel" data-id="${row.id}"><i data-lucide="square-pen"></i>编辑</button>${common}<button class="icon-link" data-action="devDocs" data-id="${row.id}"><i data-lucide="code-2"></i>开发</button><button class="icon-link" data-action="channelTest" data-id="${row.id}"><i data-lucide="flask-conical"></i>测试</button></div></details></span>`;
       }
       if (activeKey === "payoutChannels") {
-        return `<span class="row-actions"><button class="icon-link" data-action="rateConfig" data-id="${row.id}"><i data-lucide="percent"></i>费率</button><button class="icon-link" data-action="limitConfig" data-id="${row.id}"><i data-lucide="sliders-horizontal"></i>限额</button><button class="icon-link" data-action="devDocs" data-id="${row.id}"><i data-lucide="code-2"></i>开发</button><button class="icon-link" data-action="channelTest" data-id="${row.id}"><i data-lucide="flask-conical"></i>测试</button><button class="icon-link" data-action="deleteChannelPreview" data-id="${row.id}"><i data-lucide="trash-2"></i>删除</button></span>`;
+        return `<span class="row-actions"><button class="icon-link" data-action="rateConfig" data-id="${row.id}"><i data-lucide="percent"></i>费率</button><button class="icon-link" data-action="limitConfig" data-id="${row.id}"><i data-lucide="sliders-horizontal"></i>限额</button><button class="icon-link" data-action="payoutDevConfig" data-id="${row.id}"><i data-lucide="code-2"></i>开发配置</button><button class="icon-link" data-action="channelTest" data-id="${row.id}"><i data-lucide="flask-conical"></i>测试</button><button class="icon-link" data-action="deleteChannelPreview" data-id="${row.id}"><i data-lucide="trash-2"></i>删除</button></span>`;
       }
       if (activeKey === "vendors") {
         return `<span class="row-actions"><button class="icon-link" data-action="editVendor" data-id="${row.id}"><i data-lucide="square-pen"></i>编辑</button><button class="icon-link" data-action="vendorFunds" data-id="${row.id}"><i data-lucide="list-tree"></i>钱包明细</button><details class="action-more"><summary><i data-lucide="ellipsis"></i>更多</summary><div class="action-menu">${common}</div></details></span>`;
@@ -3661,6 +3674,52 @@
       `, `<button class="btn primary" data-action="closeModal">关闭</button>`, "sm");
     }
 
+    // Keep connection data separate from list rows, exports, details and audit text.
+    const payoutDevelopmentConfigs = new Map();
+
+    function openPayoutDevConfig(row) {
+      if (!row || row.direction !== "代付" || activeKey !== "payoutChannels" || !canUseChannelAction("payoutDevConfig") || !channelRowInCurrentScope(row)) return;
+      const config = payoutDevelopmentConfigs.get(row.id) || {};
+      activeModalContext = { kind: "payoutDevelopment", rowId: row.id };
+      const fields = [
+        ["merchantNo", "通道商户号", false], ["secret", "通道密钥", true],
+        ["appId", "APPID", false], ["orderUrl", "下单地址", false],
+        ["queryUrl", "查询地址", false], ["callbackIps", "允许回调IP", true],
+        ["publicKey", "公钥", true], ["privateKey", "私钥", true]
+      ];
+      openModal("编辑开发配置", `
+        <div id="modalFeedback" class="modal-feedback" hidden></div>
+        <div class="blue-form payout-development-form">
+          <div class="blue-row"><label for="payoutDevName">通道名称</label><input id="payoutDevName" value="${escapeHtml(row.name)}" disabled></div>
+          <div class="blue-row"><label for="payoutDevCode">通道编码</label><input id="payoutDevCode" value="${escapeHtml(row.thirdCode || "")}" autocomplete="off"></div>
+          ${fields.map(([key, label, multiline]) => `<div class="blue-row"><label for="payoutDev-${key}">${label}</label>${multiline
+            ? `<textarea id="payoutDev-${key}" rows="${key === "publicKey" || key === "privateKey" ? 3 : 2}" placeholder="请输入${label}" autocomplete="off" spellcheck="false">${escapeHtml(config[key] || "")}</textarea>`
+            : `<input id="payoutDev-${key}" value="${escapeHtml(config[key] || "")}" placeholder="请输入${label}" autocomplete="off" spellcheck="false">`}</div>`).join("")}
+          <div class="blue-row"><label id="payoutDevStatusLabel">状态</label><div class="radio-line" role="radiogroup" aria-labelledby="payoutDevStatusLabel">
+            <label><input type="radio" name="payoutDevStatus" value="开启" ${row.status === "开启" ? "checked" : ""}>开启</label>
+            <label><input type="radio" name="payoutDevStatus" value="关闭" ${row.status !== "开启" ? "checked" : ""}>关闭</label>
+          </div></div>
+        </div>
+      `, `<button class="btn" data-action="closeModal">关闭</button><button class="btn primary" data-action="savePayoutDevConfig">提交保存</button>`, "sm");
+    }
+
+    function savePayoutDevConfig() {
+      if (activeModalContext?.kind !== "payoutDevelopment" || !canUseChannelAction("savePayoutDevConfig")) return;
+      const row = rows.types.find(item => item.id === activeModalContext.rowId);
+      if (!row || row.direction !== "代付" || activeKey !== "payoutChannels" || !channelRowInCurrentScope(row)) return;
+      const status = document.querySelector('input[name="payoutDevStatus"]:checked')?.value;
+      if (!["开启", "关闭"].includes(status)) return setModalError("请选择状态。");
+      const config = {};
+      ["merchantNo", "secret", "appId", "orderUrl", "queryUrl", "callbackIps", "publicKey", "privateKey"].forEach(key => {
+        config[key] = $(`#payoutDev-${key}`).value;
+      });
+      payoutDevelopmentConfigs.set(row.id, config);
+      row.thirdCode = $("#payoutDevCode").value.trim();
+      row.status = status;
+      const audit = addChannelAudit({ objectId: row.id, objectType: "通道", action: "编辑开发配置", summary: `${row.name} · 代付 · ${status}`, reason: "代付通道开发配置" });
+      finishChange({ title: "开发配置已保存", detail: `${row.name} · ${status}`, audit });
+    }
+
     function openDevDocs(row) {
       openModal("技术接入摘要", `
         <div class="desc-grid">
@@ -3719,6 +3778,53 @@
         status: "ACCEPTED",
         callbackStatus: row.callbackStatus
       };
+    }
+
+    function collectionCodeTestTarget() {
+      if (activeModalContext?.kind !== "collectionCodeTest" || activeKey !== "collectionChannels") return null;
+      const row = rows.types.find(item => item.id === activeModalContext.rowId);
+      const type = row?.collectionTypes?.[activeModalContext.typeIndex];
+      if (!row || row.direction !== "代收" || !type || !channelRowInCurrentScope(row)) return null;
+      return { row, type };
+    }
+
+    function openCollectionCodeTest(row, typeIndex) {
+      if (!row || row.direction !== "代收" || activeKey !== "collectionChannels" || !Number.isInteger(typeIndex) || !row.collectionTypes?.[typeIndex] || !canUseChannelAction("collectionCodeTest") || !channelRowInCurrentScope(row)) return;
+      const type = row.collectionTypes[typeIndex];
+      activeModalContext = { kind: "collectionCodeTest", rowId: row.id, typeIndex };
+      openModal("出码测试", `
+        <div id="modalFeedback" class="modal-feedback" hidden></div>
+        <div class="blue-form">
+          <div class="blue-row"><label for="collectionTestName">通道名称</label><input id="collectionTestName" value="${escapeHtml(row.name)}" disabled></div>
+          <div class="blue-row"><label for="collectionTestCode">通道三方编码</label><input id="collectionTestCode" value="${escapeHtml(type.code || "")}" disabled></div>
+          <div class="blue-row"><label for="collectionTestAmount">支付金额</label><div class="stepper"><button type="button" data-action="collectionTestStep" data-step="-1" aria-label="减少支付金额">−</button><input id="collectionTestAmount" inputmode="decimal" placeholder="请输入支付金额" autocomplete="off"><button type="button" data-action="collectionTestStep" data-step="1" aria-label="增加支付金额">+</button></div></div>
+          <div class="blue-row"><label></label><div><button class="btn primary" data-action="runCollectionCodeTest">发起请求</button></div></div>
+          <div class="blue-row"><label for="collectionTestAddress">支付地址</label><textarea id="collectionTestAddress" placeholder="支付地址" readonly></textarea></div>
+        </div>
+      `, `<button class="btn" data-action="closeModal">关闭</button>`, "sm");
+    }
+
+    function clearCollectionTestResult() {
+      if (!collectionCodeTestTarget()) return;
+      $("#collectionTestAddress").value = "";
+      $("#modalFeedback").hidden = true;
+      $("#collectionTestAmount").removeAttribute("aria-invalid");
+    }
+
+    function runCollectionCodeTest() {
+      const target = collectionCodeTestTarget();
+      if (!target || !canUseChannelAction("runCollectionCodeTest")) return;
+      const value = $("#collectionTestAmount").value.trim();
+      const amount = Number(value);
+      if (!/^\d+(\.\d+)?$/.test(value) || !Number.isFinite(amount) || amount <= 0) {
+        $("#collectionTestAddress").value = "";
+        return setModalError("请输入大于 0 的支付金额。", "collectionTestAmount");
+      }
+      const params = new URLSearchParams({ channel: target.row.id, code: target.type.code || "", amount: String(amount), currency: target.row.asset });
+      $("#collectionTestAddress").value = `https://example.com/demo-payment?${params}`;
+      $("#modalFeedback").hidden = true;
+      $("#collectionTestAmount").removeAttribute("aria-invalid");
+      showToast("出码测试已完成（演示）");
     }
 
     function openChannelTest(row) {
@@ -4555,7 +4661,18 @@
       if (action === "executeSettlement") openSettlementExecution(findFundAccount(target.dataset.id), target.dataset.ledgerId);
       if (action === "rateConfig") openRateConfig(findRow(target.dataset.id));
       if (action === "limitConfig") openLimitConfig(findRow(target.dataset.id));
+      if (action === "payoutDevConfig") openPayoutDevConfig(findRow(target.dataset.id));
+      if (action === "savePayoutDevConfig") savePayoutDevConfig();
       if (action === "devDocs") openDevDocs(findRow(target.dataset.id));
+      if (action === "collectionCodeTest") openCollectionCodeTest(findRow(target.dataset.id), Number(target.dataset.typeIndex));
+      if (action === "runCollectionCodeTest") runCollectionCodeTest();
+      if (action === "collectionTestStep" && collectionCodeTestTarget()) {
+        const input = $("#collectionTestAmount");
+        const current = Number(input.value || 0);
+        const next = Math.max(0, (Number.isFinite(current) ? current : 0) + Number(target.dataset.step));
+        input.value = String(Number(next.toFixed(8)));
+        clearCollectionTestResult();
+      }
       if (action === "channelTest") openChannelTest(findRow(target.dataset.id));
       if (action === "openAuditLog") openAuditLog(target.dataset.id);
       if (action === "viewReceiptAudit") openAuditLog(channelLatestReceipt?.objectId);
@@ -4644,6 +4761,16 @@
       const row = event.target.closest("tr");
       if (row) row.classList.toggle("action-open", event.target.open);
       if (event.target.open) {
+        if (event.target.closest(".collection-type-action-line")) {
+          const anchor = event.target.querySelector("summary").getBoundingClientRect();
+          const popup = event.target.querySelector(".action-menu");
+          const left = Math.max(8, Math.min(anchor.right - popup.offsetWidth, window.innerWidth - popup.offsetWidth - 8));
+          const top = anchor.bottom + popup.offsetHeight + 6 <= window.innerHeight - 8
+            ? anchor.bottom + 6
+            : Math.max(8, anchor.top - popup.offsetHeight - 6);
+          popup.style.left = `${left}px`;
+          popup.style.top = `${top}px`;
+        }
         $$(".action-more[open]").forEach((menu) => {
           if (menu !== event.target) {
             menu.open = false;
@@ -4652,6 +4779,13 @@
         });
       }
     }, true);
+
+    function closeCollectionCodeMenus() {
+      $$(".collection-type-action-line .action-more[open]").forEach(menu => { menu.open = false; });
+    }
+
+    document.addEventListener("scroll", closeCollectionCodeMenus, true);
+    window.addEventListener("resize", closeCollectionCodeMenus);
 
     document.addEventListener("keydown", (event) => {
       const root = $("#modalRoot");
@@ -4673,6 +4807,10 @@
         event.preventDefault();
         first.focus();
       }
+    });
+
+    document.addEventListener("input", (event) => {
+      if (event.target.id === "collectionTestAmount") clearCollectionTestResult();
     });
 
     document.addEventListener("change", (event) => {
