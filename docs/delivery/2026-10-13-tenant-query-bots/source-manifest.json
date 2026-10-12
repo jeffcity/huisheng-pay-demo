@@ -1,0 +1,14 @@
+{
+  "source_root": "work/汇盛支付/需求文件夹/2026-10-13-租户端查单机器人配置",
+  "purpose": "read-only-github-delivery-snapshot",
+  "documents": [
+    {
+      "source": "开发清单摘要.md",
+      "sha256": "87ce6b41e7e0ce3fe59a407e8366950cf9aeb2b70cc8e8fcf1dd8ef499989bd6"
+    },
+    {
+      "source": "开发任务清单.md",
+      "sha256": "b1edbad2ecce02d20fc013d72de3622e38a80f244403f584dee7aedd111cf87d"
+    }
+  ]
+}
