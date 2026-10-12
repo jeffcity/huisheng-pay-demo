@@ -166,6 +166,19 @@
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
     }
+
+    .bot-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 28px; padding: 20px; }
+    .bot-form-grid .full { grid-column: 1 / -1; }
+    .bot-switch-field { display: flex; align-items: center; gap: 12px; min-height: 34px; }
+    .bot-switch-field label { margin: 0; }
+    .bot-form-actions { display: flex; align-items: center; gap: 12px; padding: 0 20px 20px; }
+    .bot-save-status { color: var(--text-2); font-size: 12px; }
+    .tab { flex-shrink: 0; }
+    @media (max-width: 720px) {
+      .bot-form-grid { grid-template-columns: 1fr; gap: 16px; padding: 16px; }
+      .bot-form-grid .full { grid-column: auto; }
+      .bot-form-actions { padding: 0 16px 16px; }
+    }
   </style>
 </head>
 <body>
@@ -173,7 +186,7 @@
     <header class="page-head">
       <div>
         <h1>通知中心</h1>
-        <p>查看当前租户已推送至 TG 机器人的历史消息，并维护 TG 通知目标与消息模板。</p>
+        <p>查看当前租户已推送至 TG 机器人的历史消息，并维护 TG 通知目标、消息模板与查单机器人。</p>
       </div>
       <div class="tenant-scope"><span class="scope-dot"></span><span>当前租户：HS-TEN-001 汇盛东南亚</span></div>
     </header>
@@ -181,6 +194,7 @@
     <nav class="tabs" role="tablist" aria-label="通知中心页签">
       <button class="tab active" id="messagesTab" role="tab" type="button" aria-selected="true" aria-controls="messagesPanel" data-tab="messages">发送的消息 <span class="count-pill" id="messageTabCount">8</span></button>
       <button class="tab" id="configTab" role="tab" type="button" aria-selected="false" aria-controls="configPanel" data-tab="config">通知配置 <span class="count-pill" id="configTabCount">9</span></button>
+      <button class="tab" id="queryBotsTab" role="tab" type="button" aria-selected="false" aria-controls="queryBotsPanel" data-tab="queryBots">查单机器人配置</button>
     </nav>
 
     <section class="panel" id="messagesPanel" role="tabpanel" aria-labelledby="messagesTab">
@@ -240,6 +254,32 @@
         </div>
         <div class="special-actions"><button class="btn" id="cancelSpecial" type="button">取消</button><button class="btn primary" id="saveSpecial" type="button">保存专属配置</button></div>
       </section>
+    </section>
+
+    <section class="panel" id="queryBotsPanel" role="tabpanel" aria-labelledby="queryBotsTab" hidden>
+      <form class="card" id="collectBotForm" aria-labelledby="collectBotTitle" novalidate>
+        <header class="card-head"><div><h2 id="collectBotTitle">代收机器人</h2></div></header>
+        <div class="bot-form-grid">
+          <div class="field"><label for="collectBotCallbackToken">回调报警机器人</label><input class="control mono" id="collectBotCallbackToken" name="CallbackToken" value="demo_collect_callback_token" placeholder="请输入" autocomplete="off" spellcheck="false"></div>
+          <div class="field"><label for="collectBotQueryToken">查单机器人token</label><input class="control mono" id="collectBotQueryToken" name="QueryToken" value="demo_collect_query_token" placeholder="请输入" autocomplete="off" spellcheck="false"></div>
+          <div class="field full"><label for="collectBotCallbackGroup">回调群ID</label><input class="control mono" id="collectBotCallbackGroup" name="CallbackGroup" value="-1002003004001" placeholder="输入群组id" autocomplete="off" spellcheck="false"></div>
+        </div>
+        <div class="bot-form-actions"><button class="btn primary" type="submit">保存</button><span class="bot-save-status" id="collectBotStatus" role="status"></span></div>
+      </form>
+      <form class="card" id="payoutBotForm" aria-labelledby="payoutBotTitle" novalidate>
+        <header class="card-head"><div><h2 id="payoutBotTitle">代付机器人</h2></div></header>
+        <div class="bot-form-grid">
+          <div class="field"><label for="payoutBotCallbackToken">回调报警机器人</label><input class="control mono" id="payoutBotCallbackToken" name="CallbackToken" value="demo_payout_callback_token" placeholder="请输入" autocomplete="off" spellcheck="false"></div>
+          <div class="field"><label for="payoutBotQueryToken">查单机器人token</label><input class="control mono" id="payoutBotQueryToken" name="QueryToken" value="demo_payout_query_token" placeholder="请输入" autocomplete="off" spellcheck="false"></div>
+          <div class="field"><label for="payoutBotAlertGroup">报警群ID</label><input class="control mono" id="payoutBotAlertGroup" name="AlertGroup" value="-1002003004002" placeholder="输入群组id" autocomplete="off" spellcheck="false"></div>
+          <div class="field"><label for="payoutBotCallbackGroup">回调群ID</label><input class="control mono" id="payoutBotCallbackGroup" name="CallbackGroup" value="-1002003004001" placeholder="输入群组id" autocomplete="off" spellcheck="false"></div>
+          <div class="field bot-switch-field"><label id="payoutBotRejectNoticeLabel">驳回通知开关</label><button class="switch on" id="payoutBotRejectNotice" type="button" role="switch" aria-checked="true" aria-labelledby="payoutBotRejectNoticeLabel" data-bot-switch="RejectNotice"></button></div>
+          <div class="field bot-switch-field"><label id="payoutBotAlertEnabledLabel">报警开关</label><button class="switch" id="payoutBotAlertEnabled" type="button" role="switch" aria-checked="false" aria-labelledby="payoutBotAlertEnabledLabel" data-bot-switch="AlertEnabled"></button></div>
+          <div class="field"><label for="payoutBotMerchantBalance">商户预付报警余额</label><input class="control" id="payoutBotMerchantBalance" name="MerchantBalance" type="number" min="0" step="1" value="2.00" aria-describedby="payoutBotMerchantBalanceError"><span class="field-error" id="payoutBotMerchantBalanceError">请输入大于或等于 0 的余额</span></div>
+          <div class="field"><label for="payoutBotChannelBalance">通道预付报警余额</label><input class="control" id="payoutBotChannelBalance" name="ChannelBalance" type="number" min="0" step="1" value="0.00" aria-describedby="payoutBotChannelBalanceError"><span class="field-error" id="payoutBotChannelBalanceError">请输入大于或等于 0 的余额</span></div>
+        </div>
+        <div class="bot-form-actions"><button class="btn primary" type="submit">保存</button><span class="bot-save-status" id="payoutBotStatus" role="status"></span></div>
+      </form>
     </section>
   </main>
 
@@ -347,13 +387,13 @@
     }
 
     function setActiveTab(name) {
-      const messages = name === "messages";
-      byId("messagesTab").classList.toggle("active", messages);
-      byId("configTab").classList.toggle("active", !messages);
-      byId("messagesTab").setAttribute("aria-selected", String(messages));
-      byId("configTab").setAttribute("aria-selected", String(!messages));
-      byId("messagesPanel").hidden = !messages;
-      byId("configPanel").hidden = messages;
+      ["messages", "config", "queryBots"].forEach(function (key) {
+        const active = key === name;
+        byId(key + "Tab").classList.toggle("active", active);
+        byId(key + "Tab").setAttribute("aria-selected", String(active));
+        byId(key + "Tab").tabIndex = active ? 0 : -1;
+        byId(key + "Panel").hidden = !active;
+      });
     }
 
     function renderPushedContent(item) {
@@ -643,6 +683,63 @@
       byId("configType").insertAdjacentHTML("beforeend", '<option>' + escapeHtml(type) + '</option>');
       byId("modalType").insertAdjacentHTML("beforeend", '<option>' + escapeHtml(type) + '</option>');
     });
+
+    // Local demo state only: production Telegram handlers are migrated separately.
+    const savedQueryBots = {};
+    ["collect", "payout"].forEach(function (business) {
+      const prefix = business + "Bot";
+      const form = byId(prefix + "Form");
+      form.querySelectorAll("[data-bot-switch]").forEach(function (button) {
+        button.addEventListener("click", function () {
+          const on = button.getAttribute("aria-checked") !== "true";
+          button.setAttribute("aria-checked", String(on));
+          button.classList.toggle("on", on);
+          byId(prefix + "Status").textContent = "未保存";
+        });
+      });
+      form.addEventListener("input", function (event) {
+        byId(prefix + "Status").textContent = "未保存";
+        event.target.classList.remove("invalid");
+        event.target.removeAttribute("aria-invalid");
+        const error = byId(event.target.id + "Error");
+        if (error) error.classList.remove("show");
+      });
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        let firstInvalid = null;
+        form.querySelectorAll('input[type="number"]').forEach(function (input) {
+          const valid = input.value.trim() !== "" && Number.isFinite(Number(input.value)) && Number(input.value) >= 0;
+          input.classList.toggle("invalid", !valid);
+          input.setAttribute("aria-invalid", String(!valid));
+          byId(input.id + "Error").classList.toggle("show", !valid);
+          if (!valid && !firstInvalid) firstInvalid = input;
+        });
+        if (firstInvalid) { firstInvalid.focus(); return; }
+        const values = Object.fromEntries(new FormData(form));
+        form.querySelectorAll("[data-bot-switch]").forEach(function (button) {
+          values[button.dataset.botSwitch] = button.getAttribute("aria-checked") === "true";
+        });
+        savedQueryBots[business] = values;
+        byId(prefix + "Status").textContent = "已保存";
+        toast((business === "collect" ? "代收" : "代付") + "机器人配置已保存");
+      });
+    });
+    const notificationTabs = Array.from(document.querySelectorAll("[data-tab]"));
+    notificationTabs.forEach(function (button, index) {
+      button.addEventListener("keydown", function (event) {
+        let next = index;
+        if (event.key === "ArrowRight") next = (index + 1) % notificationTabs.length;
+        else if (event.key === "ArrowLeft") next = (index + notificationTabs.length - 1) % notificationTabs.length;
+        else if (event.key === "Home") next = 0;
+        else if (event.key === "End") next = notificationTabs.length - 1;
+        else return;
+        event.preventDefault();
+        setActiveTab(notificationTabs[next].dataset.tab);
+        notificationTabs[next].focus();
+      });
+    });
+    setActiveTab("messages");
+
     renderMessages();
     renderConfigs();
   </script>
