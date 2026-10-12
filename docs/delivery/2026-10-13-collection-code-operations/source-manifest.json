@@ -1,0 +1,14 @@
+{
+  "source_root": "work/汇盛支付/需求文件夹/2026-10-13-代收通道单独对接信息",
+  "purpose": "read-only-github-delivery-snapshot",
+  "documents": [
+    {
+      "source": "开发清单摘要.md",
+      "sha256": "dd4f2dbbe40914e021d3a71eb376d6ee69a8820b225adb671184508faddce93c"
+    },
+    {
+      "source": "开发任务清单.md",
+      "sha256": "c7d66ca0da9e2e7fbe242836b0e6326773a383b025c6f797abc2ab7071af07d9"
+    }
+  ]
+}

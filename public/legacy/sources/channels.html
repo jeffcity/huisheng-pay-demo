@@ -1056,6 +1056,11 @@
       z-index: 100;
     }
 
+    .collection-code-option { display: flex; align-items: center; gap: 6px; min-width: 0; }
+    .collection-code-option input { flex-shrink: 0; }
+    .collection-code-count { color: var(--color-text-secondary); font-size: 13px; }
+    .collection-code-delete-list { margin: 12px 0 0; padding-left: 22px; line-height: 1.8; }
+
     .collection-type-name {
       color: var(--color-text-tertiary);
       font-size: 11px;
@@ -2319,7 +2324,7 @@
                 <div class="rule-item"><span class="rule-dot"></span><span>通道进入生产使用前，必须已由后端 / 技术侧完成接入和上线确认。</span></div>
                 <div class="rule-item"><span class="rule-dot"></span><span>租户使用范围由业务开通模块授权；授权后由租户人工选择和切换。</span></div>
                 <div class="rule-item"><span class="rule-dot"></span><span>通道商代收、代付钱包与租户钱包分账；代付前同时校验同币种租户余额、通道开启状态和通道商代付钱包余额。</span></div>
-                <div class="rule-item"><span class="rule-dot"></span><span>代付接入信息通过开发配置维护；代收按三方编码提供出码测试。</span></div>
+                <div class="rule-item"><span class="rule-dot"></span><span>代付接入信息通过开发配置维护；代收按三方编码提供出码测试和单独对接信息。</span></div>
               </div>
             </section>
           </aside>
@@ -2780,12 +2785,12 @@
       const items = row.collectionTypes || [];
       if (!items.length) return '<span class="muted">-</span>';
       return `<span class="collection-type-stack">${items.map((item, index) => {
-        if (key === "thirdCode") return `<span class="collection-type-line"><span class="mono">${escapeHtml(item.code || "-")}</span><span class="collection-type-name">${escapeHtml(item.name || "")}</span></span>`;
+        if (key === "thirdCode") return `<span class="collection-type-line"><label class="collection-code-option"><input class="collection-select" type="checkbox" data-collection-code-select data-id="${row.id}" data-type-index="${index}" aria-label="选择编码 ${escapeHtml(row.name)} ${escapeHtml(item.code)}" ${selectedCollectionCodes.has(item) ? "checked" : ""} ${canUseChannelAction("bulkDeleteCollectionCodes") ? "" : "disabled"}><span class="mono">${escapeHtml(item.code || "-")}</span></label><span class="collection-type-name">${escapeHtml(item.name || "")}</span></span>`;
         if (key === "todayAmount") return `<span class="collection-type-line mono">${escapeHtml(item.todayAmount ?? "0")}</span>`;
         if (key === "rate") return `<span class="collection-type-line mono">${escapeHtml(item.rate ?? "-")}</span>`;
         if (key === "receiptRule") return `<span class="collection-type-line mono">${escapeHtml(item.rule ?? "-")}</span>`;
         if (key === "typeStatus") return `<span class="collection-type-line">${collectionSwitchCell(row, "typeStatus", item.status === "开启", index)}</span>`;
-        if (key === "typeActions") return `<span class="collection-type-line collection-type-action-line"><details class="action-more"><summary aria-label="${escapeHtml(item.code || item.name)} 更多">更多 <i data-lucide="chevron-down"></i></summary><span class="action-menu"><button class="icon-link" data-action="collectionCodeTest" data-id="${row.id}" data-type-index="${index}"><i data-lucide="flask-conical"></i>出码测试</button><button class="icon-link" data-action="detail" data-id="${row.id}"><i data-lucide="info"></i>通道详情</button></span></details></span>`;
+        if (key === "typeActions") return `<span class="collection-type-line collection-type-action-line"><details class="action-more"><summary aria-label="${escapeHtml(item.code || item.name)} 更多">更多 <i data-lucide="chevron-down"></i></summary><span class="action-menu"><button class="icon-link" data-action="editCollectionCode" data-id="${row.id}" data-type-index="${index}"><i data-lucide="pencil"></i>修改通道编码</button><button class="icon-link" data-action="collectionCodeTest" data-id="${row.id}" data-type-index="${index}"><i data-lucide="flask-conical"></i>出码测试</button><button class="icon-link" data-action="collectionIntegration" data-id="${row.id}" data-type-index="${index}"><i data-lucide="plug"></i>单独对接信息</button><button class="icon-link danger" data-action="deleteCollectionCode" data-id="${row.id}" data-type-index="${index}"><i data-lucide="trash-2"></i>删除通道编码</button><button class="icon-link" data-action="detail" data-id="${row.id}"><i data-lucide="info"></i>通道详情</button></span></details></span>`;
         return "";
       }).join("")}</span>`;
     }
@@ -2914,6 +2919,8 @@
           <button class="btn" data-action="batchCollectionOpen"><i data-lucide="play"></i>全部开启</button>
           <button class="btn danger" data-action="batchCollectionClose"><i data-lucide="pause"></i>全部关闭</button>
           <button class="btn warn" data-action="batchCollectionSettle"><i data-lucide="hand-coins"></i>一键结算</button>
+          <button class="btn danger" id="bulkDeleteCollectionCodesButton" data-action="bulkDeleteCollectionCodes" ${selectedCollectionCodeTargets().length ? "" : "disabled"}><i data-lucide="trash-2"></i>批量删除通道编码</button>
+          <span class="collection-code-count" id="collectionCodeSelectionCount" role="status">已选 ${selectedCollectionCodeTargets().length} 个编码</span>
         `;
       } else if (payoutMode) {
         bar.innerHTML = `
@@ -3031,13 +3038,14 @@
     function channelActionPermission(action) {
       const byAction = {
         export: 'platform.channel.export', editVendor: 'platform.channel.vendor.manage', editChannel: 'platform.channel.manage',
-        devDocs: 'platform.channel.sandbox.generate', payoutDevConfig: 'platform.channel.sandbox.generate', savePayoutDevConfig: 'platform.channel.sandbox.generate', channelTest: 'platform.channel.sandbox.generate', collectionCodeTest: 'platform.channel.sandbox.generate', runCollectionCodeTest: 'platform.channel.sandbox.generate',
+        devDocs: 'platform.channel.sandbox.generate', payoutDevConfig: 'platform.channel.sandbox.generate', savePayoutDevConfig: 'platform.channel.sandbox.generate', channelTest: 'platform.channel.sandbox.generate', collectionCodeTest: 'platform.channel.sandbox.generate', runCollectionCodeTest: 'platform.channel.sandbox.generate', collectionIntegration: 'platform.channel.sandbox.generate', saveCollectionIntegration: 'platform.channel.sandbox.generate',
         editProduct: 'platform.channel.product.manage', bindProductChannels: 'platform.channel.product.manage', deleteProductPreview: 'platform.channel.product.manage',
         vendorFunds: 'platform.channel.funds.view', fundAccountDetail: 'platform.channel.funds.view',
         fundAdjust: 'platform.channel.funds.increase.submit', vendorAmountAdjust: 'platform.channel.funds.adjust.submit', vendorSettlement: 'platform.channel.funds.settlement.submit',
         reviewFund: 'platform.channel.funds.adjust.review', reviewSettlement: 'platform.channel.funds.settlement.review',
         executeSettlement: 'platform.channel.funds.settlement.execute', saveSettlementExecution: 'platform.channel.funds.settlement.execute',
-        rateConfig: 'platform.channel.cost.manage', limitConfig: 'platform.channel.manage'
+        rateConfig: 'platform.channel.cost.manage', limitConfig: 'platform.channel.manage',
+        editCollectionCode: 'platform.channel.manage', saveCollectionCode: 'platform.channel.manage', deleteCollectionCode: 'platform.channel.manage', confirmDeleteCollectionCode: 'platform.channel.manage', bulkDeleteCollectionCodes: 'platform.channel.manage', confirmBulkDeleteCollectionCodes: 'platform.channel.manage'
       };
       if (action === 'primary') return {
         vendors: 'platform.channel.vendor.manage', collectionChannels: 'platform.channel.manage', payoutChannels: 'platform.channel.manage', collectionProducts: 'platform.channel.product.manage', payoutProducts: 'platform.channel.product.manage'
@@ -3085,7 +3093,9 @@
       const productTableMode = collectionProductMode || payoutProductMode;
       const channelTableMode = collectionMode || payoutMode;
       const appendRowActions = !collectionMode;
-      const collectionWidths = [50, 220, 110, 180, 140, 130, 180, 140, 140, 100, 240, 100, 140, 140, 90, 100];
+      const collectionWidths = [50, 220, 110, 180, 140, 130, 180, 140, 140, 100, 260, 100, 140, 140, 90, 100];
+      const visibleCodeRecords = new Set(collectionMode ? data.flatMap(row => row.collectionTypes || []) : []);
+      for (const type of selectedCollectionCodes) if (!visibleCodeRecords.has(type)) selectedCollectionCodes.delete(type);
       const payoutWidths = [50, 180, 160, 150, 120, 120, 100, 100, 120, 120, 120, 100, 100, 120, 120, 100, 100, 200];
       const collectionProductWidths = [50, 260, 190, 120, 170, 150, 300];
       const payoutProductWidths = [320, 260, 160, 260];
@@ -3121,7 +3131,7 @@
           : "";
       renderChannelActionBar();
       renderVendorSummary(data);
-      $("#tableHead").innerHTML = `<tr>${columns[activeKey].map(([key, label]) => `<th>${key === "select" ? `<input class="collection-select" type="checkbox" aria-label="全选${payoutMode ? "代付" : "代收"}通道">` : label}</th>`).join("")}${appendRowActions ? "<th>操作</th>" : ""}</tr>`;
+      $("#tableHead").innerHTML = `<tr>${columns[activeKey].map(([key, label]) => `<th>${key === "select" ? `<input class="collection-select" type="checkbox" aria-label="全选${payoutMode ? "代付" : "代收"}通道">` : collectionMode && key === "thirdCode" ? `<label class="collection-code-option"><input class="collection-select" id="selectAllCollectionCodes" type="checkbox" data-collection-code-select-all aria-label="全选当前列表通道编码" ${canUseChannelAction("bulkDeleteCollectionCodes") ? "" : "disabled"}>${label}</label>` : label}</th>`).join("")}${appendRowActions ? "<th>操作</th>" : ""}</tr>`;
       $("#tableBody").innerHTML = data.map((row) => {
         const cells = columns[activeKey].map(([key]) => `<td>${cellContent(key, row)}</td>`).join("");
         const childCount = Math.max(1, row.collectionTypes?.length || 0);
@@ -3133,6 +3143,7 @@
       applyPlatformChannelAuthorization();
       $("#primaryAction").hidden = channelTableMode;
       $("#payoutPinButton").hidden = !payoutMode;
+      syncCollectionCodeSelection();
       renderIcons();
     }
 
@@ -3676,6 +3687,187 @@
 
     // Keep connection data separate from list rows, exports, details and audit text.
     const payoutDevelopmentConfigs = new Map();
+    const collectionIntegrationConfigs = new WeakMap();
+    const selectedCollectionCodes = new Set();
+    const collectionIntegrationTemplates = ["万能支付", "自营usdt收款"];
+    const collectionIntegrationFields = [
+      ["merchantNo", "商户号", true], ["secret", "密钥", true],
+      ["orderUrl", "下单地址", true], ["queryUrl", "查询地址", true],
+      ["callbackIps", "回调IP", true], ["publicKey", "公钥", false], ["privateKey", "私钥", false]
+    ];
+
+    function collectionIntegrationKey(row, type) {
+      return type;
+    }
+
+    function collectionIntegrationTarget() {
+      if (activeModalContext?.kind !== "collectionIntegration" || activeKey !== "collectionChannels") return null;
+      const row = rows.types.find(item => item.id === activeModalContext.rowId);
+      const type = row?.collectionTypes?.find(item => item === activeModalContext.type);
+      if (!row || row.direction !== "代收" || !type || !channelRowInCurrentScope(row)) return null;
+      return { row, type };
+    }
+
+    function openCollectionIntegration(row, typeIndex) {
+      if (!row || row.direction !== "代收" || activeKey !== "collectionChannels" || !Number.isInteger(typeIndex) || !row.collectionTypes?.[typeIndex] || !canUseChannelAction("collectionIntegration") || !channelRowInCurrentScope(row)) return;
+      const type = row.collectionTypes[typeIndex];
+      const config = collectionIntegrationConfigs.get(collectionIntegrationKey(row, type)) || {};
+      activeModalContext = { kind: "collectionIntegration", rowId: row.id, type };
+      openModal("单独对接信息", `
+        <div id="modalFeedback" class="modal-feedback" hidden></div>
+        <div class="blue-form collection-integration-form">
+          <div class="blue-row required"><label for="collectionIntegration-template">对接模板：</label><select id="collectionIntegration-template" aria-required="true"><option value="">请选择对接模板</option>${collectionIntegrationTemplates.map(template => `<option value="${escapeHtml(template)}" ${config.template === template ? "selected" : ""}>${escapeHtml(template)}</option>`).join("")}</select></div>
+          ${collectionIntegrationFields.map(([key, label, required]) => `<div class="blue-row ${required ? "required" : ""}"><label for="collectionIntegration-${key}">${label}：</label>${key === "publicKey" || key === "privateKey"
+            ? `<textarea id="collectionIntegration-${key}" rows="3" placeholder="请输入${label}" autocomplete="off" spellcheck="false">${escapeHtml(config[key] || "")}</textarea>`
+            : `<input id="collectionIntegration-${key}" value="${escapeHtml(config[key] || "")}" placeholder="请输入${label}" aria-required="${required}" autocomplete="off" spellcheck="false">`}</div>`).join("")}
+        </div>
+      `, `<button class="btn primary" data-action="saveCollectionIntegration">保存</button><button class="btn" data-action="closeModal">关闭</button>`, "sm");
+    }
+
+    function saveCollectionIntegration() {
+      if (!canUseChannelAction("saveCollectionIntegration")) return;
+      const target = collectionIntegrationTarget();
+      if (!target) return;
+      const config = { template: $("#collectionIntegration-template").value };
+      if (!collectionIntegrationTemplates.includes(config.template)) return setModalError("请选择对接模板。", "collectionIntegration-template");
+      for (const [key, label, required] of collectionIntegrationFields) {
+        const input = $(`#collectionIntegration-${key}`);
+        config[key] = input.value.trim();
+        if (required && !config[key]) return setModalError(`请输入${label}。`, input.id);
+      }
+      collectionIntegrationConfigs.set(collectionIntegrationKey(target.row, target.type), config);
+      const audit = addChannelAudit({ objectId: target.row.id, objectType: "通道编码", action: "保存单独对接信息", summary: `${target.row.name} · ${target.type.code} · ${config.template}`, reason: "代收通道单独对接信息" });
+      finishChange({ title: "单独对接信息已保存", detail: `${target.row.name} · ${target.type.code}`, audit });
+    }
+
+
+    function collectionCodeActionTarget(kind) {
+      if (activeModalContext?.kind !== kind || activeKey !== "collectionChannels") return null;
+      const row = rows.types.find(item => item.id === activeModalContext.rowId);
+      const type = row?.collectionTypes?.find(item => item === activeModalContext.type);
+      if (!row || row.direction !== "代收" || !type || !channelRowInCurrentScope(row)) return null;
+      return { row, type };
+    }
+
+    function syncCollectionPrimaryCode(row) {
+      const primary = row.collectionTypes[0];
+      row.thirdCode = primary?.code || "-";
+      row.rate = primary?.rate ?? "-";
+      row.receiptRule = primary?.rule ?? "-";
+      row.typeStatus = primary?.status || "关闭";
+    }
+
+    function openCollectionCodeEdit(row, typeIndex) {
+      if (!row || row.direction !== "代收" || activeKey !== "collectionChannels" || !Number.isInteger(typeIndex) || !row.collectionTypes?.[typeIndex] || !canUseChannelAction("editCollectionCode") || !channelRowInCurrentScope(row)) return;
+      const type = row.collectionTypes[typeIndex];
+      activeModalContext = { kind: "collectionCodeEdit", rowId: row.id, type };
+      openModal("修改通道编码", `
+        <div id="modalFeedback" class="modal-feedback" hidden></div>
+        <div class="blue-form">
+          <div class="blue-row required"><label for="collectionCodeRemark">备注</label><input id="collectionCodeRemark" value="${escapeHtml(type.name || "")}" placeholder="请输入备注" aria-required="true" autocomplete="off"></div>
+          <div class="blue-row"><label for="collectionCodeRate">费率</label><div><input id="collectionCodeRate" value="${escapeHtml(type.rate === "-" ? "" : type.rate || "")}" placeholder="请输入费率" inputmode="decimal" autocomplete="off"><div class="hint">使用小数, 0.01代表1%</div></div></div>
+          <div class="blue-row"><label for="collectionCodeRange">金额范围</label><input id="collectionCodeRange" value="${escapeHtml(type.rule === "-" ? "" : String(type.rule || "").replace(/,/g, ""))}" placeholder="请输入金额范围，用-隔开" autocomplete="off"></div>
+          <div class="blue-row required"><label for="collectionCodeValue">通道编码</label><div><input id="collectionCodeValue" value="${escapeHtml(type.code || "")}" placeholder="请输入通道编码" aria-required="true" autocomplete="off"><div class="hint">三方通道编码</div></div></div>
+        </div>
+      `, `<button class="btn primary" data-action="saveCollectionCode">保存</button><button class="btn" data-action="closeModal">关闭</button>`, "sm");
+    }
+
+    function saveCollectionCode() {
+      if (!canUseChannelAction("saveCollectionCode")) return;
+      const target = collectionCodeActionTarget("collectionCodeEdit");
+      if (!target) return;
+      const name = $("#collectionCodeRemark").value.trim();
+      const code = $("#collectionCodeValue").value.trim();
+      if (!name) return setModalError("请输入备注。", "collectionCodeRemark");
+      if (!code) return setModalError("请输入通道编码。", "collectionCodeValue");
+      const previousCode = target.type.code;
+      Object.assign(target.type, { name, code, rate: $("#collectionCodeRate").value.trim(), rule: $("#collectionCodeRange").value.trim() });
+      syncCollectionPrimaryCode(target.row);
+      const audit = addChannelAudit({ objectId: target.row.id, objectType: "通道编码", action: "修改通道编码", summary: `${target.row.name} · ${previousCode} → ${code} · ${name}`, reason: "修改代收通道编码" });
+      finishChange({ title: "通道编码已修改", detail: `${target.row.name} · ${code}`, audit });
+    }
+
+    function openCollectionCodeDelete(row, typeIndex) {
+      if (!row || row.direction !== "代收" || activeKey !== "collectionChannels" || !Number.isInteger(typeIndex) || !row.collectionTypes?.[typeIndex] || !canUseChannelAction("deleteCollectionCode") || !channelRowInCurrentScope(row)) return;
+      const type = row.collectionTypes[typeIndex];
+      activeModalContext = { kind: "collectionCodeDelete", rowId: row.id, type };
+      openModal("删除通道编码", `<p>确定要删除通道编码【${escapeHtml(type.code)}】吗？</p>`, `<button class="btn" data-action="closeModal">取消</button><button class="btn primary" data-action="confirmDeleteCollectionCode">确定</button>`, "sm");
+    }
+
+
+    function visibleCollectionCodeTargets() {
+      if (activeKey !== "collectionChannels") return [];
+      return getFilteredRows().filter(row => row.direction === "代收" && channelRowInCurrentScope(row))
+        .flatMap(row => (row.collectionTypes || []).map(type => ({ row, type })));
+    }
+
+    function selectedCollectionCodeTargets() {
+      return visibleCollectionCodeTargets().filter(target => selectedCollectionCodes.has(target.type));
+    }
+
+    function syncCollectionCodeSelection() {
+      if (activeKey !== "collectionChannels") return;
+      const visible = visibleCollectionCodeTargets();
+      const selected = selectedCollectionCodeTargets();
+      const count = $("#collectionCodeSelectionCount");
+      if (count) count.textContent = `已选 ${selected.length} 个编码`;
+      const button = $("#bulkDeleteCollectionCodesButton");
+      if (button) button.disabled = selected.length === 0;
+      const all = $("#selectAllCollectionCodes");
+      if (all) {
+        all.checked = visible.length > 0 && selected.length === visible.length;
+        all.indeterminate = selected.length > 0 && selected.length < visible.length;
+        all.disabled = visible.length === 0 || !canUseChannelAction("bulkDeleteCollectionCodes");
+      }
+      document.querySelectorAll("[data-collection-code-select]").forEach(input => {
+        const row = rows.types.find(item => item.id === input.dataset.id);
+        const type = row?.collectionTypes?.[Number(input.dataset.typeIndex)];
+        input.checked = !!type && selectedCollectionCodes.has(type);
+      });
+    }
+
+    function removeCollectionCodeRecord(row, type) {
+      const index = row.collectionTypes.indexOf(type);
+      if (index < 0) return;
+      row.collectionTypes.splice(index, 1);
+      collectionIntegrationConfigs.delete(type);
+      selectedCollectionCodes.delete(type);
+      syncCollectionPrimaryCode(row);
+    }
+
+    function openBulkCollectionCodeDelete() {
+      if (!canUseChannelAction("bulkDeleteCollectionCodes") || activeKey !== "collectionChannels") return;
+      const targets = selectedCollectionCodeTargets();
+      if (!targets.length) return showToast("请先选择通道编码");
+      activeModalContext = { kind: "collectionCodeBulkDelete", targets };
+      openModal("批量删除通道编码", `
+        <div id="modalFeedback" class="modal-feedback" hidden></div>
+        <p>确定要删除选中的 ${targets.length} 个通道编码吗？</p>
+        <ul class="collection-code-delete-list">${targets.map(({ row, type }) => `<li>${escapeHtml(row.name)} · <span class="mono">${escapeHtml(type.code)}</span></li>`).join("")}</ul>
+      `, `<button class="btn" data-action="closeModal">取消</button><button class="btn primary" data-action="confirmBulkDeleteCollectionCodes">确定</button>`, "sm");
+    }
+
+    function confirmBulkCollectionCodeDelete() {
+      if (!canUseChannelAction("confirmBulkDeleteCollectionCodes") || activeKey !== "collectionChannels" || activeModalContext?.kind !== "collectionCodeBulkDelete") return;
+      const targets = activeModalContext.targets;
+      const visible = visibleCollectionCodeTargets();
+      if (!targets.length || targets.some(target => !selectedCollectionCodes.has(target.type) || !visible.some(current => current.row === target.row && current.type === target.type))) return setModalError("所选编码已变化，请关闭后重新选择。");
+      let audit;
+      for (const { row, type } of targets) {
+        removeCollectionCodeRecord(row, type);
+        audit = addChannelAudit({ objectId: row.id, objectType: "通道编码", action: "批量删除通道编码", summary: `${row.name} · ${type.code}`, reason: "批量删除所选代收通道编码" });
+      }
+      finishChange({ title: `已删除 ${targets.length} 个通道编码`, detail: targets.map(({ row, type }) => `${row.name} · ${type.code}`).join("；"), audit });
+    }
+
+    function confirmCollectionCodeDelete() {
+      if (!canUseChannelAction("confirmDeleteCollectionCode")) return;
+      const target = collectionCodeActionTarget("collectionCodeDelete");
+      if (!target) return;
+      removeCollectionCodeRecord(target.row, target.type);
+      const audit = addChannelAudit({ objectId: target.row.id, objectType: "通道编码", action: "删除通道编码", summary: `${target.row.name} · ${target.type.code}`, reason: "删除代收通道编码" });
+      finishChange({ title: "通道编码已删除", detail: `${target.row.name} · ${target.type.code}`, audit });
+    }
 
     function openPayoutDevConfig(row) {
       if (!row || row.direction !== "代付" || activeKey !== "payoutChannels" || !canUseChannelAction("payoutDevConfig") || !channelRowInCurrentScope(row)) return;
@@ -4666,6 +4858,14 @@
       if (action === "devDocs") openDevDocs(findRow(target.dataset.id));
       if (action === "collectionCodeTest") openCollectionCodeTest(findRow(target.dataset.id), Number(target.dataset.typeIndex));
       if (action === "runCollectionCodeTest") runCollectionCodeTest();
+      if (action === "collectionIntegration") openCollectionIntegration(findRow(target.dataset.id), Number(target.dataset.typeIndex));
+      if (action === "saveCollectionIntegration") saveCollectionIntegration();
+      if (action === "editCollectionCode") openCollectionCodeEdit(findRow(target.dataset.id), Number(target.dataset.typeIndex));
+      if (action === "saveCollectionCode") saveCollectionCode();
+      if (action === "deleteCollectionCode") openCollectionCodeDelete(findRow(target.dataset.id), Number(target.dataset.typeIndex));
+      if (action === "confirmDeleteCollectionCode") confirmCollectionCodeDelete();
+      if (action === "bulkDeleteCollectionCodes") openBulkCollectionCodeDelete();
+      if (action === "confirmBulkDeleteCollectionCodes") confirmBulkCollectionCodeDelete();
       if (action === "collectionTestStep" && collectionCodeTestTarget()) {
         const input = $("#collectionTestAmount");
         const current = Number(input.value || 0);
@@ -4814,6 +5014,21 @@
     });
 
     document.addEventListener("change", (event) => {
+      if (event.target.matches("[data-collection-code-select], [data-collection-code-select-all]")) {
+        if (!canUseChannelAction("bulkDeleteCollectionCodes") || activeKey !== "collectionChannels") return;
+        if (event.target.matches("[data-collection-code-select-all]")) {
+          for (const { type } of visibleCollectionCodeTargets()) {
+            if (event.target.checked) selectedCollectionCodes.add(type); else selectedCollectionCodes.delete(type);
+          }
+        } else {
+          const row = rows.types.find(item => item.id === event.target.dataset.id);
+          const type = row?.collectionTypes?.[Number(event.target.dataset.typeIndex)];
+          if (!type || !visibleCollectionCodeTargets().some(target => target.row === row && target.type === type)) return;
+          if (event.target.checked) selectedCollectionCodes.add(type); else selectedCollectionCodes.delete(type);
+        }
+        syncCollectionCodeSelection();
+        return;
+      }
       if (!["channelDirection", "channelCurrency"].includes(event.target.id) || activeModalContext?.rowId) return;
       const direction = $("#channelDirection")?.value || "代收";
       const currency = $("#channelCurrency")?.value || "CNY";
