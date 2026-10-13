@@ -68,3 +68,10 @@ test('编辑限额校验失败不会部分保存名称、类型关系或限额�
  channelForm(f,r,'');f.api.setContext({id:r.id});f.set('pcName','不应保存');f.set('plMin','900');f.set('plMax','100');f.el('#plEnabled').checked=true;f.api.savePayoutChannel();assert.equal(JSON.stringify(r),before);assert.equal(JSON.stringify(d.products),bindings);assert(!d.payoutLimits.has(r.id));
  f.set('plMax','1000');f.set('plIps','999.0.0.1');f.api.savePayoutChannel();assert.equal(JSON.stringify(r),before);assert.equal(JSON.stringify(d.products),bindings);
 });
+
+test('代付通道主类型改为USDT后，既有CNY提款候选保留但不可选',()=>{
+ const f=fixture(),d=f.model.tenantData(),r=d.channels.find(c=>c.id==='CH-FIAT-OUT-004'),p=d.products.find(p=>p.direction==='代付'&&p.currency==='USDT');
+ channelForm(f,r,p.id);f.api.setContext({id:r.id});f.api.savePayoutChannel();assert.equal(r.asset,'USDT');assert.equal(r.productId,p.id);
+ const start=merchantsSource.indexOf('    const tenantPayoutChannels ='),end=merchantsSource.indexOf('    const fundingOrders =',start);vm.runInContext(merchantsSource.slice(start,end),f.ctx);
+ const rows=vm.runInContext(`fundingPayoutChannelProjection({authorizedPayoutChannelIds:['CH-FIAT-OUT-004']})`,f.ctx);assert.equal(rows.length,1);assert.equal(rows[0].id,r.id);assert.equal(rows[0].selectable,false);assert.equal(rows[0].acceptsNewOrders,false);
+});
