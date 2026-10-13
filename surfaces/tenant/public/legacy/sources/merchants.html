@@ -21637,6 +21637,13 @@
       { id: "CH-FIAT-OUT-012", name: "PayoutX CNY 代付", status: "暂停", acceptsNewOrders: false, productMode: "需要产品层", productId: "PROD-CNY-PAYOUT" }
     ];
 
+    if (window.HSProviderDemo) {
+      for (const row of window.HSProviderDemo.orderChannels(window.HSProviderDemo.tenantId).filter(c=>c.direction==='代付'&&c.asset==='CNY'&&c.modified)) {
+        const current=tenantPayoutChannels.find(c=>c.id===row.id);
+        const mapped={id:row.id,name:row.name,status:row.status==='开启'?'正常':'暂停',acceptsNewOrders:row.status==='开启',productMode:row.products.length?'需要产品层':'无产品层',productId:row.products[0]?.id||''};
+        if(current)Object.assign(current,mapped);else tenantPayoutChannels.push(mapped);
+      }
+    }
     function fundingPayoutChannelProjection(order) {
       const authorizedIds = new Set(order?.authorizedPayoutChannelIds || []);
       return tenantPayoutChannels
@@ -22692,7 +22699,7 @@
           ${isReview ? `<div class="sub-panel" data-astryx="FormSection">
             <h3>审核处理</h3>
             <div style="padding:12px" class="form-grid">
-              ${hasPlatformExecution ? `<div class="field wide"><label for="fundingChannel">已授权 CNY 代付通道</label><select class="select" id="fundingChannel"><option value="">请选择通道</option>${channelOptions}</select><span class="muted">授权快照 ${order.businessGrantVersion || "未记录"}。${channelProjectionSummary}。租户逐笔人工选择；系统不做自动路由或自动改道。</span><span class="field-error" id="fundingChannelError" role="alert"></span></div>` : ""}
+              ${hasPlatformExecution ? `<div class="field wide"><label for="fundingChannel">本租户 CNY 代付通道</label><select class="select" id="fundingChannel"><option value="">请选择通道</option>${channelOptions}</select><span class="muted">授权快照 ${order.businessGrantVersion || "未记录"}。${channelProjectionSummary}。租户逐笔人工选择；系统不做自动路由或自动改道。</span><span class="field-error" id="fundingChannelError" role="alert"></span></div>` : ""}
               <div class="field"><label for="fundingRejectCategory">驳回分类</label><select class="select" id="fundingRejectCategory"><option value="">请选择</option><option>申请资料不完整</option><option>金额或余额不符</option><option>风险限制</option><option>其他</option></select></div>
               <div class="field"><label for="fundingReviewReason">审核说明</label><input class="input" id="fundingReviewReason" placeholder="通过可选填；驳回时必填"></div>
               <div class="field wide"><label for="fundingReviewTwoFa">Google 2FA 验证码</label><input class="input mono" id="fundingReviewTwoFa" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="请输入 6 位验证码"><span class="muted">验证码只用于本次审核，不写入申请、日志或导出。</span></div>
@@ -22806,7 +22813,7 @@
       if (order.type === "提款") {
         const channelId = document.getElementById("fundingChannel")?.value;
         if (!channelId) {
-          showToast("请选择已授权的 CNY 代付通道");
+          showToast("请选择本租户的 CNY 代付通道");
           document.getElementById("fundingChannel")?.focus();
           return;
         }

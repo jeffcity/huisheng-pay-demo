@@ -1,0 +1,2358 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>汇盛支付租户端 · 通道管理</title><style>
+    :root {
+      --font-ui: "Avenir Next", "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --font-display: "DIN Alternate", "Avenir Next Condensed", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      --font-mono: "SFMono-Regular", "Fira Code", Consolas, monospace;
+      --color-primary: #145fe8;
+      --color-primary-hover: #0f52cc;
+      --color-primary-light: #e8f3ff;
+      --color-bg-page: #f5f7fb;
+      --color-bg-surface: #ffffff;
+      --color-bg-subtle: #f7f8fa;
+      --color-border: #e5e6eb;
+      --color-border-strong: #c9cdd4;
+      --color-text-primary: #1d2129;
+      --color-text-secondary: #4e5969;
+      --color-text-tertiary: #626d7b;
+      --color-success: #087a55;
+      --color-success-light: #e8fff3;
+      --color-warning: #8a4b00;
+      --color-warning-light: #fff7e8;
+      --color-danger: #cf1f1f;
+      --color-danger-light: #fff0ed;
+      --color-info: #0e7490;
+      --color-info-light: #e6fffb;
+      --radius-sm: 4px;
+      --radius-md: 6px;
+      --radius-lg: 8px;
+      --shadow-modal: 0 18px 48px rgba(29, 33, 41, 0.18);
+      --sidebar-width: 248px;
+      --topbar-height: 56px;
+      --spacing-control: 32px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--color-bg-page);
+      color: var(--color-text-primary);
+      font-family: var(--font-ui);
+      letter-spacing: 0;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      background: #111827;
+      color: #d9e0ec;
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .brand {
+      min-height: 64px;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, #145fe8 0%, #0e7490 100%);
+      color: #fff;
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .brand strong {
+      display: block;
+      color: #fff;
+      font-size: 16px;
+      line-height: 1.3;
+    }
+
+    .brand span {
+      display: block;
+      color: #9ca3af;
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    .nav {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .nav-title {
+      padding: 0 10px;
+      color: #8b95a7;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 24px;
+    }
+
+    .nav-button {
+      width: 100%;
+      min-height: 38px;
+      padding: 8px 10px;
+      border: 0;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #c9d1df;
+      background: transparent;
+      text-align: left;
+      transition: background 0.16s ease, color 0.16s ease;
+    }
+
+    .nav-button:hover {
+      background: rgba(255, 255, 255, 0.07);
+      color: #fff;
+    }
+
+    .nav-button.active {
+      background: rgba(20, 95, 232, 0.24);
+      color: #fff;
+    }
+
+    .nav-button i,
+    .btn i,
+    .icon-link i {
+      width: 16px;
+      height: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .workspace {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 15;
+      height: var(--topbar-height);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 16px;
+      padding: 0 24px;
+      background: rgba(255, 255, 255, 0.96);
+      border-bottom: 1px solid var(--color-border);
+      backdrop-filter: blur(10px);
+    }
+
+    .breadcrumbs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      color: var(--color-text-tertiary);
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .breadcrumbs strong {
+      color: var(--color-text-secondary);
+      font-weight: 600;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .searchbox {
+      width: 280px;
+      height: 34px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      background: var(--color-bg-subtle);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 10px;
+      color: var(--color-text-tertiary);
+      font-size: 13px;
+    }
+
+    .searchbox input {
+      min-width: 0;
+      width: 100%;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--color-text-primary);
+    }
+
+    .searchbox input::placeholder {
+      color: var(--color-text-tertiary);
+      opacity: 1;
+    }
+
+    .content {
+      padding: 20px 24px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .page-head {
+      min-height: 86px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: start;
+      gap: 18px;
+      padding: 18px 20px;
+      background: var(--color-bg-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+    }
+
+    .page-title {
+      margin: 0 0 6px;
+      font-family: var(--font-display);
+      font-size: 24px;
+      line-height: 1.25;
+      font-weight: 720;
+      letter-spacing: 0;
+    }
+
+    .page-subtitle {
+      margin: 0;
+      color: var(--color-text-secondary);
+      font-size: 13px;
+      line-height: 1.6;
+      max-width: 980px;
+    }
+
+    .data-freshness {
+      margin: 6px 0 0;
+      color: var(--color-text-tertiary);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .page-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .btn[hidden] {
+      display: none !important;
+    }
+
+    .content.channel-compact-mode {
+      padding-top: 14px;
+      gap: 10px;
+    }
+
+    .content.channel-compact-mode .page-head {
+      min-height: 0;
+      padding: 12px 16px;
+      align-items: center;
+    }
+
+    .content.channel-compact-mode .page-title {
+      margin-bottom: 3px;
+      font-size: 21px;
+    }
+
+    .content.channel-compact-mode .page-subtitle {
+      line-height: 1.45;
+    }
+
+    .content.channel-compact-mode .data-freshness {
+      margin-top: 3px;
+    }
+
+    .content.channel-compact-mode .tabs {
+      min-height: 44px;
+      padding-block: 5px;
+    }
+
+    .content.channel-compact-mode .panel-head {
+      min-height: 42px;
+      padding-block: 9px;
+    }
+
+    .content.channel-compact-mode .channel-action-bar {
+      min-height: 44px;
+      padding: 6px 12px;
+    }
+
+    .content.channel-compact-mode .filters {
+      padding: 8px 12px;
+      gap: 8px;
+    }
+
+    .content.channel-compact-mode .table-pagination {
+      min-height: 44px;
+      padding: 6px 12px;
+    }
+
+    .btn {
+      height: 32px;
+      border: 1px solid var(--color-border-strong);
+      border-radius: var(--radius-md);
+      background: #fff;
+      color: var(--color-text-primary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 0 12px;
+      white-space: nowrap;
+      transition: border-color 0.16s ease, color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
+    }
+
+    .btn:hover {
+      border-color: var(--color-primary-hover);
+      color: var(--color-primary);
+    }
+
+    .btn.primary {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      color: #fff;
+    }
+
+    .btn.primary:hover {
+      background: var(--color-primary-hover);
+      color: #fff;
+    }
+
+    .btn.ghost {
+      border-color: transparent;
+      background: #f2f3f5;
+      color: var(--color-text-secondary);
+    }
+
+    .btn.danger {
+      border-color: #ffd4cc;
+      background: #fff;
+      color: var(--color-danger);
+    }
+
+    .btn:disabled,
+    .btn:disabled:hover {
+      cursor: not-allowed;
+      border-color: var(--color-border);
+      background: #f2f3f5;
+      color: #9aa0aa;
+      box-shadow: none;
+    }
+
+    .fact-receipt {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 14px;
+      border: 1px solid #b7f4d5;
+      border-radius: var(--radius-md);
+      background: var(--color-success-light);
+    }
+
+    .fact-receipt.show {
+      display: flex;
+    }
+
+    .fact-receipt-main {
+      min-width: 0;
+      display: grid;
+      gap: 4px;
+      color: var(--color-text-secondary);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .fact-receipt-title {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      color: var(--color-text-primary);
+      font-size: 13px;
+    }
+
+    .fact-receipt-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      flex: 0 0 auto;
+    }
+
+    .modal-feedback {
+      margin-bottom: 14px;
+      padding: 10px 12px;
+      border: 1px solid #ffd4cc;
+      border-radius: var(--radius-md);
+      background: var(--color-danger-light);
+      color: var(--color-danger);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .confirm-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 12px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      background: #fbfcfe;
+      color: var(--color-text-secondary);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .confirm-card input {
+      width: 16px;
+      height: 16px;
+      margin-top: 2px;
+      flex: 0 0 auto;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 24px;
+      border-radius: 999px;
+      padding: 0 8px;
+      border: 1px solid transparent;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .pill.blue {
+      color: var(--color-primary);
+      background: var(--color-primary-light);
+      border-color: #bedaff;
+    }
+
+    .pill.green {
+      color: var(--color-success);
+      background: var(--color-success-light);
+      border-color: #b7f4d5;
+    }
+
+    .pill.orange {
+      color: var(--color-warning);
+      background: var(--color-warning-light);
+      border-color: #ffe4ba;
+    }
+
+    .pill.red {
+      color: var(--color-danger);
+      background: var(--color-danger-light);
+      border-color: #ffd4cc;
+    }
+
+    .pill.gray {
+      color: var(--color-text-secondary);
+      background: #f2f3f5;
+      border-color: var(--color-border);
+    }
+
+    .pill.cyan {
+      color: var(--color-info);
+      background: var(--color-info-light);
+      border-color: #a7f3d0;
+    }
+
+    .tabs {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      min-height: 44px;
+      padding: 5px;
+      background: var(--color-bg-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      overflow-x: auto;
+    }
+
+    .tab {
+      height: 32px;
+      border: 0;
+      border-radius: var(--radius-sm);
+      padding: 0 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: transparent;
+      color: var(--color-text-secondary);
+      font-size: 13px;
+      white-space: nowrap;
+      transition: background 0.16s ease, color 0.16s ease;
+    }
+
+    .tab:hover {
+      background: var(--color-bg-subtle);
+      color: var(--color-primary);
+    }
+
+    .tab.active {
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+      font-weight: 700;
+    }
+
+    .workbench {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 330px;
+      gap: 14px;
+      align-items: start;
+    }
+
+    .workbench.collection-table-mode,
+    .workbench.payout-table-mode,
+    .workbench.product-table-mode {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .workbench.collection-table-mode .rail,
+    .workbench.payout-table-mode .rail,
+    .workbench.product-table-mode .rail {
+      display: none;
+    }
+
+    .panel {
+      min-width: 0;
+      background: var(--color-bg-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+
+    .panel-head {
+      min-height: 48px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .panel-title {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: 15px;
+      line-height: 1.35;
+      font-weight: 720;
+    }
+
+    .panel-meta {
+      color: var(--color-text-tertiary);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .filters {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--color-border);
+      display: grid;
+      grid-template-columns: repeat(5, minmax(128px, 1fr)) auto;
+      gap: 10px;
+      align-items: end;
+      background: #fbfcfe;
+    }
+
+    .filters.collection-mode {
+      grid-template-columns: minmax(220px, 1fr) minmax(170px, 0.7fr) auto;
+    }
+
+    .filters.payout-mode {
+      grid-template-columns: minmax(230px, 1.2fr) repeat(3, minmax(160px, 0.8fr)) auto auto;
+    }
+
+    .channel-action-bar {
+      min-height: 52px;
+      padding: 9px 14px;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      background: #fff;
+    }
+
+    .channel-action-bar[hidden] {
+      display: none !important;
+    }
+
+    .channel-action-bar .btn.warn {
+      color: #8a4b00;
+      border-color: #f0b44d;
+      background: #fff7e8;
+    }
+
+    .channel-action-bar .btn.danger {
+      color: var(--color-danger);
+      border-color: #f3b5ad;
+      background: var(--color-danger-light);
+    }
+
+    .vendor-summary {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--color-border);
+      display: grid;
+      grid-template-columns: minmax(150px, 0.55fr) minmax(260px, 1fr) minmax(420px, 1.8fr);
+      gap: 10px;
+      background: #f7f9fc;
+    }
+
+    .vendor-summary[hidden],
+    .field[hidden] {
+      display: none !important;
+    }
+
+    .summary-item {
+      min-width: 0;
+      padding: 10px 12px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      background: #fff;
+      display: grid;
+      gap: 3px;
+    }
+
+    .summary-item label {
+      color: var(--color-text-tertiary);
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .summary-item strong {
+      font-family: var(--font-mono);
+      font-size: 17px;
+      line-height: 1.2;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .summary-wallet,
+    .wallet-cell {
+      display: grid;
+      gap: 7px;
+    }
+
+    .summary-wallet-row,
+    .wallet-row {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 8px;
+      align-items: start;
+    }
+
+    .currency-tag {
+      min-width: 46px;
+      height: 23px;
+      padding: 0 7px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    .wallet-balance {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 750;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .wallet-metrics {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px 12px;
+      color: var(--color-text-secondary);
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
+    .wallet-metrics strong {
+      color: var(--color-text);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .capability-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      max-width: 240px;
+    }
+
+    .field {
+      min-width: 0;
+      display: grid;
+      gap: 5px;
+    }
+
+    .field label {
+      color: var(--color-text-secondary);
+      font-size: 12px;
+      line-height: 1.2;
+      font-weight: 600;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      min-height: 32px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      background: #fff;
+      color: var(--color-text-primary);
+      outline: 0;
+      padding: 5px 9px;
+      font-size: 13px;
+    }
+
+    .check-grid {
+      min-height: 32px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .check-line {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+    }
+
+    .check-line input {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--color-primary);
+    }
+
+    .field textarea {
+      min-height: 74px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      border-color: var(--color-primary-hover);
+      box-shadow: 0 0 0 3px rgba(20, 95, 232, 0.1);
+    }
+
+    .table-wrap {
+      overflow: auto;
+      min-height: 404px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      min-width: 980px;
+    }
+
+    table.channel-wide {
+      min-width: 2200px;
+    }
+
+    table.collection-wide {
+      width: 2200px;
+      min-width: 2200px;
+      table-layout: fixed;
+    }
+
+    table.payout-wide {
+      width: 2180px;
+      min-width: 2180px;
+      table-layout: fixed;
+    }
+
+    table.vendor-wide {
+      min-width: 1280px;
+    }
+
+    th,
+    td {
+      height: 44px;
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--color-border);
+      text-align: left;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: var(--color-bg-subtle);
+      color: var(--color-text-secondary);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    th:last-child,
+    td:last-child {
+      position: sticky;
+      right: 0;
+      z-index: 2;
+      background: #fff;
+      box-shadow: -1px 0 0 var(--color-border);
+    }
+
+    th:last-child {
+      z-index: 3;
+      background: var(--color-bg-subtle);
+    }
+
+    tbody tr {
+      transition: background 0.16s ease;
+    }
+
+    tbody tr:hover {
+      background: #f7fbff;
+    }
+
+    tbody tr.action-open {
+      position: relative;
+      z-index: 8;
+    }
+
+    tbody tr:hover td:last-child {
+      background: #f7fbff;
+    }
+
+    tbody tr.action-open td:last-child {
+      z-index: 30;
+    }
+
+    .collection-wide th,
+    .collection-wide td {
+      height: 40px;
+      padding: 6px 8px;
+    }
+
+    .collection-wide th:last-child,
+    .collection-wide td:last-child {
+      position: static;
+      box-shadow: none;
+    }
+
+    .collection-wide tbody tr {
+      height: var(--collection-row-height, 60px);
+    }
+
+    .collection-wide tbody tr:hover td:last-child {
+      background: transparent;
+    }
+
+    .payout-wide th,
+    .payout-wide td {
+      height: 40px;
+      padding: 6px 8px;
+    }
+
+    .payout-wide tbody tr {
+      height: 52px;
+    }
+
+    .payout-wide .payout-inline-actions {
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 2px 8px;
+      white-space: normal;
+      font-size: 11px;
+    }
+
+    .payout-wide .payout-inline-actions .cell-link,
+    .payout-wide .cell-action > .cell-link {
+      height: auto;
+      padding: 0;
+      border-radius: 0;
+      background: transparent;
+      font-weight: 600;
+    }
+
+    .payout-wide .payout-inline-actions .cell-link:hover,
+    .payout-wide .cell-action > .cell-link:hover {
+      background: transparent;
+      text-decoration: underline;
+    }
+
+    .payout-wide .money-action-buttons .cell-link {
+      height: 22px;
+      padding-inline: 5px;
+      color: #fff;
+      border-color: #e7a126;
+      background: #e7a126;
+      font-size: 11px;
+    }
+
+    .payout-wide .money-action-buttons .cell-link:hover {
+      background: #cf8811;
+    }
+
+    .payout-wide .money-action {
+      min-width: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .payout-wide .cell-action {
+      gap: 4px;
+    }
+
+    .payout-wide .cell-action > .cell-link i,
+    .payout-wide .row-actions .icon-link i {
+      display: none;
+    }
+
+    .payout-wide .row-actions {
+      gap: 1px;
+    }
+
+    .payout-wide .row-actions .icon-link {
+      height: 24px;
+      padding-inline: 4px;
+      font-size: 11px;
+    }
+
+    .payout-wide .collection-toggle {
+      flex: 0 0 38px;
+    }
+
+    .collection-select {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--color-primary);
+    }
+
+    .collection-channel-cell {
+      min-height: 44px;
+      display: grid;
+      align-content: center;
+      gap: 3px;
+      white-space: normal;
+    }
+
+    .collection-channel-name {
+      color: var(--color-text-primary);
+      font-weight: 650;
+      line-height: 1.35;
+    }
+
+    .collection-row-links {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+    }
+
+    .collection-row-links .cell-link,
+    .collection-wide .money-action-buttons .cell-link,
+    .collection-type-actions .cell-link {
+      height: auto;
+      padding: 0;
+      border-radius: 0;
+      background: transparent;
+      font-weight: 600;
+    }
+
+    .collection-row-links .cell-link:hover,
+    .collection-wide .money-action-buttons .cell-link:hover,
+    .collection-type-actions .cell-link:hover {
+      background: transparent;
+      text-decoration: underline;
+    }
+
+    .collection-type-stack {
+      display: grid;
+      align-content: center;
+      gap: 0;
+      min-height: 30px;
+    }
+
+    .collection-type-line {
+      min-height: 30px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .collection-type-action-line {
+      overflow: visible;
+    }
+
+    .collection-type-action-line .action-menu {
+      position: fixed;
+      right: auto;
+      z-index: 100;
+    }
+
+    .collection-code-option { display: flex; align-items: center; gap: 6px; min-width: 0; }
+    .collection-code-option input { flex-shrink: 0; }
+    .collection-code-count { color: var(--color-text-secondary); font-size: 13px; }
+    .collection-code-delete-list { margin: 12px 0 0; padding-left: 22px; line-height: 1.8; }
+
+    .collection-type-name {
+      color: var(--color-text-tertiary);
+      font-size: 11px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .collection-type-actions {
+      display: grid;
+      align-content: center;
+      gap: 0;
+    }
+
+    .collection-type-actions > span {
+      min-height: 30px;
+      display: flex;
+      align-items: center;
+    }
+
+    .collection-toggle {
+      position: relative;
+      flex: 0 0 38px;
+      min-width: 38px !important;
+      width: 38px !important;
+      min-height: 32px !important;
+      height: 32px !important;
+      padding: 0 !important;
+      border: 0 !important;
+      border-radius: 999px;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .collection-toggle::before {
+      content: "";
+      position: absolute;
+      top: 7px;
+      left: 2px;
+      width: 34px;
+      height: 18px;
+      border-radius: 999px;
+      background: #c7ced8;
+      transition: background .18s ease;
+    }
+
+    .collection-toggle::after {
+      content: "";
+      position: absolute;
+      top: 9px;
+      left: 4px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, .22);
+      transition: transform .18s ease;
+    }
+
+    .collection-toggle.on::before {
+      background: #409eff;
+    }
+
+    .collection-toggle.on::after {
+      transform: translateX(16px);
+    }
+
+    .collection-wide .money-action {
+      min-width: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .collection-wide .money-action-buttons {
+      gap: 6px;
+    }
+
+    .collection-wide .money-action-buttons .cell-link,
+    .collection-wide .collection-type-actions .cell-link {
+      font-size: 11px;
+    }
+
+    .table-pagination {
+      min-height: 52px;
+      padding: 9px 14px;
+      border-top: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      color: var(--color-text-secondary);
+      background: #fff;
+      font-size: 12px;
+    }
+
+    .table-pagination[hidden],
+    .filters[hidden] {
+      display: none !important;
+    }
+
+    .page-chip {
+      min-width: 28px;
+      height: 28px;
+      border-radius: var(--radius-sm);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--color-primary);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .mono {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .muted {
+      color: var(--color-text-tertiary);
+    }
+
+    .row-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      position: relative;
+    }
+
+    .icon-link {
+      height: 28px;
+      border: 0;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: var(--color-primary);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 0 6px;
+      white-space: nowrap;
+    }
+
+    .icon-link:hover {
+      background: var(--color-primary-light);
+    }
+
+    .cell-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      max-width: 100%;
+    }
+
+    .cell-action .cell-value {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .cell-link {
+      height: 24px;
+      border: 0;
+      border-radius: var(--radius-sm);
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 0 6px;
+      white-space: nowrap;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .cell-link:hover {
+      background: #d8eaff;
+    }
+
+    .cell-link i {
+      width: 14px;
+      height: 14px;
+    }
+
+    .money-action {
+      display: grid;
+      grid-template-columns: auto;
+      gap: 4px;
+      min-width: 112px;
+    }
+
+    .money-action strong {
+      color: var(--color-text-primary);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .money-action-buttons {
+      display: inline-flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .money-action-buttons .cell-link {
+      padding-inline: 5px;
+    }
+
+    .switch-button {
+      min-width: 54px;
+      height: 28px;
+      padding: 0 9px;
+      border: 1px solid;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      transition: color .18s ease, background .18s ease, border-color .18s ease;
+    }
+
+    .switch-button.on {
+      color: var(--color-success);
+      border-color: #a8e8c8;
+      background: var(--color-success-light);
+    }
+
+    .switch-button.off {
+      color: var(--color-text-tertiary);
+      border-color: var(--color-border);
+      background: #f3f4f6;
+    }
+
+    .payout-inline-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .balance-cell {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 128px;
+    }
+
+    .balance-values {
+      display: grid;
+      gap: 2px;
+      min-width: 58px;
+    }
+
+    .balance-line {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+      line-height: 1.25;
+      white-space: nowrap;
+    }
+
+    .balance-label {
+      color: var(--color-text-tertiary);
+      font-size: 11px;
+    }
+
+    .action-more {
+      position: relative;
+      display: inline-flex;
+    }
+
+    .action-more summary {
+      height: 28px;
+      border-radius: var(--radius-sm);
+      color: var(--color-primary);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 0 6px;
+      cursor: pointer;
+      user-select: none;
+      list-style: none;
+    }
+
+    .action-more summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .action-more summary:hover,
+    .action-more[open] summary {
+      background: var(--color-primary-light);
+    }
+
+    .action-menu {
+      position: absolute;
+      right: 0;
+      top: 34px;
+      z-index: 20;
+      width: 156px;
+      padding: 6px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      background: #fff;
+      box-shadow: var(--shadow-md);
+      display: grid;
+      gap: 2px;
+    }
+
+    .action-menu .icon-link {
+      width: 100%;
+      justify-content: flex-start;
+      color: var(--color-text-secondary);
+    }
+
+    .action-menu .icon-link:hover {
+      color: var(--color-primary);
+    }
+
+    .rail {
+      position: sticky;
+      top: calc(var(--topbar-height) + 14px);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .chain {
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .chain-node {
+      display: grid;
+      grid-template-columns: 32px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+      min-height: 52px;
+    }
+
+    .node-mark {
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border-radius: var(--radius-md);
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+      font-weight: 800;
+      font-size: 12px;
+    }
+
+    .node-title {
+      color: var(--color-text-tertiary);
+      font-size: 12px;
+      margin-bottom: 3px;
+    }
+
+    .node-value {
+      color: var(--color-text-primary);
+      font-size: 13px;
+      line-height: 1.35;
+      font-weight: 650;
+      word-break: break-word;
+    }
+
+    .rule-list {
+      padding: 12px 14px 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .rule-item {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 8px;
+      color: var(--color-text-secondary);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .rule-dot {
+      width: 7px;
+      height: 7px;
+      margin-top: 6px;
+      border-radius: 50%;
+      background: var(--color-primary);
+    }
+
+    .health-bar {
+      width: 118px;
+      height: 8px;
+      border-radius: 999px;
+      background: #eef0f5;
+      overflow: hidden;
+    }
+
+    .health-bar span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--color-success);
+    }
+
+    .health-bar.warning span {
+      background: var(--color-warning);
+    }
+
+    .health-bar.danger span {
+      background: var(--color-danger);
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(17, 24, 39, 0.42);
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal {
+      width: min(960px, 100%);
+      max-height: calc(100vh - 56px);
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-modal);
+      overflow: hidden;
+    }
+
+    .modal.sm {
+      width: min(680px, 100%);
+    }
+
+    .modal.lg {
+      width: min(1180px, 100%);
+    }
+
+    .modal-head {
+      min-height: 56px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .modal-head h2 {
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.35;
+    }
+
+    .modal-body {
+      padding: 16px 18px;
+      overflow: auto;
+    }
+
+    .modal-foot {
+      min-height: 56px;
+      padding: 12px 18px;
+      border-top: 1px solid var(--color-border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      background: #fbfcfe;
+    }
+
+    .desc-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px 18px;
+    }
+
+    .desc-item {
+      min-width: 0;
+      border-bottom: 1px solid var(--color-border);
+      padding-bottom: 8px;
+    }
+
+    .desc-item label {
+      display: block;
+      color: var(--color-text-tertiary);
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+
+    .desc-item span {
+      display: block;
+      color: var(--color-text-primary);
+      font-size: 13px;
+      line-height: 1.45;
+      word-break: break-word;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px 14px;
+    }
+
+    .form-grid .full {
+      grid-column: 1 / -1;
+    }
+
+    .blue-form {
+      display: grid;
+      gap: 14px;
+      padding: 2px 0;
+    }
+
+    .blue-row {
+      display: grid;
+      grid-template-columns: 150px minmax(0, 1fr);
+      gap: 12px;
+      align-items: center;
+    }
+
+    .blue-row label {
+      color: var(--color-text-secondary);
+      font-size: 14px;
+      line-height: 1.35;
+      font-weight: 600;
+      text-align: right;
+    }
+
+    .blue-row.required label::before {
+      content: "* ";
+      color: var(--color-danger);
+    }
+
+    .blue-row input,
+    .blue-row select,
+    .blue-row textarea {
+      width: 100%;
+      min-height: 38px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      background: #fff;
+      color: var(--color-text-primary);
+      outline: 0;
+      padding: 7px 12px;
+      font-size: 14px;
+    }
+
+    .blue-row textarea {
+      min-height: 88px;
+      resize: vertical;
+      line-height: 1.55;
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+
+    .blue-row input[readonly],
+    .blue-row input:disabled,
+    .blue-row textarea[readonly] {
+      background: #f4f7fb;
+      color: var(--color-text-secondary);
+    }
+
+    .payout-development-form textarea { min-height: 58px; }
+    .payout-development-form .radio-line input { width: 16px; }
+
+    .blue-inline {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .blue-code {
+      width: 108px;
+      flex: 0 0 108px;
+    }
+
+    .radio-line {
+      display: flex;
+      gap: 28px;
+      align-items: center;
+      min-height: 38px;
+    }
+
+    .radio-line label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-align: left;
+      color: var(--color-text-primary);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .radio-line input {
+      width: 16px;
+      min-height: 16px;
+      accent-color: var(--color-primary);
+    }
+
+    .stepper {
+      display: grid;
+      grid-template-columns: 54px minmax(0, 1fr) 54px;
+      min-height: 38px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .stepper button,
+    .stepper input {
+      border: 0;
+      min-height: 38px;
+      border-radius: 0;
+      text-align: center;
+      background: #fff;
+    }
+
+    .stepper button {
+      color: var(--color-text-secondary);
+      background: #f7f9fc;
+      font-size: 18px;
+    }
+
+    .stepper button:hover {
+      color: var(--color-primary);
+      background: var(--color-primary-light);
+    }
+
+    .blue-section {
+      position: relative;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 28px 22px 20px;
+      margin-top: 8px;
+    }
+
+    .blue-section-title {
+      position: absolute;
+      top: -12px;
+      left: 20px;
+      padding: 0 10px;
+      background: #fff;
+      color: var(--color-text-primary);
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .hint {
+      margin-top: 6px;
+      color: var(--color-text-tertiary);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .test-split {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .test-block {
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      background: #fbfcfe;
+      overflow: hidden;
+    }
+
+    .test-block h3 {
+      margin: 0;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--color-border);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .test-block textarea {
+      width: 100%;
+      min-height: 150px;
+      border: 0;
+      border-radius: 0;
+      background: #fff;
+      padding: 12px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.55;
+      resize: vertical;
+      outline: 0;
+    }
+
+    .inline-error {
+      display: none;
+      margin-top: 8px;
+      color: var(--color-danger);
+      font-size: 12px;
+    }
+
+    .inline-error.show {
+      display: block;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 10px minmax(0, 1fr);
+      gap: 10px;
+      color: var(--color-text-secondary);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .timeline-item::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      margin-top: 6px;
+      border-radius: 50%;
+      background: var(--color-primary);
+    }
+
+    .toast {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      z-index: 60;
+      min-width: 280px;
+      max-width: 420px;
+      display: none;
+      align-items: start;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      background: #111827;
+      color: #fff;
+      box-shadow: 0 10px 28px rgba(17, 24, 39, 0.22);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .toast.show {
+      display: flex;
+      animation: toast-in 0.18s ease;
+    }
+
+    @keyframes toast-in {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 1280px) {
+      .app {
+        grid-template-columns: 72px minmax(0, 1fr);
+      }
+
+      .brand strong,
+      .brand span,
+      .nav-title,
+      .nav-button span {
+        display: none;
+      }
+
+      .brand {
+        justify-content: center;
+        padding: 12px;
+      }
+
+      .nav-button {
+        justify-content: center;
+      }
+
+      .workbench {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .rail {
+        position: static;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 860px) {
+      .topbar,
+      .page-head {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .top-actions,
+      .page-actions {
+        justify-content: flex-start;
+      }
+
+      .searchbox {
+        width: 100%;
+      }
+
+      .filters,
+      .vendor-summary,
+      .form-grid,
+      .desc-grid,
+      .test-split,
+      .rail {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .blue-row {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 6px;
+      }
+
+      .blue-row label {
+        text-align: left;
+      }
+
+      .content {
+        padding: 14px;
+      }
+
+      .fact-receipt {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .fact-receipt-actions .btn {
+        flex: 1 1 140px;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .app { display: block; }
+      .topbar { height: auto; min-height: 56px; padding: 10px 14px; }
+      .sidebar {
+        position: sticky;
+        top: 0;
+        z-index: 30;
+        height: auto;
+        overflow-x: auto;
+      }
+      .brand { min-height: 54px; justify-content: flex-start; padding: 10px 14px; }
+      .brand strong, .brand span { display: block; }
+      .nav { padding: 8px 12px 12px; }
+      .nav > div { display: flex; gap: 8px; width: max-content; }
+      .nav-title { display: none; }
+      .nav-button { width: auto; min-width: max-content; min-height: 44px; }
+      .nav-button span { display: inline; }
+      .modal-backdrop { padding: 0; align-items: flex-end; }
+      .modal { width: 100%; height: auto; max-height: 92vh; border-radius: 16px 16px 0 0; }
+      .modal-head { padding: 12px 16px; }
+      .modal-body { padding: 14px 16px; }
+      .modal-foot { position: sticky; bottom: 0; padding: 10px 16px; }
+      .toast { left: 14px; right: 14px; bottom: 14px; min-width: 0; max-width: none; }
+      th:last-child,
+      td:last-child {
+        position: static;
+        box-shadow: none;
+      }
+    }
+    /* 三端共用：键盘、动效与窄屏触控基线 */
+    :focus-visible {
+      outline: 3px solid #ffffff;
+      box-shadow: 0 0 0 5px #145fe8;
+      outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    @media (max-width: 768px) {
+      button,
+      input:not([type="checkbox"]):not([type="radio"]),
+      select,
+      textarea,
+      [role="button"] {
+        min-height: 44px !important;
+      }
+
+      button,
+      [role="button"] {
+        min-width: 44px !important;
+      }
+
+      input,
+      select,
+      textarea {
+        font-size: 16px !important;
+      }
+
+      .action-more summary {
+        min-height: 44px;
+      }
+    }
+
+    /* 三端统一视觉与响应式基线（2026-07-18） */
+    :root {
+      --font-ui: "Avenir Next", "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --font: var(--font-ui);
+      --color-primary: #145fe8;
+      --color-primary-hover: #0f52cc;
+      --color-primary-light: #e8f3ff;
+      --primary: var(--color-primary);
+      --primary-hover: var(--color-primary-hover);
+      --primary-strong: var(--color-primary-hover);
+      --primary-light: var(--color-primary-light);
+      --primary-soft: var(--color-primary-light);
+      --color-bg-page: #f5f7fb;
+      --color-bg-surface: #ffffff;
+      --color-bg-subtle: #f7f8fa;
+      --bg: var(--color-bg-page);
+      --bg-main: var(--color-bg-page);
+      --bg-page: var(--color-bg-page);
+      --color-bg-2: var(--color-bg-page);
+      --surface: var(--color-bg-surface);
+      --bg-card: var(--color-bg-surface);
+      --bg-surface: var(--color-bg-surface);
+      --color-bg-1: var(--color-bg-surface);
+      --surface-soft: var(--color-bg-subtle);
+      --surface-strong: var(--color-bg-subtle);
+      --bg-muted: var(--color-bg-subtle);
+      --bg-subtle: var(--color-bg-subtle);
+      --color-fill-1: var(--color-bg-subtle);
+      --color-border: #e5e6eb;
+      --color-border-strong: #d8dde8;
+      --border: var(--color-border);
+      --line: var(--color-border);
+      --border-strong: var(--color-border-strong);
+      --line-strong: var(--color-border-strong);
+      --color-text-primary: #1d2129;
+      --color-text-secondary: #4e5969;
+      --color-text-tertiary: #626d7b;
+      --text: var(--color-text-primary);
+      --text-primary: var(--color-text-primary);
+      --text-strong: var(--color-text-primary);
+      --color-text-1: var(--color-text-primary);
+      --text-secondary: var(--color-text-secondary);
+      --text-main: var(--color-text-secondary);
+      --color-text-2: var(--color-text-secondary);
+      --text-tertiary: var(--color-text-tertiary);
+      --text-muted: var(--color-text-tertiary);
+      --color-text-3: var(--color-text-tertiary);
+      --color-success: #087a55;
+      --color-success-light: #e8fff3;
+      --success: var(--color-success);
+      --success-light: var(--color-success-light);
+      --color-status-success: var(--color-success);
+      --color-warning: #8a4b00;
+      --color-warning-light: #fff7e8;
+      --warning: var(--color-warning);
+      --warning-light: var(--color-warning-light);
+      --accent: var(--color-warning);
+      --accent-soft: var(--color-warning-light);
+      --color-status-warning: var(--color-warning);
+      --color-danger: #cf1f1f;
+      --color-danger-light: #fff0ed;
+      --danger: var(--color-danger);
+      --danger-light: var(--color-danger-light);
+      --color-status-danger: var(--color-danger);
+      --color-info: #0e7490;
+      --color-info-light: #e6fffb;
+      --info: var(--color-info);
+      --info-soft: var(--color-info-light);
+      --cyan: var(--color-info);
+      --color-purple: var(--color-info);
+      --color-purple-light: var(--color-info-light);
+      --color-status-info: var(--color-info);
+      --radius-sm: 4px;
+      --radius-md: 6px;
+      --radius-lg: 8px;
+      --radius-small: var(--radius-sm);
+      --radius-medium: var(--radius-md);
+      --radius-large: var(--radius-lg);
+      --radius: var(--radius-md);
+      --sidebar-width: 248px;
+      --rail-width: var(--sidebar-width);
+      --bg-rail: #111827;
+      --sidebar: #111827;
+      --rail-bg: #111827;
+      --topbar-height: 56px;
+      --shadow-modal: 0 18px 48px rgba(29, 33, 41, 0.18);
+      --shadow-pop: var(--shadow-modal);
+      --shadow-popover: var(--shadow-modal);
+    }
+
+    html { color-scheme: light; }
+
+    body {
+      font-family: var(--font-ui) !important;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--color-text-primary);
+      background-color: var(--color-bg-page);
+    }
+
+    button,
+    [role="button"] {
+      min-height: 32px !important;
+      border-radius: var(--radius-md) !important;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    input:not([type="checkbox"]):not([type="radio"]),
+    select,
+    textarea {
+      min-height: 32px !important;
+      border-radius: var(--radius-md) !important;
+    }
+
+    :focus-visible,
+    [role="dialog"] :focus {
+      outline: 3px solid #ffffff !important;
+      box-shadow: 0 0 0 5px #145fe8 !important;
+      outline-offset: 2px !important;
+    }
+
+    .sidebar { background: #111827 !important; }
+    .topbar { min-height: var(--topbar-height); }
+    table thead th,
+    .data-table th { background: var(--color-bg-subtle) !important; }
+    table tbody td {
+      padding-top: 11px !important;
+      padding-bottom: 11px !important;
+    }
+    .modal-dialog,
+    .dialog,
+    [role="dialog"]:not(.modal-backdrop),
+    .auth-shell {
+      border-radius: var(--radius-lg) !important;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    @media (max-width: 768px) {
+      button,
+      [role="button"] {
+        min-width: 44px !important;
+        min-height: 44px !important;
+      }
+
+      input:not([type="checkbox"]):not([type="radio"]),
+      select,
+      textarea {
+        min-height: 44px !important;
+        font-size: 16px !important;
+      }
+
+      .topbar {
+        height: auto !important;
+        min-height: var(--topbar-height);
+      }
+    }
+
+:root {--primary:#3246d2;--bg:#f2f3f5;} body{display:block;background:#f2f3f5;color:#303133}.tenant-content{padding:20px 24px}.tenant-code-line{min-height:38px;display:flex;align-items:center;gap:8px}.tenant-provider-option{display:flex;gap:10px;align-items:center;padding:12px;border:1px solid #ebeef5;border-radius:6px;margin:8px 0}.tenant-provider-option:has(input:checked){background:#eef0ff;border-color:#3246d2}.tenant-page-table{overflow:auto;border:1px solid #e4e7ed;border-radius:8px;background:white}.tenant-page-table table{width:100%;border-collapse:collapse}.tenant-page-table td,.tenant-page-table th{padding:14px 16px;vertical-align:top}.tenant-page-table .icon-link{margin:4px 8px 4px 0}.tenant-filters{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:16px;background:white;border:1px solid #e4e7ed;border-radius:8px;margin:16px 0}.tenant-filters input,.tenant-filters select{padding:8px;border:1px solid #dcdfe6;border-radius:6px}.modal-feedback{padding:12px;background:#fff1f0;color:#c5221f;border-radius:6px}.tenant-panel{padding:18px;background:white;border:1px solid #e4e7ed;border-radius:8px;margin:16px 0}.modal-backdrop.show{display:flex}.modal-body{max-height:70vh;overflow:auto}.action-more .action-menu{z-index:20}input[type=checkbox]{accent-color:#3246d2}button:focus-visible,summary:focus-visible{outline:2px solid #3246d2;outline-offset:2px} .modal-footer{display:flex;gap:12px;justify-content:flex-end;padding:16px 24px;border-top:1px solid #ebeef5} @media(max-width:800px){.tenant-content{padding:16px}.form-grid{grid-template-columns:1fr}.modal{max-width:calc(100vw - 32px)}}
+
+.tenant-provider-option input[type=checkbox]{width:16px;height:16px;min-height:16px;flex:0 0 16px;padding:0;margin:0}.tenant-provider-option strong{font-family:inherit;font-weight:600}.tenant-provider-option .muted{margin-left:auto}.tenant-content{font-family:Inter,"PingFang SC","Microsoft YaHei",sans-serif}.page-head h1{font-size:20px;font-weight:600}.tenant-page-table .action-menu{position:fixed;right:24px;bottom:24px;top:auto;min-width:190px;flex-direction:column;align-items:stretch;gap:4px;padding:8px}.tenant-page-table .action-menu button{text-align:left;white-space:nowrap;width:100%;padding:8px 10px;margin:0}.tenant-page-table details[open] .action-menu{display:flex}
+
+.collection-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 16px}.collection-toolbar[hidden]{display:none}.collection-table table{font-size:13px;table-layout:fixed}.collection-table td,.collection-table th{border-right:1px solid #ebeef5;padding:12px 10px;text-align:center;vertical-align:middle}.collection-table th{white-space:nowrap;background:#f5f7fa}.collection-table td{border-bottom:1px dashed #e7eaf0}.collection-table tr.channel-start td{border-top:1px solid #e2e6ee}.collection-table .parent-channel{text-align:left;padding:20px 14px}.parent-channel strong{display:block;margin-top:10px;line-height:1.7}.provider-meta{font-size:12px;color:#909399;margin-top:4px}.collection-table .channel-actions{display:flex;gap:10px;align-items:center}.collection-table .icon-link{font-size:12px;margin:0;padding:2px 0;color:#3289f9}.collection-table .action-more summary{color:#3289f9;font-size:12px;cursor:pointer;list-style:none;padding:2px 0}.collection-table .action-more summary::-webkit-details-marker{display:none}.collection-table .fund-actions{display:flex;gap:14px;justify-content:center;margin-top:12px}.collection-table .collection-alt td{background:#f9fafc}.collection-switch{padding:0;border:0;width:36px;height:19px;min-width:36px;min-height:19px;border-radius:12px;background:#c9cdd4;cursor:pointer;position:relative}.collection-switch span{display:block;width:15px;height:15px;border-radius:50%;background:white;position:absolute;left:2px;top:2px}.collection-switch.on{background:#409eff}.collection-switch.on span{left:19px}.collection-table .code-cell{text-align:left;white-space:nowrap;overflow:hidden}.code-cell label{display:inline-flex;align-items:center;gap:5px}.code-number{font-weight:500}.code-remark{font-size:12px;color:#909399;margin-left:8px}.collection-table .action-menu{box-shadow:0 8px 24px #182c4930;border:1px solid #ebeef5;background:white;bottom:auto;right:auto;max-height:280px;overflow:auto;min-width:170px}.collection-table details[open] .action-menu{display:flex}.inline-check{display:flex!important;align-items:center;gap:8px}.inline-check input{width:16px!important;min-height:16px!important;height:16px}.field textarea{width:100%;box-sizing:border-box;border:1px solid #dcdfe6;border-radius:6px;padding:10px;font:inherit}.mapping-modal .modal{width:920px;max-width:calc(100vw - 48px)}.mapping-tabs{display:flex;gap:10px;margin:16px 0}.mapping-group{padding:18px;margin-top:18px;border:1px solid #e4e7ed;border-radius:8px}.mapping-group h3,#mappingPanel h3{margin:0 0 12px}.compact-table{width:100%;border-collapse:collapse;margin:12px 0}.compact-table th,.compact-table td{padding:10px;border:1px solid #ebeef5;text-align:left}.compact-table input{width:100%;min-height:36px;padding:8px;border:1px solid #dcdfe6;border-radius:5px}.collection-table th:nth-child(1){width:38px}.collection-table th:nth-child(2){width:210px}.collection-table th:nth-child(3){width:90px}.collection-table th:nth-child(n+4):nth-child(-n+9){width:125px}.collection-table th:nth-child(10){width:80px}.collection-table th:nth-child(11){width:310px}.collection-table th:nth-child(12){width:90px}.collection-table th:nth-child(13){width:85px}.collection-table th:nth-child(14){width:160px}.collection-table th:nth-child(15){width:85px}.collection-table th:nth-child(16){width:90px}.collection-table td.channel-select input,.collection-table .code-cell input{width:14px;height:14px;min-height:14px}.collection-table tbody tr:hover td{background:#f0f7ff}.collection-table{border-radius:6px}.field input:disabled{background:#f5f7fa;color:#a8abb2}.mapping-tabs .btn{min-width:100px}.collection-table [data-action=money]{font-size:12px}
+.collection-table td[colspan]{position:static;box-shadow:none;z-index:auto}.collection-table .code-ops{overflow:visible}
+.product-table td,.product-table th{text-align:left;vertical-align:middle}.protocol-options{display:flex;gap:24px}.binding-filters{display:flex;align-items:end;gap:12px;flex-wrap:wrap}.binding-filters .field{min-width:200px}.binding-actions{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}.binding-table{overflow:auto}.binding-table table{min-width:760px}.editable-value{border:0;background:transparent;color:#606266;cursor:text;padding:5px}.editable-value:hover{background:#edf5ff;border-radius:4px}.binding-table input[type=checkbox]{width:18px;height:18px;min-height:18px}.product-code-filter{display:flex;gap:12px;align-items:center}.product-code-filter[hidden],.tenant-filters[hidden]{display:none}.table-pagination{display:flex;align-items:center;justify-content:space-between;gap:20px;padding-top:14px}.table-pagination p{margin:0}#pagination{display:flex;gap:10px;align-items:center}#pageSize{border:1px solid #dcdfe6;border-radius:6px;padding:6px}.compact-table td:last-child,.compact-table th:last-child{position:static;box-shadow:none}
+.collection-table .parent-channel{position:sticky;left:38px;z-index:2;background:#fff}.collection-table .channel-select{position:sticky;left:0;z-index:2;background:#fff}.collection-table .collection-alt .parent-channel,.collection-table .collection-alt .channel-select{background:#f9fafc}.collection-table th:nth-child(1){left:0;z-index:4}.collection-table th:nth-child(2){left:38px;z-index:4}.collection-table tr.action-open td{z-index:10}.collection-table tr.action-open .code-ops{z-index:30}
+.collection-table th{box-sizing:border-box}.collection-table th:nth-child(2){width:190px}.collection-table th:nth-child(11){width:240px}.collection-table th:nth-child(14){width:130px}.collection-table th:nth-child(16){width:85px}.collection-switch{height:19px!important;min-height:19px!important;max-height:19px!important;min-width:36px!important;border-radius:12px!important}.collection-table .parent-channel{padding:20px 10px}
+</style></head><body><main class="tenant-content"><section class="page-head"><div><h1 id="pageTitle">已授权通道商</h1><p class="page-subtitle" id="pageSubtitle"></p></div><div class="page-actions"><button class="btn" data-action="refresh">刷新</button><button class="btn" data-action="export">导出</button><button class="btn primary" id="primaryAction" data-action="primary">新增通道</button></div></section><div class="tabs" id="tabs" role="tablist" aria-label="通道管理"></div><div class="tenant-filters"><span class="product-code-filter" id="productCodeFilter" hidden><label for="productCodeKeyword">产品编码</label><input id="productCodeKeyword" placeholder="产品编码"></span><label for="keyword">名称 / 编码</label><input id="keyword" placeholder="请输入名称或编码"><label for="statusFilter">状态</label><select id="statusFilter"></select><button class="btn primary" data-action="search">查询</button><button class="btn" data-action="reset">重置</button><button class="btn danger" id="bulkButton" data-action="bulkDelete" hidden>批量删除通道编码</button><span id="selectionCount" role="status"></span></div><div class="collection-toolbar" id="collectionToolbar" hidden><button class="btn primary" data-action="primary">新增通道</button><button class="btn" data-action="batchEnable">全部开启</button><button class="btn" data-action="batchDisable">全部关闭</button><button class="btn" data-action="batchSettlement">一键结算</button></div><div class="collection-toolbar" id="productToolbar" hidden><button class="btn primary" data-action="primary">添加</button><button class="btn" data-action="productEnable">全部开启</button><button class="btn" data-action="productDisable">全部关闭</button></div><div class="tenant-page-table"><table id="dataTable"><thead id="tableHead"></thead><tbody id="tableBody"></tbody></table></div><div class="table-pagination"><p class="muted" id="recordCount" role="status"></p><div id="pagination"></div></div></main><div class="modal-backdrop" id="modalBackdrop" aria-hidden="true"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal-head"><h2 id="modalTitle"></h2><button class="btn ghost" data-action="close">关闭</button></div><div class="modal-body" id="modalBody"></div><div class="modal-footer" id="modalFoot"></div></section></div><div class="toast" id="toast" role="status" aria-live="polite"><span id="toastText"></span></div><script>(() => {
+ const model=window.HSProviderDemo, tenantId=model.tenantId, data=model.tenantData(tenantId);data.mappingConfigs||=new Map();
+ const $=s=>document.querySelector(s), esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const tabs=[['providers','已授权通道商'],['collectionChannels','代收通道管理'],['payoutChannels','代付通道管理'],['collectionProducts','代收产品管理'],['payoutProducts','代付产品管理']];
+ let active=window.__UNIFIED_DEMO_HASH||'providers',selected=new Set(),selectedChannels=new Set(),selectedProducts=new Set(),page=1,pageSize=50,context=null,returnFocus=null;
+ if(!tabs.some(t=>t[0]===active))active='providers';if(active.endsWith('Products'))pageSize=10;
+ const direction=()=>active.startsWith('payout')?'代付':'代收',isProduct=()=>active.endsWith('Products');
+ const provider=id=>model.providers.find(p=>p.id===id),channel=id=>data.channels.find(c=>c.id===id),product=id=>data.products.find(p=>p.id===id);
+ const permitted=new Set(['tenant.channel.manage','tenant.channel.config.manage','tenant.channel.product.manage','tenant.channel.export']);
+ const permission=a=>['connection','saveConnection','test','runTest','mapping','saveMapping','mapSection','mapAdd','mapRemove'].includes(a)?'tenant.channel.config.manage':['product','saveProduct','toggleProduct','deleteProduct','saveReplicaProduct','bindCodes','bindingSearch','bindAllCodes','unbindAllCodes','saveBindingEdit','bindMerchants','merchantSearch','bindAllMerchants','unbindAllMerchants','merchantBulkRate','saveMerchantRate','productEnable','productDisable','confirmProductBatch'].includes(a)?'tenant.channel.product.manage':a==='export'?'tenant.channel.export':'tenant.channel.manage';
+ function toast(text){$('#toastText').textContent=text;$('#toast').classList.add('show');setTimeout(()=>$('#toast').classList.remove('show'),2600);}
+ function button(action,label,id='',extra=''){return `<button class="icon-link" data-action="${action}" data-id="${esc(id)}" ${extra}>${label}</button>`;}
+ function badge(value){return `<span class="pill ${['开启','已授权','已接入'].includes(value)?'green':'gray'}">${esc(value)}</span>`;}
+ function field(id,label,value='',type='text',extra=''){return `<div class="field"><label for="${id}">${label}</label><input id="${id}" type="${type}" value="${esc(value)}" ${extra}></div>`;}
+ function select(id,label,options){return `<div class="field"><label for="${id}">${label}</label><select id="${id}">${options}</select></div>`;}
+ function option(value,label,checked){return `<option value="${esc(value)}" ${checked?'selected':''}>${esc(label)}</option>`;}
+ function modal(title,body,action='save',label='保存'){
+  $('#modalBackdrop').classList.remove('mapping-modal');returnFocus=document.activeElement;$('#modalTitle').textContent=title;$('#modalBody').innerHTML=`<div id="modalFeedback" class="modal-feedback" role="alert" hidden></div>${body}`;
+  $('#modalFoot').innerHTML=`<button class="btn" data-action="close">取消</button><button class="btn primary" data-action="${action}">${label}</button>`;
+  $('.tenant-content').inert=true;$('#modalBackdrop').classList.add('show');$('#modalBackdrop').setAttribute('aria-hidden','false');$('#modalBody input, #modalBody select, #modalFoot button')?.focus();
+ }
+ function close(){ $('.tenant-content').inert=false;$('#modalBackdrop').classList.remove('show');$('#modalBackdrop').setAttribute('aria-hidden','true');context=null;render();returnFocus?.focus(); }
+ function error(text){$('#modalFeedback').textContent=text;$('#modalFeedback').hidden=false;}
+ function finish(text,object){model.log(text,object,tenantId);close();render();toast(text);}
+ function list(){const q=$('#keyword').value.trim().toLowerCase(),status=$('#statusFilter').value;
+  return (active==='providers'?model.grants.filter(g=>g.tenantId===tenantId).map(g=>({...g,name:provider(g.providerId)?.name||g.providerId})):isProduct()?data.products.filter(p=>p.direction===direction()):data.channels.filter(c=>c.direction===direction()))
+   .filter(r=>(!q||[r.name,r.id,r.productNo,r.vendor,r.thirdCode,...(r.collectionTypes||[]).map(c=>c.code)].join(' ').toLowerCase().includes(q))&&(!status||r.status===status)&&(active!=='collectionProducts'||!$('#productCodeKeyword').value.trim()||r.productNo.toLowerCase().includes($('#productCodeKeyword').value.trim().toLowerCase())));
+ }
+ function render(){
+  model.tenantData(tenantId);
+  const allRows=list();page=Math.min(page,Math.max(1,Math.ceil(allRows.length/pageSize)));const rows=allRows.slice((page-1)*pageSize,page*pageSize);selectedProducts=new Set([...selectedProducts].filter(id=>data.products.some(p=>p.id===id)));selectedChannels=new Set([...selectedChannels].filter(id=>data.channels.some(c=>c.id===id)));const visibleCodes=new Set(rows.flatMap(r=>(r.collectionTypes||[]).map(c=>c.id)));selected=new Set([...selected].filter(id=>visibleCodes.has(id)));
+  $('#pageTitle').textContent=tabs.find(t=>t[0]===active)[1];$('#pageSubtitle').textContent=active==='providers'?'平台授权通道商；通道和产品由当前租户自行配置。':active==='payoutProducts'?'维护本租户代付类型，通道的主产品在代付通道管理中选择。':isProduct()?'维护本租户代收产品，自行绑定子通道和商户。':'选择已授权通道商，维护当前租户的通道与对接信息。';
+  $('#tabs').innerHTML=tabs.map(([key,label])=>`<button class="tab ${key===active?'active':''}" role="tab" aria-selected="${key===active}" data-tab="${key}">${label}</button>`).join('');
+  $('#primaryAction').hidden=['providers','collectionChannels','collectionProducts'].includes(active);$('#collectionToolbar').hidden=active!=='collectionChannels';$('#productToolbar').hidden=active!=='collectionProducts';$('.tenant-filters').hidden=active==='payoutProducts';$('#productCodeFilter').hidden=active!=='collectionProducts';$('.tenant-page-table').classList.toggle('product-table',isProduct());$('.tenant-page-table').classList.toggle('collection-table',active==='collectionChannels');document.querySelector('label[for=keyword]').textContent=active==='collectionChannels'?'通道名称':active==='collectionProducts'?'产品名称':'名称 / 编码';$('#keyword').placeholder=active==='collectionChannels'?'请输入通道名称':active==='collectionProducts'?'产品名称':'请输入名称或编码';$('#primaryAction').textContent=active==='payoutProducts'?'添加类型':isProduct()?`新增${direction()}产品`:`新增${direction()}通道`;
+  $('#bulkButton').hidden=active!=='collectionChannels';$('#bulkButton').disabled=!selected.size;$('#selectionCount').textContent=active==='collectionChannels'?`已选 ${selectedChannels.size} 个通道 / ${selected.size} 个编码`:'';
+  $('#statusFilter').hidden=active==='providers';document.querySelector('label[for="statusFilter"]').hidden=active==='providers';
+  const statuses=active==='providers'?[]:['开启','关闭'];const prev=$('#statusFilter').value;$('#statusFilter').innerHTML=option('','全部状态',!prev)+statuses.map(s=>option(s,s,prev===s)).join('');
+  let heads;
+  if(active==='providers')heads=['通道商','通道商编号','最近变更'];
+  else if(active==='collectionProducts')heads=['<input type="checkbox" data-select-products aria-label="全选当前列表产品">','名称','产品编码','产品状态','今天成交额','绑定商户数','绑定通道数','操作'];else if(active==='payoutProducts')heads=['类型名称','类型编码','币种','产品类型','操作'];
+  else if(direction()==='代收')heads=['<input type="checkbox" data-select-channels aria-label="全选当前列表通道">','通道名称','今日成功','余额','预付','剩余预付','USDT余额','USDT预付','USDT剩余预付','状态','<label><input type="checkbox" data-select-all aria-label="全选当前列表通道编码"> 对接编码</label>','今日成交','费率','收款规则','类型状态','操作'];
+  else heads=['通道名称','通道商','币种','主产品','三方编码','状态','通道费率 / 单笔费','限额','操作'];
+  $('#tableHead').innerHTML='<tr>'+heads.map(h=>`<th>${h}</th>`).join('')+'</tr>';
+  $('#tableBody').innerHTML=rows.map((r,idx)=>{
+   if(active==='providers')return `<tr><td><strong>${esc(r.name)}</strong></td><td>${esc(r.providerId)}</td><td>${esc(r.updatedAt)}</td></tr>`;
+   if(isProduct())return renderProductRow(r);
+   const ops=button('channel','编辑通道',r.id)+button('toggleChannel',r.status==='开启'?'关闭':'开启',r.id);
+   if(direction()==='代付')return `<tr><td><strong>${esc(r.name)}</strong><div class="muted">${esc(r.id)}</div></td><td>${esc(r.vendor)}</td><td>${esc(r.asset)}</td><td>${data.products.filter(p=>p.channelIds.includes(r.id)).map(p=>esc(p.name)).join('<br>')||'无产品层'}</td><td>${esc(r.thirdCode)}</td><td>${badge(r.status)}</td><td>${esc(r.rate)} / ${esc(r.fee)}</td><td>${esc(r.limit)}</td><td>${ops}${button('connection','开发配置',r.id)}${button('test','测试',r.id)}</td></tr>`;
+   return renderCollectionRow(r,idx);
+  }).join('')||`<tr><td colspan="${heads.length}" class="muted">暂无符合条件的数据</td></tr>`;
+  $('#pagination').innerHTML=active==='providers'?'':`<button class="btn" data-action="pagePrev" ${page===1?'disabled':''}>上一页</button><span> ${page} / ${Math.max(1,Math.ceil(allRows.length/pageSize))} </span><button class="btn" data-action="pageNext" ${page*pageSize>=allRows.length?'disabled':''}>下一页</button><select id="pageSize" aria-label="每页条数">${[10,20,50,100].map(n=>option(n,n+'条/页',pageSize===n)).join('')}</select>`;
+  $('#recordCount').textContent=`共 ${allRows.length} 条`;$('#dataTable').style.minWidth=active==='collectionChannels'?'1950px':active==='payoutChannels'?'1320px':'800px';
+  document.querySelectorAll('[data-action]').forEach(b=>{if(['close','refresh','search','reset'].includes(b.dataset.action))return;b.hidden=b.hidden||!permitted.has(permission(b.dataset.action));});
+ }
+ function openChannel(id){if(direction()==='代收')return openCollectionChannel(id);const r=channel(id),dir=r?.direction||direction();context={kind:'channel',id,direction:dir};
+  const allowed=model.authorizedProviders(tenantId);if(!r&&!allowed.length){toast('暂无已授权通道商，请联系平台授权');return;}
+  const providers=[...allowed];if(r&&!providers.some(p=>p.id===r.providerId))providers.push(provider(r.providerId));
+  modal(r?'编辑通道':`新增${dir}通道`,`<div class="form-grid">${select('payoutPrimaryProduct','主产品',option('','无产品层',!r||!data.products.some(p=>p.channelIds.includes(r.id)))+data.products.filter(p=>p.direction==='代付').map(p=>option(p.id,p.name+' · '+p.currency,!!r&&p.channelIds.includes(r.id))).join(''))}${field('channelName','通道名称',r?.name||'')}${select('channelProvider','通道商',providers.filter(Boolean).map(p=>option(p.id,p.name,r?.providerId===p.id)).join(''))}${select('channelCurrency','币种',['CNY','USDT'].map(c=>option(c,c,(r?.asset||'CNY')===c)).join(''))}${select('channelStatus','状态',['开启','关闭'].map(c=>option(c,c,(r?.status||'开启')===c)).join(''))}${field('channelCode','对接编码',r?.thirdCode||'','text',r&&dir==='代收'?'readonly':'')}${field('channelRate','通道费率',r?.rate||'0.0000','number','min="0" step="0.0001"')}${field('channelFee','单笔费用',r?.fee||'0.0000','number','min="0" step="0.0001"')}${field('channelMin','最小金额',r?.limit?.split(/\s*-\s*/)[0]?.replaceAll(',','')||'0','number','min="0"')}${field('channelMax','最大金额',r?.limit?.split(/\s*-\s*/)[1]?.replaceAll(',','')||'10000','number','min="0"')}</div>${!r?'<h3 style="margin-top:18px">对接信息</h3><div class="form-grid">'+connectionFields.map(([key,label])=>field('create-'+key,label,'',key==='secret'||key==='privateKey'?'password':'text','autocomplete="off"')).join('')+'</div>':''}<p class="muted">对接信息按本租户通道保存；可在${dir==='代付'?'开发配置':'编码的单独对接信息'}中维护商户号、密钥及接口地址。</p>`, 'saveChannel');
+ }
+ function saveChannel(){const r=channel(context.id),pid=$('#channelProvider').value,name=$('#channelName').value.trim(),code=$('#channelCode').value.trim(),min=Number($('#channelMin').value),max=Number($('#channelMax').value),rate=Number($('#channelRate').value),fee=Number($('#channelFee').value);
+  if(!name||!code)return error('请填写通道名称和对接编码');if(!model.authorizedProviders(tenantId).some(p=>p.id===pid))return error('所选通道商当前未授权，请重新选择');if(![min,max,rate,fee].every(Number.isFinite)||min<0||max<=0||max<min||rate<0||fee<0)return error('请填写有效费率、费用和金额范围');
+  if(data.channels.some(c=>c.id!==r?.id&&c.name===name))return error('当前租户已有同名通道');const currency=$('#channelCurrency').value;
+  const primaryProduct=product($('#payoutPrimaryProduct').value);if(primaryProduct&&primaryProduct.currency!==currency)return error('主产品币种与通道币种不一致，请重新选择');
+  const target=r||{id:`TCH-${tenantId}-${Date.now()}`,tenantId,direction:context.direction,version:0,collectionTypes:[]};
+  Object.assign(target,{name,providerId:pid,vendor:provider(pid).name,asset:currency,status:$('#channelStatus').value,thirdCode:code,rate:String(rate),fee:String(fee),limit:`${min} - ${max}`,modified:true,version:target.version+1});
+  if(!r&&target.direction==='代收'&&!target.collectionTypes.length)target.collectionTypes.push({id:`${target.id}-CODE-1`,code,name,rate:String(rate),rule:target.limit,status:'开启'});
+  if(!r){
+    const config=Object.fromEntries(connectionFields.map(([key])=>[key,$('#create-'+key).value.trim()]));
+    for(const key of ['orderUrl','queryUrl'])if(config[key]){try{const u=new URL(config[key]);if(!['http:','https:'].includes(u.protocol))throw 0;}catch{return error('请输入有效的下单、查询地址');}}
+    data.channels.push(target);
+    if(target.direction==='代收')data.codeConfigs.set(target.collectionTypes[0].id,config);else data.connectionConfigs.set(target.id,config);
+  }for(const p of data.products.filter(p=>p.direction==='代付'))p.channelIds=p.channelIds.filter(id=>id!==target.id);if(primaryProduct)primaryProduct.channelIds.push(target.id);target.productId=primaryProduct?.id||'';finish('通道已保存',target.id);
+ }
+ function openProduct(id){return openReplicaProduct(id);const p=product(id),dir=p?.direction||direction();context={kind:'product',id,direction:dir};const curr=p?.currency||'CNY';
+  modal(p?'编辑产品':`新增${dir}产品`,`<div class="form-grid">${field('productName','产品名称',p?.name||'')}${field('productCode','产品编码',p?.productNo||'')}${select('productCurrency','币种',['CNY','USDT'].map(c=>option(c,c,c===curr)).join(''))}${select('productStatus','状态',['开启','关闭'].map(c=>option(c,c,(p?.status||'开启')===c)).join(''))}</div><div class="field" style="margin-top:16px"><label>关联通道</label><div id="productChannels"></div><p class="muted">仅选择本租户同方向、同币种通道。</p></div>`, 'saveProduct');renderBindings(p);
+ }
+ function renderBindings(p=product(context.id)){const curr=$('#productCurrency').value;$('#productChannels').innerHTML=data.channels.filter(c=>c.direction===context.direction&&c.asset===curr).map(c=>`<label class="tenant-provider-option"><input type="checkbox" data-bind-channel="${esc(c.id)}" ${p?.channelIds.includes(c.id)?'checked':''}> ${esc(c.name)}</label>`).join('')||'<span class="muted">当前币种暂无通道</span>';}
+ function saveProduct(){const p=product(context.id),name=$('#productName').value.trim(),code=$('#productCode').value.trim(),currency=$('#productCurrency').value,ids=[...document.querySelectorAll('[data-bind-channel]:checked')].map(b=>b.dataset.bindChannel);
+  if(!name||!code)return error('请填写产品名称和产品编码');if(data.products.some(r=>r.id!==p?.id&&r.direction===context.direction&&r.productNo===code))return error('当前业务方向已有相同产品编码');
+  if(ids.some(id=>!channel(id)||channel(id).direction!==context.direction||channel(id).asset!==currency))return error('通道关联已变化，请重新选择');
+  const oldChannelIds=[...(p?.channelIds||[])];
+  const target=p||{id:`TP-${tenantId}-${Date.now()}`,tenantId,direction:context.direction};Object.assign(target,{name,productNo:code,currency,status:$('#productStatus').value,channelIds:ids});if(!p)data.products.push(target);
+  for(const c of data.channels){if(ids.includes(c.id)||oldChannelIds.includes(c.id)){c.modified=true;c.version++;}}finish('产品已保存',target.id);
+ }
+ function openCode(id,codeId){if(direction()==='代收')return openCollectionCode(id,codeId);const r=channel(id),c=r?.collectionTypes.find(c=>c.id===codeId);context={kind:'code',id,codeId};if(!r)return;
+  const [min,max]=(c?.rule||r.limit||'0 - 10000').split(/\s*-\s*/).map(x=>x.replaceAll(',',''));
+  modal(c?'修改通道编码':'新增通道编码',`<div class="form-grid">${field('codeValue','通道编码',c?.code||'')}${field('codeName','编码备注',c?.name||'')}${field('codeRate','费率',c?.rate||r.rate,'number','min="0" step="0.0001"')}${field('codeMin','最小金额',min,'number','min="0"')}${field('codeMax','最大金额',max,'number','min="0"')}${select('codeStatus','状态',['开启','关闭'].map(s=>option(s,s,(c?.status||'开启')===s)).join(''))}</div>`,'saveCode');
+ }
+ function saveCode(){const r=channel(context.id),c=r?.collectionTypes.find(c=>c.id===context.codeId),code=$('#codeValue').value.trim(),min=Number($('#codeMin').value),max=Number($('#codeMax').value),rate=Number($('#codeRate').value);
+  if(!r)return error('通道已变化');if(!code)return error('请填写通道编码');if(r.collectionTypes.some(t=>t.id!==c?.id&&t.code===code))return error('当前通道已有相同编码');if(![min,max,rate].every(Number.isFinite)||min<0||max<=0||max<min||rate<0)return error('请填写有效费率和金额范围');
+  const target=c||{id:`${r.id}-CODE-${Date.now()}`};Object.assign(target,{code,name:$('#codeName').value.trim(),rate:String(rate),rule:`${min} - ${max}`,status:$('#codeStatus').value});if(!c)r.collectionTypes.push(target);r.modified=true;r.version++;finish('通道编码已保存',target.id);
+ }
+ const connectionFields=[['merchantNo','商户号'],['secret','密钥'],['orderUrl','下单地址'],['queryUrl','查询地址'],['callbackIps','回调IP'],['publicKey','公钥'],['privateKey','私钥']];
+ function openConnection(id,codeId){const r=channel(id),code=r?.collectionTypes?.find(c=>c.id===codeId);if(!r||(codeId&&!code))return;const key=codeId||id,store=codeId?data.codeConfigs:data.connectionConfigs,config=store.get(key)||{};context={kind:'connection',id,codeId,key};
+  modal(codeId?'单独对接信息':r.direction==='代收'?'通道对接信息':'编辑开发配置',`<p><strong>${esc(r.name)}${code?' · '+esc(code.code):''}</strong></p><div class="form-grid">${select('conn-template','对接模板',option('','请选择对接模板',!config.template)+option(r.providerId,r.vendor,config.template===r.providerId))}${connectionFields.map(([key,label])=>field(`conn-${key}`,label,config[key]||'',key==='secret'||key==='privateKey'?'password':'text','autocomplete="off"')).join('')}</div>`,'saveConnection');
+ }
+ function saveConnection(){const r=channel(context.id),code=r?.collectionTypes?.find(c=>c.id===context.codeId);if(!r||(context.codeId&&!code))return error('通道或编码已变化');const config=Object.fromEntries(connectionFields.map(([key])=>[key,$(`#conn-${key}`).value.trim()]));config.template=$('#conn-template').value;
+  for(const key of ['orderUrl','queryUrl'])if(config[key]){try{const u=new URL(config[key]);if(!['http:','https:'].includes(u.protocol))throw 0;}catch{return error('请输入有效的下单、查询地址');}}
+  (context.codeId?data.codeConfigs:data.connectionConfigs).set(context.key,config);finish('对接信息已保存',context.codeId||r.id);
+ }
+ function openTest(id,codeId){const r=channel(id),code=r?.collectionTypes?.find(c=>c.id===codeId);if(!r)return;context={kind:'test',id,codeId};modal(codeId?'出码测试':'通道测试',`<div class="form-grid">${field('testName','通道名称',r.name,'text','readonly')}${field('testCode','通道方编码',code?.thirdCode||code?.code||r.thirdCode,'text','readonly')}${field('testAmount','支付金额','','number','min="0.01" step="0.01" placeholder="请输入支付金额"')}${textarea('testResult','支付地址','','readonly placeholder="支付地址"')}</div>`,'runTest','发起请求');}
+ function runTest(){const amount=Number($('#testAmount').value);if(!Number.isFinite(amount)||amount<=0)return error('请输入大于 0 的测试金额');$('#modalFeedback').hidden=true;const r=channel(context.id);if(r.status!=='开启')return error('通道已关闭，不能发起测试');const code=r.collectionTypes?.find(c=>c.id===context.codeId);if(code&&code.status==='关闭')return error('子通道已关闭，不能发起测试');if(code){const bounds=code.rule.replaceAll(',','').split(/\s*-\s*/).map(Number);if(amount<bounds[0]||amount>bounds[1])return error('支付金额不在子通道收款范围内');}$('#testResult').value=context.codeId?`演示支付地址：https://pay.example.test/${encodeURIComponent(r.id)}?amount=${amount.toFixed(2)}`:'测试已完成：通道演示连接正常';}
+ function confirmCodes(targets){context={kind:'deleteCodes',targets};modal('确认删除通道编码',`<p>删除以下 ${targets.length} 个编码，通道及未选编码保留。</p><ul>${targets.map(t=>`<li>${esc(channel(t.channelId)?.name)} · ${esc(t.code)}</li>`).join('')}</ul>`,'confirmDeleteCodes','确认删除');}
+ function exportRows(){const headers=active==='providers'?['通道商','通道商编号','最近变更']:isProduct()?['产品名称','产品编码','币种','状态']:['通道名称','通道商','币种','状态'];const vals=list().map(r=>active==='providers'?[r.name,r.providerId,r.updatedAt]:isProduct()?[r.name,r.productNo,r.currency,r.status]:[r.name,r.vendor,r.asset,r.status]);const cell=v=>`"${String(v??'').replace(/^[=+@-]/,"'$&").replaceAll('"','""')}"`;const blob=new Blob(['\ufeff'+[headers,...vals].map(r=>r.map(cell).join(',')).join('\n')],{type:'text/csv;charset=utf-8'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='汇盛租户通道.csv';a.click();URL.revokeObjectURL(url);model.log('导出通道资料',active,tenantId);toast('已导出当前筛选结果');}
+ const money=v=>Number(String(v||0).replaceAll(',',''))||0, fmt=v=>money(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+ const textarea=(id,label,value='',extra='')=>`<div class="field full"><label for="${id}">${label}</label><textarea id="${id}" rows="3" ${extra}>${esc(value)}</textarea></div>`;
+ function more(label,actions){return `<details class="action-more"><summary aria-label="${esc(label)} 更多">更多⌄</summary><span class="action-menu">${actions}</span></details>`;}
+ function switchButton(action,r,id,extra=''){return `<button class="collection-switch ${r.status==='开启'?'on':''}" role="switch" aria-checked="${r.status==='开启'}" aria-label="${esc(r.name||r.code)} ${action==='toggleCode'?'类型状态':'状态'}" data-action="${action}" data-id="${esc(id)}" ${extra}><span></span></button>`;}
+ function renderCollectionRow(r,idx){
+  const codes=r.collectionTypes||[],span=Math.max(codes.length,1);
+  const fund=(key,actions)=>`<td rowspan="${span}" class="fund-cell"><div>${fmt(r[key])}</div><div class="fund-actions">${actions.map(([mode,label])=>button('money',label,r.id,`data-key="${key}" data-mode="${mode}"`)).join('')}</div></td>`;
+  const parent=`<td rowspan="${span}" class="channel-select"><input type="checkbox" data-channel-select="${esc(r.id)}" aria-label="选择通道 ${esc(r.name)}" ${selectedChannels.has(r.id)?'checked':''}></td><td rowspan="${span}" class="parent-channel"><div class="channel-actions">${button('channel','编辑',r.id)}${more(r.name,button('code','新增通道编码',r.id)+button('connection','通道对接信息',r.id)+button('mapping','参数映射配置',r.id)+button('copyChannel','复制通道',r.id)+button('deleteChannel','删除通道',r.id))}</div><strong>${esc(r.name)}</strong><div class="provider-meta">${esc(r.vendor)}</div></td><td rowspan="${span}">${esc(r.todaySuccess||'0')}</td>${fund('cnyBalance',[['adjust','调整'],['issue','下发']])}${fund('cnyPrepaid',[['adjust','调整']])}${fund('cnyRemainingPrepaid',[['settle','结算']])}${fund('usdtBalance',[['adjust','调整'],['issue','下发']])}${fund('usdtPrepaid',[['adjust','调整']])}${fund('usdtRemainingPrepaid',[['settle','结算']])}<td rowspan="${span}">${switchButton('toggleChannel',r,r.id)}</td>`;
+  return (codes.length?codes:[null]).map((c,i)=>`<tr class="${idx%2?'collection-alt':''} ${i===0?'channel-start':''}">${i===0?parent:''}${c?`<td class="code-cell"><label><input type="checkbox" data-code-select="${esc(c.id)}" aria-label="选择编码 ${esc(c.code)}" ${selected.has(c.id)?'checked':''}> <span class="code-number">${esc(c.code)}</span></label><span class="code-remark">${esc(c.name)}</span></td><td>${esc(c.todayAmount||'0')}</td><td>${esc(c.rate||'0')}</td><td>${esc(c.rule||'1-10000')}</td><td>${switchButton('toggleCode',c,r.id,`data-code="${esc(c.id)}"`)}</td><td class="code-ops">${more(c.code,button('code','修改通道编码',r.id,`data-code="${esc(c.id)}"`)+button('test','出码测试',r.id,`data-code="${esc(c.id)}"`)+button('connection','单独对接信息',r.id,`data-code="${esc(c.id)}"`)+button('deleteCode','删除通道编码',r.id,`data-code="${esc(c.id)}"`))}</td>`:'<td colspan="6" class="muted">暂无子通道编码，请在通道“更多”中新增通道编码。</td>'}</tr>`).join('');
+ }
+ function openCollectionChannel(id){const r=channel(id),allowed=model.authorizedProviders(tenantId);if(!r&&!allowed.length)return toast('暂无已授权通道商，请联系平台授权');context={kind:'collectionChannel',id};const opts=[...allowed];if(r&&!opts.some(p=>p.id===r.providerId))opts.push(provider(r.providerId));
+  modal(r?'编辑通道':'新增通道',`<div class="form-grid">${field('ccName','通道名称',r?.name||'','text','placeholder="请输入通道名称" required')}${select('ccProvider','通道商',opts.filter(Boolean).map(p=>option(p.id,p.name,r?.providerId===p.id)).join(''))}${field('ccAgent','代理',r?.agentId||'','text','placeholder="请输入代理ID，没有可以不填"')}${field('ccAgentRate','默认代理费率',r?.agentRate||'','number','min="0" step="0.0001" placeholder="请输入代理费率，没有可以不填"')}<div class="field full"><label class="inline-check"><input id="ccWarning" type="checkbox" ${r?.prepaidWarning?'checked':''}> 剩余预付预警</label>${field('ccWarningValue','预警阈值',String(r?.prepaidWarningValue||'0.00').replaceAll(',',''),'number','step="0.01" min="0"')}</div><div class="field full"><label class="inline-check"><input id="ccAutoStop" type="checkbox" ${r?.autoStop?'checked':''}> 自动切停通道</label>${field('ccStopValue','切停阈值',String(r?.autoStopValue||'0.00').replaceAll(',',''),'number','step="0.01" min="0"')}</div></div><p class="muted">新增通道后，在通道“更多”中新增子通道编码并维护对接信息。</p>`,'saveCollectionChannel');syncThresholds();
+ }
+ function syncThresholds(){if($('#ccWarningValue'))$('#ccWarningValue').disabled=!$('#ccWarning').checked;if($('#ccStopValue'))$('#ccStopValue').disabled=!$('#ccAutoStop').checked;}
+ function saveCollectionChannel(){const r=channel(context.id),name=$('#ccName').value.trim(),pid=$('#ccProvider').value,rate=$('#ccAgentRate').value.trim(),warning=Number($('#ccWarningValue').value),stop=Number($('#ccStopValue').value);
+  if(!name)return error('请填写通道名称');if(data.channels.some(c=>c.id!==r?.id&&c.name===name))return error('当前租户已有同名通道');if(!model.authorizedProviders(tenantId).some(p=>p.id===pid))return error('请选择当前已授权通道商');if((rate&&(!Number.isFinite(Number(rate))||Number(rate)<0))||!Number.isFinite(warning)||!Number.isFinite(stop)||warning<0||stop<0)return error('请填写有效费率和阈值');
+  const target=r||{id:`TCH-${tenantId}-${Date.now()}`,tenantId,direction:'代收',asset:'CNY',status:'开启',thirdCode:'',rate:'0',fee:'0',limit:'1 - 10000',version:0,collectionTypes:[],todaySuccess:'0',cnyBalance:'0.00',cnyPrepaid:'0.00',cnyRemainingPrepaid:'0.00',usdtBalance:'0.00',usdtPrepaid:'0.00',usdtRemainingPrepaid:'0.00'};
+  Object.assign(target,{name,providerId:pid,vendor:provider(pid).name,agentId:$('#ccAgent').value.trim(),agentRate:rate,prepaidWarning:$('#ccWarning').checked,prepaidWarningValue:String(warning),autoStop:$('#ccAutoStop').checked,autoStopValue:String(stop),modified:true,version:target.version+1});if(!r)data.channels.push(target);finish('通道已保存',target.id);
+ }
+ function openCollectionCode(id,codeId){const r=channel(id),c=r?.collectionTypes.find(x=>x.id===codeId);if(!r)return;context={kind:'collectionCode',id,codeId};
+  modal(c?'修改通道编码':'新增通道编码',`<p class="muted">所属通道：${esc(r.name)}</p><div class="form-grid">${field('childName','* 备注',c?.name||'','text','placeholder="请输入备注" required')}${field('childRate','费率',c?.rate||'0','number','min="0" step="0.0001" placeholder="请输入费率"')}<p class="muted field full">使用小数，0.01代表1%</p>${field('childRange','金额范围',c?.rule||'1-10000','text','placeholder="请输入金额范围，用-隔开"')}${field('childCode','* 通道编码',c?.code||'','text','placeholder="请输入通道编码" required')}${!c?field('childThirdCode','三方通道编码','','text','placeholder="请输入三方通道编码"')+field('childAgentRate','代理费率','','number','min="0" step="0.0001" placeholder="请输入代理费率"'):''}</div>`,'saveCollectionCode');
+ }
+ function saveCollectionCode(){const r=channel(context.id),c=r?.collectionTypes.find(x=>x.id===context.codeId),name=$('#childName').value.trim(),code=$('#childCode').value.trim(),range=$('#childRange').value.trim(),bounds=range.replaceAll(',','').split(/\s*-\s*/),rate=Number($('#childRate').value),agentRate=$('#childAgentRate')?.value||'';
+  if(!r)return error('所属通道已变化');if(!name||!code)return error('请填写备注和通道编码');if(bounds.length!==2||!bounds.every(v=>v!==''&&Number.isFinite(Number(v)))||Number(bounds[0])<0||Number(bounds[1])<=0||Number(bounds[1])<Number(bounds[0]))return error('金额范围需为有效的最小金额-最大金额');if(!Number.isFinite(rate)||rate<0||(agentRate&&(!Number.isFinite(Number(agentRate))||Number(agentRate)<0)))return error('请填写有效费率');if(r.collectionTypes.some(x=>x.id!==c?.id&&x.code===code))return error('该通道已有相同编码');
+  const target=c||{id:`${r.id}-CODE-${Date.now()}`,status:'开启',todayAmount:'0'};Object.assign(target,{name,code,rate:String(rate),rule:range});if(!c){target.thirdCode=$('#childThirdCode').value.trim();target.agentRate=agentRate;r.collectionTypes.push(target);}r.modified=true;r.version++;finish('子通道编码已保存',target.id);
+ }
+ function openMoney(id,key,mode){const r=channel(id);if(!r)return;const currency=key.startsWith('usdt')?'USDT':'CNY',label=key.endsWith('Prepaid')?'预付':'余额',title=mode==='adjust'?'调整':mode==='issue'?'下发':'结算';context={kind:'money',id,key,mode,currency};
+  if(mode==='settle')return modal('结算',`<p>确定要结算通道【${esc(r.name)}】的${currency==='CNY'?'人民币':'USDT'}余额吗？</p><p>当前剩余预付：${fmt(r[key])}</p><p class="muted">此操作记录本地演示预览，不发生实际资金结算。</p>`,'previewMoney','确定');
+  modal(`${label}${title}`,`<div class="form-grid">${field('moneyName','通道名称',r.name,'text','readonly')}${field('moneyCurrent',`当前${label}`,fmt(r[key]),'text','readonly')}${field('moneyAmount',`${title}金额（${currency==='CNY'?'元':'USDT'}）`,'','number',`step="${mode==='issue'?'1':'0.01'}" placeholder="${mode==='adjust'?'若要减少余额，则输入负数':'请输入整数'}"`)}${mode==='adjust'?select('moneyType','调整类型',option('手动调整','手动调整',true)+option('补记','补记',false)):select('moneyTarget','通道（非必选）',option('','不选择',true)+data.channels.filter(c=>c.id!==id&&c.direction==='代收').map(c=>option(c.id,c.name,false)).join(''))}${textarea('moneyRemark','备注')}</div><p class="muted">本地演示仅预览并记录操作，不发生真实资金变动。</p><div id="moneyPreview" role="status"></div>`,'previewMoney','保存');
+ }
+ function previewMoney(){if(context.kind==='batchSettlement'){finish('一键结算演示已记录','当前租户代收通道');return;}if(context.mode!=='settle'){const n=Number($('#moneyAmount').value);if(!$('#moneyAmount').value||!Number.isFinite(n)||n===0||(context.mode==='issue'&&(n<=0||!Number.isInteger(n))))return error(context.mode==='issue'?'请输入大于0的整数':'请输入有效的非零调整金额');const after=money(channel(context.id)[context.key])+(context.mode==='issue'?-n:n);if(context.mode==='issue'&&after<0)return error('下发金额不能大于当前余额');}finish('资金操作演示已记录',`${context.id} · ${context.currency} · ${context.mode}`);}
+ function openBatch(action){const targets=data.channels.filter(c=>c.direction==='代收'&&(!selectedChannels.size||selectedChannels.has(c.id)));context={kind:'batch',action,ids:targets.map(c=>c.id)};modal(action==='batchEnable'?'全部开启':'全部关闭',`<p>将${action==='batchEnable'?'开启':'关闭'} ${targets.length} 个${selectedChannels.size?'已选':'当前租户'}代收通道。</p><ul>${targets.map(c=>`<li>${esc(c.name)}</li>`).join('')}</ul>`,'confirmBatch','确定');}
+ function confirmBatch(){for(const id of context.ids){const r=channel(id);if(r){r.status=context.action==='batchEnable'?'开启':'关闭';r.modified=true;r.version++;}}finish('通道状态批量更新','代收通道');}
+ function openBatchSettlement(){context={kind:'batchSettlement'};const rs=data.channels.filter(c=>c.direction==='代收'&&(!selectedChannels.size||selectedChannels.has(c.id)));modal('一键结算',`<p>当前租户${selectedChannels.size?'已选':'全部'}代收通道结算预览</p><table class="compact-table"><thead><tr><th>通道</th><th>CNY剩余预付</th><th>USDT剩余预付</th></tr></thead><tbody>${rs.map(r=>`<tr><td>${esc(r.name)}</td><td>${fmt(r.cnyRemainingPrepaid)}</td><td>${fmt(r.usdtRemainingPrepaid)}</td></tr>`).join('')}</tbody></table><p class="muted">确认后仅记录本地演示，不发生实际结算。</p>`,'previewMoney','确定');}
+ function openCopy(id){const r=channel(id);if(!r)return;context={kind:'copy',id};modal('复制通道',`${field('copyName','新通道名称',r.name+'（副本）')}<p>复制本通道及其子通道编码、对接信息和参数映射。</p><p class="muted">副本默认关闭，资金余额和成交数据重置为0，不复制产品关联。</p>`,'confirmCopy','复制');}
+ function confirmCopy(){const r=channel(context.id),name=$('#copyName').value.trim();if(!name)return error('请填写新通道名称');if(data.channels.some(c=>c.name===name))return error('已有同名通道');if(!model.authorizedProviders(tenantId).some(p=>p.id===r.providerId))return error('该通道商已停用授权，不能建立新通道');const copy=JSON.parse(JSON.stringify(r));copy.id=`TCH-${tenantId}-${Date.now()}`;copy.name=name;copy.status='关闭';copy.modified=true;copy.version=1;for(const k of ['cnyBalance','cnyPrepaid','cnyRemainingPrepaid','usdtBalance','usdtPrepaid','usdtRemainingPrepaid','todaySuccess','todayAmount','balance'])copy[k]='0.00';copy.collectionTypes=(r.collectionTypes||[]).map((c,i)=>{const nc={...c,id:`${copy.id}-CODE-${i+1}`,todayAmount:'0',status:'关闭'};if(data.codeConfigs.has(c.id))data.codeConfigs.set(nc.id,JSON.parse(JSON.stringify(data.codeConfigs.get(c.id))));return nc;});if(data.connectionConfigs.has(r.id))data.connectionConfigs.set(copy.id,JSON.parse(JSON.stringify(data.connectionConfigs.get(r.id))));if(data.mappingConfigs.has(r.id))data.mappingConfigs.set(copy.id,JSON.parse(JSON.stringify(data.mappingConfigs.get(r.id))));data.channels.push(copy);finish('通道已复制',copy.id);}
+ function openDeleteChannel(id){const r=channel(id);if(!r)return;context={kind:'deleteChannel',id};const linked=data.products.filter(p=>p.channelIds.includes(id));modal('删除通道',`<p>删除【${esc(r.name)}】及其 ${r.collectionTypes.length} 个子通道编码？</p>${linked.length?'<p class="modal-feedback">该通道已关联产品，请先解除产品关联后再删除。</p>':'<p>对接信息和参数映射同步删除，历史订单记录保留。</p>'}`,'confirmDeleteChannel','确认删除');}
+ function deleteChannel(){const r=channel(context.id);if(!r)return error('通道已变化');if(data.products.some(p=>p.channelIds.includes(r.id)))return error('请先解除产品关联');for(const c of r.collectionTypes)data.codeConfigs.delete(c.id);data.connectionConfigs.delete(r.id);data.mappingConfigs.delete(r.id);data.channels.splice(data.channels.indexOf(r),1);selectedChannels.delete(r.id);finish('通道已删除',r.id);}
+ const mappingSections=[['order','下单','/api/CreateOrder'],['query','查询','/api/QueryOrder'],['balance','余额查询','/api/QueryBalance'],['callback','回调','/callback/PayNotify']];
+ function mapDefaults(){return Object.fromEntries(mappingSections.map(([key,,path])=>[key,{path,format:'JSON',signed:'需要',signature:'MD5_LOWER',exclude:'sign,key',unit:'元',statusCode:'',extra:'',request:[],response:[],headers:[]}]));}
+ function openMapping(id){const r=channel(id);if(!r)return;context={kind:'mapping',id,draft:JSON.parse(JSON.stringify(data.mappingConfigs.get(id)||mapDefaults())),section:'order'};modal('参数映射配置',`<p><strong>${esc(r.name)}</strong></p><div class="mapping-tabs" id="mappingTabs"></div><div id="mappingPanel"></div>`,'saveMapping');$('#modalBackdrop').classList.add('mapping-modal');renderMapping();}
+ function renderMapping(){const key=context.section,c=context.draft[key];$('#mappingTabs').innerHTML=mappingSections.map(([id,label])=>`<button class="btn ${id===key?'primary':''}" data-action="mapSection" data-section="${id}">${label}</button>`).join('');$('#mappingPanel').innerHTML=`<h3>${mappingSections.find(s=>s[0]===key)[1]}配置</h3><div class="form-grid">${field('mapPath','请求地址',c.path)}${select('mapFormat','请求格式',['JSON','FORM'].map(v=>option(v,v,c.format===v)).join(''))}${select('mapSigned','是否需要签名',['需要','不需要'].map(v=>option(v,v,c.signed===v)).join(''))}${select('mapSignature','签名类型',['MD5_LOWER','MD5_UPPER','HMAC_SHA256','RSA_SHA256'].map(v=>option(v,v,c.signature===v)).join(''))}${field('mapExclude','签名排除字段',c.exclude)}${select('mapUnit','金额单位',['分','元'].map(v=>option(v,v,c.unit===v)).join(''))}${field('mapStatusCode','状态码',c.statusCode,'text','placeholder="SUCCESS / 0000"')}${textarea('mapExtra','扩展参数',c.extra,'placeholder="请输入JSON扩展参数"')}</div>${[['request','请求参数映射','发给通道的业务参数'],['response','返回参数映射','同步响应或查询返回的字段'],['headers','请求头映射','HTTP Header / Header 签名字段']].map(([group,title,sub])=>`<section class="mapping-group"><h3>${title}</h3><p class="muted">${sub}</p><table class="compact-table"><thead><tr><th>系统参数</th><th>通道字段名</th><th></th></tr></thead><tbody>${c[group].map((row,i)=>`<tr><td><input data-map-group="${group}" data-map-index="${i}" data-map-field="system" placeholder="自定义系统参数名" value="${esc(row.system)}"></td><td><input data-map-group="${group}" data-map-index="${i}" data-map-field="channel" placeholder="通道文档对应字段名" value="${esc(row.channel)}"></td><td>${button('mapRemove','删除','',`data-group="${group}" data-index="${i}"`)}</td></tr>`).join('')||'<tr><td colspan="3" class="muted">暂无有效映射，点击下方按钮添加自定义映射。</td></tr>'}</tbody></table><button class="btn" data-action="mapAdd" data-group="${group}">+ 添加自定义映射</button></section>`).join('')}`;}
+ function collectMapping(){if(context?.kind!=='mapping')return;const c=context.draft[context.section];for(const [prop,id] of [['path','mapPath'],['format','mapFormat'],['signed','mapSigned'],['signature','mapSignature'],['exclude','mapExclude'],['unit','mapUnit'],['statusCode','mapStatusCode'],['extra','mapExtra']])c[prop]=$('#'+id).value.trim();document.querySelectorAll('[data-map-group]').forEach(el=>{c[el.dataset.mapGroup][Number(el.dataset.mapIndex)][el.dataset.mapField]=el.value.trim();});}
+ function saveMapping(){collectMapping();for(const [,c] of Object.entries(context.draft)){if(c.extra){try{const j=JSON.parse(c.extra);if(!j||typeof j!=='object'||Array.isArray(j))throw 0;}catch{return error('扩展参数请输入JSON对象');}}for(const group of ['request','response','headers']){if(c[group].some(row=>!row.system||!row.channel))return error('请补全系统参数与通道字段名');if(new Set(c[group].map(row=>row.system)).size!==c[group].length)return error('同一分组不能重复系统参数');}}const r=channel(context.id);data.mappingConfigs.set(r.id,JSON.parse(JSON.stringify(context.draft)));r.modified=true;r.version++;finish('参数映射配置已保存',r.id);}
+ function collectionAction(a,id,cid,b){
+  if(a==='saveCollectionChannel')saveCollectionChannel();else if(a==='saveCollectionCode')saveCollectionCode();else if(a==='money')openMoney(id,b.dataset.key,b.dataset.mode);else if(a==='previewMoney')previewMoney();else if(['batchEnable','batchDisable'].includes(a))openBatch(a);else if(a==='confirmBatch')confirmBatch();else if(a==='batchSettlement')openBatchSettlement();else if(a==='copyChannel')openCopy(id);else if(a==='confirmCopy')confirmCopy();else if(a==='deleteChannel')openDeleteChannel(id);else if(a==='confirmDeleteChannel')deleteChannel();else if(a==='mapping')openMapping(id);else if(a==='saveMapping')saveMapping();else if(a==='mapSection'){collectMapping();context.section=b.dataset.section;renderMapping();}else if(a==='mapAdd'){collectMapping();context.draft[context.section][b.dataset.group].push({system:'',channel:''});renderMapping();}else if(a==='mapRemove'){collectMapping();context.draft[context.section][b.dataset.group].splice(Number(b.dataset.index),1);renderMapping();}else if(a==='toggleCode'){const r=channel(id),c=r.collectionTypes.find(c=>c.id===cid);context={kind:'toggleCode',id,codeId:cid};modal('确认类型状态变更',`<p>${esc(r.name)} · ${esc(c.code)}：${c.status==='开启'?'关闭':'开启'}</p>`,'confirmToggleCode','确定');}else if(a==='confirmToggleCode'){const r=channel(context.id),c=r.collectionTypes.find(c=>c.id===context.codeId);c.status=c.status==='开启'?'关闭':'开启';r.modified=true;r.version++;finish('子通道状态已更新',c.id);}else return false;return true;
+ }
+
+ const demoMerchants=[{id:'MCH-2031',name:'星河游戏'},{id:'DEMO-MCH-002',name:'远航商城'},{id:'DEMO-MCH-003',name:'青禾数字'}];
+ function renderProductRow(p){if(p.direction==='代付')return `<tr><td>${esc(p.name)}</td><td>${esc(p.productNo)}</td><td>${esc(p.currency)}</td><td>${esc(p.productType||'1')}</td><td>${button('product','编辑',p.id)}${button('deleteProduct','删除',p.id)}</td></tr>`;
+  return `<tr><td><input type="checkbox" data-product-select="${esc(p.id)}" aria-label="选择产品 ${esc(p.name)}" ${selectedProducts.has(p.id)?'checked':''}></td><td>${esc(p.name)}</td><td>${esc(p.productNo)}</td><td>${switchButton('toggleProduct',p,p.id)}</td><td>${esc(p.todayAmount||'0.00')}</td><td>${Object.values(p.merchantBindings||{}).filter(v=>v.bound).length}</td><td>${p.codeBindings?Object.values(p.codeBindings).filter(v=>v.bound).length:data.channels.filter(c=>p.channelIds.includes(c.id)).reduce((n,c)=>n+(c.collectionTypes||[]).length,0)}</td><td>${button('product','编辑',p.id)}${button('bindCodes','绑定通道',p.id)}${button('bindMerchants','绑定商户',p.id)}${button('deleteProduct','删除',p.id)}</td></tr>`;
+ }
+ function openReplicaProduct(id){const p=product(id),dir=p?.direction||direction();context={kind:'replicaProduct',id,direction:dir};const payout=dir==='代付';
+  modal(payout?(p?'编辑代付类型':'添加代付类型'):(p?'编辑产品':'新增产品'),`<div class="form-grid">${field('rpName',payout?'* 类型名称':'* 产品名称',p?.name||'','text',payout?'maxlength="20" placeholder="请输入类型名称" required':'placeholder="名称，示例值：支付" required')}${field('rpCode',payout?'* 通道编码':'* 产品编码',p?.productNo||'','text',payout?`${p?'':'maxlength="15"'} placeholder="请输入通道编码" required`:'placeholder="编码，示例值：aipay" required')}${!payout?field('rpRate','默认费率',p?.defaultRate||'0.0000','number','min="0" step="0.0001"')+'<p class="field full muted">自动给商户配置默认费率，也可以在商户配置中修改费率，可以不填写。</p><div class="field full"><label>支持协议类型</label><div class="protocol-options">'+['TRC20','ERC20'].map(v=>`<label class="inline-check"><input type="checkbox" data-protocol="${v}" ${p?.protocols?.includes(v)?'checked':''}> ${v}</label>`).join('')+'</div></div>':''}${select('rpCurrency',payout?'* 币种':'币种',(!payout?option('','请选择',!p):'')+['CNY','USDT'].map(v=>option(v,v,(p?.currency||(payout?'CNY':''))===v)).join(''))}</div>`,'saveReplicaProduct',payout?'提交保存':'保存');
+ }
+ function saveReplicaProduct(){const p=product(context.id),name=$('#rpName').value.trim(),code=$('#rpCode').value.trim(),currency=$('#rpCurrency').value,rate=$('#rpRate')?.value||'0';if(!name||!code||!currency)return error('请填写名称、编码和币种');if(data.products.some(r=>r.id!==p?.id&&r.direction===context.direction&&r.productNo===code))return error('当前业务方向已有相同产品编码');if(!Number.isFinite(Number(rate))||Number(rate)<0)return error('请填写有效默认费率');if(p&&p.direction==='代付'&&p.channelIds.some(id=>channel(id)?.asset!==currency))return error('已有绑定通道币种不一致，请先解绑');const target=p||{id:`TP-${tenantId}-${Date.now()}`,tenantId,direction:context.direction,status:'开启',channelIds:[],todayAmount:'0.00',productType:'1'};Object.assign(target,{name,productNo:code,currency});if(context.direction==='代收'){target.defaultRate=rate;target.protocols=[...document.querySelectorAll('[data-protocol]:checked')].map(x=>x.dataset.protocol);}if(!p)data.products.push(target);for(const c of data.channels.filter(c=>target.channelIds.includes(c.id))){c.modified=true;c.version++;}finish('产品已保存',target.id);}
+ function bindingsFor(p){if(!p.codeBindings){p.codeBindings={};data.channels.filter(c=>c.direction==='代收').forEach(c=>(c.collectionTypes||[]).forEach(code=>{p.codeBindings[code.id]={bound:p.channelIds.includes(c.id),range:code.rule||'1-10000',weight:'1'};}));}return p.codeBindings;}
+ function syncProductChannels(p){const binds=bindingsFor(p);const old=[...p.channelIds];p.channelIds=data.channels.filter(c=>c.direction==='代收'&&c.collectionTypes.some(code=>binds[code.id]?.bound)).map(c=>c.id);for(const c of data.channels)if(old.includes(c.id)||p.channelIds.includes(c.id)){c.modified=true;c.version++;}}
+ function openBindCodes(id){const p=product(id);if(!p)return;bindingsFor(p);context={kind:'bindCodes',id};modal('绑定通道',`<p>${esc(p.name)} · ${esc(p.currency)}</p><div class="binding-filters">${select('bindingChannel','通道',option('','全部通道',true)+data.channels.filter(c=>c.direction==='代收').map(c=>option(c.id,c.name,false)).join(''))}${field('bindingCode','通道编码','','text','placeholder="通道编码"')}<button class="btn primary" data-action="bindingSearch">搜索</button></div><div class="binding-actions"><button class="btn" data-action="bindAllCodes">列表中全部绑定</button><button class="btn" data-action="unbindAllCodes">列表中全部解绑</button></div><div class="binding-table" id="bindingTable"></div>`,'close','关闭');$('#modalFoot').innerHTML='<button class="btn" data-action="close">关闭</button>';$('#modalBackdrop').classList.add('mapping-modal');renderCodeBindings();}
+ function availableBindings(){const p=product(context.id),cid=$('#bindingChannel').value,q=$('#bindingCode').value.trim().toLowerCase();return data.channels.filter(c=>c.direction==='代收'&&(!cid||c.id===cid)).flatMap(c=>c.collectionTypes.filter(code=>!q||[code.code,code.name].join(' ').toLowerCase().includes(q)).map(code=>({channel:c,code})));}
+ function renderCodeBindings(){const p=product(context.id),binds=bindingsFor(p),rs=availableBindings();$('#bindingTable').innerHTML=`<table class="compact-table"><thead><tr><th>通道名称</th><th>通道编码备注</th><th>通道编码</th><th>通道方费率</th><th>金额范围（双击修改）</th><th>权重（双击修改）</th><th>配置</th></tr></thead><tbody>${rs.map(({channel:r,code:c})=>{const config=binds[c.id]||{bound:false,range:c.rule||'1-10000',weight:'1'};return `<tr><td>${esc(r.name)}<div class="muted">${r.status==='开启'?'启用':'停用'}</div></td><td>${esc(c.name)}<div class="muted">${c.status==='开启'?'启用':'停用'}</div></td><td>${esc(c.code)}</td><td>${esc(c.rate)}</td><td><button class="editable-value" data-binding-edit="range" data-code="${esc(c.id)}">${esc(config.range)}</button></td><td><button class="editable-value" data-binding-edit="weight" data-code="${esc(c.id)}">${esc(config.weight)}</button></td><td><input type="checkbox" role="switch" data-bind-code="${esc(c.id)}" aria-label="绑定 ${esc(r.name)} ${esc(c.code)}" ${config.bound?'checked':''}></td></tr>`;}).join('')||'<tr><td colspan="7" class="muted">暂无可绑定子通道</td></tr>'}</tbody></table><p class="muted">共 ${rs.length} 条 · 配置即时保存到当前租户产品</p>`;}
+ function setCodeBinding(cid,bound){const p=product(context.id),code=data.channels.flatMap(c=>c.collectionTypes||[]).find(c=>c.id===cid);if(!code)return;bindingsFor(p)[cid]||={range:code.rule||'1-10000',weight:'1'};p.codeBindings[cid].bound=bound;syncProductChannels(p);model.log(bound?'绑定产品通道':'解绑产品通道',`${p.id} · ${cid}`,tenantId);renderCodeBindings();}
+ function openBindingEdit(cid,prop){const p=product(context.id),c=data.channels.flatMap(c=>c.collectionTypes||[]).find(c=>c.id===cid);const config=bindingsFor(p)[cid]||{bound:false,range:c.rule||'1-10000',weight:'1'};context={kind:'bindingEdit',id:p.id,codeId:cid,prop};modal(prop==='range'?'修改金额范围':'修改权重',field('bindingValue',prop==='range'?'金额范围':'权重',config[prop],prop==='range'?'text':'number',prop==='range'?'placeholder="最小金额-最大金额"':'min="1" max="100" step="1"'),'saveBindingEdit');}
+ function saveBindingEdit(){const value=$('#bindingValue').value.trim(),{id,codeId,prop}=context,p=product(id),code=data.channels.flatMap(c=>c.collectionTypes||[]).find(c=>c.id===codeId);if(prop==='range'){const b=value.replaceAll(',','').split(/\s*-\s*/);if(b.length!==2||b.some(v=>!v||!Number.isFinite(Number(v)))||Number(b[0])<0||Number(b[1])<Number(b[0])||Number(b[1])<=0)return error('请输入有效的最小金额-最大金额');}else if(!Number.isInteger(Number(value))||Number(value)<1||Number(value)>100)return error('权重须为1-100的整数');p.codeBindings[codeId]||={bound:false,range:code.rule||'1-10000',weight:'1'};p.codeBindings[codeId][prop]=value;model.log('更新产品通道配置',`${id} · ${codeId}`,tenantId);close();openBindCodes(id);}
+ function merchantConfigs(p){p.merchantBindings||={};return p.merchantBindings;}
+ function openBindMerchants(id){const p=product(id);merchantConfigs(p);context={kind:'bindMerchants',id};modal('绑定商户',`<p>${esc(p.name)}</p><div class="binding-filters">${field('bindingMerchant','商户名称','','text','placeholder="请输入商户名称"')}<button class="btn primary" data-action="merchantSearch">搜索</button></div><div class="binding-actions"><button class="btn" data-action="bindAllMerchants">列表中全部绑定</button><button class="btn" data-action="unbindAllMerchants">列表中全部解绑</button><button class="btn" data-action="merchantBulkRate">一键设置商户费率</button></div><div id="merchantBindingTable" class="binding-table"></div>`,'close','关闭');$('#modalFoot').innerHTML='<button class="btn" data-action="close">关闭</button>';$('#modalBackdrop').classList.add('mapping-modal');renderMerchantBindings();}
+ function visibleMerchants(){const q=$('#bindingMerchant').value.trim();return demoMerchants.filter(m=>!q||[m.name,m.id].join(' ').includes(q));}
+ function renderMerchantBindings(){const p=product(context.id),configs=merchantConfigs(p);$('#merchantBindingTable').innerHTML=`<table class="compact-table"><thead><tr><th>商户名称</th><th>商户费率（双击修改）</th><th>代理费率（双击修改）</th><th>单笔手续费（双击修改）</th><th>配置</th></tr></thead><tbody>${visibleMerchants().map(m=>{const c=configs[m.id]||{bound:false,rate:p.defaultRate||'0',agentRate:'0',fee:'0'};return `<tr><td>${esc(m.name)}</td>${['rate','agentRate','fee'].map(prop=>`<td><button class="editable-value" data-merchant-edit="${prop}" data-merchant="${m.id}">${esc(c[prop])}</button></td>`).join('')}<td><input type="checkbox" role="switch" data-bind-merchant="${m.id}" aria-label="绑定商户 ${esc(m.name)}" ${c.bound?'checked':''}></td></tr>`;}).join('')||'<tr><td colspan="5">暂无数据</td></tr>'}</tbody></table><p class="muted">当前展示虚构演示商户，配置仅保存在本租户产品中。</p>`;}
+ function merchantConfig(p,id){const configs=merchantConfigs(p);configs[id]||={bound:false,rate:p.defaultRate||'0',agentRate:'0',fee:'0'};return configs[id];}
+ function openMerchantRate(id,prop,targets){const p=product(context.id);context={kind:'merchantRate',id:p.id,merchantId:id,prop,targets};const labels={rate:'商户费率',agentRate:'代理费率',fee:'单笔手续费'};modal(targets?'一键设置商户费率':`修改${labels[prop]}`,field('merchantRateValue',targets?'费率':labels[prop],targets?'':merchantConfig(p,id)[prop],'number','min="0" step="0.0001" placeholder="请输入费率（如0.01表示1%）"'),'saveMerchantRate','确定');}
+ function saveMerchantRate(){const val=$('#merchantRateValue').value.trim();if(!val||!Number.isFinite(Number(val))||Number(val)<0)return error('请输入有效的非负数');const {id,merchantId,prop,targets}=context,p=product(id);for(const mid of targets||[merchantId])merchantConfig(p,mid)[prop||'rate']=val;model.log('更新产品商户费率',p.id,tenantId);close();openBindMerchants(id);}
+ function productAction(a,id,b){if(a==='saveReplicaProduct')saveReplicaProduct();else if(a==='bindCodes')openBindCodes(id);else if(a==='bindingSearch')renderCodeBindings();else if(a==='bindAllCodes'||a==='unbindAllCodes'){const p=product(context.id);for(const {code} of availableBindings()){bindingsFor(p)[code.id]||={range:code.rule||'1-10000',weight:'1'};p.codeBindings[code.id].bound=a==='bindAllCodes';}syncProductChannels(p);model.log(a==='bindAllCodes'?'批量绑定通道':'批量解绑通道',p.id,tenantId);renderCodeBindings();}else if(a==='saveBindingEdit')saveBindingEdit();else if(a==='bindMerchants')openBindMerchants(id);else if(a==='merchantSearch')renderMerchantBindings();else if(a==='bindAllMerchants'||a==='unbindAllMerchants'){const p=product(context.id);visibleMerchants().forEach(m=>merchantConfig(p,m.id).bound=a==='bindAllMerchants');model.log(a==='bindAllMerchants'?'批量绑定商户':'批量解绑商户',p.id,tenantId);renderMerchantBindings();}else if(a==='merchantBulkRate')openMerchantRate('', 'rate',visibleMerchants().map(m=>m.id));else if(a==='saveMerchantRate')saveMerchantRate();else if(a==='productEnable'||a==='productDisable'){const targets=data.products.filter(p=>p.direction==='代收'&&(!selectedProducts.size||selectedProducts.has(p.id)));context={kind:'productBatch',ids:targets.map(p=>p.id),status:a==='productEnable'?'开启':'关闭'};modal(a==='productEnable'?'全部开启':'全部关闭',`<p>${targets.length} 个${selectedProducts.size?'已选':'当前租户'}代收产品将${context.status}。</p>`,'confirmProductBatch','确定');}else if(a==='confirmProductBatch'){for(const id of context.ids){const p=product(id);p.status=context.status;for(const c of data.channels.filter(c=>p.channelIds.includes(c.id))){c.modified=true;c.version++;}}selectedProducts.clear();finish('产品状态已批量更新','代收产品');}else return false;return true;}
+ document.addEventListener('dblclick',e=>{const b=e.target.closest('[data-binding-edit],[data-merchant-edit]');if(!b)return;if(b.dataset.bindingEdit)openBindingEdit(b.dataset.code,b.dataset.bindingEdit);else openMerchantRate(b.dataset.merchant,b.dataset.merchantEdit);});
+
+ document.addEventListener('click',event=>{const b=event.target.closest('button');if(!b)return;const tab=b.dataset.tab;if(tab){active=tab;page=1;pageSize=active==='collectionChannels'?50:10;selected.clear();selectedChannels.clear();selectedProducts.clear();$('#productCodeKeyword').value='';$('#keyword').value='';$('#statusFilter').value='';render();const pages={providers:'channels',collectionChannels:'collection-channels',payoutChannels:'payout-channels',collectionProducts:'collection-products',payoutProducts:'payout-products'};window.parent.postMessage({type:'hs-unified-open-page',pageId:pages[tab]},'*');return;}const a=b.dataset.action,id=b.dataset.id,cid=b.dataset.code;if(!a)return;b.closest('details')?.removeAttribute('open');
+  if(!['close','refresh','search','reset'].includes(a)&&!permitted.has(permission(a)))return toast('当前账号无此操作权限');
+  if(productAction(a,id,b)||collectionAction(a,id,cid,b))return;if(a==='pagePrev'||a==='pageNext'){page+=a==='pageNext'?1:-1;selected.clear();selectedChannels.clear();selectedProducts.clear();render();return;}
+  if(a==='close')close();else if(a==='refresh'||a==='search'){page=1;render();}else if(a==='reset'){$('#keyword').value='';$('#productCodeKeyword').value='';$('#statusFilter').value='';page=1;selected.clear();selectedChannels.clear();selectedProducts.clear();render();}
+  else if(a==='primary')isProduct()?openProduct():openChannel();else if(a==='channel')openChannel(id);else if(a==='saveChannel')saveChannel();else if(a==='product')openProduct(id);else if(a==='saveProduct')saveProduct();else if(a==='code')openCode(id,cid);else if(a==='saveCode')saveCode();else if(a==='connection')openConnection(id,cid);else if(a==='saveConnection')saveConnection();else if(a==='test')openTest(id,cid);else if(a==='runTest')runTest();
+  else if(a==='toggleChannel'||a==='toggleProduct'){const r=a==='toggleChannel'?channel(id):product(id);context={kind:'toggle',id,product:a==='toggleProduct'};modal('确认状态变更',`<p>${esc(r.name)}：${r.status==='开启'?'关闭':'开启'}</p>`,'confirmToggle','确认');}
+  else if(a==='confirmToggle'){const r=context.product?product(context.id):channel(context.id);r.status=r.status==='开启'?'关闭':'开启';if(!context.product){r.modified=true;r.version++;}else{for(const c of data.channels.filter(c=>r.channelIds.includes(c.id))){c.modified=true;c.version++;}}finish('状态已更新',r.id);}
+  else if(a==='deleteCode'){const c=channel(id)?.collectionTypes.find(c=>c.id===cid);if(c)confirmCodes([{channelId:id,id:cid,code:c.code}]);}
+  else if(a==='bulkDelete')confirmCodes(data.channels.flatMap(r=>(r.collectionTypes||[]).filter(c=>selected.has(c.id)).map(c=>({channelId:r.id,id:c.id,code:c.code}))));
+  else if(a==='confirmDeleteCodes'){for(const t of context.targets){const r=channel(t.channelId);r.collectionTypes=r.collectionTypes.filter(c=>c.id!==t.id);data.codeConfigs.delete(t.id);for(const p of data.products.filter(p=>p.direction==='代收')){if(p.codeBindings){delete p.codeBindings[t.id];syncProductChannels(p);}else if(!r.collectionTypes.length)p.channelIds=p.channelIds.filter(id=>id!==r.id);}r.modified=true;r.version++;}selected.clear();finish('通道编码已删除','编码删除');}
+  else if(a==='deleteProduct'){const p=product(id);if(p.channelIds.length||Object.values(p.merchantBindings||{}).some(c=>c.bound))return toast('请先解除产品与通道、商户的关联');context={kind:'deleteProduct',id};modal('确认删除产品',`<p>删除 ${esc(p.name)}，保留历史记录。</p>`,'confirmDeleteProduct','确认删除');}
+  else if(a==='confirmDeleteProduct'){data.products.splice(data.products.findIndex(p=>p.id===context.id),1);finish('产品已删除',context.id);}else if(a==='export')exportRows();
+ });
+ document.addEventListener('change',e=>{if(e.target.id==='pageSize'){pageSize=Number(e.target.value);page=1;selected.clear();selectedChannels.clear();selectedProducts.clear();render();}if(e.target.dataset.productSelect){e.target.checked?selectedProducts.add(e.target.dataset.productSelect):selectedProducts.delete(e.target.dataset.productSelect);}if(e.target.hasAttribute('data-select-products')){list().slice((page-1)*pageSize,page*pageSize).forEach(p=>e.target.checked?selectedProducts.add(p.id):selectedProducts.delete(p.id));render();}if(e.target.dataset.bindCode)setCodeBinding(e.target.dataset.bindCode,e.target.checked);if(e.target.dataset.bindMerchant){const p=product(context.id);merchantConfig(p,e.target.dataset.bindMerchant).bound=e.target.checked;model.log(e.target.checked?'绑定产品商户':'解绑产品商户',p.id,tenantId);renderMerchantBindings();}if(e.target.id==='ccWarning'||e.target.id==='ccAutoStop')syncThresholds();if(e.target.dataset.channelSelect){e.target.checked?selectedChannels.add(e.target.dataset.channelSelect):selectedChannels.delete(e.target.dataset.channelSelect);render();}if(e.target.hasAttribute('data-select-channels')){list().slice((page-1)*pageSize,page*pageSize).forEach(r=>e.target.checked?selectedChannels.add(r.id):selectedChannels.delete(r.id));render();}if(e.target.id==='productCurrency')renderBindings();if(e.target.dataset.codeSelect){e.target.checked?selected.add(e.target.dataset.codeSelect):selected.delete(e.target.dataset.codeSelect);render();}if(e.target.hasAttribute('data-select-all')){list().slice((page-1)*pageSize,page*pageSize).forEach(r=>(r.collectionTypes||[]).forEach(c=>e.target.checked?selected.add(c.id):selected.delete(c.id)));render();}if(e.target.id==='statusFilter'){selected.clear();selectedChannels.clear();selectedProducts.clear();$('#bulkButton').disabled=true;$('#selectionCount').textContent=active==='collectionChannels'?'已选 0 个编码':'';}});
+ document.addEventListener('input',e=>{if(e.target.id==='keyword'||e.target.id==='productCodeKeyword'){selected.clear();selectedChannels.clear();selectedProducts.clear();$('#bulkButton').disabled=true;$('#selectionCount').textContent=active==='collectionChannels'?'已选 0 个编码':'';}if(e.target.id==='testAmount'&&$('#testResult'))$('#testResult').value='';});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape')close();if(e.key==='Tab'&&$('#modalBackdrop').classList.contains('show')){const nodes=[...$('#modalBackdrop').querySelectorAll('button,input,select,textarea')].filter(n=>!n.disabled&&!n.hidden);if(e.shiftKey&&document.activeElement===nodes[0]){e.preventDefault();nodes.at(-1)?.focus();}else if(!e.shiftKey&&document.activeElement===nodes.at(-1)){e.preventDefault();nodes[0]?.focus();}}});
+ $('#modalBackdrop').addEventListener('click',e=>{if(e.target===$('#modalBackdrop'))close();});
+ document.addEventListener('toggle',e=>{const d=e.target;if(!d.matches('details.action-more'))return;d.closest('tr')?.classList.toggle('action-open',d.open);if(!d.open)return;document.querySelectorAll('details.action-more[open]').forEach(other=>{if(other!==d)other.open=false;});const menu=d.querySelector('.action-menu'),box=d.getBoundingClientRect();const height=Math.min(menu.scrollHeight||220,280);menu.style.left=Math.max(8,Math.min(box.left,window.innerWidth-210))+'px';menu.style.top=(box.bottom+height>window.innerHeight?Math.max(8,box.top-height):box.bottom+6)+'px';},true);
+ document.addEventListener('click',e=>{if(!e.target.closest('details.action-more'))document.querySelectorAll('details.action-more[open]').forEach(d=>d.open=false);});
+ render();
+})();
+</script></body></html>

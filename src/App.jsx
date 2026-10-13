@@ -71,7 +71,7 @@ export default function App() {
   const onShellSearch = (value) => {
     const childDocument = frameRef.current?.contentDocument;
     const target = childDocument?.querySelector(
-      "#globalSearch, #keywordFilter, [data-page-filter='0'], input[type='search']"
+      "#globalSearch, #keywordFilter, #keyword, [data-page-filter='0'], input[type='search']"
     );
     if (!target) return;
     target.value = value;

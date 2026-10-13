@@ -549,9 +549,14 @@
       font-weight: 700;
     }
 
+    table.vendor-wide { width: 100%; min-width: 0; table-layout: fixed; }
+    table.vendor-wide th, table.vendor-wide td { position: static; width: auto; white-space: normal; }
+    table.vendor-wide th:first-child, table.vendor-wide td:first-child { width: 45%; }
+    table.vendor-wide th:nth-child(2), table.vendor-wide td:nth-child(2) { width: 20%; }
+    table.vendor-wide th:last-child, table.vendor-wide td:last-child { width: 35%; }
     .workbench {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 330px;
+      grid-template-columns: minmax(0, 1fr);
       gap: 14px;
       align-items: start;
     }
@@ -2153,6 +2158,14 @@
         min-height: var(--topbar-height);
       }
     }
+
+    #dataTable.vendor-wide { min-width: 0; width: 100%; table-layout: fixed; }
+    #dataTable.vendor-wide th, #dataTable.vendor-wide td { position: static; width: auto; white-space: normal; }
+    #dataTable.vendor-wide th:first-child, #dataTable.vendor-wide td:first-child { width: 45%; }
+    #dataTable.vendor-wide th:nth-child(2), #dataTable.vendor-wide td:nth-child(2) { width: 20%; }
+    #dataTable.vendor-wide th:last-child, #dataTable.vendor-wide td:last-child { width: 35%; }
+    .filters { grid-template-columns: minmax(180px, .6fr) minmax(260px, 1fr) auto; }
+    @media (max-width: 800px) { .filters { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -2191,7 +2204,7 @@
         <div class="top-actions">
           <label class="searchbox" for="globalSearch">
             <i data-lucide="search"></i>
-            <input id="globalSearch" type="search" placeholder="搜索通道商、通道、产品、三方编码" aria-label="全局搜索通道">
+            <input id="globalSearch" type="search" placeholder="搜索通道商名称或编号" aria-label="搜索通道商">
           </label>
           <span class="pill blue">生产环境</span>
           <span class="pill gray">平台超管</span>
@@ -2202,7 +2215,7 @@
         <div class="page-head">
           <div>
             <h1 class="page-title" id="pageTitle">平台端通道管理</h1>
-            <p class="page-subtitle" id="pageSubtitle">平台统一维护通道商、代收与代付通道、分币种钱包、产品和健康状态；代收、代付分别管理，每个具体通道只属于一个业务方向。</p>
+            <p class="page-subtitle" id="pageSubtitle">维护平台已完成接入的通道商资料，供租户授权使用。</p>
             <p class="data-freshness" id="channelDataAsOf" role="status" aria-live="polite">最近成功刷新：2026-07-18 10:12:30（UTC+8）</p>
           </div>
           <div class="page-actions">
@@ -2225,26 +2238,12 @@
               <span class="panel-meta" id="panelMeta">0 条记录</span>
             </div>
 
-            <div class="vendor-summary" id="vendorSummary">
-              <div class="summary-item"><label>通道商数量</label><strong id="vendorCount">0</strong></div>
-              <div class="summary-item"><label>代收钱包余额</label><div class="summary-wallet" id="vendorCollectionSummary"></div></div>
-              <div class="summary-item"><label>代付钱包（分币种）</label><div class="summary-wallet" id="vendorPayoutSummary"></div></div>
-            </div>
-
             <div class="channel-action-bar" id="channelActionBar" hidden></div>
 
             <div class="filters">
               <div class="field" id="filterVendorField">
                 <label for="filterVendor">通道商</label>
                 <select id="filterVendor"></select>
-              </div>
-              <div class="field" id="filterOwnershipField">
-                <label for="filterOwnership">是否自营</label>
-                <select id="filterOwnership">
-                  <option value="">全部</option>
-                  <option value="self">自营通道</option>
-                  <option value="third">第三方通道</option>
-                </select>
               </div>
               <div class="field" id="filterDirectionField">
                 <label for="filterDirection">业务方向</label>
@@ -2284,7 +2283,7 @@
               </div>
               <div class="field" id="filterKeywordField">
                 <label for="filterKeyword" id="filterKeywordLabel">关键词</label>
-                <input id="filterKeyword" type="search" placeholder="编号 / 名称 / 产品">
+                <input id="filterKeyword" type="search" placeholder="请输入通道商编号或名称">
               </div>
               <button class="btn primary" id="filterSearchButton" data-action="search"><i data-lucide="search"></i>查询</button>
               <button class="btn" id="payoutPinButton" data-action="pinEnabledPayout" hidden><i data-lucide="list-start"></i>开启置顶</button>
@@ -2304,30 +2303,7 @@
             </div>
           </section>
 
-          <aside class="rail">
-            <section class="panel">
-              <div class="panel-head">
-                <h2 class="panel-title">能力链路</h2>
-                <span class="panel-meta" id="chainScope">当前选中</span>
-              </div>
-              <div class="chain" id="chainView"></div>
-            </section>
 
-            <section class="panel">
-              <div class="panel-head">
-                <h2 class="panel-title">规则校验</h2>
-                <span class="pill green">已确认 5</span>
-              </div>
-              <div class="rule-list">
-                <div class="rule-item"><span class="rule-dot"></span><span>通道不要求产品层时，产品字段允许为空。</span></div>
-                <div class="rule-item"><span class="rule-dot"></span><span>通道商可同时经营代收与代付；每个具体通道只能选择“代收”或“代付”其中一个方向，不存在双向通道。</span></div>
-                <div class="rule-item"><span class="rule-dot"></span><span>通道进入生产使用前，必须已由后端 / 技术侧完成接入和上线确认。</span></div>
-                <div class="rule-item"><span class="rule-dot"></span><span>租户使用范围由业务开通模块授权；授权后由租户人工选择和切换。</span></div>
-                <div class="rule-item"><span class="rule-dot"></span><span>通道商代收、代付钱包与租户钱包分账；代付前同时校验同币种租户余额、通道开启状态和通道商代付钱包余额。</span></div>
-                <div class="rule-item"><span class="rule-dot"></span><span>代付接入信息通过开发配置维护；代收按三方编码提供出码测试和单独对接信息。</span></div>
-              </div>
-            </section>
-          </aside>
         </div>
       </section>
     </main>
@@ -2352,11 +2328,7 @@
     const platformChannelAuthorization = window.HSPlatformAuthRouteGuard.getAuthorizationContext();
     const platformChannelActionPermissions = new Set(platformChannelAuthorization?.actionPermissions || []);
     const modules = [
-      { key: "vendors", label: "通道商管理", icon: "building-2", action: "新增通道商", pageTitle: "平台端通道商管理", subtitle: "统一维护可同时提供代收、代付能力的通道商主体，并按业务方向和币种查看独立钱包。" },
-      { key: "collectionChannels", label: "代收通道管理", icon: "arrow-down-left", action: "新增通道", direction: "代收", pageTitle: "平台端代收通道管理", subtitle: "按蓝盛代收通道页维护通道资金、预付、对接编码、费率、收款规则和类型启停；CNY 与 USDT 分开显示。" },
-      { key: "payoutChannels", label: "代付通道管理", icon: "arrow-up-right", action: "添加代付通道", direction: "代付", pageTitle: "平台端代付通道管理", subtitle: "维护通道商、代付产品、接口类型、权重、费率、限额与回调配置。" },
-      { key: "collectionProducts", label: "代收产品管理", icon: "package-open", action: "新增代收产品", direction: "代收", pageTitle: "平台端代收产品管理", subtitle: "维护代收产品名称、编码、状态、今日成交和关联通道；产品启用后进入平台公共产品目录，默认供全部租户使用。" },
-      { key: "payoutProducts", label: "代付产品管理", icon: "package-check", action: "新增代付产品", direction: "代付", pageTitle: "平台端代付产品管理", subtitle: "维护代付产品名称、编码和币种；汇盛统一使用“产品”命名。" }
+      { key: "vendors", label: "通道商管理", icon: "building-2", action: "新增通道商", pageTitle: "平台端通道商管理", subtitle: "维护平台已完成接入的通道商资料，供租户授权使用。" },
     ];
 
     const platformMasterRoutes = {
@@ -2412,6 +2384,8 @@
       ]
     };
 
+    rows.vendors = window.HSProviderDemo.providers;
+
     const vendorFundAccounts = [
       { id: "FA-001", accountNo: "FA-CNY-IN-001", vendorId: "V-001", vendorName: "QuickPay", name: "QuickPay", direction: "代收", currency: "CNY", bookBalance: 680000, reservedAmount: 46200, availableAmount: 633800, providerBalance: 680000, reconciliation: "一致", reconciledAt: "2026-07-24 09:45:00", settlement: "可操作", fundStatus: "正常", unsettledOrders: 18, fundVersion: 1 },
       { id: "FA-002", accountNo: "FA-USDT-IN-002", vendorId: "V-001", vendorName: "QuickPay", name: "QuickPay", direction: "代收", currency: "USDT", bookBalance: 125000, reservedAmount: 5000, availableAmount: 120000, providerBalance: 125000, reconciliation: "一致", reconciledAt: "2026-07-24 09:46:00", settlement: "可操作", fundStatus: "正常", unsettledOrders: 4, fundVersion: 1 },
@@ -2424,7 +2398,7 @@
     ];
     const columns = {
       vendors: [
-        ["name", "通道商"], ["vendorNo", "编号"], ["selfOperated", "是否自营"], ["capabilities", "业务能力"], ["collectionWallets", "代收钱包"], ["payoutWallets", "代付钱包"]
+        ["name", "通道商"], ["vendorNo", "编号"]
       ],
       collectionChannels: [
         ["select", ""], ["name", "通道名称"], ["todaySuccess", "今日成功"], ["cnyBalance", "余额"], ["cnyPrepaid", "预付"], ["cnyRemainingPrepaid", "剩余预付"], ["usdtBalance", "USDT余额"], ["usdtPrepaid", "USDT预付"], ["usdtRemainingPrepaid", "USDT剩余预付"], ["status", "状态"], ["thirdCode", "对接编码"], ["todayAmount", "今日成交"], ["rate", "费率"], ["receiptRule", "收款规则"], ["typeStatus", "类型状态"], ["typeActions", "操作"]
@@ -2524,6 +2498,7 @@
     }
 
     function addChannelAudit({ objectId, objectType, action, summary, reason = "-" }) {
+      window.HSProviderDemo?.log(action, objectId, "", "platform");
       channelAuditSequence += 1;
       const audit = {
         id: `AUD-CH-${channelAuditSequence}`,
@@ -2950,7 +2925,6 @@
       const direction = $("#filterDirection").value;
       const mode = $("#filterProductMode").value;
       const status = $("#filterStatus").value;
-      const ownership = $("#filterOwnership").value;
       const payoutType = $("#filterPayoutType")?.value || "";
       const productModule = isProductModule();
       const keyword = ($("#filterKeyword").value + " " + $("#globalSearch").value).trim().toLowerCase();
@@ -2959,15 +2933,14 @@
         const searchableValues = activeKey === "payoutChannels"
           ? Object.entries(row).filter(([key]) => !["tenantIds", "tenantRefs"].includes(key)).map(([, value]) => value)
           : Object.values(row);
-        const blob = `${searchableValues.join(" ")} ${row.selfOperated ? "自营" : "第三方"}`.toLowerCase();
+        const blob = (activeKey === "vendors" ? `${row.name} ${row.vendorNo}` : searchableValues.join(" ")).toLowerCase();
         const vendorOk = productModule || !vendor || row.vendor === vendor || row.name === vendor;
         const directionOk = activeKey === "vendors" || isChannelModule() || productModule || !direction || row.direction === direction;
         const modeOk = activeKey === "vendors" || isChannelModule() || productModule || !mode || row.productMode === mode || (mode === "无产品层" && row.product === "无产品层");
         const statusOk = activeKey === "vendors" || activeKey === "payoutProducts" || !status || row.status === status;
-        const ownershipOk = activeKey !== "vendors" || !ownership || (ownership === "self" ? row.selfOperated : !row.selfOperated);
         const payoutTypeOk = activeKey !== "payoutChannels" || !payoutType || row.productId === payoutType;
         const keywordOk = !keyword || blob.includes(keyword);
-        return vendorOk && directionOk && modeOk && statusOk && ownershipOk && payoutTypeOk && keywordOk;
+        return vendorOk && directionOk && modeOk && statusOk && payoutTypeOk && keywordOk;
       });
     }
 
@@ -2980,8 +2953,6 @@
       const collectionProductMode = activeKey === "collectionProducts";
       const payoutProductMode = activeKey === "payoutProducts";
       const filters = document.querySelector(".filters");
-      $("#vendorSummary").hidden = !vendorMode;
-      $("#filterOwnershipField").hidden = !vendorMode;
       $("#filterDirectionField").hidden = vendorMode || channelMode || productMode;
       $("#filterVendorField").hidden = collectionMode || productMode;
       $("#filterProductModeField").hidden = vendorMode || channelMode || productMode;
@@ -2999,27 +2970,7 @@
       $("#filterSearchButton").style.order = payoutMode ? "5" : "";
       $("#payoutPinButton").style.order = payoutMode ? "6" : "";
       $("#filterKeywordLabel").textContent = collectionMode ? "通道名称" : payoutMode ? "名称 / 编码" : collectionProductMode ? "产品名称 / 编码" : "关键词";
-      $("#filterKeyword").placeholder = collectionMode ? "请输入通道名称" : payoutMode ? "通道名称或三方编码" : collectionProductMode ? "请输入产品名称或产品编码" : "编号 / 名称 / 产品";
-    }
-
-    function renderVendorSummary(data) {
-      const list = activeKey === "vendors" ? data : [];
-      const totals = list.reduce((sum, vendor) => {
-        const item = vendorFundSummary(vendor);
-        orderedCurrencyEntries(item.collectionWallets).forEach(([currency, balance]) => {
-          sum.collection[currency] = Number(sum.collection[currency] || 0) + Number(balance || 0);
-        });
-        orderedCurrencyEntries(item.payoutWallets).forEach(([currency, metrics]) => {
-          sum.payout[currency] ||= { payoutVolume: 0, walletBalance: 0, totalPrepaid: 0 };
-          sum.payout[currency].payoutVolume += Number(metrics.payoutVolume || 0);
-          sum.payout[currency].walletBalance += Number(metrics.walletBalance || 0);
-          sum.payout[currency].totalPrepaid += Number(metrics.totalPrepaid || 0);
-        });
-        return sum;
-      }, { collection: {}, payout: {} });
-      $("#vendorCount").textContent = String(list.length);
-      $("#vendorCollectionSummary").innerHTML = renderCollectionWallets(totals.collection, true);
-      $("#vendorPayoutSummary").innerHTML = renderPayoutWallets(totals.payout, true);
+      $("#filterKeyword").placeholder = collectionMode ? "请输入通道名称" : payoutMode ? "通道名称或三方编码" : collectionProductMode ? "请输入产品名称或产品编码" : "请输入通道商编号或名称";
     }
 
     function channelRowInCurrentScope(row) {
@@ -3130,7 +3081,6 @@
           ? `<span>共 ${data.length} 条</span><span class="pill gray">10 条 / 页</span><span class="page-chip">1</span>`
           : "";
       renderChannelActionBar();
-      renderVendorSummary(data);
       $("#tableHead").innerHTML = `<tr>${columns[activeKey].map(([key, label]) => `<th>${key === "select" ? `<input class="collection-select" type="checkbox" aria-label="全选${payoutMode ? "代付" : "代收"}通道">` : collectionMode && key === "thirdCode" ? `<label class="collection-code-option"><input class="collection-select" id="selectAllCollectionCodes" type="checkbox" data-collection-code-select-all aria-label="全选当前列表通道编码" ${canUseChannelAction("bulkDeleteCollectionCodes") ? "" : "disabled"}>${label}</label>` : label}</th>`).join("")}${appendRowActions ? "<th>操作</th>" : ""}</tr>`;
       $("#tableBody").innerHTML = data.map((row) => {
         const cells = columns[activeKey].map(([key]) => `<td>${cellContent(key, row)}</td>`).join("");
@@ -3139,7 +3089,6 @@
         return `<tr data-id="${row.id}"${collectionMode ? ` style="--collection-row-height:${rowHeight}px"` : ""}>${cells}${appendRowActions ? `<td>${rowActions(row)}</td>` : ""}</tr>`;
       }).join("") || `<tr><td colspan="${columns[activeKey].length + (appendRowActions ? 1 : 0)}" class="muted">暂无符合条件的数据</td></tr>`;
       selectedRow = data[0] || moduleRows()[0];
-      renderChain(selectedRow);
       applyPlatformChannelAuthorization();
       $("#primaryAction").hidden = channelTableMode;
       $("#payoutPinButton").hidden = !payoutMode;
@@ -3156,7 +3105,7 @@
         return `<span class="row-actions"><button class="icon-link" data-action="rateConfig" data-id="${row.id}"><i data-lucide="percent"></i>费率</button><button class="icon-link" data-action="limitConfig" data-id="${row.id}"><i data-lucide="sliders-horizontal"></i>限额</button><button class="icon-link" data-action="payoutDevConfig" data-id="${row.id}"><i data-lucide="code-2"></i>开发配置</button><button class="icon-link" data-action="channelTest" data-id="${row.id}"><i data-lucide="flask-conical"></i>测试</button><button class="icon-link" data-action="deleteChannelPreview" data-id="${row.id}"><i data-lucide="trash-2"></i>删除</button></span>`;
       }
       if (activeKey === "vendors") {
-        return `<span class="row-actions"><button class="icon-link" data-action="editVendor" data-id="${row.id}"><i data-lucide="square-pen"></i>编辑</button><button class="icon-link" data-action="vendorFunds" data-id="${row.id}"><i data-lucide="list-tree"></i>钱包明细</button><details class="action-more"><summary><i data-lucide="ellipsis"></i>更多</summary><div class="action-menu">${common}</div></details></span>`;
+        return `<span class="row-actions"><button class="icon-link" data-action="editVendor" data-id="${row.id}"><i data-lucide="square-pen"></i>编辑</button><details class="action-more"><summary><i data-lucide="ellipsis"></i>更多</summary><div class="action-menu">${common}</div></details></span>`;
       }
       if (activeKey === "collectionProducts") {
         return `<span class="row-actions"><button class="icon-link" data-action="editProduct" data-id="${row.id}"><i data-lucide="square-pen"></i>编辑</button><button class="icon-link" data-action="bindProductChannels" data-id="${row.id}"><i data-lucide="git-branch"></i>关联通道</button><button class="icon-link danger-link" data-action="deleteProductPreview" data-id="${row.id}"><i data-lucide="trash-2"></i>删除</button></span>`;
@@ -3165,37 +3114,6 @@
         return `<span class="row-actions"><button class="icon-link" data-action="editProduct" data-id="${row.id}"><i data-lucide="square-pen"></i>编辑</button><button class="icon-link danger-link" data-action="deleteProductPreview" data-id="${row.id}"><i data-lucide="trash-2"></i>删除</button></span>`;
       }
       return `<span class="row-actions">${common}</span>`;
-    }
-
-    function renderChain(row) {
-      const chain = inferChain(row);
-      $("#chainScope").textContent = row ? row.id : "当前选中";
-      $("#chainView").innerHTML = [
-        ["1", "通道商", chain.vendor],
-        ["2", "通道商资金", chain.funds],
-        ["3", "通道", chain.type],
-        ["4", "产品", chain.product]
-      ].map(([no, label, value]) => `
-        <div class="chain-node">
-          <div class="node-mark">${no}</div>
-          <div>
-            <div class="node-title">${label}</div>
-            <div class="node-value">${value}</div>
-          </div>
-        </div>
-      `).join("");
-    }
-
-    function inferChain(row) {
-      const vendor = row.vendor || row.name || "未选择";
-      const fundVendor = activeKey === "vendors" ? row : rows.vendors.find((item) => item.name === vendor);
-      const summary = fundVendor ? vendorFundSummary(fundVendor) : null;
-      const collectionText = summary ? orderedCurrencyEntries(summary.collectionWallets).map(([currency, balance]) => `${currency} ${formatCurrencyAmount(balance, currency)}`).join(" / ") : "";
-      const payoutText = summary ? orderedCurrencyEntries(summary.payoutWallets).map(([currency, metrics]) => `${currency} 余额 ${formatCurrencyAmount(metrics.walletBalance, currency)}`).join(" / ") : "";
-      const funds = summary?.accounts.length ? `代收 ${collectionText || "-"} · 代付 ${payoutText || "-"}` : "尚未形成钱包记录";
-      const type = activeKey === "vendors" ? `下属 ${row.channels || 0} 个通道` : (isChannelModule() ? row.name : (row.type || "按绑定关系查看"));
-      const product = activeKey === "vendors" ? `下属 ${row.products || 0} 个产品` : (isChannelModule() ? (row.productMode === "无产品层" ? "无产品层" : row.primaryType) : (row.name || "可选产品"));
-      return { vendor, funds, type, product };
     }
 
     function findRow(id) {
@@ -3231,9 +3149,8 @@
     function openDetail(id) {
       const row = findRow(id);
       selectedRow = row;
-      renderChain(row);
       const vendorFundKeys = new Set(["bookBalance", "reservedAmount", "availableAmount", "totalFunded", "providerBalance", "reconciliation", "reconciledAt", "settlement", "fundStatus", "unsettledOrders", "fundVersion", "direction"]);
-      const details = Object.entries(row).filter(([key]) => key !== "id" && key !== "productRequired" && !(activeKey === "vendors" && vendorFundKeys.has(key))).map(([key, value]) => `
+      const details = Object.entries(row).filter(([key]) => (activeKey !== "vendors" || ["name", "vendorNo"].includes(key)) && key !== "id" && key !== "productRequired" && !(activeKey === "vendors" && vendorFundKeys.has(key))).map(([key, value]) => `
         <div class="desc-item">
           <label>${fieldName(key)}</label>
           <span>${maybeTag(key, value)}</span>
@@ -3259,16 +3176,7 @@
         <div id="modalFeedback" class="modal-feedback" hidden></div>
         <div class="form-grid">
           <div class="field"><label for="vendorNameCreate">通道商名称</label><input id="vendorNameCreate" value="${escapeHtml(row?.name || "")}" placeholder="请输入通道商名称"></div>
-          <div class="field"><label for="vendorCallbackLimit">回调限制（分钟）</label><input id="vendorCallbackLimit" inputmode="numeric" value="${Number(row?.callbackLimitMinutes || 0)}"></div>
-          <div class="field"><label for="vendorUncallbacked">未回调</label><input id="vendorUncallbacked" inputmode="numeric" value="${Number(row?.uncallbackedCount || 0)}"></div>
-          <div class="field"><label for="vendorDeposit">保证金（CNY）</label><input id="vendorDeposit" inputmode="decimal" value="${formatCny(row?.deposit || 0).replaceAll(",", "")}"></div>
-          <div class="field"><label for="vendorBotId">机器人 ID</label><input id="vendorBotId" value="${escapeHtml(row?.botId || "0")}" placeholder="0 或机器人编号"></div>
-          <div class="field"><label for="vendorSelfOperated">是否自营</label><select id="vendorSelfOperated"><option value="self" ${row?.selfOperated !== false ? "selected" : ""}>是（自营通道）</option><option value="third" ${row?.selfOperated === false ? "selected" : ""}>否（第三方通道）</option></select></div>
-        </div>
-        <div style="height:14px"></div>
-        <div class="rule-list">
-          <div class="rule-item"><span class="rule-dot"></span><span>通道商本身不绑定单一业务方向；代收或代付能力由下属通道逐条确定，每个通道只能选择一个方向。</span></div>
-          <div class="rule-item"><span class="rule-dot"></span><span>代收、代付钱包按币种独立管理；代付钱包中的累计跑量与总预付必须通过独立调整入口留痕处理。</span></div>
+          ${isEdit ? `<div class="field"><label>通道商编号</label><input value="${escapeHtml(row.vendorNo)}" readonly></div>` : ""}
         </div>
       `, `<button class="btn" data-action="closeModal">取消</button><button class="btn primary" data-action="saveVendor">${isEdit ? "保存变更" : "保存通道商"}</button>`);
     }
@@ -4105,15 +4013,8 @@
 
     function saveVendor() {
       const name = $("#vendorNameCreate")?.value.trim();
-      const callbackLimitMinutes = Number($("#vendorCallbackLimit")?.value);
-      const uncallbackedCount = Number($("#vendorUncallbacked")?.value);
-      const deposit = parseCnyInput($("#vendorDeposit")?.value, { allowZero: true });
-      const botId = $("#vendorBotId")?.value.trim() || "0";
       const row = rows.vendors.find((item) => item.id === activeModalContext?.rowId);
       if (!name) return setModalError("请填写通道商名称。", "vendorNameCreate");
-      if (!Number.isInteger(callbackLimitMinutes) || callbackLimitMinutes < 0) return setModalError("回调限制必须是大于或等于 0 的整数分钟。", "vendorCallbackLimit");
-      if (!Number.isInteger(uncallbackedCount) || uncallbackedCount < 0) return setModalError("未回调必须是大于或等于 0 的整数。", "vendorUncallbacked");
-      if (deposit === null) return setModalError("保证金必须是大于或等于 0 的 CNY 金额，且最多两位小数。", "vendorDeposit");
       if (rows.vendors.some((item) => item.id !== row?.id && item.name.toLowerCase() === name.toLowerCase())) return setModalError("通道商名称已存在，请核对后再保存。");
       const oldName = row?.name;
       const target = row || {
@@ -4124,14 +4025,7 @@
         channels: "0",
         products: "0"
       };
-      Object.assign(target, {
-        name,
-        callbackLimitMinutes,
-        uncallbackedCount,
-        deposit,
-        botId,
-        selfOperated: $("#vendorSelfOperated")?.value === "self"
-      });
+      Object.assign(target, { name });
       if (!row) {
         rows.vendors.unshift(target);
       }
@@ -4146,10 +4040,10 @@
         objectId: target.id,
         objectType: "通道商",
         action: row ? "编辑通道商" : "新增通道商",
-        summary: `${name} · ${target.selfOperated ? "自营" : "第三方"} · 回调限制 ${callbackLimitMinutes} 分钟 · 未回调 ${uncallbackedCount}`,
+        summary: name,
         reason: row ? "编辑通道商资料" : "新增通道商资料"
       });
-      finishChange({ title: row ? "通道商资料已更新" : "通道商已建立", detail: `${name} · ${target.selfOperated ? "自营" : "第三方"}`, audit });
+      finishChange({ title: row ? "通道商资料已更新" : "通道商已建立", detail: name, audit });
     }
 
     function saveVendorAmountAdjustment() {

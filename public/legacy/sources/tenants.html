@@ -2522,26 +2522,12 @@
     }
 
     function renderAuthorizedChannelRows(tenant) {
-      const channels = tenant.channels || [];
-      if (channels.length === 0) {
-        return '<tr><td colspan="4" class="table-empty"><strong>暂无授权通道</strong><span>该租户当前没有已授权通道。</span></td></tr>';
-      }
-
-      return channels.map(item => {
-        const raw = String(item || '');
-        const parts = raw.split('/').map(part => part.trim()).filter(Boolean);
-        const business = parts[0] || '未标注业务';
-        const channel = parts.slice(1).join(' / ') || parts[0] || '-';
-        const businessEnabled = (tenant.businessCatalog || []).some(item => item.name === business && item.status === '已授权');
-        const readonly = tenant.status === '关闭' || raw.includes('历史') || !businessEnabled;
-        const scope = tenant.status === '停用' || !businessEnabled ? '仅存量业务' : readonly ? '历史查询' : '当前租户';
-        return '<tr>' +
-          '<td>' + business + '</td>' +
-          '<td><strong>' + channel + '</strong></td>' +
-          '<td>' + scope + '</td>' +
-          '<td>' + tag(readonly ? '历史只读' : '已授权', readonly ? 'gray' : 'green') + '</td>' +
-        '</tr>';
-      }).join('');
+      const model = window.HSProviderDemo;
+      const grants = model.grants.filter(g => g.tenantId === tenant.id);
+      return grants.map(g => {
+        const provider = model.providers.find(p => p.id === g.providerId);
+        return '<tr><td><strong>' + escapeHtml(provider?.name || g.providerId) + '</strong></td><td>' + escapeHtml(g.providerId) + '</td><td>' + tag(g.status, g.status === '已授权' ? 'green' : 'gray') + '</td><td>' + escapeHtml(g.updatedAt) + '</td></tr>';
+      }).join('') || '<tr><td colspan="4" class="table-empty">暂无已授权通道商</td></tr>';
     }
 
     function domainStatusTone(status) {
@@ -3023,8 +3009,8 @@
             '<td><div class="table-actions">' + action + '</div></td>' +
           '</tr>';
         }).join('') + '</tbody></table></div>' +
-        sectionTitle('已授权通道列表') +
-        '<div class="table-wrap detail-table"><table aria-label="已授权通道列表"><thead><tr><th>业务</th><th>授权通道</th><th>授权范围</th><th>状态</th></tr></thead><tbody>' +
+        sectionTitle('已授权通道商列表') +
+        '<div class="table-wrap detail-table"><table aria-label="已授权通道商列表"><thead><tr><th>通道商</th><th>通道商编号</th><th>授权状态</th><th>最近变更</th></tr></thead><tbody>' +
           renderAuthorizedChannelRows(tenant) +
         '</tbody></table></div>';
 

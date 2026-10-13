@@ -21541,7 +21541,7 @@
           </div>
           <div class="page-actions" data-astryx="ActionGroup">
             <button class="btn" type="button" data-action="refresh-page"><i data-lucide="refresh-cw"></i>刷新</button>
-            <button class="btn" type="button" data-action="channel"><i data-lucide="route"></i>查看已授权通道</button>
+            <button class="btn" type="button" data-action="channel"><i data-lucide="route"></i>查看通道管理</button>
             <button class="btn btn-primary" type="button" data-action="export"><i data-lucide="download"></i>导出当前视图</button>
           </div>
         </section>
@@ -21670,7 +21670,7 @@
             <section class="panel data-panel" data-astryx="ResourceList" hidden>
               <div class="panel-header">
                 <div>
-                  <h2 class="panel-title">授权通道健康</h2>
+                  <h2 class="panel-title">租户通道健康</h2>
                   <p class="panel-subtitle">平台授权给本租户的可用能力。</p>
                 </div>
                 <button class="btn" type="button" data-action="channel"><i data-lucide="list"></i>查看全部</button>
@@ -25833,6 +25833,16 @@
       ["CH-FIAT-OUT-004", { id: "CH-FIAT-OUT-004", name: "BridgePay CNY 代付", direction: "payout", currency: "CNY", status: "正常", acceptsNewOrders: true, channelVersion: 19, productMode: "none", productId: "", productName: "无产品层", products: [] }],
       ["CH-FIAT-OUT-012", { id: "CH-FIAT-OUT-012", name: "PayoutX CNY 代付", direction: "payout", currency: "CNY", status: "暂停", acceptsNewOrders: false, channelVersion: 23, productMode: "single", productId: "PROD-CNY-PAYOUT", productName: "CNY 银行卡代付", products: [{ id: "PROD-CNY-PAYOUT", name: "CNY 银行卡代付", enabled: true, version: 2, channelId: "CH-FIAT-OUT-012" }] }]
     ]);
+    // Only overlay edited configuration and newly created channels; historical order snapshots stay intact.
+    if (window.HSProviderDemo) {
+      const configured = window.HSProviderDemo.orderChannels(currentTenantAccount.tenantId);
+      for (const row of configured) {
+        if (tenantChannelMaster.has(row.id) && !row.modified) continue;
+        const enabledCodes=(row.collectionTypes||[]).filter(c=>c.status==='开启');
+        const products = row.products.filter(p=>p.currency===row.asset).map(p => ({id:p.id,name:p.name,enabled:p.status==='开启'&&(row.direction!=='代收'||enabledCodes.some(c=>!p.codeBindings||p.codeBindings[c.id]?.bound)),version:row.version,channelId:row.id}));
+        tenantChannelMaster.set(row.id,{id:row.id,name:row.name,direction:row.direction==='代付'?'payout':'collect',currency:row.asset,status:row.status,acceptsNewOrders:row.status==='开启'&&(row.direction!=='代收'||enabledCodes.length>0),channelVersion:row.version,productMode:products.length>1?'multiple':products.length===1?'single':'none',productId:products.length===1?products[0].id:'',productName:products.length===1?products[0].name:'',products});
+      }
+    }
     const tenantBusinessGrantSnapshots = {
       collect: { businessGrantVersion: "BGA-HS-TEN-001-COLLECT-v7", authorizedChannelIds: ["CH-FIAT-IN-001", "CH-FIAT-IN-018"] },
       payout: { businessGrantVersion: "BGA-HS-TEN-001-PAYOUT-v5", authorizedChannelIds: ["CH-FIAT-OUT-004", "CH-FIAT-OUT-012"] }
@@ -25925,7 +25935,10 @@
 
     function ensureTenantOrderChannelSnapshot(requestNo, direction, orderVersion = 1) {
       if (tenantOrderChannelSnapshots.has(requestNo)) return tenantOrderChannelSnapshots.get(requestNo);
-      const grant = tenantBusinessGrantSnapshots[direction];
+      const grant = window.HSProviderDemo ? {
+        businessGrantVersion: 'TENANT-CONFIG-' + currentTenantAccount.tenantId,
+        authorizedChannelIds: window.HSProviderDemo.tenantData(currentTenantAccount.tenantId).channels.filter(c => (c.direction === '代付' ? 'payout' : 'collect') === direction && c.asset === 'CNY').map(c => c.id)
+      } : tenantBusinessGrantSnapshots[direction];
       const snapshot = {
         requestNo,
         direction,
@@ -28032,7 +28045,7 @@
     }
 
     function renderChannelHealth() {
-      const notice = tenantHomeModuleNotice("channels", "授权通道健康");
+      const notice = tenantHomeModuleNotice("channels", "租户通道健康");
       document.getElementById("channelHealth").innerHTML = notice + (state.homeHealth.channels.status === "empty" ? "" : channelHealth.map((item) => `
         <div class="side-item">
           <div class="side-item-head">
@@ -28120,6 +28133,7 @@
     }
 
     function openChannelDrawer() {
+      if (window.HSProviderDemo) { window.parent.postMessage({type:"hs-unified-open-page",pageId:"channels"},"*"); return; }
       document.getElementById("drawerTitle").textContent = "已授权通道";
       document.getElementById("drawerBody").innerHTML = `
         <div class="kv-grid">
@@ -29788,9 +29802,9 @@
         confirmText = "确认提交";
         body = `
           <p class="modal-note">${summary}</p>
-          <p class="modal-note">${usesBusinessGrantSnapshot ? "本单创建于业务停用前，继续从订单保存的授权通道集合中选择当前可执行通道；当前业务停用不会回退或取消本单。" : "租户可逐笔选择任一已授权且可接新单的 CNY 通道。"} 暂停通道只阻止新的通道执行，历史在途订单继续原通道查单；通道受理后不能直接换道。</p>
+          <p class="modal-note">${usesBusinessGrantSnapshot ? "本单创建于业务停用前，继续从订单保存的授权通道集合中选择当前可执行通道；当前业务停用不会回退或取消本单。" : "租户可逐笔选择本租户已配置且可执行的 CNY 通道。"} 暂停通道只阻止新的通道执行，历史在途订单继续原通道查单；通道受理后不能直接换道。</p>
           <div class="modal-grid">
-            <div class="field full"><label for="actionChoice">订单授权快照内通道</label><select class="select" id="actionChoice">${eligibleCount ? optionMarkup : `<option value="">当前没有可执行通道</option>${optionMarkup}`}</select><span class="muted">授权快照 ${snapshot.businessGrantVersion} · 订单 v${snapshot.orderVersion}；快照 ${options.length} 个，当前可选 ${eligibleCount} 个。已失效通道保留可见并禁用。</span><span class="field-error" id="channelSelectionError" role="alert"></span></div>
+            <div class="field full"><label for="actionChoice">订单通道快照内通道</label><select class="select" id="actionChoice">${eligibleCount ? optionMarkup : `<option value="">当前没有可执行通道</option>${optionMarkup}`}</select><span class="muted">授权快照 ${snapshot.businessGrantVersion} · 订单 v${snapshot.orderVersion}；快照 ${options.length} 个，当前可选 ${eligibleCount} 个。已失效通道保留可见并禁用。</span><span class="field-error" id="channelSelectionError" role="alert"></span></div>
             <div class="field full"><label for="actionProduct">通道产品</label><select class="select" id="actionProduct" aria-describedby="channelProductSummary channelProductError"></select><p class="modal-note" id="channelProductSummary"></p><span class="field-error" id="channelProductError" role="alert"></span></div>
             <div class="field full"><p class="modal-note">先选择实际通道，再确定具体产品。无产品层时产品为空；只有一个可用产品时自动带入并展示；多个可用产品时必须由租户明确选择后才能提交。</p></div>
             ${payoutWalletSummary}

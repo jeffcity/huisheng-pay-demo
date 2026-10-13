@@ -11,14 +11,14 @@ export const NAV_GROUPS = [
   { title: '租户管理', items: [
     { module: 'tenant-list', label: '租户管理' },
   ]},
-  { title: '业务开通', items: [
-    { module: 'business', label: '业务开通' },
+  { title: '通道商授权', items: [
+    { module: 'business', label: '通道商授权' },
   ]},
   { title: '财务模块', items: [
     { module: 'wallets', label: '租户平台钱包' },
   ]},
-  { title: '通道管理', items: [
-    { module: 'channel-vendors', label: '通道管理' },
+  { title: '通道商管理', items: [
+    { module: 'channel-vendors', label: '通道商管理' },
   ]},
   { title: '报表模块', subgroups: [
     { title: '日终统计', items: [

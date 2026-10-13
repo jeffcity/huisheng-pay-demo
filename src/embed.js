@@ -1,3 +1,4 @@
+import providerModel from './provider-model.js?raw';
 // 旧壳 prepareEmbeddedDocument 的忠实移植：fetch 真实源文件 → 内联 authGuard →
 // 隐藏内页自带 sidebar/topbar → 注入统一壳补丁与路由同步脚本 → 交给 iframe.srcdoc。
 // 与旧实现逐条对应，行为口径不变。
@@ -391,7 +392,7 @@ export async function prepareEmbeddedDocument(sourceKey, initialHash = '') {
     /<header\b[^>]*class=["'][^"']*\btopbar\b[^"']*["'][^>]*>[\s\S]*?<\/header>/i,
     match => match.replace(/<header\b/i, '<header hidden aria-hidden="true" style="display:none!important"')
   );
-  html = html.replace(/<\/head>/i, `${shellPatch(normalizedHash, sourceKey)}</head>`);
+  html = html.replace(/<\/head>/i, `<script>${providerModel.replace(/<\/script/gi, '<\\/script')}</script>${shellPatch(normalizedHash, sourceKey)}</head>`);
   html = html.replace(/<\/body>/i, `${routeSync}</body>`);
   return html;
 }

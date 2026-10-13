@@ -32,12 +32,12 @@
     "initialHash": "merchant-rate"
   },
   "channels": {
-    "label": "授权通道",
-    "group": "业务运营",
-    "module": "overview",
-    "sourceKey": "overview",
-    "sourceName": "00-总览 / 业务运营 / 资金中心 / 运营中心",
-    "initialHash": "channels"
+    "label": "已授权通道商",
+    "group": "通道管理",
+    "module": "channels",
+    "sourceKey": "channels",
+    "sourceName": "通道管理",
+    "initialHash": "providers"
   },
   "collect": {
     "label": "CNY 代收订单",
@@ -184,5 +184,37 @@
     "sourceName": "06-登录入口 / 03-登录页",
     "initialHash": "",
     "utility": true
+  },
+  "collection-channels": {
+    "label": "代收通道管理",
+    "group": "通道管理",
+    "module": "channels",
+    "sourceKey": "channels",
+    "sourceName": "通道管理",
+    "initialHash": "collectionChannels"
+  },
+  "payout-channels": {
+    "label": "代付通道管理",
+    "group": "通道管理",
+    "module": "channels",
+    "sourceKey": "channels",
+    "sourceName": "通道管理",
+    "initialHash": "payoutChannels"
+  },
+  "collection-products": {
+    "label": "代收产品管理",
+    "group": "通道管理",
+    "module": "channels",
+    "sourceKey": "channels",
+    "sourceName": "通道管理",
+    "initialHash": "collectionProducts"
+  },
+  "payout-products": {
+    "label": "代付产品管理",
+    "group": "通道管理",
+    "module": "channels",
+    "sourceKey": "channels",
+    "sourceName": "通道管理",
+    "initialHash": "payoutProducts"
   }
 }
