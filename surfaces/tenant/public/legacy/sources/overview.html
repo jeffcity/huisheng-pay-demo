@@ -25835,6 +25835,8 @@
     ]);
     // Only overlay edited configuration and newly created channels; historical order snapshots stay intact.
     if (window.HSProviderDemo) {
+      const tenantConfig=window.HSProviderDemo.tenantData(currentTenantAccount.tenantId);
+      for(const id of tenantConfig.deletedChannelIds||[]){const previous=tenantChannelMaster.get(id);if(previous)tenantChannelMaster.set(id,{...previous,status:'已删除',acceptsNewOrders:false,products:previous.products.map(p=>({...p,enabled:false}))});}
       const configured = window.HSProviderDemo.orderChannels(currentTenantAccount.tenantId);
       for (const row of configured) {
         if (tenantChannelMaster.has(row.id) && !row.modified) continue;
