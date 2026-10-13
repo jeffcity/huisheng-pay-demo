@@ -3689,7 +3689,6 @@
     const payoutDevelopmentConfigs = new Map();
     const collectionIntegrationConfigs = new WeakMap();
     const selectedCollectionCodes = new Set();
-    const collectionIntegrationTemplates = ["万能支付", "自营usdt收款"];
     const collectionIntegrationFields = [
       ["merchantNo", "商户号", true], ["secret", "密钥", true],
       ["orderUrl", "下单地址", true], ["queryUrl", "查询地址", true],
@@ -3716,7 +3715,6 @@
       openModal("单独对接信息", `
         <div id="modalFeedback" class="modal-feedback" hidden></div>
         <div class="blue-form collection-integration-form">
-          <div class="blue-row required"><label for="collectionIntegration-template">对接模板：</label><select id="collectionIntegration-template" aria-required="true"><option value="">请选择对接模板</option>${collectionIntegrationTemplates.map(template => `<option value="${escapeHtml(template)}" ${config.template === template ? "selected" : ""}>${escapeHtml(template)}</option>`).join("")}</select></div>
           ${collectionIntegrationFields.map(([key, label, required]) => `<div class="blue-row ${required ? "required" : ""}"><label for="collectionIntegration-${key}">${label}：</label>${key === "publicKey" || key === "privateKey"
             ? `<textarea id="collectionIntegration-${key}" rows="3" placeholder="请输入${label}" autocomplete="off" spellcheck="false">${escapeHtml(config[key] || "")}</textarea>`
             : `<input id="collectionIntegration-${key}" value="${escapeHtml(config[key] || "")}" placeholder="请输入${label}" aria-required="${required}" autocomplete="off" spellcheck="false">`}</div>`).join("")}
@@ -3728,15 +3726,14 @@
       if (!canUseChannelAction("saveCollectionIntegration")) return;
       const target = collectionIntegrationTarget();
       if (!target) return;
-      const config = { template: $("#collectionIntegration-template").value };
-      if (!collectionIntegrationTemplates.includes(config.template)) return setModalError("请选择对接模板。", "collectionIntegration-template");
+      const config = {};
       for (const [key, label, required] of collectionIntegrationFields) {
         const input = $(`#collectionIntegration-${key}`);
         config[key] = input.value.trim();
         if (required && !config[key]) return setModalError(`请输入${label}。`, input.id);
       }
       collectionIntegrationConfigs.set(collectionIntegrationKey(target.row, target.type), config);
-      const audit = addChannelAudit({ objectId: target.row.id, objectType: "通道编码", action: "保存单独对接信息", summary: `${target.row.name} · ${target.type.code} · ${config.template}`, reason: "代收通道单独对接信息" });
+      const audit = addChannelAudit({ objectId: target.row.id, objectType: "通道编码", action: "保存单独对接信息", summary: `${target.row.name} · ${target.type.code}`, reason: "代收通道单独对接信息" });
       finishChange({ title: "单独对接信息已保存", detail: `${target.row.name} · ${target.type.code}`, audit });
     }
 
