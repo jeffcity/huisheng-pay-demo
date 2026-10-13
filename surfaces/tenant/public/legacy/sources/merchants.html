@@ -21638,9 +21638,11 @@
     ];
 
     if (window.HSProviderDemo) {
+      const deleted=window.HSProviderDemo.tenantData(window.HSProviderDemo.tenantId).deletedChannelIds||new Set();
+      for(const row of tenantPayoutChannels)if(deleted.has(row.id))Object.assign(row,{status:'已删除',acceptsNewOrders:false});
       for (const row of window.HSProviderDemo.orderChannels(window.HSProviderDemo.tenantId).filter(c=>c.direction==='代付'&&c.asset==='CNY'&&c.modified)) {
         const current=tenantPayoutChannels.find(c=>c.id===row.id);
-        const mapped={id:row.id,name:row.name,status:row.status==='开启'?'正常':'暂停',acceptsNewOrders:row.status==='开启',productMode:row.products.length?'需要产品层':'无产品层',productId:row.products[0]?.id||''};
+        const mapped={id:row.id,name:row.name,status:row.status==='开启'?'正常':'暂停',acceptsNewOrders:row.status==='开启',productMode:row.productId?'需要产品层':'无产品层',productId:row.productId||''};
         if(current)Object.assign(current,mapped);else tenantPayoutChannels.push(mapped);
       }
     }
