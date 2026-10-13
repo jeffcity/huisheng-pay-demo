@@ -5675,6 +5675,7 @@
         });
       });
       pages.audit.rows.unshift(...auditRows);
+      if (window.HSProviderDemo) pages.audit.rows.unshift(...window.HSProviderDemo.audits.filter(e=>e.surface==='platform'&&!pages.audit.rows.some(r=>r[0]===e.id)).map(e=>[e.id,e.at,'平台超管 / 平台',e.action,e.object,'成功','普通','本地演示']));
 
       const finalWallet = platformRefundJourneyFactsSource.summary.finalPlatformWallet;
       platformWalletStates.set('汇盛东南亚|代收钱包', {

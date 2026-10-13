@@ -395,15 +395,9 @@
           <div class="tenant-tab-content" data-tenant-panel="brand"><div class="config-section-bar"><div><h3>品牌展示资料</h3><p>使用图片上传与预览维护品牌资源，确认后直接发布。</p></div><button class="btn primary" data-modal="提交品牌配置"><i data-lucide="image-up"></i>维护品牌配置</button></div><div class="config-value-list"><div class="config-value"><span>租户 Logo</span><strong data-config-value="brandLogo">hs-sea-logo.svg</strong><small>用于租户端、商户端顶部展示</small></div><div class="config-value"><span>Favicon</span><strong data-config-value="brandFavicon">hs-sea.ico</strong><small>用于浏览器标签和登录页</small></div><div class="config-value"><span>品牌主色</span><strong data-config-value="brandPrimary"><i class="color-dot" style="background:#165DFF"></i>#165DFF</strong><small>按钮、链接和重点状态色</small></div><div class="config-value"><span>登录页背景</span><strong data-config-value="brandLoginBg">login-bg-20260705.png</strong><small>资源不可用时回退平台默认品牌</small></div></div></div>
           <div class="tenant-tab-content" data-tenant-panel="access"><div class="config-section-bar"><div><h3>访问域名</h3><p>查看平台为当前租户自动生成的租户端及商户端访问子域名。</p></div><span class="config-readonly-note">只读展示</span></div><div class="notice"><i data-lucide="info"></i><div><strong>生成说明：</strong>平台创建租户时会直接生成对应子域名，租户端仅展示访问地址。</div></div><div class="access-history"><div class="access-history-head">租户端访问子域名</div><div class="table-wrap"><table class="data-table" aria-label="当前租户端访问子域名"><thead><tr><th>访问地址</th></tr></thead><tbody id="accessDomainRows"></tbody></table></div></div><div class="access-history"><div class="access-history-head">商户端共享访问子域名</div><div class="table-wrap"><table class="data-table" aria-label="当前租户商户端共享访问子域名"><thead><tr><th>访问地址</th></tr></thead><tbody id="merchantAccessDomainRows"></tbody></table></div></div><p class="muted" style="margin:14px 0 0">两类子域名都用于识别当前租户。商户端登录时，账号与密码会在该租户范围内继续识别具体商户；共享子域名供当前租户下全部商户使用。</p></div>
           <div class="tenant-tab-content" data-tenant-panel="authorization">
-            <div class="config-section-bar"><div><h3>业务授权与费率</h3><p>平台按业务方向和币种为当前租户配置授权状态、租户费率和授权通道；租户端只读，不支持修改。</p></div><span class="config-readonly-note">只读展示</span></div>
+            <div class="config-section-bar"><div><h3>业务授权与费率</h3><p>平台授权通道商；租户自行建立通道、配置产品及对接信息。现有租户费率只读展示。</p></div><span class="config-readonly-note">只读展示</span></div>
             <div class="table-wrap">
-              <table class="data-table" aria-label="当前租户业务授权与费率">
-                <thead><tr><th>业务方向</th><th>币种</th><th>授权状态</th><th>租户费率</th><th>授权通道</th><th>最近变更</th></tr></thead>
-                <tbody>
-                  <tr><td><strong>代收</strong></td><td><span class="tag blue">CNY</span></td><td><span class="tag green">已开通</span></td><td><strong>0.45%</strong></td><td><div class="role-stack"><span class="tag blue">QuickPay CNY 代收 · 共享</span><span class="tag purple">FastCollect CNY 代收 · 专属</span></div></td><td class="mono">2026-07-29 10:22</td></tr>
-                  <tr><td><strong>代付</strong></td><td><span class="tag blue">CNY</span></td><td><span class="tag green">已开通</span></td><td><strong>0.15% + CNY 2.00 / 笔</strong></td><td><div class="role-stack"><span class="tag purple">BridgePay CNY 代付 · 专属</span><span class="tag blue">PayoutX CNY 代付 · 共享</span></div></td><td class="mono">2026-07-29 10:18</td></tr>
-                </tbody>
-              </table>
+              <table class="data-table"><thead><tr><th>通道商</th><th>通道商编号</th><th>授权状态</th><th>最近变更</th></tr></thead><tbody id="tenantProviderGrantRows"></tbody></table><h3 style="margin-top:18px">租户费率</h3><table class="data-table"><thead><tr><th>业务方向</th><th>币种</th><th>租户费率</th></tr></thead><tbody><tr><td>代收</td><td>CNY</td><td>0.45%</td></tr><tr><td>代付</td><td>CNY</td><td>0.15% + CNY 2.00 / 笔</td></tr></tbody></table>
             </div>
             <p class="muted" style="margin:16px 0 0">新订单使用当前已生效的授权、费率和通道范围；历史与在途订单保留创建时的授权与费率快照。</p>
           </div>
@@ -446,6 +440,12 @@ let settings=[['租户名称','汇盛东南亚','基础资料','平台配置 / �
 const tenantAccessConfig={domains:[{value:'https://tenant.hs-pay.com/login'}],merchantDomains:[{value:'https://tenant-001.merchant.hs-pay.com/login'}]};
 let brand=[['Favicon','hs-sea.ico','登录页 / 浏览器','已发布','租户直接配置','2026-07-05 10:06'],['租户 Logo','hs-sea-logo.svg','租户端 / 商户端','已发布','租户直接配置','2026-07-03 17:22'],['主色','#165DFF','租户端控件','已发布','租户直接配置','2026-07-03 16:10'],['辅助色','#0E8F93','通用状态标签','已发布','租户直接配置','2026-07-05 09:31'],['登录页背景','login-bg-20260705.png','登录页','已发布','租户直接配置','2026-07-05 10:10']];
 let audits=[['AL202607050031','账户','ops_lee','锁定账号','租户管理员手动锁定','security','103.88.42.18','成功','2026-07-05 10:35'],['AL202607050028','角色','TENANT_FINANCE','更新授权','新增资金导出按钮权限','admin','103.88.42.18','成功','2026-07-05 10:20'],['AL202607050019','登录安全','临时远程','新增白名单','122.224.8.18','tech_safe','103.88.42.88','成功','2026-07-05 09:40'],['AL202607050014','资金','TF202607050011','提交申请','存款 CNY 120,000.00','finance01','103.88.42.21','成功','2026-07-05 10:22'],['AL202607040088','导出','资金流水','确认导出','导出文件带水印，24 小时有效','finance01','103.88.42.21','成功','2026-07-04 18:36']];
+if (window.HSProviderDemo) {
+ const m=window.HSProviderDemo;
+ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ audits.unshift(...m.audits.filter(e=>e.surface==='tenant'&&e.tenantId===m.tenantId).map(e=>[e.id,'通道管理',e.object,e.action,e.action,'tenant-admin','本地演示','成功',e.at].map(esc)));
+}
+
 function tenantSystemPublicAudits(){return typeof window.__tenantSystemVisibleAudits==='function'?window.__tenantSystemVisibleAudits():audits}
 const tenantPermissionCatalog=[
   {id:'dashboard',page:'总览工作台',path:'/tenant/home',perm:'tenant.dashboard.view',group:'总览',actions:[{id:'dashboard_export',label:'导出',code:'tenant.dashboard.export',risk:false}],object:'当前租户聚合数据',risk:'低'},
@@ -455,7 +455,7 @@ const tenantPermissionCatalog=[
   {id:'collect',page:'法币代收订单',path:'/tenant/orders/collect',perm:'tenant.collect.view',group:'订单处理',actions:[{id:'collect_select_channel',label:'选择通道并提交',code:'tenant.collect.select_channel',risk:true},{id:'collect_cancel',label:'受理前取消',code:'tenant.collect.cancel',risk:true},{id:'collect_query',label:'主动查单',code:'tenant.order.query',risk:false},{id:'collect_export',label:'导出',code:'tenant.collect.export',risk:false}],object:'当前租户代收订单',risk:'高'},
   {id:'refunds',page:'代收退款审核',path:'/tenant/orders/refunds',perm:'tenant.refund.view',group:'订单处理',actions:[{id:'refund_review',label:'通过 / 驳回',code:'tenant.refund.review',risk:true},{id:'refund_query',label:'主动查单',code:'tenant.order.query',risk:false},{id:'refund_export',label:'导出',code:'tenant.refund.export',risk:false}],object:'当前租户退款申请',risk:'高'},
   {id:'payouts',page:'法币代付订单',path:'/tenant/orders/payouts',perm:'tenant.payout.view',group:'订单处理',actions:[{id:'payout_review',label:'通过 / 驳回',code:'tenant.payout.review',risk:true},{id:'payout_select_channel',label:'选择通道并提交',code:'tenant.payout.select_channel',risk:true},{id:'payout_cancel',label:'受理前取消',code:'tenant.payout.cancel',risk:true},{id:'payout_query',label:'主动查单',code:'tenant.order.query',risk:false},{id:'payout_export',label:'导出',code:'tenant.payout.export',risk:false}],object:'当前租户代付申请与订单',risk:'高'},
-  {id:'channels',page:'授权通道',path:'/tenant/channels',perm:'tenant.channel_authorization.view',group:'通道与账户',actions:[{id:'channel_notify_platform',label:'通知平台异常',code:'tenant.channel_incident.notify',risk:false},{id:'channel_export',label:'导出',code:'tenant.channel_authorization.export',risk:false}],object:'平台已授权通道只读摘要',risk:'中'},
+  {id:'channels',page:'通道管理',path:'/tenant/channels',perm:'tenant.channel.view',group:'通道与账户',actions:[{id:'channel_manage',label:'新增 / 编辑 / 启停通道',code:'tenant.channel.manage',risk:true},{id:'channel_config',label:'对接信息与测试',code:'tenant.channel.config.manage',risk:true},{id:'channel_product',label:'产品管理',code:'tenant.channel.product.manage',risk:false},{id:'channel_export',label:'导出',code:'tenant.channel.export',risk:false}],object:'当前租户通道、产品和已授权通道商',risk:'中'},
   {id:'wallets',page:'平台钱包',path:'/tenant/wallets',perm:'tenant.platform_wallet.view',group:'通道与账户',actions:[{id:'wallet_view',label:'查看流水',code:'tenant.ledger.view',risk:false},{id:'wallet_transfer',label:'发起划转',code:'tenant.wallet_transfer.create',risk:true},{id:'wallet_withdrawal',label:'发起提现',code:'tenant.fund_application.create',risk:true},{id:'wallet_export',label:'导出',code:'tenant.platform_wallet.export',risk:true}],object:'当前租户三个平台钱包',risk:'高'},
   {id:'funding',page:'资金划转',path:'/tenant/funds',perm:'tenant.wallet_transfer.view',group:'通道与账户',actions:[{id:'transfer_create',label:'发起划转',code:'tenant.wallet_transfer.create',risk:true},{id:'transfer_detail',label:'查看订单',code:'tenant.wallet_transfer.view',risk:false},{id:'transfer_export',label:'导出',code:'tenant.wallet_transfer.export',risk:true}],object:'当前租户授权商户钱包之间的划转订单',risk:'高'},
   {id:'ledger',page:'账户流水',path:'/tenant/ledger',perm:'tenant.ledger.view',group:'通道与账户',actions:[{id:'ledger_view',label:'查看详情',code:'tenant.ledger.view',risk:false},{id:'ledger_export',label:'导出',code:'tenant.ledger.export',risk:true}],object:'当前租户不可变流水',risk:'中'},
@@ -1494,5 +1494,7 @@ document.addEventListener('submit',event=>{
     })();
   </script>
 
-</body>
+<script>
+(() => { const m=window.HSProviderDemo; const el=document.getElementById('tenantProviderGrantRows'); if(!m||!el)return; const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));el.innerHTML=m.grants.filter(g=>g.tenantId===m.tenantId).map(g=>'<tr><td>'+esc(m.providers.find(p=>p.id===g.providerId)?.name||g.providerId)+'</td><td>'+esc(g.providerId)+'</td><td>'+esc(g.status)+'</td><td>'+esc(g.updatedAt)+'</td></tr>').join(''); })();
+</script></body>
 </html>

@@ -1,322 +1,322 @@
 {
- "project-index": {
-  "label": "平台端功能导航索引",
-  "code": "INDEX",
-  "group": "项目入口",
-  "description": "全部模块综合入口与跨页导航",
-  "sourceName": "平台端功能导航索引-demo.html",
-  "sourceKey": "projectIndex",
-  "initialHash": "",
-  "navId": "project-index"
- },
- "home": {
-  "label": "首页数据看板",
-  "code": "00-01",
-  "group": "00 首页数据看板",
-  "description": "指标、趋势、排行与风险来源",
-  "sourceName": "平台端首页数据看板-demo.html",
-  "sourceKey": "home",
-  "initialHash": "home",
-  "navId": "home"
- },
- "tenant-list": {
-  "label": "租户列表",
-  "code": "01-01",
-  "group": "01 租户管理",
-  "description": "查询、筛选与租户生命周期入口",
-  "sourceName": "平台端租户管理-demo.html",
-  "sourceKey": "tenants",
-  "initialHash": "list",
-  "navId": "tenant-list"
- },
- "tenant-create": {
-  "label": "新增租户",
-  "code": "01-02",
-  "group": "01 租户管理",
-  "description": "基础资料、访问地址与超级管理员初始化",
-  "sourceName": "平台端租户管理-demo.html",
-  "sourceKey": "tenants",
-  "initialHash": "create",
-  "navId": "tenant-list"
- },
- "tenant-detail-overview": {
-  "label": "租户详情·概览",
-  "code": "01-03",
-  "group": "01 租户管理",
-  "description": "租户资料、状态与生命周期摘要",
-  "sourceName": "平台端租户管理-demo.html",
-  "sourceKey": "tenants",
-  "initialHash": "detail-overview",
-  "navId": "tenant-list"
- },
- "tenant-detail-business": {
-  "label": "租户详情·业务",
-  "code": "01-04",
-  "group": "01 租户管理",
-  "description": "业务开通情况与已授权通道",
-  "sourceName": "平台端租户管理-demo.html",
-  "sourceKey": "tenants",
-  "initialHash": "detail-business",
-  "navId": "tenant-list"
- },
- "tenant-detail-security": {
-  "label": "租户详情·安全",
-  "code": "01-05",
-  "group": "01 租户管理",
-  "description": "账号状态、后台登录 IP、业务 API 来源 IP 与安全处理",
-  "sourceName": "平台端租户管理-demo.html",
-  "sourceKey": "tenants",
-  "initialHash": "detail-security",
-  "navId": "tenant-list"
- },
- "tenant-detail-domains": {
-  "label": "租户详情·域名管理",
-  "code": "01-06",
-  "group": "01 租户管理",
-  "description": "租户后台与商户端共享域名的录入、检测、启停和解绑",
-  "sourceName": "平台端租户管理-demo.html",
-  "sourceKey": "tenants",
-  "initialHash": "detail-domains",
-  "navId": "tenant-list"
- },
- "tenant-detail-wallet": {
-  "label": "租户详情·钱包",
-  "code": "01-07",
-  "group": "01 租户管理",
-  "description": "三类 CNY 钱包摘要与独立页面入口",
-  "sourceName": "平台端租户管理-demo.html",
-  "sourceKey": "tenants",
-  "initialHash": "detail-wallet",
-  "navId": "tenant-list"
- },
- "tenant-detail-audit": {
-  "label": "租户详情·审计",
-  "code": "01-08",
-  "group": "01 租户管理",
-  "description": "租户相关操作与状态变更记录",
-  "sourceName": "平台端租户管理-demo.html",
-  "sourceKey": "tenants",
-  "initialHash": "detail-audit",
-  "navId": "tenant-list"
- },
- "business": {
-  "label": "代收代付业务授权",
-  "code": "02-01",
-  "group": "02 业务开通",
-  "description": "按租户、业务方向和币种配置独立费率与授权通道",
-  "sourceName": "平台端业务开通-demo.html",
-  "sourceKey": "business",
-  "initialHash": "business",
-  "navId": "business"
- },
- "channel-vendors": {
-  "label": "通道商管理",
-  "code": "03-01",
-  "group": "03 通道管理",
-  "description": "通道商主体、代收钱包与分币种代付钱包。",
-  "sourceName": "平台端通道管理-demo.html",
-  "sourceKey": "channels",
-  "initialHash": "vendors",
-  "navId": "channel-vendors"
- },
- "collection-channels": {
-  "label": "代收通道管理",
-  "code": "03-02",
-  "group": "03 通道管理",
-  "description": "代收通道资金、预付、对接编码、费率、收款规则与类型启停。",
-  "sourceName": "平台端通道管理-demo.html",
-  "sourceKey": "channels",
-  "initialHash": "collectionChannels",
-  "navId": "channel-vendors"
- },
- "payout-channels": {
-  "label": "代付通道管理",
-  "code": "03-03",
-  "group": "03 通道管理",
-  "description": "代付通道产品、接口类型、权重、费率、限额与回调配置。",
-  "sourceName": "平台端通道管理-demo.html",
-  "sourceKey": "channels",
-  "initialHash": "payoutChannels",
-  "navId": "channel-vendors"
- },
- "collection-products": {
-  "label": "代收产品管理",
-  "code": "03-04",
-  "group": "03 通道管理",
-  "description": "代收产品名称、编码、状态与关联通道；启用后进入公共产品目录。",
-  "sourceName": "平台端通道管理-demo.html",
-  "sourceKey": "channels",
-  "initialHash": "collectionProducts",
-  "navId": "channel-vendors"
- },
- "payout-products": {
-  "label": "代付产品管理",
-  "code": "03-05",
-  "group": "03 通道管理",
-  "description": "代付产品名称、编码与币种。",
-  "sourceName": "平台端通道管理-demo.html",
-  "sourceKey": "channels",
-  "initialHash": "payoutProducts",
-  "navId": "channel-vendors"
- },
- "wallets": {
-  "label": "租户平台钱包",
-  "code": "04-01",
-  "group": "04 租户平台钱包",
-  "description": "三类 CNY 钱包、余额与关联流水",
-  "sourceName": "平台端租户平台钱包-demo.html",
-  "sourceKey": "wallets",
-  "initialHash": "wallets",
-  "navId": "wallets"
- },
- "funds": {
-  "label": "资金待办",
-  "code": "05-01",
-  "group": "05 资金待办",
-  "description": "提款、账户、调整与异常资金队列",
-  "sourceName": "平台端资金待办-demo.html",
-  "sourceKey": "funds",
-  "initialHash": "funds",
-  "navId": "funds"
- },
- "tenant-daily-report": {
-  "label": "租户日终报表",
-  "code": "06-01",
-  "group": "06 日终统计",
-  "description": "按租户汇总经营指标、成本与利润",
-  "sourceName": "平台端租户整体报表-demo.html",
-  "sourceKey": "report",
-  "initialHash": "tenant-daily-report",
-  "navId": "tenant-daily-report"
- },
- "channel-daily-report": {
-  "label": "通道日终报表",
-  "code": "06-02",
-  "group": "06 日终统计",
-  "description": "按全平台通道汇总成功率、成本与利润",
-  "sourceName": "平台端租户整体报表-demo.html",
-  "sourceKey": "report",
-  "initialHash": "channel-daily-report",
-  "navId": "channel-daily-report"
- },
- "ledger": {
-  "label": "租户整体流水",
-  "code": "07-01",
-  "group": "07 租户整体流水",
-  "description": "余额变动、冻结与来源追溯",
-  "sourceName": "平台端租户整体流水-demo.html",
-  "sourceKey": "ledger",
-  "initialHash": "ledger",
-  "navId": "ledger"
- },
- "orders": {
-  "label": "全局订单查询",
-  "code": "08-01",
-  "group": "08 全局订单查询",
-  "description": "四层编号定位与关联下钻",
-  "sourceName": "平台端全局订单查询-demo.html",
-  "sourceKey": "orders",
-  "initialHash": "orders",
-  "navId": "orders"
- },
- "audit": {
-  "label": "审计日志",
-  "code": "09-01",
-  "group": "09 审计日志",
-  "description": "操作记录、筛选与范围导出",
-  "sourceName": "平台端审计日志-demo.html",
-  "sourceKey": "audit",
-  "initialHash": "audit",
-  "navId": "audit"
- },
- "system-accounts": {
-  "label": "平台账号",
-  "code": "10-01",
-  "group": "10 系统管理",
-  "description": "账号新增、编辑、重置与下线",
-  "sourceName": "平台端系统管理-demo.html",
-  "sourceKey": "system",
-  "initialHash": "users",
-  "navId": "system-accounts"
- },
- "system-roles": {
-  "label": "角色配置",
-  "code": "10-02",
-  "group": "10 系统管理",
-  "description": "角色、成员、页面与按钮授权",
-  "sourceName": "平台端系统管理-demo.html",
-  "sourceKey": "system",
-  "initialHash": "roles",
-  "navId": "system-accounts"
- },
- "system-security": {
-  "label": "安全配置",
-  "code": "10-03",
-  "group": "10 系统管理",
-  "description": "登录策略、IP 白名单与安全操作",
-  "sourceName": "平台端系统管理-demo.html",
-  "sourceKey": "system",
-  "initialHash": "security",
-  "navId": "system-accounts"
- },
- "system-menus": {
-  "label": "平台菜单管理",
-  "code": "10-04",
-  "group": "10 系统管理",
-  "description": "平台端自身目录、页面、路由与权限标识",
-  "sourceName": "平台端系统管理-demo.html",
-  "sourceKey": "system",
-  "initialHash": "menus",
-  "navId": "system-accounts"
- },
- "system-tenant-menus": {
-  "label": "租户菜单管理",
-  "code": "10-05",
-  "group": "10 系统管理",
-  "description": "租户端菜单目录、路由、权限标识与发布范围",
-  "sourceName": "平台端系统管理-demo.html",
-  "sourceKey": "system",
-  "initialHash": "tenant-menus",
-  "navId": "system-accounts"
- },
- "login-form": {
-  "label": "账号登录",
-  "code": "11-01",
-  "group": "11 登录页面",
-  "description": "账号、密码与 Google 2FA 登录",
-  "sourceName": "平台端登录页面-demo.html",
-  "sourceKey": "login",
-  "initialHash": "login",
-  "navId": "login-form"
- },
- "login-bind": {
-  "label": "首次绑定 2FA",
-  "code": "11-02",
-  "group": "11 登录页面",
-  "description": "二维码、密钥与验证码绑定流程",
-  "sourceName": "平台端登录页面-demo.html",
-  "sourceKey": "login",
-  "initialHash": "bind",
-  "navId": "login-bind"
- },
- "login-exception": {
-  "label": "登录异常提示",
-  "code": "11-03",
-  "group": "11 登录页面",
-  "description": "账号、权限与安全拦截反馈",
-  "sourceName": "平台端登录页面-demo.html",
-  "sourceKey": "login",
-  "initialHash": "exception",
-  "navId": "login-exception"
- },
- "notifications": {
-  "label": "平台通知中心",
-  "code": "14-01",
-  "group": "14 平台通知中心",
-  "description": "平台级通知发送记录、通知配置与事件来源追溯",
-  "sourceName": "平台端通知中心-demo.html",
-  "sourceKey": "notifications",
-  "initialHash": "notifications",
-  "navId": "notifications"
- }
+  "project-index": {
+    "label": "平台端功能导航索引",
+    "code": "INDEX",
+    "group": "项目入口",
+    "description": "全部模块综合入口与跨页导航",
+    "sourceName": "平台端功能导航索引-demo.html",
+    "sourceKey": "projectIndex",
+    "initialHash": "",
+    "navId": "project-index"
+  },
+  "home": {
+    "label": "首页数据看板",
+    "code": "00-01",
+    "group": "00 首页数据看板",
+    "description": "指标、趋势、排行与风险来源",
+    "sourceName": "平台端首页数据看板-demo.html",
+    "sourceKey": "home",
+    "initialHash": "home",
+    "navId": "home"
+  },
+  "tenant-list": {
+    "label": "租户列表",
+    "code": "01-01",
+    "group": "01 租户管理",
+    "description": "查询、筛选与租户生命周期入口",
+    "sourceName": "平台端租户管理-demo.html",
+    "sourceKey": "tenants",
+    "initialHash": "list",
+    "navId": "tenant-list"
+  },
+  "tenant-create": {
+    "label": "新增租户",
+    "code": "01-02",
+    "group": "01 租户管理",
+    "description": "基础资料、访问地址与超级管理员初始化",
+    "sourceName": "平台端租户管理-demo.html",
+    "sourceKey": "tenants",
+    "initialHash": "create",
+    "navId": "tenant-list"
+  },
+  "tenant-detail-overview": {
+    "label": "租户详情·概览",
+    "code": "01-03",
+    "group": "01 租户管理",
+    "description": "租户资料、状态与生命周期摘要",
+    "sourceName": "平台端租户管理-demo.html",
+    "sourceKey": "tenants",
+    "initialHash": "detail-overview",
+    "navId": "tenant-list"
+  },
+  "tenant-detail-business": {
+    "label": "租户详情·业务",
+    "code": "01-04",
+    "group": "01 租户管理",
+    "description": "已授权通道商与业务摘要",
+    "sourceName": "平台端租户管理-demo.html",
+    "sourceKey": "tenants",
+    "initialHash": "detail-business",
+    "navId": "tenant-list"
+  },
+  "tenant-detail-security": {
+    "label": "租户详情·安全",
+    "code": "01-05",
+    "group": "01 租户管理",
+    "description": "账号状态、后台登录 IP、业务 API 来源 IP 与安全处理",
+    "sourceName": "平台端租户管理-demo.html",
+    "sourceKey": "tenants",
+    "initialHash": "detail-security",
+    "navId": "tenant-list"
+  },
+  "tenant-detail-domains": {
+    "label": "租户详情·域名管理",
+    "code": "01-06",
+    "group": "01 租户管理",
+    "description": "租户后台与商户端共享域名的录入、检测、启停和解绑",
+    "sourceName": "平台端租户管理-demo.html",
+    "sourceKey": "tenants",
+    "initialHash": "detail-domains",
+    "navId": "tenant-list"
+  },
+  "tenant-detail-wallet": {
+    "label": "租户详情·钱包",
+    "code": "01-07",
+    "group": "01 租户管理",
+    "description": "三类 CNY 钱包摘要与独立页面入口",
+    "sourceName": "平台端租户管理-demo.html",
+    "sourceKey": "tenants",
+    "initialHash": "detail-wallet",
+    "navId": "tenant-list"
+  },
+  "tenant-detail-audit": {
+    "label": "租户详情·审计",
+    "code": "01-08",
+    "group": "01 租户管理",
+    "description": "租户相关操作与状态变更记录",
+    "sourceName": "平台端租户管理-demo.html",
+    "sourceKey": "tenants",
+    "initialHash": "detail-audit",
+    "navId": "tenant-list"
+  },
+  "business": {
+    "label": "通道商授权",
+    "code": "02-01",
+    "group": "02 通道商授权",
+    "description": "按租户授权通道商；租户自行配置通道和产品",
+    "sourceName": "平台端业务开通-demo.html",
+    "sourceKey": "business",
+    "initialHash": "business",
+    "navId": "business"
+  },
+  "channel-vendors": {
+    "label": "通道商管理",
+    "code": "03-01",
+    "group": "03 通道商管理",
+    "description": "通道商主体、代收钱包与分币种代付钱包。",
+    "sourceName": "平台端通道管理-demo.html",
+    "sourceKey": "channels",
+    "initialHash": "vendors",
+    "navId": "channel-vendors"
+  },
+  "collection-channels": {
+    "label": "通道商管理",
+    "code": "03-02",
+    "group": "03 通道商管理",
+    "description": "通道配置已下放租户端；旧入口定位通道商管理",
+    "sourceName": "平台端通道管理-demo.html",
+    "sourceKey": "channels",
+    "initialHash": "vendors",
+    "navId": "channel-vendors"
+  },
+  "payout-channels": {
+    "label": "通道商管理",
+    "code": "03-03",
+    "group": "03 通道商管理",
+    "description": "通道配置已下放租户端；旧入口定位通道商管理",
+    "sourceName": "平台端通道管理-demo.html",
+    "sourceKey": "channels",
+    "initialHash": "vendors",
+    "navId": "channel-vendors"
+  },
+  "collection-products": {
+    "label": "代收产品管理",
+    "code": "03-04",
+    "group": "03 通道商管理",
+    "description": "代收产品名称、编码、状态与关联通道；启用后进入公共产品目录。",
+    "sourceName": "平台端通道管理-demo.html",
+    "sourceKey": "channels",
+    "initialHash": "collectionProducts",
+    "navId": "channel-vendors"
+  },
+  "payout-products": {
+    "label": "代付产品管理",
+    "code": "03-05",
+    "group": "03 通道商管理",
+    "description": "代付产品名称、编码与币种。",
+    "sourceName": "平台端通道管理-demo.html",
+    "sourceKey": "channels",
+    "initialHash": "payoutProducts",
+    "navId": "channel-vendors"
+  },
+  "wallets": {
+    "label": "租户平台钱包",
+    "code": "04-01",
+    "group": "04 租户平台钱包",
+    "description": "三类 CNY 钱包、余额与关联流水",
+    "sourceName": "平台端租户平台钱包-demo.html",
+    "sourceKey": "wallets",
+    "initialHash": "wallets",
+    "navId": "wallets"
+  },
+  "funds": {
+    "label": "资金待办",
+    "code": "05-01",
+    "group": "05 资金待办",
+    "description": "提款、账户、调整与异常资金队列",
+    "sourceName": "平台端资金待办-demo.html",
+    "sourceKey": "funds",
+    "initialHash": "funds",
+    "navId": "funds"
+  },
+  "tenant-daily-report": {
+    "label": "租户日终报表",
+    "code": "06-01",
+    "group": "06 日终统计",
+    "description": "按租户汇总经营指标、成本与利润",
+    "sourceName": "平台端租户整体报表-demo.html",
+    "sourceKey": "report",
+    "initialHash": "tenant-daily-report",
+    "navId": "tenant-daily-report"
+  },
+  "channel-daily-report": {
+    "label": "通道日终报表",
+    "code": "06-02",
+    "group": "06 日终统计",
+    "description": "按全平台通道汇总成功率、成本与利润",
+    "sourceName": "平台端租户整体报表-demo.html",
+    "sourceKey": "report",
+    "initialHash": "channel-daily-report",
+    "navId": "channel-daily-report"
+  },
+  "ledger": {
+    "label": "租户整体流水",
+    "code": "07-01",
+    "group": "07 租户整体流水",
+    "description": "余额变动、冻结与来源追溯",
+    "sourceName": "平台端租户整体流水-demo.html",
+    "sourceKey": "ledger",
+    "initialHash": "ledger",
+    "navId": "ledger"
+  },
+  "orders": {
+    "label": "全局订单查询",
+    "code": "08-01",
+    "group": "08 全局订单查询",
+    "description": "四层编号定位与关联下钻",
+    "sourceName": "平台端全局订单查询-demo.html",
+    "sourceKey": "orders",
+    "initialHash": "orders",
+    "navId": "orders"
+  },
+  "audit": {
+    "label": "审计日志",
+    "code": "09-01",
+    "group": "09 审计日志",
+    "description": "操作记录、筛选与范围导出",
+    "sourceName": "平台端审计日志-demo.html",
+    "sourceKey": "audit",
+    "initialHash": "audit",
+    "navId": "audit"
+  },
+  "system-accounts": {
+    "label": "平台账号",
+    "code": "10-01",
+    "group": "10 系统管理",
+    "description": "账号新增、编辑、重置与下线",
+    "sourceName": "平台端系统管理-demo.html",
+    "sourceKey": "system",
+    "initialHash": "users",
+    "navId": "system-accounts"
+  },
+  "system-roles": {
+    "label": "角色配置",
+    "code": "10-02",
+    "group": "10 系统管理",
+    "description": "角色、成员、页面与按钮授权",
+    "sourceName": "平台端系统管理-demo.html",
+    "sourceKey": "system",
+    "initialHash": "roles",
+    "navId": "system-accounts"
+  },
+  "system-security": {
+    "label": "安全配置",
+    "code": "10-03",
+    "group": "10 系统管理",
+    "description": "登录策略、IP 白名单与安全操作",
+    "sourceName": "平台端系统管理-demo.html",
+    "sourceKey": "system",
+    "initialHash": "security",
+    "navId": "system-accounts"
+  },
+  "system-menus": {
+    "label": "平台菜单管理",
+    "code": "10-04",
+    "group": "10 系统管理",
+    "description": "平台端自身目录、页面、路由与权限标识",
+    "sourceName": "平台端系统管理-demo.html",
+    "sourceKey": "system",
+    "initialHash": "menus",
+    "navId": "system-accounts"
+  },
+  "system-tenant-menus": {
+    "label": "租户菜单管理",
+    "code": "10-05",
+    "group": "10 系统管理",
+    "description": "租户端菜单目录、路由、权限标识与发布范围",
+    "sourceName": "平台端系统管理-demo.html",
+    "sourceKey": "system",
+    "initialHash": "tenant-menus",
+    "navId": "system-accounts"
+  },
+  "login-form": {
+    "label": "账号登录",
+    "code": "11-01",
+    "group": "11 登录页面",
+    "description": "账号、密码与 Google 2FA 登录",
+    "sourceName": "平台端登录页面-demo.html",
+    "sourceKey": "login",
+    "initialHash": "login",
+    "navId": "login-form"
+  },
+  "login-bind": {
+    "label": "首次绑定 2FA",
+    "code": "11-02",
+    "group": "11 登录页面",
+    "description": "二维码、密钥与验证码绑定流程",
+    "sourceName": "平台端登录页面-demo.html",
+    "sourceKey": "login",
+    "initialHash": "bind",
+    "navId": "login-bind"
+  },
+  "login-exception": {
+    "label": "登录异常提示",
+    "code": "11-03",
+    "group": "11 登录页面",
+    "description": "账号、权限与安全拦截反馈",
+    "sourceName": "平台端登录页面-demo.html",
+    "sourceKey": "login",
+    "initialHash": "exception",
+    "navId": "login-exception"
+  },
+  "notifications": {
+    "label": "平台通知中心",
+    "code": "14-01",
+    "group": "14 平台通知中心",
+    "description": "平台级通知发送记录、通知配置与事件来源追溯",
+    "sourceName": "平台端通知中心-demo.html",
+    "sourceKey": "notifications",
+    "initialHash": "notifications",
+    "navId": "notifications"
+  }
 }
