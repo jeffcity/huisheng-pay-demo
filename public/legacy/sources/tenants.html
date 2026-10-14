@@ -1517,7 +1517,8 @@
         min-height: var(--topbar-height);
       }
     }
-  </style>
+  .tenant-billing-settings{border:1px solid #e4e7ed;border-radius:8px;padding:16px;background:#f8faff}.tenant-billing-settings h3{font-size:15px;margin:0 0 8px}.tenant-billing-settings small{line-height:1.6;display:block;color:#606266}.tenant-billing-settings .form-grid{margin-top:12px}.tenant-billing-settings .field{justify-content:flex-start}.tenant-billing-settings select{min-height:32px!important;height:32px!important;padding:4px 10px}.tenant-billing-settings .field label{min-height:20px}
+</style>
 </head>
 <body>
   <div class="app-shell">
@@ -1750,6 +1751,10 @@
           <label for="initialLoginIpInput">初始管理员登录 IP</label>
           <input id="initialLoginIpInput" class="mono" value="103.18.50.80" placeholder="必填，完整 IPv4" autocomplete="off">
           <small>与租户及管理员原子创建并立即启用，确保管理员可首次登录。</small>
+        </div>
+        <div class="field wide tenant-billing-settings">
+          <h3>租户服务费</h3><p class="cell-sub">平台向本租户收取的费用，代收、代付分别设置；按成功交易计算。</p>
+          <div class="form-grid"><div class="field"><label for="tenantCollectionBillingMode">代收计费方式</label><select id="tenantCollectionBillingMode"><option value="percentage">交易百分比</option><option value="perTransaction">按单笔</option></select></div><div class="field"><label id="tenantCollectionBillingLabel" for="tenantCollectionBillingValue">代收费率（%）</label><input id="tenantCollectionBillingValue" type="number" min="0" step="0.0001" placeholder="未设置"><small id="tenantCollectionBillingFormula"></small></div><div class="field"><label for="tenantPayoutBillingMode">代付计费方式</label><select id="tenantPayoutBillingMode"><option value="percentage">交易百分比</option><option value="perTransaction">按单笔</option></select></div><div class="field"><label id="tenantPayoutBillingLabel" for="tenantPayoutBillingValue">代付费率（%）</label><input id="tenantPayoutBillingValue" type="number" min="0" step="0.0001" placeholder="未设置"><small id="tenantPayoutBillingFormula"></small></div></div><p class="cell-sub">单笔费用按当前 CNY 业务设置；未填写表示尚未设置，填写 0 表示免费。</p>
         </div>
         <div class="field wide">
           <label for="tenantRemarkInput">备注</label>
@@ -2972,6 +2977,7 @@
           kv('提款钱包可用', formatMoney(tenant.credit)) +
           kv('代付钱包总额', formatMoney(tenant.wallet)) +
           kv('当前状态', tenant.status) +
+          kv('租户服务费', tenantBillingSummary(tenant)) +
         '</div>' +
         '<div class="tag-row">' +
           editProfileAction +
@@ -3113,6 +3119,20 @@
       });
     }
 
+    function readTenantBillingForm() {
+      return Object.fromEntries([['collection','Collection'],['payout','Payout']].map(([key,id])=>[key,{mode:document.getElementById('tenant'+id+'BillingMode').value,value:document.getElementById('tenant'+id+'BillingValue').value.trim()}]));
+    }
+    function updateTenantBillingPreview() {
+      const model=window.HSProviderDemo;
+      for(const [key,label] of [['Collection','代收'],['Payout','代付']]) {
+        const mode=document.getElementById('tenant'+key+'BillingMode').value,input=document.getElementById('tenant'+key+'BillingValue'),out=document.getElementById('tenant'+key+'BillingFormula');
+        document.getElementById('tenant'+key+'BillingLabel').textContent=label+(mode==='percentage'?'费率（%）':'单笔费用（CNY / 笔）');
+        input.step=mode==='percentage'?'0.0001':'0.01';if(mode==='percentage')input.max='100';else input.removeAttribute('max');
+        try{const p={mode,value:input.value.trim()},amount=model.billingPreview(p);out.textContent=amount===null?'未设置':model.billingFormula(p)+'；例：成功金额 CNY 10,000，成功 100 笔，服务费 CNY '+amount;}catch(e){out.textContent=e.message;}
+      }
+    }
+    function tenantBillingSummary(tenant) {const model=window.HSProviderDemo,b=model.tenantBilling(tenant.id);return '代收：'+model.billingFormula(b.collection)+'；代付：'+model.billingFormula(b.payout);}
+
     function openTenantModal(mode, tenantId) {
       const permissions = getPermissions();
       if (mode === 'create' && !canCreateTenant()) {
@@ -3144,6 +3164,9 @@
       initialLoginIpInput.readOnly = mode === 'edit';
       document.getElementById('initialLoginIpField').hidden = false;
       document.getElementById('tenantRemarkInput').value = mode === 'edit' ? tenant.remark : '';
+      const billing=mode==='edit'?window.HSProviderDemo.tenantBilling(tenant.id):{collection:{mode:'percentage',value:''},payout:{mode:'percentage',value:''}};
+      for(const [key,id] of [['collection','Collection'],['payout','Payout']]){document.getElementById('tenant'+id+'BillingMode').value=billing[key].mode;document.getElementById('tenant'+id+'BillingValue').value=billing[key].value;}
+      updateTenantBillingPreview();
       document.getElementById('modalBackdrop').classList.add('open');
       showTenantDialog(document.getElementById('tenantModal'));
     }
@@ -3279,6 +3302,8 @@
         showFormError('tenantFormError', '当前角色没有本次租户资料操作权限，未保存任何数据。');
         return;
       }
+      let billing;
+      try{billing=window.HSProviderDemo.validateTenantBilling(readTenantBillingForm());}catch(e){showFormError('tenantFormError',e.message,['tenantCollectionBillingValue','tenantPayoutBillingValue']);return;}
       const values = {
         name: document.getElementById('tenantNameInput').value.trim(),
         contact: document.getElementById('contactInput').value.trim(),
@@ -3362,7 +3387,7 @@
           apiIpRules: [],
           channels: [],
           tx: '-',
-          feePolicy: '待业务开通绑定套餐',
+          feePolicy: '按租户服务费设置',
           audit: []
         };
         tenants.unshift(tenant);
@@ -3378,9 +3403,10 @@
       let sharedTenant = providerModel.tenants.find(t=>t.id===tenant.id);
       if (!sharedTenant) {sharedTenant={id:tenant.id,name:tenant.name};providerModel.tenants.push(sharedTenant);}
       sharedTenant.name = tenant.name;
+      providerModel.setTenantBilling(tenant.id,billing);
       appState.selectedTenant = tenant;
       ensureTenantAccessState(tenant);
-      const audit = addTenantAudit(tenant, action, '成功', editing ? '更新租户资料' : '原子创建租户、唯一超级管理员、已启用初始登录 IP、未启用系统域名和三个 CNY 钱包');
+      const audit = addTenantAudit(tenant, action, '成功', editing ? '更新租户资料及服务费：代收 '+providerModel.billingFormula(billing.collection)+'；代付 '+providerModel.billingFormula(billing.payout) : '原子创建租户、唯一超级管理员、已启用初始登录 IP、未启用系统域名和三个 CNY 钱包');
       setOperationReceipt({
         title: editing ? '租户资料已保存并生效' : '租户已创建',
         tenant,
@@ -3390,6 +3416,7 @@
       });
       closeTenantModal();
       applyFilters(false);
+      if(document.getElementById('tenantDetailModal')?.classList?.contains('open'))renderDetailSections(tenant);
       showToast(editing ? '租户资料已保存' : '租户已创建', tenant.id + ' 已同步列表、详情和审计日志。');
       if (!editing) openTenantCreatedResult(tenant, oneTimePassword);
     }
@@ -3827,6 +3854,7 @@
         document.getElementById('domainInput').value = normalized ? normalized + '.hs-pay.com' : '请输入域名前缀';
       });
       document.getElementById('saveTenantBtn').addEventListener('click', saveTenantProfile);
+      for(const key of ['Collection','Payout']) {document.getElementById('tenant'+key+'BillingMode').addEventListener('change',()=>{document.getElementById('tenant'+key+'BillingValue').value='';updateTenantBillingPreview();});document.getElementById('tenant'+key+'BillingValue').addEventListener('input',updateTenantBillingPreview);}
       document.querySelectorAll('[data-close-modal]').forEach(button => button.addEventListener('click', closeTenantModal));
       document.querySelectorAll('[data-close-confirm]').forEach(button => button.addEventListener('click', closeConfirm));
       document.getElementById('confirmActionBtn').addEventListener('click', applyTenantConfirm);
