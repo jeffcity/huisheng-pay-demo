@@ -167,6 +167,29 @@
       *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
     }
 
+    .operator-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding: 16px; background: var(--surface-soft); }
+    .operator-toolbar .control { max-width: 250px; }
+    .operator-table { min-width: 1100px; }
+    .operator-username { color: var(--primary); }
+    .operator-permission-summary { display: block; max-width: 310px; overflow: hidden; text-overflow: ellipsis; }
+    .operator-businesses { display: flex; flex-wrap: wrap; gap: 6px; }
+    .operator-checks { display: flex; flex-wrap: wrap; gap: 18px; min-height: 34px; align-items: center; }
+    .field .operator-checkbox { display: inline-flex; align-items: center; gap: 8px; margin: 0; color: var(--text); font-size: 14px; font-weight: 400; cursor: pointer; }
+    .operator-checkbox input { width: 16px; height: 16px; margin: 0; accent-color: var(--primary); }
+    .operator-permission-picker { position: relative; }
+    .operator-permission-trigger { display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; }
+    .operator-permission-trigger span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    .operator-permission-trigger:disabled { cursor: not-allowed; background: #f2f3f5; color: var(--text-3); }
+    .operator-permission-options { position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 95; display: grid; gap: 2px; max-height: 240px; overflow: auto; padding: 6px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); box-shadow: 0 6px 20px rgba(29,33,41,.16); }
+    .operator-permission-options .operator-checkbox { display: flex; padding: 8px; border-radius: 3px; }
+    .operator-permission-options .operator-checkbox:hover { background: var(--primary-soft); }
+    .operator-form-grid { grid-template-columns: 1fr; }
+    .operator-required { color: var(--danger); margin-right: 4px; }
+    .operator-page-jump { width: 54px; }
+    .operator-page-size { width: 105px; }
+    .operator-pager { flex-wrap: wrap; }
+    @media (max-width: 720px) { .operator-toolbar .control { max-width: none; } .operator-pager { justify-content: flex-start; } }
+
     .bot-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 28px; padding: 20px; }
     .bot-form-grid .full { grid-column: 1 / -1; }
     .bot-switch-field { display: flex; align-items: center; gap: 12px; min-height: 34px; }
@@ -280,6 +303,26 @@
         </div>
         <div class="bot-form-actions"><button class="btn primary" type="submit">保存</button><span class="bot-save-status" id="payoutBotStatus" role="status"></span></div>
       </form>
+      <section class="card" id="tgOperatorsCard" aria-labelledby="tgOperatorsTitle">
+        <header class="card-head"><div><h2 id="tgOperatorsTitle">TG操作员</h2></div></header>
+        <div class="operator-toolbar">
+          <input class="control" id="operatorSearch" type="search" placeholder="请输入TG账号" aria-label="TG账号搜索">
+          <button class="btn primary" id="searchOperators" type="button">搜索</button>
+          <button class="btn primary" id="addOperator" type="button">新增</button>
+        </div>
+        <div class="table-wrap"><table class="operator-table" aria-label="TG操作员列表">
+          <thead><tr><th>序号</th><th>用户名</th><th>业务类型</th><th>业务权限</th><th>系统管理员账号</th><th>状态</th><th>创建时间</th><th>操作</th></tr></thead>
+          <tbody id="operatorsBody"></tbody>
+        </table></div>
+        <div class="pager operator-pager">
+          <span id="operatorTotal" role="status"></span>
+          <select class="control operator-page-size" id="operatorPageSize" aria-label="TG操作员每页条数"><option value="10">10条/页</option><option value="20">20条/页</option><option value="50">50条/页</option></select>
+          <button class="page-btn" id="operatorPreviousPage" type="button" aria-label="TG操作员上一页">‹</button>
+          <span class="row-actions" id="operatorPageButtons"></span>
+          <button class="page-btn" id="operatorNextPage" type="button" aria-label="TG操作员下一页">›</button>
+          <label for="operatorPageJump">前往</label><input class="control operator-page-jump" id="operatorPageJump" type="number" min="1" value="1" aria-label="TG操作员页码"><span>页</span>
+        </div>
+      </section>
     </section>
   </main>
 
@@ -299,6 +342,21 @@
       </div>
       <footer class="modal-actions"><button class="btn" id="cancelConfigModal" type="button">取消</button><button class="btn primary" id="submitConfigModal" type="button">保存配置</button></footer>
     </div>
+  </div>
+
+  <div class="mask" id="operatorMask" role="dialog" aria-modal="true" aria-labelledby="operatorModalTitle">
+    <form class="modal" id="operatorForm" novalidate>
+      <header class="modal-head"><h3 id="operatorModalTitle">新增TG操作员</h3><button class="close" id="closeOperatorModal" type="button" aria-label="关闭TG操作员弹窗">×</button></header>
+      <div class="modal-body"><div class="modal-grid operator-form-grid">
+        <div class="field"><label for="operatorUsername"><span class="operator-required">*</span>用户名</label><input class="control" id="operatorUsername" placeholder="请输入带@的TG用户名，例如：@12345" autocomplete="off" aria-required="true" aria-describedby="operatorUsernameError"><span class="field-error" id="operatorUsernameError"></span></div>
+        <div class="field"><label id="operatorEnabledLabel">状态</label><div class="bot-switch-field"><button class="switch on" id="operatorEnabled" type="button" role="switch" aria-checked="true" aria-labelledby="operatorEnabledLabel"></button><span id="operatorEnabledText">启用</span></div></div>
+        <div class="field"><label id="operatorBusinessesLabel">业务类型</label><div class="operator-checks" role="group" aria-labelledby="operatorBusinessesLabel" aria-describedby="operatorBusinessesError"><label class="operator-checkbox"><input type="checkbox" id="operatorCollectBusiness" value="collect">代收</label><label class="operator-checkbox"><input type="checkbox" id="operatorPayoutBusiness" value="payout">代付</label></div><span class="hint">可同时勾选；请至少选一项</span><span class="field-error" id="operatorBusinessesError"></span></div>
+        <div class="field"><label id="operatorCollectPermissionsLabel">代收业务</label><div class="operator-permission-picker"><button class="control operator-permission-trigger" id="operatorCollectPermissions" type="button" aria-label="选择代收业务权限" aria-expanded="false" aria-controls="operatorCollectPermissionOptions" disabled><span id="operatorCollectPermissionSummary">请选择代收权限</span><span aria-hidden="true">⌄</span></button><div class="operator-permission-options" id="operatorCollectPermissionOptions" role="group" aria-label="代收业务权限" hidden></div></div></div>
+        <div class="field"><label id="operatorPayoutPermissionsLabel">代付业务</label><div class="operator-permission-picker"><button class="control operator-permission-trigger" id="operatorPayoutPermissions" type="button" aria-label="选择代付业务权限" aria-expanded="false" aria-controls="operatorPayoutPermissionOptions" disabled><span id="operatorPayoutPermissionSummary">请选择代付权限</span><span aria-hidden="true">⌄</span></button><div class="operator-permission-options" id="operatorPayoutPermissionOptions" role="group" aria-label="代付业务权限" hidden></div></div></div>
+        <div class="field"><label for="operatorSystemAccount"><span class="operator-required">*</span>系统管理员账号</label><input class="control" id="operatorSystemAccount" placeholder="请输入" autocomplete="off" aria-required="true" aria-describedby="operatorSystemAccountError"><span class="field-error" id="operatorSystemAccountError"></span></div>
+      </div></div>
+      <footer class="modal-actions"><button class="btn" id="cancelOperatorModal" type="button">取消</button><button class="btn primary" type="submit">确定</button></footer>
+    </form>
   </div>
 
   <div class="mask" id="confirmMask" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
@@ -724,6 +782,165 @@
         toast((business === "collect" ? "代收" : "代付") + "机器人配置已保存");
       });
     });
+    // Local demonstration only; real operator permission codes and Telegram auth come from the original service.
+    const operatorPermissions = {
+      collect: ["绑定商户", "绑定通道", "下发资金", "预付增加", "预付扣减", "结算", "执行对账", "启用商户/通道", "禁用商户/通道", "查单反馈", "代收回调", "代收回调确认"],
+      payout: ["绑定商户", "绑定通道", "查单反馈", "代付预付增加", "代付预付扣减", "代付回调", "代付回调确认"]
+    };
+    const operatorBusinessNames = { collect: "代收", payout: "代付" };
+    const operatorTenantId = window.HSProviderDemo?.tenantId || "HS-TEN-001";
+    function createDemoOperators(tenantId) {
+      return Array.from({ length: 13 }, function (_, index) {
+        const mode = index % 3;
+        return { id: tenantId + "-TG-" + (index + 1), username: "@hs_" + ["query", "collect", "payout"][mode] + "_" + tenantId.slice(-3) + "_" + String(index + 1).padStart(2, "0"),
+          businesses: mode === 0 ? ["collect", "payout"] : [mode === 1 ? "collect" : "payout"],
+          permissions: { collect: mode !== 2 ? ["绑定商户", "查单反馈"] : [], payout: mode !== 1 ? ["绑定通道", "查单反馈"] : [] },
+          systemAccount: ["tenant.admin", "tenant.collect", "tenant.payout"][mode], on: index !== 6,
+          createdAt: "2026-10-14 10:" + String(index + 10).padStart(2, "0") + ":00" };
+      });
+    }
+    const operatorTenantData = window.HSProviderDemo?.tenantData(operatorTenantId);
+    const operatorRecords = operatorTenantData ? (operatorTenantData.tgOperators ||= createDemoOperators(operatorTenantId)) : createDemoOperators(operatorTenantId);
+    let operatorKeyword = "", operatorPage = 1, editingOperatorId = null, operatorSequence = 0, operatorReturnFocus = null;
+    function operatorContextValid() {
+      if ((window.HSProviderDemo?.tenantId || "HS-TEN-001") === operatorTenantId) return true;
+      closeOperatorModal();
+      toast("当前租户已切换，请重新进入通知中心");
+      return false;
+    }
+    function filteredOperators() {
+      return operatorRecords.filter(function (item) { return item.username.toLowerCase().includes(operatorKeyword); });
+    }
+    function operatorPageCount() { return Math.max(1, Math.ceil(filteredOperators().length / Number(byId("operatorPageSize").value))); }
+    function renderOperators() {
+      const records = filteredOperators(), size = Number(byId("operatorPageSize").value), pages = operatorPageCount();
+      operatorPage = Math.min(Math.max(1, operatorPage), pages);
+      const start = (operatorPage - 1) * size;
+      byId("operatorsBody").innerHTML = records.slice(start, start + size).map(function (item, index) {
+        const permissions = item.businesses.map(function (business) { return (item.permissions[business] || []).join("、"); }).filter(Boolean).join("；") || "—";
+        return '<tr><td>' + (start + index + 1) + '</td><td><span class="operator-username">' + escapeHtml(item.username) + '</span></td><td><div class="operator-businesses">' + item.businesses.map(function (business) { return '<span class="tag blue">' + operatorBusinessNames[business] + '</span>'; }).join("") + '</div></td><td><span class="operator-permission-summary" title="' + escapeHtml(permissions) + '">' + escapeHtml(permissions) + '</span></td><td>' + escapeHtml(item.systemAccount) + '</td><td><button class="switch ' + (item.on ? 'on' : '') + '" type="button" role="switch" aria-checked="' + item.on + '" aria-label="' + escapeHtml(item.username) + ' 状态" data-operator-action="toggle" data-operator-id="' + escapeHtml(item.id) + '"></button><span class="switch-label">' + (item.on ? '启用' : '停用') + '</span></td><td class="mono">' + escapeHtml(item.createdAt) + '</td><td><div class="row-actions"><button class="link-btn" type="button" data-operator-action="edit" data-operator-id="' + escapeHtml(item.id) + '">修改</button><button class="link-btn danger" type="button" data-operator-action="delete" data-operator-id="' + escapeHtml(item.id) + '">删除</button></div></td></tr>';
+      }).join("") || '<tr><td class="empty" colspan="8">暂无匹配的TG操作员</td></tr>';
+      byId("operatorTotal").textContent = "共 " + records.length + " 条";
+      byId("operatorPreviousPage").disabled = operatorPage === 1;
+      byId("operatorNextPage").disabled = operatorPage === pages;
+      byId("operatorPageJump").value = operatorPage;
+      byId("operatorPageJump").max = pages;
+      const firstPage = Math.max(1, Math.min(operatorPage - 2, pages - 4));
+      byId("operatorPageButtons").innerHTML = Array.from({ length: Math.min(5, pages) }, function (_, index) {
+        const page = firstPage + index;
+        return '<button class="page-btn ' + (page === operatorPage ? 'active' : '') + '" type="button" data-operator-page="' + page + '" aria-label="TG操作员第 ' + page + ' 页"' + (page === operatorPage ? ' aria-current="page"' : '') + '>' + page + '</button>';
+      }).join("");
+    }
+    function closeOperatorPermissionPickers() {
+      ["Collect", "Payout"].forEach(function (business) { byId("operator" + business + "PermissionOptions").hidden = true; byId("operator" + business + "Permissions").setAttribute("aria-expanded", "false"); });
+    }
+    function updateOperatorPermissionControls() {
+      ["collect", "payout"].forEach(function (business) {
+        const suffix = business === "collect" ? "Collect" : "Payout", enabled = byId("operator" + suffix + "Business").checked;
+        const inputs = Array.from(byId("operator" + suffix + "PermissionOptions").querySelectorAll("input"));
+        inputs.forEach(function (input) { input.disabled = !enabled; });
+        byId("operator" + suffix + "Permissions").disabled = !enabled;
+        byId("operator" + suffix + "PermissionSummary").textContent = enabled && inputs.some(function (input) { return input.checked; }) ? inputs.filter(function (input) { return input.checked; }).map(function (input) { return input.value; }).join("、") : "请选择" + operatorBusinessNames[business] + "权限";
+        if (!enabled) { byId("operator" + suffix + "PermissionOptions").hidden = true; byId("operator" + suffix + "Permissions").setAttribute("aria-expanded", "false"); }
+      });
+    }
+    function clearOperatorErrors() {
+      ["operatorUsername", "operatorSystemAccount"].forEach(function (id) { byId(id).classList.remove("invalid"); byId(id).removeAttribute("aria-invalid"); });
+      ["operatorUsernameError", "operatorSystemAccountError", "operatorBusinessesError"].forEach(function (id) { byId(id).textContent = ""; byId(id).classList.remove("show"); });
+    }
+    function openOperatorModal(item, opener) {
+      if (!operatorContextValid()) return;
+      editingOperatorId = item?.id || null;
+      operatorReturnFocus = opener;
+      byId("operatorModalTitle").textContent = item ? "修改TG操作员" : "新增TG操作员";
+      byId("operatorUsername").value = item?.username || "";
+      byId("operatorSystemAccount").value = item?.systemAccount || "";
+      const enabled = item ? item.on : true;
+      byId("operatorEnabled").setAttribute("aria-checked", String(enabled)); byId("operatorEnabled").classList.toggle("on", enabled); byId("operatorEnabledText").textContent = enabled ? "启用" : "停用";
+      ["collect", "payout"].forEach(function (business) {
+        const suffix = business === "collect" ? "Collect" : "Payout";
+        byId("operator" + suffix + "Business").checked = Boolean(item?.businesses.includes(business));
+        byId("operator" + suffix + "PermissionOptions").innerHTML = operatorPermissions[business].map(function (permission, index) {
+          return '<label class="operator-checkbox"><input type="checkbox" value="' + escapeHtml(permission) + '"' + (item?.permissions[business]?.includes(permission) ? ' checked' : '') + '>' + escapeHtml(permission) + '</label>';
+        }).join("");
+      });
+      clearOperatorErrors(); closeOperatorPermissionPickers(); updateOperatorPermissionControls();
+      byId("operatorMask").classList.add("show"); byId("operatorUsername").focus();
+    }
+    function closeOperatorModal() {
+      byId("operatorMask").classList.remove("show"); closeOperatorPermissionPickers(); editingOperatorId = null;
+      if (operatorReturnFocus?.isConnected) operatorReturnFocus.focus(); else byId("addOperator").focus();
+    }
+    byId("operatorForm").addEventListener("submit", function (event) {
+      event.preventDefault(); if (!operatorContextValid()) return; clearOperatorErrors();
+      const username = byId("operatorUsername").value.trim(), systemAccount = byId("operatorSystemAccount").value.trim();
+      const businesses = ["collect", "payout"].filter(function (business) { return byId("operator" + (business === "collect" ? "Collect" : "Payout") + "Business").checked; });
+      let firstInvalid = null;
+      [["operatorUsername", !/^@\S+$/.test(username), "请输入带@的TG用户名"], ["operatorSystemAccount", !systemAccount, "请输入系统管理员账号"]].forEach(function ([id, invalid, message]) {
+        if (!invalid) return;
+        byId(id).classList.add("invalid"); byId(id).setAttribute("aria-invalid", "true"); byId(id + "Error").textContent = message; byId(id + "Error").classList.add("show"); firstInvalid ||= byId(id);
+      });
+      if (!businesses.length) { byId("operatorBusinessesError").textContent = "请至少选择一项业务类型"; byId("operatorBusinessesError").classList.add("show"); firstInvalid ||= byId("operatorCollectBusiness"); }
+      if (firstInvalid) { firstInvalid.focus(); return; }
+      const permissions = {};
+      ["collect", "payout"].forEach(function (business) { permissions[business] = businesses.includes(business) ? Array.from(byId("operator" + (business === "collect" ? "Collect" : "Payout") + "PermissionOptions").querySelectorAll("input:checked")).map(function (input) { return input.value; }) : []; });
+      const original = editingOperatorId ? operatorRecords.find(function (item) { return item.id === editingOperatorId; }) : null;
+      if (editingOperatorId && !original) { closeOperatorModal(); toast("操作员记录已变化，请重新打开"); return; }
+      const row = { id: original?.id || operatorTenantId + "-TG-" + Date.now() + "-" + (++operatorSequence), username, systemAccount, businesses, permissions, on: byId("operatorEnabled").getAttribute("aria-checked") === "true", createdAt: original?.createdAt || new Date().toLocaleString("sv-SE", { timeZone: "Asia/Taipei" }) };
+      if (original) Object.assign(original, row); else operatorRecords.unshift(row);
+      operatorPage = 1; renderOperators(); closeOperatorModal(); toast(original ? "TG操作员已修改" : "TG操作员已新增");
+    });
+    byId("operatorForm").addEventListener("input", function (event) {
+      if (!["operatorUsername", "operatorSystemAccount"].includes(event.target.id)) return;
+      event.target.classList.remove("invalid"); event.target.removeAttribute("aria-invalid");
+      byId(event.target.id + "Error").classList.remove("show");
+    });
+    byId("operatorEnabled").addEventListener("click", function () { const enabled = this.getAttribute("aria-checked") !== "true"; this.setAttribute("aria-checked", String(enabled)); this.classList.toggle("on", enabled); byId("operatorEnabledText").textContent = enabled ? "启用" : "停用"; });
+    ["Collect", "Payout"].forEach(function (business) {
+      byId("operator" + business + "Business").addEventListener("change", function () {
+        updateOperatorPermissionControls();
+        if (byId("operatorCollectBusiness").checked || byId("operatorPayoutBusiness").checked) byId("operatorBusinessesError").classList.remove("show");
+      });
+      byId("operator" + business + "Permissions").addEventListener("click", function () { const options = byId("operator" + business + "PermissionOptions"), open = options.hidden; closeOperatorPermissionPickers(); options.hidden = !open; this.setAttribute("aria-expanded", String(open)); });
+      byId("operator" + business + "PermissionOptions").addEventListener("change", updateOperatorPermissionControls);
+    });
+    byId("addOperator").addEventListener("click", function () { openOperatorModal(null, this); });
+    byId("closeOperatorModal").addEventListener("click", closeOperatorModal); byId("cancelOperatorModal").addEventListener("click", closeOperatorModal);
+    byId("operatorMask").addEventListener("click", function (event) { if (event.target === this) closeOperatorModal(); });
+    byId("operatorsBody").addEventListener("click", function (event) {
+      const button = event.target.closest("[data-operator-action]"); if (!button || !operatorContextValid()) return;
+      const item = operatorRecords.find(function (record) { return record.id === button.dataset.operatorId; }); if (!item) return;
+      if (button.dataset.operatorAction === "edit") openOperatorModal(item, button);
+      else if (button.dataset.operatorAction === "toggle") { item.on = !item.on; renderOperators(); toast(item.username + (item.on ? " 已启用" : " 已停用")); }
+      else if (button.dataset.operatorAction === "delete") openConfirm("删除TG操作员", "确定要删除TG操作员【" + item.username + "】吗？", function () {
+        if (!operatorContextValid()) return;
+        const index = operatorRecords.indexOf(item); if (index < 0) return;
+        operatorRecords.splice(index, 1); renderOperators(); toast("TG操作员已删除");
+      }, false, true);
+    });
+    function searchOperators() { operatorKeyword = byId("operatorSearch").value.trim().toLowerCase(); operatorPage = 1; renderOperators(); }
+    byId("searchOperators").addEventListener("click", searchOperators); byId("operatorSearch").addEventListener("keydown", function (event) { if (event.key === "Enter") { event.preventDefault(); searchOperators(); } });
+    byId("operatorPageSize").addEventListener("change", function () { operatorPage = 1; renderOperators(); });
+    byId("operatorPreviousPage").addEventListener("click", function () { operatorPage--; renderOperators(); }); byId("operatorNextPage").addEventListener("click", function () { operatorPage++; renderOperators(); });
+    byId("operatorPageButtons").addEventListener("click", function (event) { const button = event.target.closest("[data-operator-page]"); if (button) { operatorPage = Number(button.dataset.operatorPage); renderOperators(); } });
+    function jumpOperatorPage() { const value = Number(byId("operatorPageJump").value); operatorPage = Number.isInteger(value) ? value : 1; renderOperators(); }
+    byId("operatorPageJump").addEventListener("change", jumpOperatorPage); byId("operatorPageJump").addEventListener("keydown", function (event) { if (event.key === "Enter") { event.preventDefault(); jumpOperatorPage(); } });
+    document.addEventListener("click", function (event) { if (!event.target.closest(".operator-permission-picker")) closeOperatorPermissionPickers(); });
+    document.addEventListener("keydown", function (event) {
+      if (!byId("operatorMask").classList.contains("show")) return;
+      if (event.key === "Escape") {
+        event.preventDefault();
+        const openBusiness = ["Collect", "Payout"].find(function (business) { return !byId("operator" + business + "PermissionOptions").hidden; });
+        if (openBusiness) { closeOperatorPermissionPickers(); byId("operator" + openBusiness + "Permissions").focus(); } else closeOperatorModal();
+      }
+      if (event.key === "Tab") {
+        const focusable = Array.from(byId("operatorMask").querySelectorAll("button,input,select,textarea")).filter(function (element) { return !element.disabled && element.getClientRects().length; });
+        const first = focusable[0], last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); } else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+      }
+    });
+    renderOperators();
+
     const notificationTabs = Array.from(document.querySelectorAll("[data-tab]"));
     notificationTabs.forEach(function (button, index) {
       button.addEventListener("keydown", function (event) {
