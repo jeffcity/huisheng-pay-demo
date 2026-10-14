@@ -13,10 +13,11 @@ function fixture(){
  for(const [id,value] of Object.entries({tenantNameInput:profile.name,contactInput:profile.contact,mobileInput:profile.phone,expireInput:profile.expire,tenantRemarkInput:'',domainPrefixInput:'tenant-001',initialLoginIpInput:'192.0.2.1'}))el(id).value=value;
  return {el,profile,permissions,errors,model:window.HSProviderDemo,save(){vm.runInContext('saveTenantProfile()',ctx);}};
 }
-test('租户编辑只选代收后保存到共享许可，并拒绝代付通道配置',()=>{
- const f=fixture();f.el('tenantBusinessPayout').checked=false;f.save();assert.equal(f.errors.length,0);assert.deepEqual(Array.from(f.model.tenantBusinessDirections('HS-TEN-001')),['代收']);assert.equal(f.model.canConfigureChannel('HS-TEN-001','V-001','代付'),false);assert(f.model.canConfigureChannel('HS-TEN-001','V-001','代收'));
+test('租户编辑资料不再修改通道商授权业务',()=>{
+ const f=fixture();f.model.grantFor('HS-TEN-001','V-001').directions=['代收'];const before=JSON.stringify(f.model.grants);
+ f.el('tenantNameInput').value='修改租户名称';f.save();assert.equal(f.errors.length,0);assert.equal(f.profile.name,'修改租户名称');assert.equal(JSON.stringify(f.model.grants),before);
+ assert.equal(f.model.canConfigureChannel('HS-TEN-001','V-001','代付'),false);
 });
-test('租户表单校验失败或无业务授权权限时，不改变原业务许可',()=>{
- const f=fixture();f.el('mobileInput').value='1';f.el('tenantBusinessPayout').checked=false;f.save();assert.equal(f.errors.length,1);assert.equal(f.model.tenantBusinessDirections('HS-TEN-001').length,2);
- f.el('mobileInput').value=f.profile.phone;f.model.setTenantBusinessDirections('HS-TEN-001',['代收']);f.permissions.canBusinessAuth=false;f.el('tenantBusinessPayout').checked=true;f.save();assert.deepEqual(Array.from(f.model.tenantBusinessDirections('HS-TEN-001')),['代收']);
+test('租户资料校验失败不改变通道商授权',()=>{
+ const f=fixture(),before=JSON.stringify(f.model.grants);f.el('mobileInput').value='1';f.save();assert.equal(f.errors.length,1);assert.equal(JSON.stringify(f.model.grants),before);
 });

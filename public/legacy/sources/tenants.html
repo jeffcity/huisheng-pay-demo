@@ -1652,7 +1652,6 @@
                     <tr>
                       <th>租户</th>
                       <th>状态</th>
-                      <th>授权业务</th>
                       <th>钱包余额</th>
                       <th class="action-col">操作</th>
                     </tr>
@@ -1751,10 +1750,6 @@
           <label for="initialLoginIpInput">初始管理员登录 IP</label>
           <input id="initialLoginIpInput" class="mono" value="103.18.50.80" placeholder="必填，完整 IPv4" autocomplete="off">
           <small>与租户及管理员原子创建并立即启用，确保管理员可首次登录。</small>
-        </div>
-        <div class="field wide" id="tenantBusinessField">
-          <label>授权业务</label>
-          <div style="display:flex;gap:24px"><label style="display:flex;align-items:center;gap:8px"><input id="tenantBusinessCollect" type="checkbox" style="width:16px;height:16px">代收</label><label style="display:flex;align-items:center;gap:8px"><input id="tenantBusinessPayout" type="checkbox" style="width:16px;height:16px">代付</label></div>
         </div>
         <div class="field wide">
           <label for="tenantRemarkInput">备注</label>
@@ -2434,15 +2429,6 @@
       return (tenant.businessCatalog || []).some(item => aliases.includes(item.name) && item.status === '已授权');
     }
 
-    function tenantAuthorizedDirections(tenant) {
-      return window.HSProviderDemo.tenants.find(t=>t.id===tenant.id)?.businessDirections || tenant.businessDirections || ['代收','代付'].filter(direction=>(tenant.businessCatalog||[]).some(item=>item.status==='已授权'&&item.name.includes(direction)));
-    }
-
-    function businessAbilityCell(tenant) {
-      const directions = tenantAuthorizedDirections(tenant);
-      return directions.map(direction=>tag(direction,direction==='代收'?'green':'blue')).join(' ') || '<span class="cell-sub">未授权</span>';
-    }
-
     function walletSummaryCell(tenant) {
       const snapshot = listWalletSnapshots[tenant.id] || {
         withdrawable: { CNY: tenant.credit || 0 },
@@ -2477,7 +2463,7 @@
       document.getElementById('createTenantTop').title = createAllowed ? '' : (permissions.canCreate ? '新增顶层租户要求“全部租户”数据范围' : appState.currentRole + ' 无新增租户权限');
 
       if (result.length === 0) {
-        rows.innerHTML = '<tr><td colspan="5" class="table-empty"><strong>没有符合条件的租户</strong><span>请调整筛选条件后再查看列表。</span><br><button class="btn" data-clear-filters><i data-lucide="rotate-ccw"></i>清空筛选</button></td></tr>';
+        rows.innerHTML = '<tr><td colspan="4" class="table-empty"><strong>没有符合条件的租户</strong><span>请调整筛选条件后再查看列表。</span><br><button class="btn" data-clear-filters><i data-lucide="rotate-ccw"></i>清空筛选</button></td></tr>';
         refreshIcons();
         return;
       }
@@ -2494,7 +2480,6 @@
         return '<tr data-index="' + index + '">' +
           '<td><div class="tenant-cell"><strong>' + tenant.name + '</strong><span class="mono">' + tenant.id + ' / ' + tenant.contact + '</span>' + (accessPending ? '<span>' + tag('域名待处理 ' + accessPending, 'orange') + '</span>' : '') + '</div></td>' +
           '<td>' + tag(tenant.status, tenant.statusTone) + '</td>' +
-          '<td>' + businessAbilityCell(tenant) + '</td>' +
           '<td>' + walletSummaryCell(tenant) + '</td>' +
           '<td class="action-col"><div class="table-actions">' +
             '<button class="action-link" data-open="' + tenant.id + '">详情</button>' +
@@ -2533,8 +2518,8 @@
       const grants = model.grants.filter(g => g.tenantId === tenant.id);
       return grants.map(g => {
         const provider = model.providers.find(p => p.id === g.providerId);
-        return '<tr><td><strong>' + escapeHtml(provider?.name || g.providerId) + '</strong></td><td>' + escapeHtml(g.providerId) + '</td><td>' + tag(g.status, g.status === '已授权' ? 'green' : 'gray') + '</td><td>' + escapeHtml(g.updatedAt) + '</td></tr>';
-      }).join('') || '<tr><td colspan="4" class="table-empty">暂无已授权通道商</td></tr>';
+        return '<tr><td><strong>' + escapeHtml(provider?.name || g.providerId) + '</strong></td><td>' + escapeHtml(g.providerId) + '</td><td>' + model.grantDirections(tenant.id,g.providerId).map(d=>tag(d,d==='代收'?'green':'blue')).join(' ') + '</td><td>' + tag(g.status, g.status === '已授权' ? 'green' : 'gray') + '</td><td>' + escapeHtml(g.updatedAt) + '</td></tr>';
+      }).join('') || '<tr><td colspan="5" class="table-empty">暂无已授权通道商</td></tr>';
     }
 
     function domainStatusTone(status) {
@@ -2992,10 +2977,8 @@
           editProfileAction +
         '</div>';
 
-      document.getElementById('tab-business').innerHTML = sectionTitle('授权业务') +
-        '<div class="tag-row">' + businessAbilityCell(tenant) + '</div><div class="tag-row">' + editProfileAction + '</div>' +
-        sectionTitle('已授权通道商列表') +
-        '<div class="table-wrap detail-table"><table aria-label="已授权通道商列表"><thead><tr><th>通道商</th><th>通道商编号</th><th>授权状态</th><th>最近变更</th></tr></thead><tbody>' +
+      document.getElementById('tab-business').innerHTML = sectionTitle('已授权通道商列表') +
+        '<div class="table-wrap detail-table"><table aria-label="已授权通道商列表"><thead><tr><th>通道商</th><th>通道商编号</th><th>授权业务</th><th>授权状态</th><th>最近变更</th></tr></thead><tbody>' +
           renderAuthorizedChannelRows(tenant) +
         '</tbody></table></div>';
 
@@ -3161,11 +3144,6 @@
       initialLoginIpInput.readOnly = mode === 'edit';
       document.getElementById('initialLoginIpField').hidden = false;
       document.getElementById('tenantRemarkInput').value = mode === 'edit' ? tenant.remark : '';
-      const grantedBusinesses = mode === 'edit' ? tenantAuthorizedDirections(tenant) : [];
-      document.getElementById('tenantBusinessCollect').checked = grantedBusinesses.includes('代收');
-      document.getElementById('tenantBusinessPayout').checked = grantedBusinesses.includes('代付');
-      document.getElementById('tenantBusinessCollect').disabled = !permissions.canBusinessAuth;
-      document.getElementById('tenantBusinessPayout').disabled = !permissions.canBusinessAuth;
       document.getElementById('modalBackdrop').classList.add('open');
       showTenantDialog(document.getElementById('tenantModal'));
     }
@@ -3398,16 +3376,11 @@
 
       const providerModel = window.HSProviderDemo;
       let sharedTenant = providerModel.tenants.find(t=>t.id===tenant.id);
-      if (!sharedTenant) {sharedTenant={id:tenant.id,name:tenant.name,businessDirections:[]};providerModel.tenants.push(sharedTenant);}
+      if (!sharedTenant) {sharedTenant={id:tenant.id,name:tenant.name};providerModel.tenants.push(sharedTenant);}
       sharedTenant.name = tenant.name;
-      if (permissions.canBusinessAuth) {
-        const businessDirections = [['代收','tenantBusinessCollect'],['代付','tenantBusinessPayout']].filter(([,id])=>document.getElementById(id).checked).map(([direction])=>direction);
-        providerModel.setTenantBusinessDirections(tenant.id,businessDirections);
-        tenant.businessDirections = [...businessDirections];
-      }
       appState.selectedTenant = tenant;
       ensureTenantAccessState(tenant);
-      const audit = addTenantAudit(tenant, action, '成功', editing ? '更新租户资料及授权业务：' + providerModel.tenantBusinessDirections(tenant.id).join(' / ') : '原子创建租户、唯一超级管理员、已启用初始登录 IP、未启用系统域名和三个 CNY 钱包');
+      const audit = addTenantAudit(tenant, action, '成功', editing ? '更新租户资料' : '原子创建租户、唯一超级管理员、已启用初始登录 IP、未启用系统域名和三个 CNY 钱包');
       setOperationReceipt({
         title: editing ? '租户资料已保存并生效' : '租户已创建',
         tenant,
