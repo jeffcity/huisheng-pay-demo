@@ -12,3 +12,7 @@
 - 修改后依次运行 npm run build、npm run check。运行时验证使用 npm run smoke（需本机 Chrome）。
 - 推送 main 后 Actions 重新检查并发布 dist，不绕过检查。未获明确授权不主动推送/部署。
 - 不启动 Obsidian，保护已有改动。
+
+## iframe 标注兼容（2026-10-14）
+
+使用 iframe 装载完整页面时遵循 `docs/demo-iframe-annotation-lifecycle.md`：新窗口同步文档写入、React稳定宿主、当前上下文初始化、过期加载隔离，以及跨端标注验收。保留原有唯一源、交付入口与安全约束。
