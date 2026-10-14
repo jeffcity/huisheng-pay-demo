@@ -857,10 +857,8 @@
     .notify-error:empty { display:none; }
     .notify-modal .control[aria-invalid="true"] { border-color:var(--color-danger); }
     .notify-modal .field.full { grid-column:1/-1; }
-    .notify-condition { grid-column:1/-1; display:grid; grid-template-columns:1fr 1fr; gap:14px; padding:14px; border:1px solid var(--color-border); border-radius:var(--radius-md); background:var(--color-bg-subtle); }
-    .notify-condition .notify-help { grid-column:1/-1; margin:0; }
     .notify-modal textarea { min-height:132px; }
-    @media(max-width:640px) { .notify-condition { grid-template-columns:1fr; } .notify-filters .field { min-width:100%; } }
+    @media(max-width:640px) { .notify-filters .field { min-width:100%; } }
   </style>
 </head>
 <body>
@@ -1288,8 +1286,7 @@
       <div class="modal-body form-grid">
         <div class="field"><label for="notifyType">消息类型 *</label><select class="control" id="notifyType" required aria-describedby="notifyTypeError"><option value="">请选择消息类型</option><option value="loginFailures">登录错误过多</option><option value="passwordChanged">修改密码</option></select><div class="notify-error" id="notifyTypeError"></div></div>
         <div class="field"><label for="notifyGroup">TG 群 ID *</label><input class="control mono" id="notifyGroup" required placeholder="例如：-100203100001" aria-describedby="notifyGroupError"><div class="notify-error" id="notifyGroupError"></div></div>
-        <div class="field full"><label for="notifyBotSelect">通知机器人 *</label><select class="control" id="notifyBotSelect" required aria-describedby="notifyBotSelectError notifyBotSelectHint"></select><div class="notify-error" id="notifyBotSelectError"></div><p class="notify-help" id="notifyBotSelectHint">选项来自当前商户的「通知机器人配置」。</p></div>
-        <div class="notify-condition" id="notifyLoginCondition" hidden><div class="field"><label for="notifyWindow">统计时长（分钟）*</label><input class="control" id="notifyWindow" type="number" min="1" step="1" value="10" aria-describedby="notifyWindowError"><div class="notify-error" id="notifyWindowError"></div></div><div class="field"><label for="notifyThreshold">失败次数（次）*</label><input class="control" id="notifyThreshold" type="number" min="1" step="1" value="5" aria-describedby="notifyThresholdError"><div class="notify-error" id="notifyThresholdError"></div></div><p class="notify-help">达到设定条件时发送登录告警，不自动锁定账号。</p></div>
+        <div class="field full"><label for="notifyBotSelect">通知机器人 *</label><select class="control" id="notifyBotSelect" required aria-describedby="notifyBotSelectError"></select><div class="notify-error" id="notifyBotSelectError"></div></div>
         <div class="field full" id="notifyPasswordCondition" hidden><div class="notice">账号成功修改密码后发送通知，消息中不包含密码或验证码。</div></div>
         <div class="field full"><label>可用变量 <span class="muted">· 点击插入模板</span></label><div class="notify-variables" id="notifyVariables"></div></div>
         <div class="field full"><label for="notifyTemplate">消息模板 *</label><textarea class="control" id="notifyTemplate" required placeholder="选择消息类型后编辑模板" aria-describedby="notifyTemplateError"></textarea><div class="notify-error" id="notifyTemplateError"></div></div>
@@ -6005,15 +6002,12 @@
       return String(config.template || '').replace(/\$\{([^{}]+)\}/g, (match, key) => Object.hasOwn(values, key) ? values[key] : match);
     }
     function updateNotifyPreview() {
-      notifyEl('notifyPreview').textContent = notifyEl('notifyType').value ? notifySample({ template: notifyEl('notifyTemplate').value, windowMinutes: notifyEl('notifyWindow').value, threshold: notifyEl('notifyThreshold').value }) || '请输入消息模板' : '请选择消息类型';
+      notifyEl('notifyPreview').textContent = notifyEl('notifyType').value ? notifySample({ ...merchantNotifyStore().configs.find(config => config.id === merchantNotifyState.editingConfig), template: notifyEl('notifyTemplate').value }) || '请输入消息模板' : '请选择消息类型';
     }
     function updateNotifyType(resetTemplate = false) {
       const type = notifyEl('notifyType').value;
       const meta = merchantNotifyTypes[type];
-      notifyEl('notifyLoginCondition').hidden = type !== 'loginFailures';
       notifyEl('notifyPasswordCondition').hidden = type !== 'passwordChanged';
-      notifyEl('notifyWindow').disabled = type !== 'loginFailures';
-      notifyEl('notifyThreshold').disabled = type !== 'loginFailures';
       if (resetTemplate) notifyEl('notifyTemplate').value = meta?.template || '';
       notifyEl('notifyVariables').innerHTML = meta ? meta.vars.map(name => `<button type="button" class="btn" data-notify-variable="${name}">\${${name}}</button>`).join('') : '<span class="muted">请选择消息类型</span>';
       updateNotifyPreview();
@@ -6042,8 +6036,6 @@
       notifyEl('notifyGroup').value = config?.group || '';
       notifyEl('notifyBotSelect').innerHTML = notifyBotOptions(config?.botId);
       notifyEl('notifyTemplate').value = config?.template || '';
-      notifyEl('notifyWindow').value = config?.windowMinutes || 10;
-      notifyEl('notifyThreshold').value = config?.threshold || 5;
       updateNotifyType(); openModal('notifyConfigModal');
     }
     notifyEl('notifyBotForm').addEventListener('submit', event => {
@@ -6073,15 +6065,10 @@
       const store = merchantNotifyStore(); const id = merchantNotifyState.editingConfig;
       const type = notifyEl('notifyType').value; const group = notifyEl('notifyGroup').value.trim();
       const botId = Number(notifyEl('notifyBotSelect').value); const template = notifyEl('notifyTemplate').value.trim();
-      const windowMinutes = Number(notifyEl('notifyWindow').value); const threshold = Number(notifyEl('notifyThreshold').value);
       resetNotifyErrors(event.currentTarget);
       if (!merchantNotifyTypes[type]) notifyFieldError('notifyType', '请选择消息类型');
       if (!/^-[1-9]\d*$/.test(group)) notifyFieldError('notifyGroup', '请输入有效的 TG 群 ID（以负号开头的数字）');
       if (!store.bots.some(bot => bot.id === botId)) notifyFieldError('notifyBotSelect', '请选择当前商户的通知机器人');
-      if (type === 'loginFailures') {
-        if (!Number.isSafeInteger(windowMinutes) || windowMinutes <= 0) notifyFieldError('notifyWindow', '统计时长须为正整数');
-        if (!Number.isSafeInteger(threshold) || threshold <= 0) notifyFieldError('notifyThreshold', '失败次数须为正整数');
-      }
       const allowed = merchantNotifyTypes[type]?.vars || [];
       const unknown = [...template.matchAll(/\$\{([^{}]*)\}/g)].map(match => match[1]).filter(name => !allowed.includes(name));
       const malformed = template.replace(/\$\{[^{}]*\}/g, '').includes('${');
@@ -6091,7 +6078,7 @@
       const invalid = event.currentTarget.querySelector('[aria-invalid="true"]'); if (invalid) { invalid.focus(); return; }
       const existing = store.configs.find(config => config.id === id);
       if (id && !existing) { showToast('通知配置已变化，请重新打开'); return; }
-      const record = { id: id || Math.max(0, ...store.configs.map(config => config.id)) + 1, type, group, botId, template, enabled: existing?.enabled ?? true, updated: merchantNow(), ...(type === 'loginFailures' ? { windowMinutes, threshold } : {}) };
+      const record = { id: id || Math.max(0, ...store.configs.map(config => config.id)) + 1, type, group, botId, template, enabled: existing?.enabled ?? true, updated: merchantNow(), ...(type === 'loginFailures' ? { windowMinutes: existing?.windowMinutes ?? 10, threshold: existing?.threshold ?? 5 } : {}) };
       if (existing) store.configs.splice(store.configs.indexOf(existing), 1, record); else store.configs.unshift(record);
       merchantNotifyState.filters = { type: '', bot: '', status: '' }; notifyEl('notifyConfigFilters').reset();
       closeModal(notifyEl('notifyConfigModal')); renderMerchantNotificationSettings();
@@ -6101,7 +6088,7 @@
     notifyEl('notifyBotFilters').addEventListener('submit', event => { event.preventDefault(); if (!notifyCheckScope('notificationBots')) return; merchantNotifyState.botKeyword = notifyEl('notifyBotKeyword').value.trim().toLowerCase(); renderMerchantNotificationSettings(); });
     notifyEl('notifyConfigFilters').addEventListener('submit', event => { event.preventDefault(); if (!notifyCheckScope('notificationConfigs')) return; merchantNotifyState.filters = { type: notifyEl('notifyFilterType').value, bot: notifyEl('notifyFilterBot').value, status: notifyEl('notifyFilterStatus').value }; renderMerchantNotificationSettings(); });
     notifyEl('notifyType').addEventListener('change', () => { resetNotifyErrors(notifyEl('notifyConfigForm')); updateNotifyType(true); });
-    ['notifyTemplate', 'notifyWindow', 'notifyThreshold'].forEach(id => notifyEl(id).addEventListener('input', updateNotifyPreview));
+    notifyEl('notifyTemplate').addEventListener('input', updateNotifyPreview);
     notifyEl('notifyVariables').addEventListener('click', event => {
       const name = event.target.closest('[data-notify-variable]')?.dataset.notifyVariable;
       if (!name || !merchantNotifyTypes[notifyEl('notifyType').value]?.vars.includes(name)) return;
