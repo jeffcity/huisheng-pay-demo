@@ -70,13 +70,16 @@
         const frame = document.createElement('iframe');
         frame.title = '汇盛支付 · ' + button.textContent;
         frame.dataset.activeSurface = id;
+        let written = false;
         frame.addEventListener('load', () => {
-          if (panel.contains(frame)) { clearTimeout(timer); loading.hidden = true; }
+          if (written && frame.contentDocument?.readyState === 'complete' && panel.contains(frame)) { clearTimeout(timer); loading.hidden = true; }
         });
         try {
-          frame.srcdoc = JSON.parse(document.getElementById('surface-' + id).textContent);
+          const html = JSON.parse(document.getElementById('surface-' + id).textContent);
           panel.append(frame);
           timer = setTimeout(() => { statusText.textContent = '加载时间较长，请重试'; retry.hidden = false; }, 15000);
+          const embedded = frame.contentDocument;
+          embedded.open();embedded.write(html);written = true;embedded.close();
         } catch (error) {
           statusText.textContent = '页面加载失败，请重新加载';
           retry.hidden = false;

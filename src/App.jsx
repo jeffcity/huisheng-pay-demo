@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { mountFrameDocument } from './frame-document.js';
 import { Layout, Menu, Breadcrumb, Input, Tag, Spin, Result } from '@arco-design/web-react';
 import {
   IconHome, IconUser, IconApps, IconStorage, IconCalendarClock, IconBranch,
@@ -30,24 +31,31 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const frameRef = useRef(null);
+  const frameHostRef = useRef(null);
+  const requestRef = useRef(0);
   const searchRef = useRef('');
 
   const openModule = useCallback(async (moduleId, hash) => {
+    const request = ++requestRef.current;
     const target = MODULES[moduleId] || MODULES.home;
     setActiveModule(MODULES[moduleId] ? moduleId : 'home');
     setLoading(true);
     setError('');
     try {
       const doc = await prepareEmbeddedDocument(target.sourceKey, hash ?? target.initialHash);
-      const frame = frameRef.current;
-      if (!frame) return;
-      frame.title = '汇盛支付平台端 · ' + target.label;
-      frame.srcdoc = doc;
+      const host = frameHostRef.current;
+      if (!host || request !== requestRef.current) return;
+      mountFrameDocument(host, doc, { title: '汇盛支付平台端 · ' + target.label, frameRef, onLoad: () => {
+        if (request === requestRef.current) setLoading(false);
+      }});
     } catch (err) {
+      if (request !== requestRef.current) return;
       setError(String(err?.message || err));
       setLoading(false);
     }
   }, []);
+
+  useEffect(() => () => { requestRef.current++; }, []);
 
   useEffect(() => { openModule(activeModule); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -142,12 +150,7 @@ export default function App() {
               <Result status="error" title="页面来源缺失" subTitle={error} />
             </div>
           )}
-          <iframe
-            ref={frameRef}
-            title="汇盛支付平台端页面"
-            referrerPolicy="no-referrer"
-            onLoad={() => setLoading(false)}
-          />
+          <div ref={frameHostRef} className="embedded-frame-host" />
         </Content>
       </Layout>
     </Layout>
