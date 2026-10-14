@@ -551,9 +551,10 @@
 
     table.vendor-wide { width: 100%; min-width: 0; table-layout: fixed; }
     table.vendor-wide th, table.vendor-wide td { position: static; width: auto; white-space: normal; }
-    table.vendor-wide th:first-child, table.vendor-wide td:first-child { width: 45%; }
+    table.vendor-wide th:first-child, table.vendor-wide td:first-child { width: 35%; }
     table.vendor-wide th:nth-child(2), table.vendor-wide td:nth-child(2) { width: 20%; }
-    table.vendor-wide th:last-child, table.vendor-wide td:last-child { width: 35%; }
+    table.vendor-wide th:last-child, table.vendor-wide td:last-child { width: 25%; }
+    table.vendor-wide th:nth-child(3), table.vendor-wide td:nth-child(3) { width: 20%; white-space: nowrap; }
     .workbench {
       display: grid;
       grid-template-columns: minmax(0, 1fr);
@@ -2161,9 +2162,10 @@
 
     #dataTable.vendor-wide { min-width: 0; width: 100%; table-layout: fixed; }
     #dataTable.vendor-wide th, #dataTable.vendor-wide td { position: static; width: auto; white-space: normal; }
-    #dataTable.vendor-wide th:first-child, #dataTable.vendor-wide td:first-child { width: 45%; }
+    #dataTable.vendor-wide th:first-child, #dataTable.vendor-wide td:first-child { width: 35%; }
     #dataTable.vendor-wide th:nth-child(2), #dataTable.vendor-wide td:nth-child(2) { width: 20%; }
-    #dataTable.vendor-wide th:last-child, #dataTable.vendor-wide td:last-child { width: 35%; }
+    #dataTable.vendor-wide th:nth-child(3), #dataTable.vendor-wide td:nth-child(3) { width: 20%; white-space: nowrap; }
+    #dataTable.vendor-wide th:last-child, #dataTable.vendor-wide td:last-child { width: 25%; }
     .filters { grid-template-columns: minmax(180px, .6fr) minmax(260px, 1fr) auto; }
     @media (max-width: 800px) { .filters { grid-template-columns: 1fr; } }
   </style>
@@ -2398,7 +2400,7 @@
     ];
     const columns = {
       vendors: [
-        ["name", "通道商"], ["vendorNo", "编号"]
+        ["name", "通道商"], ["vendorNo", "编号"], ["directions", "业务方向"]
       ],
       collectionChannels: [
         ["select", ""], ["name", "通道名称"], ["todaySuccess", "今日成功"], ["cnyBalance", "余额"], ["cnyPrepaid", "预付"], ["cnyRemainingPrepaid", "剩余预付"], ["usdtBalance", "USDT余额"], ["usdtPrepaid", "USDT预付"], ["usdtRemainingPrepaid", "USDT剩余预付"], ["status", "状态"], ["thirdCode", "对接编码"], ["todayAmount", "今日成交"], ["rate", "费率"], ["receiptRule", "收款规则"], ["typeStatus", "类型状态"], ["typeActions", "操作"]
@@ -2776,6 +2778,7 @@
         const summary = vendorFundSummary(row);
         const capabilities = vendorBusinessCapabilities(row);
         if (key === "selfOperated") return `<span class="pill ${row.selfOperated ? "green" : "gray"}">${row.selfOperated ? "自营" : "第三方"}</span>`;
+        if (key === "directions") return `<span class="capability-list">${(row.directions || []).map(direction => `<span class="pill ${direction === "代收" ? "cyan" : "blue"}">${escapeHtml(direction)}</span>`).join("")}</span>`;
         if (key === "capabilities") return renderVendorCapabilities(row);
         if (key === "collectionWallets") return `<div class="wallet-cell">${capabilities["代收"] ? renderCollectionWallets(summary.collectionWallets, false, "钱包配置缺失") : '<span class="muted">无此业务</span>'}</div>`;
         if (key === "payoutWallets") return `<div class="wallet-cell">${capabilities["代付"] ? renderPayoutWallets(summary.payoutWallets, false, "钱包配置缺失") : '<span class="muted">无此业务</span>'}</div>`;
@@ -3150,7 +3153,7 @@
       const row = findRow(id);
       selectedRow = row;
       const vendorFundKeys = new Set(["bookBalance", "reservedAmount", "availableAmount", "totalFunded", "providerBalance", "reconciliation", "reconciledAt", "settlement", "fundStatus", "unsettledOrders", "fundVersion", "direction"]);
-      const details = Object.entries(row).filter(([key]) => (activeKey !== "vendors" || ["name", "vendorNo"].includes(key)) && key !== "id" && key !== "productRequired" && !(activeKey === "vendors" && vendorFundKeys.has(key))).map(([key, value]) => `
+      const details = Object.entries(row).filter(([key]) => (activeKey !== "vendors" || ["name", "vendorNo", "directions"].includes(key)) && key !== "id" && key !== "productRequired" && !(activeKey === "vendors" && vendorFundKeys.has(key))).map(([key, value]) => `
         <div class="desc-item">
           <label>${fieldName(key)}</label>
           <span>${maybeTag(key, value)}</span>
@@ -3177,6 +3180,7 @@
         <div class="form-grid">
           <div class="field"><label for="vendorNameCreate">通道商名称</label><input id="vendorNameCreate" value="${escapeHtml(row?.name || "")}" placeholder="请输入通道商名称"></div>
           ${isEdit ? `<div class="field"><label>通道商编号</label><input value="${escapeHtml(row.vendorNo)}" readonly></div>` : ""}
+          <div class="field full"><label>业务方向</label><div class="check-grid"><label class="check-line"><input id="vendorDirectionCollect" type="checkbox" ${row?.directions?.includes("代收") ? "checked" : ""}> 代收</label><label class="check-line"><input id="vendorDirectionPayout" type="checkbox" ${row?.directions?.includes("代付") ? "checked" : ""}> 代付</label></div></div>
         </div>
       `, `<button class="btn" data-action="closeModal">取消</button><button class="btn primary" data-action="saveVendor">${isEdit ? "保存变更" : "保存通道商"}</button>`);
     }
@@ -3207,7 +3211,7 @@
 
     function fieldName(key) {
       const map = {
-        vendorNo: "通道商编号", name: "名称", support: "支持能力", direction: "业务方向", status: "状态", risk: "风险等级",
+        vendorNo: "通道商编号", name: "名称", directions: "业务方向", support: "支持能力", direction: "业务方向", status: "状态", risk: "风险等级",
         contact: "联系人", selfOperated: "是否自营", callbackLimitMinutes: "回调限制（分钟）",
         uncallbackedCount: "未回调", deposit: "保证金",
         botId: "机器人 ID", receiveCallback: "接收回调", channels: "通道数", products: "产品数", typeNo: "通道编号", channelNo: "通道编号", vendor: "通道商",
@@ -4014,7 +4018,9 @@
     function saveVendor() {
       const name = $("#vendorNameCreate")?.value.trim();
       const row = rows.vendors.find((item) => item.id === activeModalContext?.rowId);
+      const directions = [["代收", "vendorDirectionCollect"], ["代付", "vendorDirectionPayout"]].filter(([, id]) => $("#" + id)?.checked).map(([direction]) => direction);
       if (!name) return setModalError("请填写通道商名称。", "vendorNameCreate");
+      if (!directions.length) return setModalError("请至少选择一个业务方向。", "vendorDirectionCollect");
       if (rows.vendors.some((item) => item.id !== row?.id && item.name.toLowerCase() === name.toLowerCase())) return setModalError("通道商名称已存在，请核对后再保存。");
       const oldName = row?.name;
       const target = row || {
@@ -4025,7 +4031,7 @@
         channels: "0",
         products: "0"
       };
-      Object.assign(target, { name });
+      Object.assign(target, { name, directions });
       if (!row) {
         rows.vendors.unshift(target);
       }
@@ -4040,7 +4046,7 @@
         objectId: target.id,
         objectType: "通道商",
         action: row ? "编辑通道商" : "新增通道商",
-        summary: name,
+        summary: `${name} · ${directions.join(" / ")}`,
         reason: row ? "编辑通道商资料" : "新增通道商资料"
       });
       finishChange({ title: row ? "通道商资料已更新" : "通道商已建立", detail: name, audit });
@@ -4469,6 +4475,7 @@
     }
 
     function vendorExportValue(row, key) {
+      if (key === "directions") return (row.directions || []).join(" / ");
       if (!["capabilities", "collectionWallets", "payoutWallets"].includes(key)) return row[key];
       const capabilities = vendorBusinessCapabilities(row);
       if (key === "capabilities") {

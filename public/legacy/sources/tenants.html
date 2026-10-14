@@ -1652,7 +1652,7 @@
                     <tr>
                       <th>租户</th>
                       <th>状态</th>
-                      <th>已开通业务</th>
+                      <th>授权业务</th>
                       <th>钱包余额</th>
                       <th class="action-col">操作</th>
                     </tr>
@@ -1751,6 +1751,10 @@
           <label for="initialLoginIpInput">初始管理员登录 IP</label>
           <input id="initialLoginIpInput" class="mono" value="103.18.50.80" placeholder="必填，完整 IPv4" autocomplete="off">
           <small>与租户及管理员原子创建并立即启用，确保管理员可首次登录。</small>
+        </div>
+        <div class="field wide" id="tenantBusinessField">
+          <label>授权业务</label>
+          <div style="display:flex;gap:24px"><label style="display:flex;align-items:center;gap:8px"><input id="tenantBusinessCollect" type="checkbox" style="width:16px;height:16px">代收</label><label style="display:flex;align-items:center;gap:8px"><input id="tenantBusinessPayout" type="checkbox" style="width:16px;height:16px">代付</label></div>
         </div>
         <div class="field wide">
           <label for="tenantRemarkInput">备注</label>
@@ -2430,14 +2434,13 @@
       return (tenant.businessCatalog || []).some(item => aliases.includes(item.name) && item.status === '已授权');
     }
 
+    function tenantAuthorizedDirections(tenant) {
+      return window.HSProviderDemo.tenants.find(t=>t.id===tenant.id)?.businessDirections || tenant.businessDirections || ['代收','代付'].filter(direction=>(tenant.businessCatalog||[]).some(item=>item.status==='已授权'&&item.name.includes(direction)));
+    }
+
     function businessAbilityCell(tenant) {
-      return '<div class="business-matrix">' + businessAbilities.map(group => (
-        '<div class="business-line">' + group.map(item => {
-          const active = hasAuthorizedBusiness(tenant, item.aliases);
-          const extraClass = item.className ? ' ' + item.className : '';
-          return '<span class="ability-pill' + extraClass + (active ? ' active' : '') + '">' + item.label + '</span>';
-        }).join('') + '</div>'
-      )).join('') + '</div>';
+      const directions = tenantAuthorizedDirections(tenant);
+      return directions.map(direction=>tag(direction,direction==='代收'?'green':'blue')).join(' ') || '<span class="cell-sub">未授权</span>';
     }
 
     function walletSummaryCell(tenant) {
@@ -2519,6 +2522,10 @@
           '<td><div class="table-actions"><button class="btn" data-audit-detail="' + event.id + '"><i data-lucide="eye"></i>查看</button></div></td>' +
         '</tr>'
       )).join('');
+    }
+
+    function escapeHtml(value) {
+      return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     }
 
     function renderAuthorizedChannelRows(tenant) {
@@ -2985,30 +2992,8 @@
           editProfileAction +
         '</div>';
 
-      document.getElementById('tab-business').innerHTML = sectionTitle('业务开通') +
-        '<div class="table-wrap detail-table"><table aria-label="租户业务授权表"><thead><tr><th>业务</th><th>授权状态</th><th>归属模块</th><th>最近变更</th><th style="text-align:right;">操作</th></tr></thead><tbody>' +
-        (tenant.businessCatalog || []).map(item => {
-          const authorized = item.status === '已授权';
-          const stopped = item.status === '已停用';
-          const readonly = item.status === '历史只读' || closed;
-          const changeText = authorized ? '2026-07-04 / 授权生效' : stopped ? '新订单已阻断 / 存量继续' : readonly ? '历史只读' : '待申请';
-          const action = !permissions.canBusinessAuth
-            ? disabledButton(authorized ? '停用业务' : stopped ? '重新开通' : '发起授权', authorized ? 'ban' : 'toggle-right', appState.currentRole + ' 无业务授权操作权限')
-            : authorized && !readonly
-              ? '<button class="btn danger" data-confirm="关闭业务授权" data-confirm-tenant="' + tenant.id + '" data-confirm-business="' + item.name + '" data-confirm-detail="停用 ' + tenant.name + ' 的 ' + item.name + ' 后，商户 API、商户后台和租户端不再接受新单；历史和已创建业务继续按快照处理。"><i data-lucide="ban"></i>停用业务</button>'
-              : readonly
-                ? disabledButton('不可授权', 'lock', '关闭租户或历史业务只允许查看')
-                : stopped
-                  ? '<button class="btn primary" data-confirm="重新开通业务授权" data-confirm-tenant="' + tenant.id + '" data-confirm-business="' + item.name + '" data-confirm-detail="重新开通前校验租户、唯一启用套餐和可用授权通道；成功只恢复后续新单资格，下级状态保持不变。"><i data-lucide="toggle-right"></i>重新开通</button>'
-                  : '<button class="btn primary" data-confirm="发起业务授权" data-confirm-tenant="' + tenant.id + '" data-confirm-business="' + item.name + '" data-confirm-detail="从租户详情为 ' + tenant.name + ' 发起 ' + item.name + ' 授权；确认后直接生效并同步业务开通记录。"><i data-lucide="toggle-right"></i>发起授权</button>';
-          return '<tr>' +
-            '<td><strong>' + item.name + '</strong></td>' +
-            '<td>' + tag(item.status, item.tone) + '</td>' +
-            '<td>业务开通模块</td>' +
-            '<td class="cell-sub">' + changeText + '</td>' +
-            '<td><div class="table-actions">' + action + '</div></td>' +
-          '</tr>';
-        }).join('') + '</tbody></table></div>' +
+      document.getElementById('tab-business').innerHTML = sectionTitle('授权业务') +
+        '<div class="tag-row">' + businessAbilityCell(tenant) + '</div><div class="tag-row">' + editProfileAction + '</div>' +
         sectionTitle('已授权通道商列表') +
         '<div class="table-wrap detail-table"><table aria-label="已授权通道商列表"><thead><tr><th>通道商</th><th>通道商编号</th><th>授权状态</th><th>最近变更</th></tr></thead><tbody>' +
           renderAuthorizedChannelRows(tenant) +
@@ -3176,6 +3161,11 @@
       initialLoginIpInput.readOnly = mode === 'edit';
       document.getElementById('initialLoginIpField').hidden = false;
       document.getElementById('tenantRemarkInput').value = mode === 'edit' ? tenant.remark : '';
+      const grantedBusinesses = mode === 'edit' ? tenantAuthorizedDirections(tenant) : [];
+      document.getElementById('tenantBusinessCollect').checked = grantedBusinesses.includes('代收');
+      document.getElementById('tenantBusinessPayout').checked = grantedBusinesses.includes('代付');
+      document.getElementById('tenantBusinessCollect').disabled = !permissions.canBusinessAuth;
+      document.getElementById('tenantBusinessPayout').disabled = !permissions.canBusinessAuth;
       document.getElementById('modalBackdrop').classList.add('open');
       showTenantDialog(document.getElementById('tenantModal'));
     }
@@ -3406,9 +3396,18 @@
         action = '新增租户';
       }
 
+      const providerModel = window.HSProviderDemo;
+      let sharedTenant = providerModel.tenants.find(t=>t.id===tenant.id);
+      if (!sharedTenant) {sharedTenant={id:tenant.id,name:tenant.name,businessDirections:[]};providerModel.tenants.push(sharedTenant);}
+      sharedTenant.name = tenant.name;
+      if (permissions.canBusinessAuth) {
+        const businessDirections = [['代收','tenantBusinessCollect'],['代付','tenantBusinessPayout']].filter(([,id])=>document.getElementById(id).checked).map(([direction])=>direction);
+        providerModel.setTenantBusinessDirections(tenant.id,businessDirections);
+        tenant.businessDirections = [...businessDirections];
+      }
       appState.selectedTenant = tenant;
       ensureTenantAccessState(tenant);
-      const audit = addTenantAudit(tenant, action, '成功', editing ? '更新租户基础资料，域名配置、管理账号和白名单未改变' : '原子创建租户、唯一超级管理员、已启用初始登录 IP、未启用系统域名和三个 CNY 钱包');
+      const audit = addTenantAudit(tenant, action, '成功', editing ? '更新租户资料及授权业务：' + providerModel.tenantBusinessDirections(tenant.id).join(' / ') : '原子创建租户、唯一超级管理员、已启用初始登录 IP、未启用系统域名和三个 CNY 钱包');
       setOperationReceipt({
         title: editing ? '租户资料已保存并生效' : '租户已创建',
         tenant,
