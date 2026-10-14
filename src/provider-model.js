@@ -6,12 +6,11 @@ const hsProviderFixtures = {"typeRows": [{"id": "CH-FIAT-IN-001", "channelNo": "
   if (!owner.__HSProviderDemo) {
     const clone = value => JSON.parse(JSON.stringify(value));
     const tenants = [{id:'HS-TEN-001',name:'汇盛东南亚'},{id:'HS-TEN-017',name:'蓝盛拆分租户'},{id:'HS-TEN-029',name:'北辰支付'},{id:'HS-TEN-046',name:'澜海商服'}];
-    tenants.forEach(t=>t.businessDirections=['代收','代付']);
     const providers = hsProviderFixtures.rows.vendors.map(p => ({...p, adapterStatus:'已接入', directions:['代收','代付'].filter(direction=>hsProviderFixtures.typeRows.some(c=>c.vendor===p.name&&c.direction===direction))}));
     const grants = [];
     for (const tenant of tenants) for (const provider of providers) {
       const hasChannel = hsProviderFixtures.typeRows.some(c => c.vendor === provider.name && c.tenantIds.includes(tenant.id));
-      if (hasChannel || (tenant.id === 'HS-TEN-001' && provider.id === 'V-004')) grants.push({id:`VG-${tenant.id}-${provider.id}`,tenantId:tenant.id,providerId:provider.id,status:'已授权',updatedAt:'2026-10-13 10:00',reason:'通道商授权演示'});
+      if (hasChannel || (tenant.id === 'HS-TEN-001' && provider.id === 'V-004')) grants.push({id:`VG-${tenant.id}-${provider.id}`,tenantId:tenant.id,providerId:provider.id,status:'已授权',directions:[...provider.directions],updatedAt:'2026-10-13 10:00',reason:'通道商授权演示'});
     }
     const data = {};
     const model = {
@@ -29,9 +28,10 @@ const hsProviderFixtures = {"typeRows": [{"id": "CH-FIAT-IN-001", "channelNo": "
         data[id].channels.forEach(c=>{c.vendor=providers.find(p=>p.id===c.providerId)?.name||c.vendor;});
         return data[id];
       },
-      tenantBusinessDirections(id = 'HS-TEN-001') {return tenants.find(t=>t.id===id)?.businessDirections||[];},
-      setTenantBusinessDirections(id,directions) {const t=tenants.find(t=>t.id===id);if(!t||!Array.isArray(directions)||directions.some(d=>!['代收','代付'].includes(d)))throw new Error('授权业务无效');t.businessDirections=[...new Set(directions)];},
-      authorizedProviders(id = 'HS-TEN-001',direction) {return providers.filter(p=>grants.some(g=>g.tenantId===id&&g.providerId===p.id&&g.status==='已授权')&&(!direction||(this.tenantBusinessDirections(id).includes(direction)&&p.directions?.includes(direction))));},
+      grantDirections(id,providerId) {const g=this.grantFor(id,providerId),p=providers.find(p=>p.id===providerId);return g?.status==='已授权' ? ['代收','代付'].filter(d=>g.directions?.includes(d)&&p?.directions?.includes(d)) : [];},
+      tenantBusinessDirections(id = 'HS-TEN-001') {return ['代收','代付'].filter(d=>this.authorizedProviders(id,d).length);},
+      validateGrantDirections(providerId,directions) {const p=providers.find(p=>p.id===providerId);if(!p||!Array.isArray(directions)||!directions.length||directions.some(d=>!['代收','代付'].includes(d)||!p.directions?.includes(d)))throw new Error('请选择通道商支持的授权业务');return [...new Set(directions)];},
+      authorizedProviders(id = 'HS-TEN-001',direction) {return providers.filter(p=>{const directions=this.grantDirections(id,p.id);return direction?directions.includes(direction):directions.length>0;});},
       canConfigureChannel(id,providerId,direction) {return ['代收','代付'].includes(direction)&&this.authorizedProviders(id,direction).some(p=>p.id===providerId);},
       grantFor(id,providerId){return grants.find(g=>g.tenantId===id&&g.providerId===providerId);},
       log(action,object,tenantId='',surface='tenant'){const entry={surface,id:`AU-${Date.now()}-${this.audits.length}`,action,object,tenantId,at:this.now()};this.audits.push(entry);return entry;},

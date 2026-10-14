@@ -11,10 +11,11 @@ function fixture(){
  const window={document:{}};window.top=window;
  const ctx=vm.createContext({window,Map,Set,URL,setTimeout(){},document:{querySelector:el,querySelectorAll:selector=>selector==='[data-payout-apply]:checked'?applies:[],addEventListener(type,fn){if(!listeners.has(type))listeners.set(type,[]);listeners.get(type).push(fn);}}});vm.runInContext(providerSource,ctx);
  const script=source.slice(source.lastIndexOf('<script>')+8,source.lastIndexOf('</script>'));
- const modified=script.replace(/ function finish\(text,object\)\{[^\n]+\}/,' function finish(text,object){model.log(text,object,tenantId);}').replace(/ render\(\);\s*\}\)\(\);\s*$/,`window.payoutTest={configurationActionAllowed,productAction,savePayoutChannel,savePayoutDev,savePayoutBulk,savePayoutLimit,setPayoutType,confirmPayoutDelete,runPayoutMoney,runPayoutTest,saveReplicaProduct,setContext(value){context=value;}};})();`);
+ const modified=script.replace(/ function close\(\)\{[^\n]+\}/,' function close(){context=null;}').replace(/ function finish\(text,object\)\{[^\n]+\}/,' function finish(text,object){model.log(text,object,tenantId);}').replace(/ render\(\);\s*\}\)\(\);\s*$/,`window.payoutTest={productBindingRows,bindingsFor,availableBindings,setCodeBinding,saveBindingEdit,openBindCodes,openBindMerchants,saveMerchantRate,renderProductRow,saveCollectionCode,configurationActionAllowed,productAction,savePayoutChannel,savePayoutDev,savePayoutBulk,savePayoutLimit,setPayoutType,confirmPayoutDelete,runPayoutMoney,runPayoutTest,saveReplicaProduct,setContext(value){context=value;}};})();`);
  assert.notEqual(modified,script);vm.runInContext(modified,ctx);
- return {noModalFeedback(){feedbackAbsent=true;},click(action,id){const button={dataset:{action,id},closest(){return null;}};const event={target:{closest(selector){return selector==='button'?button:null;}}};for(const fn of listeners.get('click')||[])fn(event);},el,ctx,model:window.HSProviderDemo,api:window.payoutTest,applies,set:(id,value)=>el('#'+id).value=value};
+ return {change(target){target.hasAttribute||=()=>false;for(const fn of listeners.get('change')||[])fn({target});},noModalFeedback(){feedbackAbsent=true;},click(action,id,extra={}){const button={dataset:{action,id,...extra},closest(){return null;}};const event={target:{closest(selector){return selector==='button'?button:null;}}};for(const fn of listeners.get('click')||[])fn(event);},el,ctx,model:window.HSProviderDemo,api:window.payoutTest,applies,set:(id,value)=>el('#'+id).value=value};
 }
+function setTenantGrantDirections(model,tenantId,directions){for(const g of model.grants.filter(g=>g.tenantId===tenantId))g.directions=directions.filter(d=>model.providers.find(p=>p.id===g.providerId).directions.includes(d));}
 function limitForm(f,r={}){const c=f.model.tenantData().payoutLimits.get(r.id)||{};const b=(r.limit||'1 - 10000').replaceAll(',','').split(/\s*-\s*/);for(const [id,v] of Object.entries({plMin:c.min||b[0],plMax:c.max||b[1],plDaily:c.dailyAmount||'0',plFixed:c.fixedAmounts||'',plExcluded:c.excludedAmounts||'',plIps:c.submitIpBlacklist||'',plStart:c.start||'00:00',plEnd:c.end||'23:59',plCallbackTime:r.callbackTime||'0',plCallbackStatus:r.callbackStatus||'接受'}))f.set(id,v);f.el('#plEnabled').checked=r.limitStatus==='开启';}
 function channelForm(f,r,productId=r.productId){limitForm(f,r);for(const [id,v] of Object.entries({pcName:r.name,pcProvider:r.providerId,pcWeight:r.weight||'1',pcProduct:productId||'',pcInterface:r.interfaceType||'chpay',pcStatus:r.status,pcGroup:''}))f.set(id,v);}
 test('新增代付通道检查授权与权重，并由主类型确定币种',()=>{
@@ -78,12 +79,12 @@ test('代付通道主类型改为USDT后，既有CNY提款候选保留但不可�
 
 test('租户仅有代收许可时，代付创建、编辑、开发、限额和批量配置均不保存',()=>{
  const f=fixture(),d=f.model.tenantData(),r=d.channels.find(c=>c.providerId==='V-001'&&c.direction==='代付');
- f.model.setTenantBusinessDirections('HS-TEN-001',['代收']);const before=JSON.stringify(d.channels),products=JSON.stringify(d.products);
+ setTenantGrantDirections(f.model,'HS-TEN-001',['代收']);const before=JSON.stringify(d.channels),products=JSON.stringify(d.products);
  channelForm(f,{name:'不应新增',providerId:'V-001',weight:'2',status:'开启'});f.api.setContext({id:undefined});f.api.savePayoutChannel();assert.equal(JSON.stringify(d.channels),before);
  channelForm(f,r);f.api.setContext({id:r.id});f.set('pcName','不应编辑');f.api.savePayoutChannel();assert.equal(JSON.stringify(d.channels),before);assert.equal(JSON.stringify(d.products),products);
  f.api.savePayoutDev();f.api.savePayoutLimit();assert.equal(d.connectionConfigs.size,0);assert.equal(d.payoutLimits.size,0);
  f.api.setContext({kind:'payoutBulkCallback',ids:[r.id]});f.set('pbTime','30');f.set('pbCallback','拒绝');f.api.savePayoutBulk();assert.equal(JSON.stringify(d.channels),before);
- f.model.setTenantBusinessDirections('HS-TEN-001',['代收','代付']);channelForm(f,r);f.set('pcName','重新授权后可编辑');f.api.setContext({id:r.id});f.api.savePayoutChannel();assert.equal(r.name,'重新授权后可编辑');
+ setTenantGrantDirections(f.model,'HS-TEN-001',['代收','代付']);channelForm(f,r);f.set('pcName','重新授权后可编辑');f.api.setContext({id:r.id});f.api.savePayoutChannel();assert.equal(r.name,'重新授权后可编辑');
 });
 test('通道商支持方向不匹配时，即使租户双方向许可也不能保存代付',()=>{
  const f=fixture(),d=f.model.tenantData(),r=d.channels.find(c=>c.providerId==='V-001'&&c.direction==='代付');f.model.providers.find(p=>p.id==='V-001').directions=['代收'];
@@ -93,7 +94,7 @@ test('通道商支持方向不匹配时，即使租户双方向许可也不能�
 test('产品批量开关按产品方向校验，不把产品ID当成通道ID',()=>{
  const f=fixture(),d=f.model.tenantData(),products=d.products.filter(p=>p.direction==='代收');f.api.setContext({kind:'productBatch',ids:products.map(p=>p.id),status:'关闭'});
  assert.equal(f.api.configurationActionAllowed('confirmProductBatch',''),true);f.api.productAction('confirmProductBatch','',{});assert(products.every(p=>p.status==='关闭'));
- f.model.setTenantBusinessDirections('HS-TEN-001',['代付']);f.api.setContext({kind:'productBatch',ids:products.map(p=>p.id),status:'开启'});assert.equal(f.api.configurationActionAllowed('confirmProductBatch',''),false);assert(products.every(p=>p.status==='关闭'));
+ setTenantGrantDirections(f.model,'HS-TEN-001',['代付']);f.api.setContext({kind:'productBatch',ids:products.map(p=>p.id),status:'开启'});assert.equal(f.api.configurationActionAllowed('confirmProductBatch',''),false);assert(products.every(p=>p.status==='关闭'));
 });
 
 test('批量删除编码逐项校验通道许可，任一未授权时整批保留',()=>{
@@ -106,10 +107,71 @@ test('批量删除编码逐项校验通道许可，任一未授权时整批保�
 test('商户批量费率按产品方向校验，不把商户ID当成通道目标',()=>{
  const f=fixture(),p=f.model.tenantData().products.find(p=>p.direction==='代收');f.api.setContext({kind:'merchantRate',id:p.id,targets:['DEMO-M-01','DEMO-M-02'],prop:'rate'});
  assert.equal(f.api.configurationActionAllowed('saveMerchantRate',''),true);
- f.model.setTenantBusinessDirections('HS-TEN-001',['代付']);assert.equal(f.api.configurationActionAllowed('saveMerchantRate',''),false);
+ setTenantGrantDirections(f.model,'HS-TEN-001',['代付']);assert.equal(f.api.configurationActionAllowed('saveMerchantRate',''),false);
 });
 
 test('未打开弹窗时，未授权方向操作正常提示并拒绝，不产生脚本错误',()=>{
- const f=fixture(),d=f.model.tenantData(),r=d.channels.find(c=>c.direction==='代付');f.model.setTenantBusinessDirections('HS-TEN-001',['代收']);f.noModalFeedback();const before=JSON.stringify(d.channels);
+ const f=fixture(),d=f.model.tenantData(),r=d.channels.find(c=>c.direction==='代付');setTenantGrantDirections(f.model,'HS-TEN-001',['代收']);f.noModalFeedback();const before=JSON.stringify(d.channels);
  assert.doesNotThrow(()=>f.click('channel',r.id));assert(f.el('#toastText').textContent.includes('代付'));assert.equal(JSON.stringify(d.channels),before);
+});
+
+test('新增代收编码使用单一三方编码输入，保存到所选父通道并校验必填及范围',()=>{
+ const f=fixture(),d=f.model.tenantData(),r=d.channels.find(c=>c.direction==='代收'),other=d.channels.find(c=>c.direction==='代收'&&c.id!==r.id),before=r.collectionTypes.length,otherBefore=JSON.stringify(other);
+ f.api.setContext({kind:'collectionCode',id:r.id});for(const [id,value] of Object.entries({childName:'',childRate:'',childRange:'1-10000',childCode:'BLUE-CODE-NEW',childAgentRate:'0.003'}))f.set(id,value);
+ f.api.saveCollectionCode();assert.equal(r.collectionTypes.length,before);f.set('childName','新增编码备注');f.set('childRange','100-10');f.api.saveCollectionCode();assert.equal(r.collectionTypes.length,before);
+ f.set('childRange','1-10000');f.api.saveCollectionCode();const c=r.collectionTypes.at(-1);assert.equal(c.code,'BLUE-CODE-NEW');assert.equal(c.thirdCode,c.code);assert.equal(c.name,'新增编码备注');assert.equal(c.rate,'0');assert.equal(c.agentRate,'0.003');assert.equal(JSON.stringify(other),otherBefore);
+ f.api.setContext({kind:'collectionCode',id:r.id});f.api.saveCollectionCode();assert.equal(r.collectionTypes.length,before+1);
+});
+
+test('代付保存按所选通道商授权校验，另一通道商的代付授权不能借用',()=>{
+ const f=fixture(),d=f.model.tenantData();f.model.grantFor('HS-TEN-001','V-001').directions=['代收'];
+ const before=d.channels.length;channelForm(f,{name:'QuickPay 不可代付',providerId:'V-001',status:'开启'});f.api.setContext({id:undefined});f.api.savePayoutChannel();assert.equal(d.channels.length,before);
+ channelForm(f,{name:'BridgePay 可代付',providerId:'V-003',status:'开启'});f.api.setContext({id:undefined});f.api.savePayoutChannel();assert.equal(d.channels.length,before+1);assert.equal(d.channels.at(-1).providerId,'V-003');
+});
+
+test('代付产品单个绑定通道保留主类型，与其他产品及租户隔离',()=>{
+ const f=fixture(),d=f.model.tenantData(),p=d.products.find(p=>p.id==='PROD-OUT-002'),r=d.channels.find(c=>c.direction==='代付'&&c.providerId==='V-003'),main=d.products.find(p=>p.id===r.productId),mainBefore=JSON.stringify(main.channelIds),otherBefore=JSON.stringify(f.model.tenantData('HS-TEN-017'));
+ f.api.setContext({kind:'bindCodes',id:p.id});f.api.setCodeBinding(r.id,true);assert(p.channelIds.includes(r.id));assert.equal(r.productId,main.id);assert.equal(JSON.stringify(main.channelIds),mainBefore);
+ f.api.setCodeBinding(r.id,false);assert(!p.channelIds.includes(r.id));assert.equal(JSON.stringify(f.model.tenantData('HS-TEN-017')),otherBefore);
+ f.api.setContext({kind:'bindCodes',id:main.id});f.api.setCodeBinding(r.id,false);assert(main.channelIds.includes(r.id));
+ f.api.setContext({kind:'bindCodes',id:p.id});const collect=d.channels.find(c=>c.direction==='代收');f.api.setCodeBinding(collect.collectionTypes[0].id,true);assert(!p.channelIds.includes(collect.id));
+});
+test('代付产品候选只含获对应业务授权的通道，搜索和批量绑定解绑生效',()=>{
+ const f=fixture(),d=f.model.tenantData(),p=d.products.find(p=>p.id==='PROD-OUT-002'),quick=d.channels.find(c=>c.direction==='代付'&&c.providerId==='V-001');f.model.grantFor('HS-TEN-001','V-001').directions=['代收'];
+ f.api.setContext({kind:'bindCodes',id:p.id});assert(f.api.availableBindings().every(r=>r.channel.direction==='代付'&&r.channel.providerId!=='V-001'));
+ f.api.setCodeBinding(quick.id,true);assert(!p.channelIds.includes(quick.id));
+ f.set('bindingCode','BRIDGE-CNY');const visible=f.api.availableBindings();assert.equal(visible.length,1);f.click('bindAllCodes');assert.deepEqual(Array.from(p.channelIds),[visible[0].channel.id]);
+ f.set('bindingCode','');f.click('bindAllCodes');assert.equal(p.channelIds.length,f.api.availableBindings().length);f.click('unbindAllCodes');assert.equal(p.channelIds.length,0);
+ const main=d.products.find(p=>p.id==='PROD-OUT-001');f.api.setContext({kind:'bindCodes',id:main.id});f.click('unbindAllCodes');assert(d.channels.filter(c=>c.productId===main.id).every(c=>main.channelIds.includes(c.id)));
+});
+test('代付绑定配置修改范围权重保存并校验，通道侧类型更新能回显',()=>{
+ const f=fixture(),d=f.model.tenantData(),p=d.products.find(p=>p.id==='PROD-OUT-002'),r=d.channels.find(c=>c.direction==='代付');
+ f.api.setContext({kind:'bindingEdit',id:p.id,codeId:r.id,prop:'range'});f.set('bindingValue','20-10');f.api.saveBindingEdit();assert.equal(p.codeBindings,undefined);
+ f.set('bindingValue','20-1000');f.api.saveBindingEdit();assert.equal(p.codeBindings[r.id].range,'20-1000');
+ f.api.setContext({kind:'bindingEdit',id:p.id,codeId:r.id,prop:'weight'});f.set('bindingValue','101');f.api.saveBindingEdit();assert.equal(p.codeBindings[r.id].weight,'1');f.set('bindingValue','5');f.api.saveBindingEdit();assert.equal(p.codeBindings[r.id].weight,'5');
+ f.api.setContext({kind:'payoutTypes',id:r.id});f.api.setPayoutType(p.id,true);assert.equal(f.api.bindingsFor(p)[r.id].bound,true);f.api.setPayoutType(p.id,false);assert.equal(f.api.bindingsFor(p)[r.id].bound,false);assert.equal(p.codeBindings[r.id].weight,'5');
+ f.model.grantFor('HS-TEN-001',r.providerId).directions=['代收'];f.api.setContext({kind:'bindingEdit',id:p.id,codeId:r.id,prop:'weight'});f.set('bindingValue','8');f.api.saveBindingEdit();assert.equal(p.codeBindings[r.id].weight,'5');
+});
+test('代付产品商户绑定、搜索批量和费率保存与代收配置隔离',()=>{
+ const f=fixture(),d=f.model.tenantData(),p=d.products.find(p=>p.id==='PROD-OUT-002'),collect=d.products.find(p=>p.direction==='代收'),before=JSON.stringify(collect);
+ f.api.openBindMerchants(p.id);f.change({dataset:{bindMerchant:'MCH-2031'},checked:true});assert(p.merchantBindings['MCH-2031'].bound);
+ f.set('bindingMerchant','远航');f.click('bindAllMerchants');assert(p.merchantBindings['DEMO-MCH-002'].bound);assert(!p.merchantBindings['DEMO-MCH-003']);f.click('unbindAllMerchants');assert(!p.merchantBindings['DEMO-MCH-002'].bound);assert(p.merchantBindings['MCH-2031'].bound);
+ f.api.setContext({kind:'merchantRate',id:p.id,merchantId:'MCH-2031',prop:'rate'});f.set('merchantRateValue','-1');f.api.saveMerchantRate();assert.equal(p.merchantBindings['MCH-2031'].rate,'0');f.set('merchantRateValue','0.015');f.api.saveMerchantRate();assert.equal(p.merchantBindings['MCH-2031'].rate,'0.015');assert.equal(JSON.stringify(collect),before);
+ setTenantGrantDirections(f.model,'HS-TEN-001',['代收']);f.change({dataset:{bindMerchant:'MCH-2031'},checked:false});assert(p.merchantBindings['MCH-2031'].bound);
+});
+test('共享绑定通道改动保留代收子编码粒度',()=>{
+ const f=fixture(),d=f.model.tenantData(),p=d.products.find(p=>p.direction==='代收'),r=d.channels.find(c=>c.direction==='代收'&&c.collectionTypes.length>1),first=r.collectionTypes[0],second=r.collectionTypes[1];f.api.setContext({kind:'bindCodes',id:p.id});
+ f.api.setCodeBinding(first.id,true);f.api.setCodeBinding(second.id,true);f.api.setCodeBinding(first.id,false);assert(p.channelIds.includes(r.id));assert(f.api.bindingsFor(p)[second.id].bound);f.api.setCodeBinding(second.id,false);assert(!p.channelIds.includes(r.id));assert(f.api.availableBindings().every(r=>r.channel.direction==='代收'));
+});
+
+test('已配置代收产品的父通道新增子编码时，不自动授权绑定新编码',()=>{
+ const f=fixture(),d=f.model.tenantData(),p=d.products.find(p=>p.id==='PROD-IN-001'),r=d.channels.find(c=>p.channelIds.includes(c.id)&&c.collectionTypes.length);
+ f.api.bindingsFor(p);const old=r.collectionTypes[0];assert(p.codeBindings[old.id].bound);r.collectionTypes.push({id:r.id+'-NEW',code:'NEW-CODE',name:'新增编码',rule:'1-10000',status:'开启'});
+ f.api.openBindCodes(p.id);assert.equal(p.codeBindings[r.id+'-NEW'].bound,false);assert(p.codeBindings[old.id].bound);assert(p.channelIds.includes(r.id));
+});
+
+test('代付编辑权重加减限制1至9，状态单选提交保存且保留限额配置',()=>{
+ const f=fixture(),r=f.model.tenantData().channels.find(c=>c.direction==='代付');channelForm(f,r);f.api.setContext({kind:'payoutChannel',id:r.id});
+ f.set('pcWeight','9');f.click('payoutWeightStep','',{step:'1'});assert.equal(f.el('#pcWeight').value,'9');f.set('pcWeight','1');f.click('payoutWeightStep','',{step:'-1'});assert.equal(f.el('#pcWeight').value,'1');f.click('payoutWeightStep','',{step:'1'});assert.equal(f.el('#pcWeight').value,'2');
+ f.change({name:'pcStatusChoice',value:'关闭',dataset:{}});assert.equal(f.el('#pcStatus').value,'关闭');f.set('pcGroup','DEMO-GROUP');f.api.savePayoutChannel();assert.equal(r.status,'关闭');assert.equal(r.weight,'2');assert.equal(r.tgGroup,'DEMO-GROUP');assert.equal(r.limitStatus,'开启');
 });

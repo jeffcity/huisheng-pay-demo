@@ -27,25 +27,27 @@ test('秘密资料独立保存，订单通道投影不带对接配置',()=>{
  assert.ok(!JSON.stringify(m.orderChannels()).includes('DEMO-SECRET'));const audit=m.log('保存对接信息','DEMO-CODE','HS-TEN-001');assert.ok(!JSON.stringify(audit).includes('DEMO-SECRET'));
 });
 
-test('租户业务许可、通道商方向和授权记录共同决定配置资格',()=>{
- const m=boot(),before=m.tenantData().channels.length;
- assert(m.providers.find(p=>p.id==='V-001').directions.includes('代付'));
- m.setTenantBusinessDirections('HS-TEN-001',['代收']);
+test('同一租户逐个通道商授权方向，其他通道商和租户不受影响',()=>{
+ const m=boot(),before=m.tenantData().channels.length;m.grantFor('HS-TEN-001','V-001').directions=['代收'];
  assert(m.canConfigureChannel('HS-TEN-001','V-001','代收'));
  assert.equal(m.canConfigureChannel('HS-TEN-001','V-001','代付'),false);
- assert.equal(m.authorizedProviders('HS-TEN-001','代付').length,0);
+ assert(m.canConfigureChannel('HS-TEN-001','V-003','代付'));
  assert(m.canConfigureChannel('HS-TEN-017','V-001','代付'));
- m.setTenantBusinessDirections('HS-TEN-001',['代收','代付']);
- assert(m.canConfigureChannel('HS-TEN-001','V-001','代付'));
+ assert.equal(m.authorizedProviders('HS-TEN-001','代付').some(p=>p.id==='V-001'),false);
  assert.equal(m.canConfigureChannel('HS-TEN-001','V-004','代收'),false);
- m.grantFor('HS-TEN-001','V-001').status='已停用';
- assert.equal(m.canConfigureChannel('HS-TEN-001','V-001','代付'),false);
+ assert.deepEqual(Array.from(m.grantDirections('HS-TEN-001','V-001')),['代收']);
  assert.equal(m.tenantData().channels.length,before);
 });
-test('授权业务全部取消或非法方向时，拒绝配置且失败保留许可',()=>{
- const m=boot();m.setTenantBusinessDirections('HS-TEN-001',[]);
- assert.equal(m.canConfigureChannel('HS-TEN-001','V-001','代收'),false);
- assert.equal(m.canConfigureChannel('HS-TEN-001','V-001','代付'),false);
- assert.throws(()=>m.setTenantBusinessDirections('HS-TEN-001',['非法']));
- assert.equal(m.tenantBusinessDirections('HS-TEN-001').length,0);
+test('授权方向严格取已选业务与通道商支持方向交集，无记录和停用时无许可',()=>{
+ const m=boot(),g=m.grantFor('HS-TEN-001','V-001');g.directions=['代付'];m.providers.find(p=>p.id==='V-001').directions=['代收'];
+ assert.equal(m.grantDirections('HS-TEN-001','V-001').length,0);
+ m.providers.find(p=>p.id==='V-001').directions=['代收','代付'];assert.equal(m.canConfigureChannel('HS-TEN-001','V-001','代收'),false);
+ g.status='已停用';assert.equal(m.grantDirections('HS-TEN-001','V-001').length,0);
+ assert.equal(m.canConfigureChannel('unknown','V-004','代付'),false);
+ delete g.directions;g.status='已授权';assert.equal(m.grantDirections('HS-TEN-001','V-001').length,0);
+});
+test('授权方向校验拒绝空值、非法业务和通道商不支持的方向',()=>{
+ const m=boot();for(const directions of [[],['非法'],['代收']])assert.throws(()=>m.validateGrantDirections('V-004',directions));
+ assert.deepEqual(Array.from(m.validateGrantDirections('V-004',['代付','代付'])),['代付']);
+ assert.throws(()=>m.validateGrantDirections('missing',['代付']));
 });
