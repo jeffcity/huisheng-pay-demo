@@ -51,3 +51,13 @@ test('授权方向校验拒绝空值、非法业务和通道商不支持的方�
  assert.deepEqual(Array.from(m.validateGrantDirections('V-004',['代付','代付'])),['代付']);
  assert.throws(()=>m.validateGrantDirections('missing',['代付']));
 });
+
+test('租户计费仅支持百分比或单笔，校验精度范围且失败时保留全部设置',()=>{
+ const m=boot(),valid={collection:{mode:'percentage',value:'0.45'},payout:{mode:'perTransaction',value:'2.00'}};m.setTenantBilling('HS-TEN-001',valid);const before=JSON.stringify(m.tenantBilling('HS-TEN-001'));
+ for(const value of ['-1','NaN','1e2','101','0.12345'])assert.throws(()=>m.setTenantBilling('HS-TEN-001',{...valid,collection:{mode:'percentage',value}}));
+ assert.throws(()=>m.setTenantBilling('HS-TEN-001',{...valid,payout:{mode:'perTransaction',value:'0.001'}}));assert.throws(()=>m.setTenantBilling('HS-TEN-001',{...valid,payout:{mode:'mixed',value:'1'}}));assert.throws(()=>m.setTenantBilling('unknown',valid));assert.equal(JSON.stringify(m.tenantBilling('HS-TEN-001')),before);
+ const copy=m.tenantBilling('HS-TEN-001');copy.collection.value='9';assert.equal(JSON.stringify(m.tenantBilling('HS-TEN-001')),before);
+});
+test('服务费计算示例按成功金额或成功笔数计算，0与未设置不同',()=>{
+ const m=boot();assert.equal(m.billingPreview({mode:'percentage',value:'0.45'}),'45.00');assert.equal(m.billingPreview({mode:'percentage',value:'0.29'}),'29.00');assert.equal(m.billingPreview({mode:'percentage',value:'0.0001'}),'0.01');assert.equal(m.billingPreview({mode:'perTransaction',value:'2'}),'200.00');assert.equal(m.billingPreview({mode:'perTransaction',value:'0'}),'0.00');assert.equal(m.billingPreview({mode:'percentage',value:''}),null);
+});

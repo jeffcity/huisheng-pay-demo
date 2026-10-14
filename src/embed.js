@@ -392,7 +392,7 @@ export async function prepareEmbeddedDocument(sourceKey, initialHash = '') {
     /<header\b[^>]*class=["'][^"']*\btopbar\b[^"']*["'][^>]*>[\s\S]*?<\/header>/i,
     match => match.replace(/<header\b/i, '<header hidden aria-hidden="true" style="display:none!important"')
   );
-  html = html.replace(/<\/head>/i, `<script>${providerModel.replace(/<\/script/gi, '<\\/script')}</script>${shellPatch(normalizedHash, sourceKey)}</head>`);
+  html = html.replace(/<\/head>/i, () => `<script>${providerModel.replace(/<\/script/gi, '<\\/script')}</script>${shellPatch(normalizedHash, sourceKey)}</head>`);
   html = html.replace(/<\/body>/i, `${routeSync}</body>`);
   return html;
 }

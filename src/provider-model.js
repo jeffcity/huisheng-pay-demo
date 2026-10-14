@@ -12,10 +12,19 @@ const hsProviderFixtures = {"typeRows": [{"id": "CH-FIAT-IN-001", "channelNo": "
       const hasChannel = hsProviderFixtures.typeRows.some(c => c.vendor === provider.name && c.tenantIds.includes(tenant.id));
       if (hasChannel || (tenant.id === 'HS-TEN-001' && provider.id === 'V-004')) grants.push({id:`VG-${tenant.id}-${provider.id}`,tenantId:tenant.id,providerId:provider.id,status:'已授权',directions:[...provider.directions],updatedAt:'2026-10-13 10:00',reason:'通道商授权演示'});
     }
+    const billing = new Map();
+    const emptyBilling = () => ({collection:{mode:'percentage',value:''},payout:{mode:'percentage',value:''}});
+    const scaled = (value,precision) => {const text=String(value??'').trim();if(!new RegExp('^\\d+(?:\\.\\d{1,'+precision+'})?$').test(text))throw new Error('请输入有效的非负金额或费率');const [whole,fraction='']=text.split('.');return BigInt(whole+fraction.padEnd(precision,'0'));};
+    const normalizeBilling = settings => {const result={};for(const key of ['collection','payout']){const p=settings?.[key];if(!p||!['percentage','perTransaction'].includes(p.mode))throw new Error('请选择有效计费方式');const value=String(p.value??'').trim();if(value){const n=scaled(value,p.mode==='percentage'?4:2);if(p.mode==='percentage'&&n>1000000n)throw new Error('百分比费率不能超过100%');if(n>BigInt(Number.MAX_SAFE_INTEGER))throw new Error('收费数值过大');}result[key]={mode:p.mode,value};}return result;};
     const data = {};
     const model = {
       tenants, providers, grants, audits:[], tenantId:'HS-TEN-001',
       now:() => new Date().toLocaleString('sv-SE',{timeZone:'Asia/Taipei'}),
+      tenantBilling(id) {return clone(billing.get(id)||emptyBilling());},
+      validateTenantBilling(settings) {return normalizeBilling(settings);},
+      setTenantBilling(id,settings) {if(!tenants.some(t=>t.id===id))throw new Error('未知租户');const normalized=normalizeBilling(settings);billing.set(id,normalized);},
+      billingFormula(policy) {if(!policy?.value)return '未设置';return policy.mode==='percentage'?`成功交易金额 × ${policy.value}%`:`成功交易笔数 × CNY ${policy.value} / 笔`;},
+      billingPreview(policy) {if(!policy?.value)return null;const settings=normalizeBilling({collection:policy,payout:policy}),p=settings.collection;const cents=p.mode==='percentage'?(1000000n*scaled(p.value,4)+500000n)/1000000n:100n*scaled(p.value,2);return `${cents/100n}.${String(cents%100n).padStart(2,'0')}`;},
       tenantData(id = 'HS-TEN-001') {
         if (!tenants.some(t => t.id === id)) throw new Error('未知租户');
         if (!data[id]) {
