@@ -7,13 +7,13 @@ const providerSource=fs.readFileSync(new URL('../src/provider-model.js',import.m
 const merchantsSource=fs.readFileSync(new URL('../surfaces/tenant/public/legacy/sources/merchants.html',import.meta.url),'utf8');
 const overviewSource=fs.readFileSync(new URL('../surfaces/tenant/public/legacy/sources/overview.html',import.meta.url),'utf8');
 function fixture(){
- const elements=new Map(),applies=[];const el=selector=>{if(!elements.has(selector))elements.set(selector,{value:'',checked:false,disabled:false,hidden:false,innerHTML:'',textContent:'',dataset:{},setAttribute(){},focus(){},addEventListener(){},insertAdjacentHTML(){},classList:{add(){},remove(){},contains(){return false;}}});return elements.get(selector);};
+ const elements=new Map(),applies=[],listeners=new Map();let feedbackAbsent=false;const el=selector=>{if(feedbackAbsent&&selector==='#modalFeedback')return null;if(!elements.has(selector))elements.set(selector,{value:'',checked:false,disabled:false,hidden:false,innerHTML:'',textContent:'',dataset:{},setAttribute(){},focus(){},addEventListener(){},insertAdjacentHTML(){},classList:{add(){},remove(){},contains(){return false;}}});return elements.get(selector);};
  const window={document:{}};window.top=window;
- const ctx=vm.createContext({window,Map,Set,URL,setTimeout(){},document:{querySelector:el,querySelectorAll:selector=>selector==='[data-payout-apply]:checked'?applies:[],addEventListener(){}}});vm.runInContext(providerSource,ctx);
+ const ctx=vm.createContext({window,Map,Set,URL,setTimeout(){},document:{querySelector:el,querySelectorAll:selector=>selector==='[data-payout-apply]:checked'?applies:[],addEventListener(type,fn){if(!listeners.has(type))listeners.set(type,[]);listeners.get(type).push(fn);}}});vm.runInContext(providerSource,ctx);
  const script=source.slice(source.lastIndexOf('<script>')+8,source.lastIndexOf('</script>'));
- const modified=script.replace(/ function finish\(text,object\)\{[^\n]+\}/,' function finish(text,object){model.log(text,object,tenantId);}').replace(/ render\(\);\s*\}\)\(\);\s*$/,`window.payoutTest={savePayoutChannel,savePayoutDev,savePayoutBulk,savePayoutLimit,setPayoutType,confirmPayoutDelete,runPayoutMoney,runPayoutTest,saveReplicaProduct,setContext(value){context=value;}};})();`);
+ const modified=script.replace(/ function finish\(text,object\)\{[^\n]+\}/,' function finish(text,object){model.log(text,object,tenantId);}').replace(/ render\(\);\s*\}\)\(\);\s*$/,`window.payoutTest={configurationActionAllowed,productAction,savePayoutChannel,savePayoutDev,savePayoutBulk,savePayoutLimit,setPayoutType,confirmPayoutDelete,runPayoutMoney,runPayoutTest,saveReplicaProduct,setContext(value){context=value;}};})();`);
  assert.notEqual(modified,script);vm.runInContext(modified,ctx);
- return {el,ctx,model:window.HSProviderDemo,api:window.payoutTest,applies,set:(id,value)=>el('#'+id).value=value};
+ return {noModalFeedback(){feedbackAbsent=true;},click(action,id){const button={dataset:{action,id},closest(){return null;}};const event={target:{closest(selector){return selector==='button'?button:null;}}};for(const fn of listeners.get('click')||[])fn(event);},el,ctx,model:window.HSProviderDemo,api:window.payoutTest,applies,set:(id,value)=>el('#'+id).value=value};
 }
 function limitForm(f,r={}){const c=f.model.tenantData().payoutLimits.get(r.id)||{};const b=(r.limit||'1 - 10000').replaceAll(',','').split(/\s*-\s*/);for(const [id,v] of Object.entries({plMin:c.min||b[0],plMax:c.max||b[1],plDaily:c.dailyAmount||'0',plFixed:c.fixedAmounts||'',plExcluded:c.excludedAmounts||'',plIps:c.submitIpBlacklist||'',plStart:c.start||'00:00',plEnd:c.end||'23:59',plCallbackTime:r.callbackTime||'0',plCallbackStatus:r.callbackStatus||'接受'}))f.set(id,v);f.el('#plEnabled').checked=r.limitStatus==='开启';}
 function channelForm(f,r,productId=r.productId){limitForm(f,r);for(const [id,v] of Object.entries({pcName:r.name,pcProvider:r.providerId,pcWeight:r.weight||'1',pcProduct:productId||'',pcInterface:r.interfaceType||'chpay',pcStatus:r.status,pcGroup:''}))f.set(id,v);}
@@ -74,4 +74,42 @@ test('代付通道主类型改为USDT后，既有CNY提款候选保留但不可�
  channelForm(f,r,p.id);f.api.setContext({id:r.id});f.api.savePayoutChannel();assert.equal(r.asset,'USDT');assert.equal(r.productId,p.id);
  const start=merchantsSource.indexOf('    const tenantPayoutChannels ='),end=merchantsSource.indexOf('    const fundingOrders =',start);vm.runInContext(merchantsSource.slice(start,end),f.ctx);
  const rows=vm.runInContext(`fundingPayoutChannelProjection({authorizedPayoutChannelIds:['CH-FIAT-OUT-004']})`,f.ctx);assert.equal(rows.length,1);assert.equal(rows[0].id,r.id);assert.equal(rows[0].selectable,false);assert.equal(rows[0].acceptsNewOrders,false);
+});
+
+test('租户仅有代收许可时，代付创建、编辑、开发、限额和批量配置均不保存',()=>{
+ const f=fixture(),d=f.model.tenantData(),r=d.channels.find(c=>c.providerId==='V-001'&&c.direction==='代付');
+ f.model.setTenantBusinessDirections('HS-TEN-001',['代收']);const before=JSON.stringify(d.channels),products=JSON.stringify(d.products);
+ channelForm(f,{name:'不应新增',providerId:'V-001',weight:'2',status:'开启'});f.api.setContext({id:undefined});f.api.savePayoutChannel();assert.equal(JSON.stringify(d.channels),before);
+ channelForm(f,r);f.api.setContext({id:r.id});f.set('pcName','不应编辑');f.api.savePayoutChannel();assert.equal(JSON.stringify(d.channels),before);assert.equal(JSON.stringify(d.products),products);
+ f.api.savePayoutDev();f.api.savePayoutLimit();assert.equal(d.connectionConfigs.size,0);assert.equal(d.payoutLimits.size,0);
+ f.api.setContext({kind:'payoutBulkCallback',ids:[r.id]});f.set('pbTime','30');f.set('pbCallback','拒绝');f.api.savePayoutBulk();assert.equal(JSON.stringify(d.channels),before);
+ f.model.setTenantBusinessDirections('HS-TEN-001',['代收','代付']);channelForm(f,r);f.set('pcName','重新授权后可编辑');f.api.setContext({id:r.id});f.api.savePayoutChannel();assert.equal(r.name,'重新授权后可编辑');
+});
+test('通道商支持方向不匹配时，即使租户双方向许可也不能保存代付',()=>{
+ const f=fixture(),d=f.model.tenantData(),r=d.channels.find(c=>c.providerId==='V-001'&&c.direction==='代付');f.model.providers.find(p=>p.id==='V-001').directions=['代收'];
+ channelForm(f,r);f.api.setContext({id:r.id});f.set('pcName','不应保存方向不匹配');const before=JSON.stringify(r);f.api.savePayoutChannel();assert.equal(JSON.stringify(r),before);
+});
+
+test('产品批量开关按产品方向校验，不把产品ID当成通道ID',()=>{
+ const f=fixture(),d=f.model.tenantData(),products=d.products.filter(p=>p.direction==='代收');f.api.setContext({kind:'productBatch',ids:products.map(p=>p.id),status:'关闭'});
+ assert.equal(f.api.configurationActionAllowed('confirmProductBatch',''),true);f.api.productAction('confirmProductBatch','',{});assert(products.every(p=>p.status==='关闭'));
+ f.model.setTenantBusinessDirections('HS-TEN-001',['代付']);f.api.setContext({kind:'productBatch',ids:products.map(p=>p.id),status:'开启'});assert.equal(f.api.configurationActionAllowed('confirmProductBatch',''),false);assert(products.every(p=>p.status==='关闭'));
+});
+
+test('批量删除编码逐项校验通道许可，任一未授权时整批保留',()=>{
+ const f=fixture(),d=f.model.tenantData(),rows=d.channels.filter(c=>c.direction==='代收'&&c.collectionTypes.length).slice(0,2);assert.equal(rows.length,2);
+ const targets=rows.map(r=>({channelId:r.id,id:r.collectionTypes[0].id,code:r.collectionTypes[0].code})),before=JSON.stringify(d.channels);
+ f.model.providers.find(p=>p.id===rows[1].providerId).directions=['代付'];f.api.setContext({kind:'deleteCodes',targets});f.click('confirmDeleteCodes');assert.equal(JSON.stringify(d.channels),before);
+ f.model.providers.find(p=>p.id===rows[1].providerId).directions=['代收','代付'];f.api.setContext({kind:'deleteCodes',targets});f.click('confirmDeleteCodes');assert(targets.every(t=>!d.channels.find(r=>r.id===t.channelId).collectionTypes.some(c=>c.id===t.id)));
+});
+
+test('商户批量费率按产品方向校验，不把商户ID当成通道目标',()=>{
+ const f=fixture(),p=f.model.tenantData().products.find(p=>p.direction==='代收');f.api.setContext({kind:'merchantRate',id:p.id,targets:['DEMO-M-01','DEMO-M-02'],prop:'rate'});
+ assert.equal(f.api.configurationActionAllowed('saveMerchantRate',''),true);
+ f.model.setTenantBusinessDirections('HS-TEN-001',['代付']);assert.equal(f.api.configurationActionAllowed('saveMerchantRate',''),false);
+});
+
+test('未打开弹窗时，未授权方向操作正常提示并拒绝，不产生脚本错误',()=>{
+ const f=fixture(),d=f.model.tenantData(),r=d.channels.find(c=>c.direction==='代付');f.model.setTenantBusinessDirections('HS-TEN-001',['代收']);f.noModalFeedback();const before=JSON.stringify(d.channels);
+ assert.doesNotThrow(()=>f.click('channel',r.id));assert(f.el('#toastText').textContent.includes('代付'));assert.equal(JSON.stringify(d.channels),before);
 });

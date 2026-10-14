@@ -6,7 +6,8 @@ const hsProviderFixtures = {"typeRows": [{"id": "CH-FIAT-IN-001", "channelNo": "
   if (!owner.__HSProviderDemo) {
     const clone = value => JSON.parse(JSON.stringify(value));
     const tenants = [{id:'HS-TEN-001',name:'汇盛东南亚'},{id:'HS-TEN-017',name:'蓝盛拆分租户'},{id:'HS-TEN-029',name:'北辰支付'},{id:'HS-TEN-046',name:'澜海商服'}];
-    const providers = hsProviderFixtures.rows.vendors.map(p => ({...p, adapterStatus:'已接入'}));
+    tenants.forEach(t=>t.businessDirections=['代收','代付']);
+    const providers = hsProviderFixtures.rows.vendors.map(p => ({...p, adapterStatus:'已接入', directions:['代收','代付'].filter(direction=>hsProviderFixtures.typeRows.some(c=>c.vendor===p.name&&c.direction===direction))}));
     const grants = [];
     for (const tenant of tenants) for (const provider of providers) {
       const hasChannel = hsProviderFixtures.typeRows.some(c => c.vendor === provider.name && c.tenantIds.includes(tenant.id));
@@ -28,7 +29,10 @@ const hsProviderFixtures = {"typeRows": [{"id": "CH-FIAT-IN-001", "channelNo": "
         data[id].channels.forEach(c=>{c.vendor=providers.find(p=>p.id===c.providerId)?.name||c.vendor;});
         return data[id];
       },
-      authorizedProviders(id = 'HS-TEN-001') {return providers.filter(p=>grants.some(g=>g.tenantId===id&&g.providerId===p.id&&g.status==='已授权'));},
+      tenantBusinessDirections(id = 'HS-TEN-001') {return tenants.find(t=>t.id===id)?.businessDirections||[];},
+      setTenantBusinessDirections(id,directions) {const t=tenants.find(t=>t.id===id);if(!t||!Array.isArray(directions)||directions.some(d=>!['代收','代付'].includes(d)))throw new Error('授权业务无效');t.businessDirections=[...new Set(directions)];},
+      authorizedProviders(id = 'HS-TEN-001',direction) {return providers.filter(p=>grants.some(g=>g.tenantId===id&&g.providerId===p.id&&g.status==='已授权')&&(!direction||(this.tenantBusinessDirections(id).includes(direction)&&p.directions?.includes(direction))));},
+      canConfigureChannel(id,providerId,direction) {return ['代收','代付'].includes(direction)&&this.authorizedProviders(id,direction).some(p=>p.id===providerId);},
       grantFor(id,providerId){return grants.find(g=>g.tenantId===id&&g.providerId===providerId);},
       log(action,object,tenantId='',surface='tenant'){const entry={surface,id:`AU-${Date.now()}-${this.audits.length}`,action,object,tenantId,at:this.now()};this.audits.push(entry);return entry;},
       orderChannels(id='HS-TEN-001') {return this.tenantData(id).channels.map(c=>({...c,products:this.tenantData(id).products.filter(p=>p.channelIds.includes(c.id))}));}
