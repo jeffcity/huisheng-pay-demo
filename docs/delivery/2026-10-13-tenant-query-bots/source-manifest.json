@@ -4,11 +4,11 @@
   "documents": [
     {
       "source": "开发清单摘要.md",
-      "sha256": "87ce6b41e7e0ce3fe59a407e8366950cf9aeb2b70cc8e8fcf1dd8ef499989bd6"
+      "sha256": "a9d408123fc7c8220927f055159075f8fc163e49cef63551ccff37c9c571d704"
     },
     {
       "source": "开发任务清单.md",
-      "sha256": "b1edbad2ecce02d20fc013d72de3622e38a80f244403f584dee7aedd111cf87d"
+      "sha256": "bd05fd600fe4c915c936916d4e5a813aa8f91b21119ec4aa59663a3a62a34fd9"
     }
   ]
 }
