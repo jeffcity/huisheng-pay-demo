@@ -16,7 +16,14 @@ const puppeteer = require('puppeteer-core');
     const shell = await (await page.waitForSelector('#surface-panel > iframe')).contentFrame();
     await shell.waitForSelector('.arco-menu-item');
     async function open(id, selector) {
+      const previous = await shell.$('iframe');
       await shell.evaluate(pageId => window.postMessage({ type: 'hs-unified-open-page', pageId }, '*'), id);
+      // Navigation replaces the iframe window, including when reopening the same page.
+      await shell.waitForFunction((oldFrame, target) => {
+        const current = document.querySelector('iframe');
+        return current && current !== oldFrame && current.contentDocument?.querySelector(target);
+      }, {}, previous, selector);
+      await previous?.dispose();
       const frame = await (await shell.waitForSelector('iframe')).contentFrame();
       await frame.waitForSelector(selector, { visible: true });
       return frame;
