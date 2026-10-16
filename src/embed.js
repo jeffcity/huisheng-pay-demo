@@ -1,3 +1,4 @@
+import settlementModel from './settlement-model.js?raw';
 import providerModel from './provider-model.js?raw';
 // 旧壳 prepareEmbeddedDocument 的忠实移植：fetch 真实源文件 → 内联 authGuard →
 // 隐藏内页自带 sidebar/topbar → 注入统一壳补丁与路由同步脚本 → 交给 iframe.srcdoc。
@@ -340,6 +341,21 @@ function shellPatch(normalizedHash, sourceKey) {
           body > .app-shell > .main > .workspace { min-width: 0 !important; width: 100% !important; }
         </style>
         ${visualBaselinePatch(sourceKey)}
+        <style id="hsPlatformThemePalette">
+          /* 仅颜色；保留现有页面、表格与弹窗的布局及交互。 */
+          :root {
+            --primary:#3246d2 !important; --color-primary:#3246d2 !important;
+            --primary-hover:#2939b7 !important; --color-primary-hover:#2939b7 !important;
+            --primary-soft:#eef0ff !important; --soft:#eef0ff !important;
+            --primary-light:#eef0ff !important; --color-primary-light:#eef0ff !important;
+            --color-primary-line:#a7b1f3 !important;
+            --bg:#f0f2f5 !important; --bg-main:#f0f2f5 !important; --bg-page:#f0f2f5 !important;
+            --color-bg-page:#f0f2f5 !important; --color-bg-2:#f0f2f5 !important;
+            --border:#e3e8ef !important; --color-border:#e3e8ef !important;
+          }
+          html,body,.content { background-color:#f0f2f5 !important; }
+          .btn.primary:hover,.primary.btn:hover { background-color:#2939b7 !important; border-color:#2939b7 !important; }
+        </style>
         <script>
           const hsNativeReplaceState = window.history.replaceState.bind(window.history);
           window.history.replaceState = (...args) => {
@@ -392,7 +408,7 @@ export async function prepareEmbeddedDocument(sourceKey, initialHash = '') {
     /<header\b[^>]*class=["'][^"']*\btopbar\b[^"']*["'][^>]*>[\s\S]*?<\/header>/i,
     match => match.replace(/<header\b/i, '<header hidden aria-hidden="true" style="display:none!important"')
   );
-  html = html.replace(/<\/head>/i, () => `<script>${providerModel.replace(/<\/script/gi, '<\\/script')}</script>${shellPatch(normalizedHash, sourceKey)}</head>`);
+  html = html.replace(/<\/head>/i, () => `<script>${providerModel.replace(/<\/script/gi, '<\\/script')}</script><script>${settlementModel.replace(/<\/script/gi, '<\\/script')}</script>${shellPatch(normalizedHash, sourceKey)}</head>`);
   html = html.replace(/<\/body>/i, `${routeSync}</body>`);
   return html;
 }

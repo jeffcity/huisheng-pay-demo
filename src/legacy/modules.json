@@ -80,14 +80,14 @@
     "navId": "tenant-list"
   },
   "tenant-detail-wallet": {
-    "label": "租户详情·钱包",
+    "label": "租户结算单",
     "code": "01-07",
     "group": "01 租户管理",
-    "description": "三类 CNY 钱包摘要与独立页面入口",
-    "sourceName": "平台端租户管理-demo.html",
-    "sourceKey": "tenants",
-    "initialHash": "detail-wallet",
-    "navId": "tenant-list"
+    "description": "当前租户月结算单",
+    "sourceName": "平台端租户结算单-demo.html",
+    "sourceKey": "wallets",
+    "initialHash": "settlements",
+    "navId": "wallets"
   },
   "tenant-detail-audit": {
     "label": "租户详情·审计",
@@ -160,13 +160,13 @@
     "navId": "channel-vendors"
   },
   "wallets": {
-    "label": "租户平台钱包",
+    "label": "租户结算单",
     "code": "04-01",
-    "group": "04 租户平台钱包",
-    "description": "三类 CNY 钱包、余额与关联流水",
-    "sourceName": "平台端租户平台钱包-demo.html",
+    "group": "04 租户结算单",
+    "description": "按月统计成功订单并计算租户服务费",
+    "sourceName": "平台端租户结算单-demo.html",
     "sourceKey": "wallets",
-    "initialHash": "wallets",
+    "initialHash": "settlements",
     "navId": "wallets"
   },
   "funds": {

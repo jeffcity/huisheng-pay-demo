@@ -1607,7 +1607,7 @@
         <div class="page-head">
           <div class="page-title">
             <h1>平台端租户管理</h1>
-            <p>管理租户生命周期、基础资料、账号安全、状态管理，并从租户详情进入当前租户的租户钱包。</p>
+            <p>管理租户生命周期、基础资料、账号安全、状态管理和租户收费设置。</p>
           </div>
           <div class="head-actions">
             <button class="btn primary" id="createTenantTop"><i data-lucide="plus"></i>新增租户</button>
@@ -1654,7 +1654,6 @@
                     <tr>
                       <th>租户</th>
                       <th>状态</th>
-                      <th>钱包余额</th>
                       <th class="action-col">操作</th>
                     </tr>
                   </thead>
@@ -1686,7 +1685,6 @@
       <button class="detail-tab" data-tab="business">业务</button>
       <button class="detail-tab" data-tab="security">安全</button>
       <button class="detail-tab" data-tab="domains">域名管理</button>
-      <button class="detail-tab" data-tab="wallet">租户钱包</button>
       <button class="detail-tab" data-tab="audit">审计日志</button>
     </div>
     <div class="detail-modal-body">
@@ -1694,7 +1692,6 @@
       <section class="detail-section" id="tab-business"></section>
       <section class="detail-section" id="tab-security"></section>
       <section class="detail-section" id="tab-domains"></section>
-      <section class="detail-section" id="tab-wallet"></section>
       <section class="detail-section" id="tab-audit"></section>
     </div>
   </section>
@@ -1823,15 +1820,6 @@
           { name: '法币代付', status: '已授权', tone: 'green' }
         ],
         businessTypes: ['法币业务'],
-        wallet: 482350.18,
-        available: 452100.18,
-        frozen: 30250,
-        wallets: [
-          { currency: 'CNY', network: '代收钱包', balance: 1284600, available: 1261200, frozen: 23400, status: '正常', tone: 'green' },
-          { currency: 'CNY', network: '代付钱包', balance: 482350.18, available: 452100.18, frozen: 30250, status: '正常', tone: 'green' },
-          { currency: 'CNY', network: '提款钱包', balance: 50000, available: 50000, frozen: 0, status: '正常', tone: 'green' }
-        ],
-        credit: 50000,
         expire: '2027-01-31',
         domain: 'pay-hs-sea.com',
         admin: 'admin_hs_sea',
@@ -1854,15 +1842,6 @@
           { name: '法币代付', status: '未授权', tone: 'orange' }
         ],
         businessTypes: ['法币业务'],
-        wallet: 12680.2,
-        available: 12680.2,
-        frozen: 0,
-        wallets: [
-          { currency: 'CNY', network: '代收钱包', balance: 385000, available: 385000, frozen: 0, status: '审核中', tone: 'orange' },
-          { currency: 'CNY', network: '代付钱包', balance: 12680.2, available: 12680.2, frozen: 0, status: '低余额', tone: 'orange' },
-          { currency: 'CNY', network: '提款钱包', balance: 30000, available: 30000, frozen: 0, status: '正常', tone: 'green' }
-        ],
-        credit: 30000,
         expire: '2026-10-18',
         domain: 'pay-bc-ops.net',
         admin: 'bc_admin',
@@ -1885,15 +1864,6 @@
           { name: '法币代付', status: '已授权', tone: 'green' }
         ],
         businessTypes: ['法币业务'],
-        wallet: 8230.55,
-        available: 0,
-        frozen: 8230.55,
-        wallets: [
-          { currency: 'CNY', network: '代收钱包', balance: 0, available: 0, frozen: 0, status: '停用', tone: 'red' },
-          { currency: 'CNY', network: '代付钱包', balance: 8230.55, available: 0, frozen: 8230.55, status: '冻结', tone: 'red' },
-          { currency: 'CNY', network: '提款钱包', balance: 20000, available: 0, frozen: 20000, status: '冻结', tone: 'red' }
-        ],
-        credit: 20000,
         expire: '2026-08-30',
         domain: 'ls-hs-tenant.io',
         admin: 'ls_admin',
@@ -1916,15 +1886,6 @@
           { name: '法币代付', status: '已授权', tone: 'green' }
         ],
         businessTypes: ['法币业务'],
-        wallet: 219004.08,
-        available: 199004.08,
-        frozen: 20000,
-        wallets: [
-          { currency: 'CNY', network: '代收钱包', balance: 7380000, available: 7100000, frozen: 280000, status: '正常', tone: 'green' },
-          { currency: 'CNY', network: '代付钱包', balance: 219004.08, available: 199004.08, frozen: 20000, status: '正常', tone: 'green' },
-          { currency: 'CNY', network: '提款钱包', balance: 80000, available: 80000, frozen: 0, status: '正常', tone: 'green' }
-        ],
-        credit: 80000,
         expire: '2027-04-15',
         domain: 'hailan-pay.com',
         admin: 'hl_ops_admin',
@@ -1947,15 +1908,6 @@
           { name: '法币代付', status: '未授权', tone: 'gray' }
         ],
         businessTypes: ['法币业务'],
-        wallet: 0,
-        available: 0,
-        frozen: 0,
-        wallets: [
-          { currency: 'CNY', network: '代收钱包', balance: 0, available: 0, frozen: 0, status: '关闭', tone: 'gray' },
-          { currency: 'CNY', network: '代付钱包', balance: 0, available: 0, frozen: 0, status: '关闭', tone: 'gray' },
-          { currency: 'CNY', network: '提款钱包', balance: 0, available: 0, frozen: 0, status: '关闭', tone: 'gray' }
-        ],
-        credit: 0,
         expire: '2026-06-30',
         domain: 'yinwan-pay.net',
         admin: 'yw_admin',
@@ -2264,34 +2216,6 @@
       ]
     ];
 
-    const listWalletSnapshots = {
-      'HS-TEN-001': {
-        withdrawable: { CNY: 50000 },
-        collection: { CNY: 1261200 },
-        payout: { CNY: 452100.18 }
-      },
-      'HS-TEN-018': {
-        withdrawable: { CNY: 30000 },
-        collection: { CNY: 385000 },
-        payout: { CNY: 12680.2 }
-      },
-      'HS-TEN-029': {
-        withdrawable: { CNY: 0 },
-        collection: { CNY: 0 },
-        payout: { CNY: 0 }
-      },
-      'HS-TEN-044': {
-        withdrawable: { CNY: 80000 },
-        collection: { CNY: 7100000 },
-        payout: { CNY: 199004.08 }
-      },
-      'HS-TEN-061': {
-        withdrawable: { CNY: 0 },
-        collection: { CNY: 0 },
-        payout: { CNY: 0 }
-      }
-    };
-
     const statusTone = {
       '正常': 'green',
       '审核中': 'orange',
@@ -2436,27 +2360,6 @@
       return (tenant.businessCatalog || []).some(item => aliases.includes(item.name) && item.status === '已授权');
     }
 
-    function walletSummaryCell(tenant) {
-      const snapshot = listWalletSnapshots[tenant.id] || {
-        withdrawable: { CNY: tenant.credit || 0 },
-        collection: { CNY: 0 },
-        payout: { CNY: tenant.available || 0 }
-      };
-      const rows = [
-        ['可提现', snapshot.withdrawable],
-        ['代收', snapshot.collection],
-        ['代付', snapshot.payout]
-      ];
-      return '<div class="wallet-ledger">' + rows.map(row => (
-        '<div class="wallet-ledger-line">' +
-          '<span class="label">' + row[0] + '</span>' +
-          '<span class="amount">' + formatLedgerAmount(row[1].CNY, 'CNY') + '</span>' +
-        '</div>'
-      )).join('') +
-        '<button class="wallet-link" data-open-wallet="' + tenant.id + '">钱包详情</button>' +
-      '</div>';
-    }
-
     function tag(text, tone) {
       return '<span class="tag ' + tone + '">' + text + '</span>';
     }
@@ -2470,7 +2373,7 @@
       document.getElementById('createTenantTop').title = createAllowed ? '' : (permissions.canCreate ? '新增顶层租户要求“全部租户”数据范围' : appState.currentRole + ' 无新增租户权限');
 
       if (result.length === 0) {
-        rows.innerHTML = '<tr><td colspan="4" class="table-empty"><strong>没有符合条件的租户</strong><span>请调整筛选条件后再查看列表。</span><br><button class="btn" data-clear-filters><i data-lucide="rotate-ccw"></i>清空筛选</button></td></tr>';
+        rows.innerHTML = '<tr><td colspan="3" class="table-empty"><strong>没有符合条件的租户</strong><span>请调整筛选条件后再查看列表。</span><br><button class="btn" data-clear-filters><i data-lucide="rotate-ccw"></i>清空筛选</button></td></tr>';
         refreshIcons();
         return;
       }
@@ -2487,7 +2390,6 @@
         return '<tr data-index="' + index + '">' +
           '<td><div class="tenant-cell"><strong>' + tenant.name + '</strong><span class="mono">' + tenant.id + ' / ' + tenant.contact + '</span>' + (accessPending ? '<span>' + tag('域名待处理 ' + accessPending, 'orange') + '</span>' : '') + '</div></td>' +
           '<td>' + tag(tenant.status, tenant.statusTone) + '</td>' +
-          '<td>' + walletSummaryCell(tenant) + '</td>' +
           '<td class="action-col"><div class="table-actions">' +
             '<button class="action-link" data-open="' + tenant.id + '">详情</button>' +
             statusAction +
@@ -2980,8 +2882,6 @@
           kv('租户编号', tenant.id) +
           kv('联系人', tenant.contact + ' / ' + tenant.phone) +
           kv('过期时间', tenant.expire) +
-          kv('提款钱包可用', formatMoney(tenant.credit)) +
-          kv('代付钱包总额', formatMoney(tenant.wallet)) +
           kv('当前状态', tenant.status) +
           kv('租户服务费', tenantBillingSummary(tenant)) +
         '</div>' +
@@ -3059,36 +2959,6 @@
           renderDomainRows(merchantDomains, permissions) +
         '</tbody></table></div>';
 
-      const walletAccounts = tenant.wallets || [];
-      const walletCards = walletAccounts.map(wallet => (
-        walletCard(wallet.network, formatCurrency(wallet.balance, wallet.currency), wallet.tone, '首版仅 CNY')
-      )).join('');
-      const walletRows = walletAccounts.map(wallet => (
-        '<tr>' +
-          '<td><strong>' + wallet.currency + '</strong><br><span class="mono">' + wallet.network + '</span></td>' +
-          '<td class="amount">' + formatCurrency(wallet.balance, wallet.currency) + '</td>' +
-          '<td class="amount">' + formatCurrency(wallet.available, wallet.currency) + '</td>' +
-          '<td class="amount">' + formatCurrency(wallet.frozen, wallet.currency) + '</td>' +
-          '<td>' + tag(wallet.status, wallet.tone) + '</td>' +
-        '</tr>'
-      )).join('');
-
-      document.getElementById('tab-wallet').innerHTML = sectionTitle('租户钱包') +
-        '<div class="wallet-grid">' +
-          walletCards +
-        '</div>' +
-        sectionTitle('CNY 钱包列表') +
-        '<div class="table-wrap"><table><thead><tr><th>钱包</th><th>余额</th><th>可用余额</th><th>冻结金额</th><th>状态</th></tr></thead><tbody>' +
-          walletRows +
-        '</tbody></table></div>' +
-        sectionTitle('最近资金摘要') +
-        '<div class="table-wrap"><table><thead><tr><th>类型</th><th>金额</th><th>来源</th><th>状态</th><th>关联信息</th></tr></thead><tbody>' +
-          '<tr><td>外部存款</td><td class="amount">' + formatMoney(Math.max(tenant.wallet * 0.18, 0)) + '</td><td>通道商入账结果</td><td>' + tag('已入账', 'green') + '</td><td class="mono">' + tenant.tx + '</td></tr>' +
-          '<tr><td>服务费扣款</td><td class="amount">CNY 3,580.12</td><td>' + tenant.feePolicy + '</td><td>' + tag('已扣款', 'green') + '</td><td>订单成功后实时入账</td></tr>' +
-          '<tr><td>人工加款</td><td class="amount">CNY 8,000.00</td><td>租户财务申请</td><td>' + tag('待平台审核', 'orange') + '</td><td>平台不替租户创建申请</td></tr>' +
-        '</tbody></table></div>' +
-        '<div class="notice"><i data-lucide="info"></i><div><strong>页面边界：</strong>租户详情只保留钱包和待处理摘要，不在本页审核、查单、登记结果或直接改账。</div></div>';
-
       document.getElementById('tab-audit').innerHTML = sectionTitle('审计日志') +
         '<div class="table-wrap"><table aria-label="租户详情审计日志表格"><thead><tr>' +
           '<th>日志编号</th>' +
@@ -3107,10 +2977,6 @@
 
     function kv(label, value) {
       return '<div class="kv"><span>' + label + '</span><strong>' + value + '</strong></div>';
-    }
-
-    function walletCard(label, value, tone, note) {
-      return '<div class="wallet-card"><span>' + label + '</span><strong>' + value + '</strong><div class="tag-row">' + tag(note, 'gray') + tag(tone === 'red' ? '风险' : tone === 'orange' ? '关注' : tone === 'gray' ? '只读' : '正常', tone) + '</div></div>';
     }
 
     function activateDetailTab(tab) {
@@ -3288,7 +3154,7 @@
       appState.confirmTenantId = tenant.id;
       document.getElementById('confirmTitle').textContent = '租户创建完成';
       document.getElementById('confirmHeadline').textContent = tenant.id + ' 已创建';
-      document.getElementById('confirmDetail').textContent = '租户、唯一超级管理员、初始登录 IP、未启用系统域名和三个 CNY 钱包已原子创建；管理员登录准入已就绪。';
+      document.getElementById('confirmDetail').textContent = '租户、唯一超级管理员、初始登录 IP、未启用系统域名已原子创建；管理员登录准入已就绪。';
       document.getElementById('confirmForm').innerHTML =
         '<div class="field"><label>租户编号</label><input value="' + tenant.id + '" readonly></div>' +
         '<div class="field"><label>当前状态</label><input value="审核中" readonly></div>' +
@@ -3398,15 +3264,6 @@
             { name: '法币代付', status: '未授权', tone: 'gray' }
           ],
           businessTypes: ['法币业务'],
-          wallet: 0,
-          available: 0,
-          frozen: 0,
-          wallets: [
-            { currency: 'CNY', network: '代收钱包', balance: 0, available: 0, frozen: 0, status: '正常', tone: 'green' },
-            { currency: 'CNY', network: '代付钱包', balance: 0, available: 0, frozen: 0, status: '正常', tone: 'green' },
-            { currency: 'CNY', network: '提款钱包', balance: 0, available: 0, frozen: 0, status: '正常', tone: 'green' }
-          ],
-          credit: 0,
           admin: `admin_${suffix}`,
           loginIpRules: [{ id: `LIP-${suffix}-001`, value: initialLoginIp, name: '初始管理员登录 IP', status: '启用', updatedAt: platformNow() }],
           apiIpRules: [],
@@ -3416,11 +3273,6 @@
           audit: []
         };
         tenants.unshift(tenant);
-        listWalletSnapshots[id] = {
-          withdrawable: { CNY: 0 },
-          collection: { CNY: 0 },
-          payout: { CNY: 0 }
-        };
         action = '新增租户';
       }
 
@@ -3428,10 +3280,11 @@
       let sharedTenant = providerModel.tenants.find(t=>t.id===tenant.id);
       if (!sharedTenant) {sharedTenant={id:tenant.id,name:tenant.name};providerModel.tenants.push(sharedTenant);}
       sharedTenant.name = tenant.name;
+      window.HSTenantSettlements?.registerTenant(tenant);
       providerModel.setTenantBilling(tenant.id,billing);
       appState.selectedTenant = tenant;
       ensureTenantAccessState(tenant);
-      const audit = addTenantAudit(tenant, action, '成功', editing ? '更新租户资料及服务费：代收 '+providerModel.billingFormula(billing.collection)+'；代付 '+providerModel.billingFormula(billing.payout) : '原子创建租户、唯一超级管理员、已启用初始登录 IP、未启用系统域名和三个 CNY 钱包');
+      const audit = addTenantAudit(tenant, action, '成功', editing ? '更新租户资料及服务费：代收 '+providerModel.billingFormula(billing.collection)+'；代付 '+providerModel.billingFormula(billing.payout) : '原子创建租户、唯一超级管理员、已启用初始登录 IP、未启用系统域名');
       setOperationReceipt({
         title: editing ? '租户资料已保存并生效' : '租户已创建',
         tenant,
@@ -3796,13 +3649,6 @@
           return;
         }
 
-        const openWalletBtn = event.target.closest('[data-open-wallet]');
-        if (openWalletBtn) {
-          openDetailModal(openWalletBtn.dataset.openWallet);
-          activateDetailTab('wallet');
-          return;
-        }
-
         const domainActionBtn = event.target.closest('[data-domain-action]');
         if (domainActionBtn) {
           openDomainAction(domainActionBtn.dataset.domainAction, domainActionBtn.dataset.domainId || '');
@@ -3931,7 +3777,7 @@
       const initialRoute = window.__UNIFIED_DEMO_HASH || window.location.hash.replace('#', '');
       if (initialRoute.startsWith('detail-')) {
         openDetailModal(tenants[0].id);
-        activateDetailTab(initialRoute.replace('detail-', ''));
+        activateDetailTab(initialRoute === 'detail-wallet' ? 'overview' : initialRoute.replace('detail-', ''));
       } else if (initialRoute === 'create') {
         openTenantModal('create');
       }
@@ -3947,8 +3793,7 @@
         admin: tenant.admin,
         domain: tenant.domain,
         domains: allTenantDomains(tenant).map(domain => ({ ...domain })),
-        businessCatalog: (tenant.businessCatalog || []).map(item => ({ ...item })),
-        wallets: (tenant.wallets || []).map(wallet => ({ ...wallet }))
+        businessCatalog: (tenant.businessCatalog || []).map(item => ({ ...item }))
       })),
       getAudits: () => auditEvents.map(item => ({ ...item })),
       getLatestReceipt: () => appState.latestReceipt ? { ...appState.latestReceipt } : null,

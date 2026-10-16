@@ -20,8 +20,17 @@ async function fetchSource(key) {
 
 const headBridge = `
         <style id="hs-unified-content-bridge">
+          /* 仅统一主题色，不改变业务页面结构、字号、尺寸或交互。 */
+          :root {
+            --primary:#3246d2; --color-primary:#3246d2;
+            --primary-hover:#2939b7; --color-primary-hover:#2939b7;
+            --primary-soft:#eef0ff; --soft:#eef0ff; --color-primary-light:#eef0ff;
+            --color-primary-line:#a7b1f3;
+            --bg:#f0f2f5; --color-bg-page:#f0f2f5; --color-bg-2:#f0f2f5;
+            --border:#e3e8ef; --color-border:#e3e8ef;
+          }
           html, body { min-width: 0 !important; }
-          body { overflow: auto !important; }
+          body { overflow: auto !important; background:#f0f2f5 !important; }
           .sidebar, [data-astryx="SidebarNav"] { display: none !important; }
           header.topbar, [data-astryx="TopBar"] { display: none !important; }
           .app, .app-shell { grid-template-columns: minmax(0, 1fr) !important; }

@@ -96,8 +96,8 @@ export default function App() {
   };
 
   return (
-    <Layout style={{ height: '100vh' }}>
-      <Sider width={220} style={{ display: 'flex', flexDirection: 'column' }}>
+    <Layout className="platform-shell" style={{ height: '100vh' }}>
+      <Sider className="platform-sider" width={220} style={{ display: 'flex', flexDirection: 'column' }}>
         <div className="platform-brand">
           <Tag color="arcoblue" style={{ fontWeight: 600 }}>HS</Tag>
           <span><strong>汇盛支付</strong><br /><small style={{ color: 'var(--color-text-3)' }}>平台端控制台</small></span>
@@ -108,29 +108,26 @@ export default function App() {
           defaultOpenKeys={['report']}
           onClickMenuItem={(key) => openModule(key)}
         >
-          {NAV_GROUPS.map(group => (
-            <ItemGroup key={group.title} title={group.title}>
+          {NAV_GROUPS.map((group, groupIndex) => (
+            <ItemGroup key={group.title} title={<span className="platform-nav-group"><span className={'platform-nav-icon tone-' + groupIndex % 7} aria-hidden="true">{MODULE_ICON[group.items?.[0]?.module] || <IconApps />}</span>{group.title}</span>}>
               {group.subgroups?.map(sub => (
-                <SubMenu key={sub.title === '日终统计' ? 'report' : sub.title} title={sub.title} icon={<IconCalendar />}>
+                <SubMenu key={sub.title === '日终统计' ? 'report' : sub.title} title={sub.title} icon={<span className={'platform-nav-icon is-small tone-' + (groupIndex + 1) % 7} aria-hidden="true"><IconCalendar /></span>}>
                   {sub.items.map(item => (
-                    <MenuItem key={item.module}>{item.label}</MenuItem>
+                    <MenuItem key={item.module}><span className={'platform-nav-icon is-small tone-' + (groupIndex + 2) % 7} aria-hidden="true">{MODULE_ICON[item.module] || <IconCalendar />}</span><span>{item.label}</span></MenuItem>
                   ))}
                 </SubMenu>
               ))}
-              {group.items?.map(item => (
-                <MenuItem key={item.module}>{MODULE_ICON[item.module]}{item.label}</MenuItem>
+              {group.items?.map((item, itemIndex) => (
+                <MenuItem key={item.module}><span className={'platform-nav-icon is-small tone-' + (groupIndex + itemIndex + 1) % 7} aria-hidden="true">{MODULE_ICON[item.module] || <IconCommon />}</span><span>{item.label}</span></MenuItem>
               ))}
             </ItemGroup>
           ))}
         </Menu>
       </Sider>
       <Layout>
-        <Header style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0 16px' }}>
-          <Breadcrumb>
-            <Breadcrumb.Item>平台端</Breadcrumb.Item>
-            <Breadcrumb.Item>{navLabel(activeTarget.navId || activeModule)}</Breadcrumb.Item>
-          </Breadcrumb>
-          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12 }}>
+        <Header className="platform-header">
+          <h1>{navLabel(activeTarget.navId || activeModule)}</h1>
+          <div className="platform-header-actions">
             <Input.Search
               style={{ width: 280 }}
               placeholder="搜索租户、订单、通道、审计单号"
@@ -141,6 +138,12 @@ export default function App() {
             <Tag color="arcoblue">平台超管</Tag>
           </div>
         </Header>
+        <div className="platform-pagebar">
+          <Breadcrumb>
+            <Breadcrumb.Item>平台端</Breadcrumb.Item>
+            <Breadcrumb.Item>{navLabel(activeTarget.navId || activeModule)}</Breadcrumb.Item>
+          </Breadcrumb>
+        </div>
         <Content style={{ position: 'relative', flex: 1, minHeight: 0 }}>
           {loading && !error && (
             <div className="frame-overlay"><Spin tip="正在载入审查页面" /></div>

@@ -1660,7 +1660,7 @@
       { group: '租户管理', items: [{ id: 'tenants', label: '租户管理', icon: 'tenant' }] },
       { group: '业务开通', items: [{ id: 'business', label: '业务开通', icon: 'business' }] },
       { group: '资金运营', items: [
-        { id: 'wallets', label: '租户平台钱包', icon: 'wallet' },
+        { id: 'wallets', label: '租户结算单', icon: 'wallet' },
         { id: 'funds', label: '资金待办', icon: 'funds' }
       ] },
       { group: '通道管理', items: [{ id: 'channels', label: '通道管理', icon: 'channel' }] },
@@ -3125,6 +3125,7 @@
         showToast('当前账号没有目标页面权限，未加载任何数据');
         return false;
       }
+      if (id === 'wallets') { window.parent.postMessage({type:'hs-demo-open-module',module:'wallets'}, '*'); return; }
       currentPage = id;
       if (!integratedRoutes[id] && window.location.hash !== `#${id}`) {
         window.history.replaceState(null, '', `#${id}`);
