@@ -19811,6 +19811,8 @@
       background: #f7f8fa;
     }
 
+    #createParentField[hidden] { display: none !important; }
+
     .field {
       display: grid;
       gap: 5px;
@@ -24423,10 +24425,6 @@
                 <label>对接密钥</label>
                 <input class="input" value="平台配置，一户一把，默认脱敏" readonly>
               </div>
-              <div class="field">
-                <label for="createMerchant2fa">Google 2FA 验证码</label>
-                <input class="input mono" id="createMerchant2fa" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="填写白名单时必填">
-              </div>
             </div>
           </div>
           <div class="sub-panel" data-astryx="DataPanel">
@@ -24434,6 +24432,15 @@
             <div style="padding:12px" class="form-grid">
               <div class="field"><label for="createSingleLimit">单笔限额（CNY）</label><input class="input" id="createSingleLimit" inputmode="decimal" pattern="[0-9]+([.][0-9]{1,2})?" data-cny-amount value="50000" placeholder="大于 0，最多两位小数"></div>
               <div class="field"><label for="createDailyLimit">日限额（CNY）</label><input class="input" id="createDailyLimit" inputmode="decimal" pattern="[0-9]+([.][0-9]{1,2})?" data-cny-amount value="500000" placeholder="大于 0，最多两位小数"></div>
+            </div>
+          </div>
+          <div class="sub-panel" data-astryx="DataPanel">
+            <h3>操作验证</h3>
+            <div style="padding:12px" class="form-grid">
+              <div class="field wide">
+                <label for="createMerchant2fa">当前操作人 Google 2FA 验证码</label>
+                <input class="input mono" id="createMerchant2fa" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="填写白名单时，输入当前操作人的 6 位验证码">
+              </div>
             </div>
           </div>
           <div class="field-error" id="modalError" role="alert"></div>
@@ -24449,9 +24456,12 @@
       const syncParentField = () => {
         const isChild = typeSelect.value === "子商户";
         document.getElementById("createParentField").hidden = !isChild;
-        if (!isChild) document.getElementById("createMerchantParent").value = "";
+        const parentSelect = document.getElementById("createMerchantParent");
+        parentSelect.disabled = !isChild;
+        if (!isChild) parentSelect.value = "";
       };
       typeSelect.addEventListener("change", syncParentField);
+      syncParentField();
       document.getElementById("saveMerchantDraft").addEventListener("click", () => {
         clearInlineError();
         showToast("新增商户草稿已暂存在当前页面；草稿不会创建账号或钱包");
@@ -24467,7 +24477,7 @@
       const owner = document.getElementById("createMerchantOwner").value.trim();
       const phone = document.getElementById("createMerchantPhone").value.trim();
       const merchantAdminAccount = document.getElementById("createMerchantAccount").value.trim().toLowerCase();
-      const parentMerchantId = document.getElementById("createMerchantParent").value;
+      const parentMerchantId = type === "子商户" ? document.getElementById("createMerchantParent").value : "";
       const unifiedCallback = document.getElementById("createUnifiedCallback").value.trim();
       const whitelist = document.getElementById("createMerchantWhitelist").value.trim();
       const google2fa = document.getElementById("createMerchant2fa").value.trim();
@@ -24558,9 +24568,7 @@
             <div class="info-item"><div class="k">初始角色</div><div class="v">系统超级管理员（全部权限）</div></div>
             <div class="info-item"><div class="k">初始账号</div><div class="v mono">${escapeHtml(merchant.adminSecurity.account)}</div></div>
             <div class="info-item"><div class="k">一次性密码</div><div class="v mono" id="createdMerchantOtp">${escapeHtml(oneTimePassword)}</div></div>
-            <div class="info-item"><div class="k">有效期</div><div class="v">24 小时；首次登录强制改密并绑定 Google 2FA</div></div>
           </div>
-          <div class="notice">一次性密码仅在本次结果中展示。创建商户不会生成独立域名；商户使用当前租户已有的共享商户端域名登录，系统再通过账号识别具体商户。</div>
         </div>
         <div class="modal-footer" data-astryx="FooterActions">
           <button class="btn" type="button" id="copyCreatedMerchant"><i data-lucide="copy"></i>复制交付信息</button>
@@ -24570,7 +24578,7 @@
       showModal("small");
       bindModalEvents();
       document.getElementById("copyCreatedMerchant").addEventListener("click", async () => {
-        const summary = `商户：${merchant.name}\n商户编号：${merchant.id}\n商户端共享登录地址：https://${tenantMerchantLoginAccess.loginDomain}/login\n共享入口状态：${tenantMerchantLoginAccess.loginDomainStatus}\n初始账号：${merchant.adminSecurity.account}\n一次性密码：${oneTimePassword}\n有效期：24 小时`;
+        const summary = `商户：${merchant.name}\n商户编号：${merchant.id}\n商户端共享登录地址：https://${tenantMerchantLoginAccess.loginDomain}/login\n共享入口状态：${tenantMerchantLoginAccess.loginDomainStatus}\n初始账号：${merchant.adminSecurity.account}\n一次性密码：${oneTimePassword}`;
         const copied = await copyText(summary);
         showToast(copied ? "交付信息已复制；请通过安全渠道发送" : "复制失败，请手动复制当前可见交付信息");
       });
