@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { mountFrameDocument } from '../../../src/frame-document.js';
 import { Layout, Menu, Breadcrumb, Spin, Result, Tag, Button } from '@arco-design/web-react';
 import { MODULES, NAV_GROUPS, UTILITY_ITEMS } from './modules.js';
 import { prepareEmbeddedDocument } from './embed.js';
@@ -20,9 +21,12 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const frameRef = useRef(null);
+  const frameHostRef = useRef(null);
+  const requestRef = useRef(0);
   const loadingRef = useRef(true);
 
   const openPage = useCallback(async (pageId, { updateHash = true } = {}) => {
+    const request = ++requestRef.current;
     pageId = resolvePageId(pageId);
     const config = MODULES[pageId] || MODULES.home;
     const resolved = MODULES[pageId] ? pageId : 'home';
@@ -32,21 +36,25 @@ export default function App() {
     setError('');
     try {
       const doc = await prepareEmbeddedDocument(config.sourceKey, config.module);
-      const frame = frameRef.current;
-      if (!frame) return;
-      frame.dataset.initialHash = config.initialHash || '';
-      frame.title = '汇盛支付租户端 · ' + config.label;
-      frame.srcdoc = doc;
+      const host = frameHostRef.current;
+      if (!host || request !== requestRef.current) return;
+      mountFrameDocument(host, doc, { title: '汇盛支付租户端 · ' + config.label, frameRef, dataset: { initialHash: config.initialHash || '' }, onLoad: () => {
+        if (request !== requestRef.current) return;
+        if (loadingRef.current) { loadingRef.current = false; setLoading(false); }
+      }});
       if (updateHash) {
-        // srcdoc 没有可改写的独立 URL；路由仍由 activePage 管理。
+        // 内页路由由 activePage 管理，不让内页改写外壳地址。
         try { window.history.replaceState(null, '', '#' + resolved); } catch {}
       }
     } catch (err) {
+      if (request !== requestRef.current) return;
       setError(String(err?.message || err));
       setLoading(false);
       loadingRef.current = false;
     }
   }, []);
+
+  useEffect(() => () => { requestRef.current++; }, []);
 
   useEffect(() => { openPage(activePage, { updateHash: false }); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -126,12 +134,7 @@ export default function App() {
               <Result status="error" title="页面来源缺失" subTitle={error} />
             </div>
           )}
-          <iframe
-            ref={frameRef}
-            title="汇盛支付租户端页面"
-            referrerPolicy="no-referrer"
-            onLoad={() => { if (loadingRef.current) { loadingRef.current = false; setLoading(false); } }}
-          />
+          <div ref={frameHostRef} className="embedded-frame-host" />
         </Content>
       </Layout>
     </Layout>

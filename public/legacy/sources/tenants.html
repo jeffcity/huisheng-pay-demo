@@ -1518,6 +1518,7 @@
       }
     }
   .tenant-billing-settings{border:1px solid #e4e7ed;border-radius:8px;padding:16px;background:#f8faff}.tenant-billing-settings h3{font-size:15px;margin:0 0 8px}.tenant-billing-settings small{line-height:1.6;display:block;color:#606266}.tenant-billing-settings .form-grid{margin-top:12px}.tenant-billing-settings .field{justify-content:flex-start}.tenant-billing-settings select{min-height:32px!important;height:32px!important;padding:4px 10px}.tenant-billing-settings .field label{min-height:20px}
+  #tenantModal.billing-only .modal-body > .form-grid > .field:not(.tenant-billing-settings){display:none}
 </style>
 </head>
 <body>
@@ -2197,6 +2198,7 @@
       currentConfirm: '高风险操作',
       currentRole: platformTenantAuthorization ? '登录账号' : '平台超管',
       editingTenantId: '',
+      editingBillingOnly: false,
       confirmTenantId: '',
       confirmBusinessName: '',
       confirmRequestId: '',
@@ -2969,6 +2971,10 @@
         ? '<button class="btn primary" data-edit="' + tenant.id + '"><i data-lucide="file-pen-line"></i>编辑资料</button>'
         : disabledButton('编辑资料', 'file-pen-line', appState.currentRole + ' 无编辑租户资料权限');
 
+      const editBillingAction = permissions.canEdit && !closed
+        ? '<button class="btn" data-billing="' + tenant.id + '"><i data-lucide="percent"></i>设置费率</button>'
+        : disabledButton('设置费率', 'percent', closed ? '关闭租户只允许历史查看' : appState.currentRole + ' 无编辑租户资料权限');
+
       document.getElementById('tab-overview').innerHTML = sectionTitle('基础资料') +
         '<div class="kv-grid">' +
           kv('租户编号', tenant.id) +
@@ -2980,7 +2986,7 @@
           kv('租户服务费', tenantBillingSummary(tenant)) +
         '</div>' +
         '<div class="tag-row">' +
-          editProfileAction +
+          editProfileAction + editBillingAction +
         '</div>';
 
       document.getElementById('tab-business').innerHTML = sectionTitle('已授权通道商列表') +
@@ -3133,7 +3139,7 @@
     }
     function tenantBillingSummary(tenant) {const model=window.HSProviderDemo,b=model.tenantBilling(tenant.id);return '代收：'+model.billingFormula(b.collection)+'；代付：'+model.billingFormula(b.payout);}
 
-    function openTenantModal(mode, tenantId) {
+    function openTenantModal(mode, tenantId, billingOnly = false) {
       const permissions = getPermissions();
       if (mode === 'create' && !canCreateTenant()) {
         showToast('当前范围不能新增租户', permissions.canCreate ? '新增顶层租户要求“全部租户”数据范围。' : '当前账号没有新增租户权限。');
@@ -3144,9 +3150,15 @@
         showToast('记录不存在或无权访问', '请返回当前授权范围重新查询。');
         return;
       }
+      if (billingOnly && (mode !== 'edit' || !permissions.canEdit || tenant.status === '关闭')) {
+        showToast('无法设置费率', '当前账号无编辑权限，或租户已关闭。');
+        return;
+      }
+      appState.editingBillingOnly = mode === 'edit' && billingOnly;
+      document.getElementById('tenantModal').classList.toggle('billing-only', appState.editingBillingOnly);
       appState.editingTenantId = mode === 'edit' ? tenant.id : '';
       clearFormError('tenantFormError');
-      document.getElementById('tenantModalTitle').textContent = mode === 'edit' ? '编辑租户' : '新增租户';
+      document.getElementById('tenantModalTitle').textContent = appState.editingBillingOnly ? '设置费率 · ' + tenant.name : mode === 'edit' ? '编辑租户' : '新增租户';
       document.getElementById('tenantNameInput').value = mode === 'edit' ? tenant.name : '汇盛新租户';
       document.getElementById('tenantCodeInput').value = mode === 'edit' ? tenant.id : '系统自动生成';
       document.getElementById('contactInput').value = mode === 'edit' ? tenant.contact : '新联系人';
@@ -3178,7 +3190,7 @@
       document.getElementById('modalBackdrop').classList.remove('open');
       dialog.classList.remove('open');
       dialog.setAttribute('aria-hidden', 'true');
-      restoreTenantDialogFocus(dialog, appState.editingTenantId ? '[data-open="' + appState.editingTenantId + '"]' : '#createTenantTop');
+      restoreTenantDialogFocus(dialog, appState.editingBillingOnly ? '[data-billing="' + appState.editingTenantId + '"]' : appState.editingTenantId ? '[data-open="' + appState.editingTenantId + '"]' : '#createTenantTop');
     }
 
     function openConfirm(title, detail, tenantId = '', businessName = '') {
@@ -3304,6 +3316,19 @@
       }
       let billing;
       try{billing=window.HSProviderDemo.validateTenantBilling(readTenantBillingForm());}catch(e){showFormError('tenantFormError',e.message,['tenantCollectionBillingValue','tenantPayoutBillingValue']);return;}
+      if (appState.editingBillingOnly) {
+        const tenant = tenants.find(item => item.id === appState.editingTenantId);
+        if (!editing || !tenant || tenant.status === '关闭') {
+          showFormError('tenantFormError', '租户不存在或已关闭，不能设置费率。');
+          return;
+        }
+        const model = window.HSProviderDemo;
+        if (!model.tenants.some(item => item.id === tenant.id)) model.tenants.push({ id: tenant.id, name: tenant.name });
+        model.setTenantBilling(tenant.id, billing);
+        finishTenantAction(tenant, { action: '设置租户费率', detail: '代收、代付收费设置已更新', reason: tenantBillingSummary(tenant) });
+        closeTenantModal();
+        return;
+      }
       const values = {
         name: document.getElementById('tenantNameInput').value.trim(),
         contact: document.getElementById('contactInput').value.trim(),
@@ -3816,6 +3841,12 @@
         const openBtn = event.target.closest('[data-open]');
         if (openBtn) {
           openDetailModal(openBtn.dataset.open);
+          return;
+        }
+
+        const billingBtn = event.target.closest('[data-billing]');
+        if (billingBtn) {
+          openTenantModal('edit', billingBtn.dataset.billing, true);
           return;
         }
 
