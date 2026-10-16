@@ -15,7 +15,7 @@ export const NAV_GROUPS = [
     { module: 'business', label: '通道商授权' },
   ]},
   { title: '财务模块', items: [
-    { module: 'wallets', label: '租户平台钱包' },
+    { module: 'wallets', label: '租户结算单' },
   ]},
   { title: '通道商管理', items: [
     { module: 'channel-vendors', label: '通道商管理' },

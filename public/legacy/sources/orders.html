@@ -5937,6 +5937,9 @@
     }
 
     hydratePlatformRefundJourneyFacts();
+    const monthlyOrderRows = window.HSTenantSettlements?.getOrderRows();
+    if (monthlyOrderRows) pages.orders.rows.splice(0, pages.orders.rows.length, ...monthlyOrderRows);
+    else window.HSTenantSettlements?.syncOrders(pages.orders.rows);
     const platformWalletTransferFacts = new Map([
       ['TRF202607170018', {
         transferId: 'TRF202607170018', correlationId: 'TRF202607170018', tenantId: 'HS-TEN-001', tenantName: '汇盛东南亚', currency: 'CNY',
@@ -6604,6 +6607,7 @@
     }
 
     function renderTableRows(page, rows, { resetPage = false } = {}) {
+      window.HSTenantSettlements?.syncOrders(pages.orders.rows);
       const pageId = Object.entries(pages).find(([, item]) => item === page)?.[0] || currentPage;
       const state = platformListState[pageId];
       if (resetPage) platformPagination[pageId].page = 1;

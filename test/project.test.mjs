@@ -115,9 +115,9 @@ test("财务模块保留七类独立待办入口", async () => {
   }
 });
 
-test("财务模块导航只展示租户平台钱包", async () => {
+test("财务模块导航展示租户结算单", async () => {
   const moduleSource = await readFile(path.join(root, "src/modules.js"), "utf8");
-  assert.match(moduleSource, /\{ module: 'wallets', label: '租户平台钱包' \}/);
+  assert.match(moduleSource, /\{ module: 'wallets', label: '租户结算单' \}/);
   assert.doesNotMatch(moduleSource, /\{ module: 'funds', label: '资金待办' \}/);
 });
 
@@ -165,43 +165,10 @@ test("平台系统管理提供独立租户菜单目录与安全发布边界", as
   assert.doesNotMatch(tenantPage, /删除菜单|data-message="tenant-menu:delete/);
 });
 
-test("租户平台钱包详情使用弹窗并展示租户钱包信息", async () => {
-  const wallets = await readFile(path.join(root, "public/legacy/sources/wallets.html"), "utf8");
-  const walletDetail = wallets.slice(wallets.indexOf("function platformWalletDetailMarkup"), wallets.indexOf("function detailMarkup"));
-  const walletPageStart = wallets.indexOf("      wallets: {");
-  const walletPage = wallets.slice(walletPageStart, wallets.indexOf("      funds: {", walletPageStart));
-  assert.match(wallets, /classList\.toggle\('wallet-modal', page\.detailKind === 'wallet'\)/);
-  assert.match(wallets, /\.drawer\.wallet-modal/);
-  assert.match(walletDetail, /租户钱包/);
-  assert.match(walletDetail, /activeWalletCurrency/);
-  assert.match(wallets, /最近钱包流水/);
-  assert.match(wallets, /data-wallet-flow-period/);
-  for (const period of ["近一小时", "今日", "昨日"]) assert.match(wallets, new RegExp(period));
-  const walletFlow = wallets.slice(wallets.indexOf("function platformWalletFlowMarkup"), wallets.indexOf("function platformWalletDetailMarkup"));
-  assert.match(walletFlow, /<th>流水单号<\/th>/);
-  assert.match(walletFlow, /<th>类型<\/th>/);
-  for (const orderType of ["人工调整", "冻结", "解冻", "增加", "减少"]) {
-    assert.match(walletFlow, new RegExp(orderType), `钱包流水缺少类型：${orderType}`);
-  }
-  assert.doesNotMatch(walletFlow, /<th>流水类型<\/th>/);
-  assert.doesNotMatch(walletFlow, /<th>收支<\/th>/);
-  assert.doesNotMatch(walletFlow, /<th>订单类型<\/th>/);
-  assert.doesNotMatch(wallets, /最近资金摘要/);
-  assert.match(walletDetail, /可用余额/);
-  assert.match(walletDetail, /冻结金额/);
-  assert.match(wallets, /data-wallet-currency/);
-  for (const currency of ["CNY", "USD", "PHP", "THB"]) assert.match(wallets, new RegExp(`${currency}:`));
-  assert.doesNotMatch(wallets, /<div class="risk-strip">/);
-  assert.doesNotMatch(wallets, /平台只维护租户的 CNY 代收/);
-  assert.doesNotMatch(walletPage, /核对异常/);
-  for (const hiddenColumn of ["待处理事项", "最近变化", "状态"]) {
-    assert.doesNotMatch(walletPage.match(/columns: \[[^\n]+/)?.[0] || "", new RegExp(hiddenColumn));
-  }
-  const walletActions = wallets.slice(wallets.indexOf("function detailActions"), wallets.indexOf("function platformSafeSummary"));
-  assert.match(walletActions, /page\.detailKind === 'wallet'[\s\S]*?return ''/);
-  for (const outdatedBlock of ["租户三钱包摘要", "余额与流水边界", "关联流水示例", "内部划转只读事实", "当前风险冻结", "成功后迟到失败待冲正"]) {
-    assert.doesNotMatch(walletDetail, new RegExp(outdatedBlock));
-  }
+test("平台租户管理不再展示或创建租户钱包，保留费率设置", async () => {
+ const tenants=await readFile(path.join(root,"public/legacy/sources/tenants.html"),"utf8"),page=await readFile(path.join(root,"public/legacy/sources/wallets.html"),"utf8");
+ assert.doesNotMatch(tenants,/<th>钱包余额<\/th>|data-open-wallet|id="tab-wallet"|walletSummaryCell|listWalletSnapshots/);
+ assert.match(tenants,/设置费率/);assert.match(page,/<h1>租户结算单<\/h1>/);assert.match(page,/type="month"/);assert.doesNotMatch(page,/租户平台钱包|可用余额|冻结金额|人工加款/);
 });
 
 test("统一导航使用最新模块名称", async () => {
