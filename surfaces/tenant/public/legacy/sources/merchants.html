@@ -20526,6 +20526,10 @@
     .merchant-switch:hover:not(:disabled) { background: var(--primary-soft); }
     .merchant-switch:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
     .merchant-switch:disabled { cursor: not-allowed; opacity: .5; }
+    .merchant-capability-list { min-width: 112px; gap: 0; }
+    .merchant-capability-list .capability-kind { font-size: 12px; color: var(--text-secondary); }
+    .merchant-capability-line { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; cursor: pointer; color: var(--text); }
+    .merchant-capability-line .merchant-switch { vertical-align: middle; }
     .merchant-fee-control { display: flex; align-items: center; gap: 8px; width: min(240px, 55%); }
     .merchant-fee-control .input { min-width: 0; width: 100%; }
     .merchant-fee-control span { color: var(--text-secondary); font-size: 13px; }
@@ -22350,16 +22354,14 @@
       ["CNY", ["法币代收", "法币代付"]]
     ];
 
+    function renderMerchantCapabilitySwitch(item, capability, source = "detail") {
+      const enabled = item.capabilities.includes(capability);
+      const mode = capability === "法币代收" ? "collect" : "payout";
+      return `<input class="merchant-switch" type="checkbox" role="switch" id="merchant-capability-${source}-${escapeHtml(item.id)}-${mode}" ${source === "list" ? `data-list-capability="${capability}" data-capability-merchant="${escapeHtml(item.id)}"` : `data-capability-toggle="${capability}"`} data-capability-action="${enabled ? "关闭" : "开通"}" aria-label="${escapeHtml(item.name)} ${capability}业务能力" ${enabled ? "checked" : ""}>`;
+    }
+
     function renderCapabilityMatrix(item) {
-      const rows = capabilityGroups.map(([kind, caps]) => `
-        <div class="capability-line">
-          <span class="capability-kind">${kind}</span>
-          <span class="capability-tags">
-            ${caps.map((cap) => tag(cap, item.capabilities.includes(cap) ? undefined : "disabled")).join("")}
-          </span>
-        </div>
-      `);
-      return `<div class="capability-matrix">${rows.join("")}</div>`;
+      return `<div class="capability-matrix merchant-capability-list"><span class="capability-kind">CNY</span>${merchantCapabilityOptions.map((capability) => `<label class="merchant-capability-line" for="merchant-capability-list-${escapeHtml(item.id)}-${capability === "法币代收" ? "collect" : "payout"}"><span>${capability === "法币代收" ? "代收" : "代付"}</span>${renderMerchantCapabilitySwitch(item, capability, "list")}</label>`).join("")}</div>`;
     }
 
     function filteredMerchants() {
@@ -23558,7 +23560,6 @@
         <option value="${merchant.id}"${item.parentMerchantId === merchant.id ? " selected" : ""}>${escapeHtml(merchant.name)} · ${merchant.id}</option>
       `).join("");
       return `
-        ${renderMerchantCapabilities(item)}
         ${section("基础资料", `
           <div style="padding:12px" class="form-grid">
             <div class="field">
@@ -23607,26 +23608,6 @@
       `;
     }
 
-    function renderMerchantCapabilities(item) {
-      const rows = merchantCapabilityOptions.map((cap) => {
-        const enabled = item.capabilities.includes(cap);
-        return `
-          <tr>
-            <td>${tag(cap)}</td>
-            <td>${tag(enabled ? "已开通" : "未开通", enabled ? "green" : "orange")}</td>
-            <td>
-              <button class="link-btn ${enabled ? "danger-text" : ""}" type="button" data-capability-toggle="${cap}" data-capability-action="${enabled ? "关闭" : "开通"}">${enabled ? "关闭" : "开通"}</button>
-            </td>
-          </tr>
-        `;
-      }).join("");
-      return section("业务能力", `
-        <table class="mini-table">
-          <thead><tr><th>业务</th><th>状态</th><th>操作</th></tr></thead>
-          <tbody>${rows}</tbody>
-        </table>
-      `);
-    }
 
     function renderVolumeTab(item) {
       return `
@@ -24384,9 +24365,6 @@
         if (parentField.hidden) document.getElementById("merchantBasicParent").value = "";
       });
       document.getElementById("saveMerchantBasic")?.addEventListener("click", () => saveMerchantBasic(item));
-      document.querySelectorAll("[data-capability-toggle]").forEach((button) => {
-        button.addEventListener("click", () => openCapabilityConfirm(item, button.dataset.capabilityToggle, button.dataset.capabilityAction));
-      });
       document.querySelectorAll("[data-callback-ip-save]").forEach((button) => button.addEventListener("click", () => saveMerchantCallbackIps(item, button.dataset.callbackIpSave)));
       document.querySelectorAll("[data-business-config-save]").forEach((button) => {
         button.addEventListener("click", () => saveMerchantBusinessConfig(item, button.dataset.businessConfigSave));
@@ -24410,7 +24388,7 @@
 
     function preparePayoutSettingsConfirm(item) {
       const cfg = item.payoutConfig;
-      if (!item.capabilities.includes("法币代付")) return showInlineError("当前商户未开通法币代付，请先在概览中开通业务能力。");
+      if (!item.capabilities.includes("法币代付")) return showInlineError("当前商户未开通法币代付，请先在商户列表开通业务能力。");
       const next = {
         status: document.getElementById("merchantPayoutStatus").checked ? "开启" : merchantStatusOffLabel(cfg, true),
         manualOrder: document.getElementById("merchantPayoutManual").checked ? "开启" : "关闭",
@@ -24471,12 +24449,12 @@
       const isCollect = mode === "collect";
       const cfg = isCollect ? item.collectConfig : item.payoutConfig;
       const capability = isCollect ? "法币代收" : "法币代付";
-      if (!item.capabilities.includes(capability)) return showInlineError(`当前商户未开通${capability}，请先在概览中开通业务能力。`);
+      if (!item.capabilities.includes(capability)) return showInlineError(`当前商户未开通${capability}，请先在商户列表开通业务能力。`);
       const statusId = isCollect ? "merchantCollectStatus" : "merchantPayoutStatus";
       const reasonId = isCollect ? "merchantCollectReason" : "merchantPayoutReason";
       const status = document.getElementById(statusId).checked ? "开启" : merchantStatusOffLabel(cfg, true);
       const reason = document.getElementById(reasonId).value.trim();
-      if (status === "未开通") return showInlineError("关闭业务能力请前往概览处理；业务配置不能直接改为未开通。", statusId);
+      if (status === "未开通") return showInlineError("关闭业务能力请前往商户列表处理；业务配置不能直接改为未开通。", statusId);
       const next = isCollect ? { status } : {
         status,
         manualOrder: document.getElementById("merchantPayoutManual").checked ? "开启" : "关闭",
@@ -24536,7 +24514,8 @@
       }, 300);
     }
 
-    function openCapabilityConfirm(item, capability, action) {
+    function openCapabilityConfirm(item, capability, action, source = "detail") {
+      const state = { source, tenantId: window.HSProviderDemo?.tenantId, before: JSON.stringify(item.capabilities) };
       document.getElementById("modal").innerHTML = `
         <div class="modal-head" data-astryx="DialogHeader">
           <div><h2>${action}${capability}</h2><p>${escapeHtml(item.name)} · ${item.id}</p></div>
@@ -24560,25 +24539,47 @@
       `;
       showModal("small");
       bindModalEvents();
-      document.getElementById("capabilityCancel").addEventListener("click", () => renderDetailModal(item));
-      document.getElementById("capabilityConfirm").addEventListener("click", () => applyCapabilityChange(item, capability, action));
+      document.getElementById("capabilityCancel").addEventListener("click", () => returnFromCapabilityChange(item, capability, source));
+      document.getElementById("capabilityConfirm").addEventListener("click", () => applyCapabilityChange(item, capability, action, state));
     }
 
-    function applyCapabilityChange(item, capability, action) {
+    function returnFromCapabilityChange(item, capability, source) {
+      renderRows();
+      if (source === "list") closeModal();
+      else { activeModalTab = "概览"; renderDetailModal(item); }
+      const mode = capability === "法币代收" ? "collect" : "payout";
+      const target = document.getElementById(`merchant-capability-${source}-${item.id}-${mode}`);
+      (target || (source === "list" ? document.getElementById("capabilityFilter") : null))?.focus();
+    }
+
+    function capabilityChangeAllowed(item, capability, action, state) {
+      return state && window.HSProviderDemo?.tenantId === state.tenantId &&
+        merchantCapabilityOptions.includes(capability) && ["开通", "关闭"].includes(action) &&
+        JSON.stringify(item.capabilities) === state.before &&
+        item.capabilities.includes(capability) === (action === "关闭");
+    }
+
+    function applyCapabilityChange(item, capability, action, state) {
       clearInlineError();
+      if (!capabilityChangeAllowed(item, capability, action, state)) return showInlineError("租户或业务能力已变化，未保存，请重新核对。");
       const reason = document.getElementById("capabilityReason").value.trim();
       if (!reason) return showInlineError("请填写调整原因。", "capabilityReason");
       const button = document.getElementById("capabilityConfirm");
+      if (button.disabled) return;
       button.disabled = true;
       button.textContent = "处理中…";
       setTimeout(() => {
+        if (document.getElementById("capabilityConfirm") !== button) return;
+        if (!capabilityChangeAllowed(item, capability, action, state)) {
+          button.disabled = false; button.textContent = `确认${action}`;
+          return showInlineError("租户或业务能力已变化，未保存，请重新核对。");
+        }
         const enabled = action === "开通";
         item.capabilities = enabled ? [...new Set([...item.capabilities, capability])] : item.capabilities.filter((itemCapability) => itemCapability !== capability);
         const cfg = capability === "法币代收" ? item.collectConfig : item.payoutConfig;
         cfg.status = enabled ? "待配置" : "未开通";
         item.logs.unshift([nowText(), `${action}${capability}`, currentTenantOperator.account, `${reason}；不进入平台审核`]);
-        activeModalTab = "概览";
-        renderDetailModal(item);
+        returnFromCapabilityChange(item, capability, state.source);
         showToast(`${capability}已${action === "开通" ? "开通并进入待配置" : "关闭"}；已创建订单不受影响`);
       }, 350);
     }
@@ -25254,6 +25255,15 @@
       });
 
       document.getElementById("merchantRows").addEventListener("change", (event) => {
+        const capabilitySwitch = event.target.closest("[data-list-capability]");
+        if (capabilitySwitch) {
+          const item = merchants.find((merchant) => merchant.id === capabilitySwitch.dataset.capabilityMerchant);
+          if (!item) return;
+          const capability = capabilitySwitch.dataset.listCapability;
+          capabilitySwitch.checked = item.capabilities.includes(capability);
+          openCapabilityConfirm(item, capability, capabilitySwitch.checked ? "关闭" : "开通", "list");
+          return;
+        }
         const checkbox = event.target.closest("[data-merchant-select]");
         if (!checkbox) return;
         if (checkbox.checked) selectedMerchantIds.add(checkbox.dataset.merchantSelect);
