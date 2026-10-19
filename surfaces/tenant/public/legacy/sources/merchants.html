@@ -20502,6 +20502,161 @@
       min-width: 0;
     }
 
+
+    /* 商户配置：启停项使用紧凑设置行，复用系统色与表单控件。 */
+    .merchant-settings { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); padding: 0 16px; }
+    .merchant-setting { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 62px; padding: 10px 0; }
+    .merchant-setting + .merchant-setting { border-top: 1px solid var(--border); }
+    .merchant-collect-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 0; }
+    .merchant-collect-summary > .merchant-setting { min-width: 0; padding: 10px 16px; }
+    .merchant-collect-summary > .merchant-setting + .merchant-setting { border-top: 0; border-left: 1px solid var(--border); }
+    .merchant-collect-summary strong { overflow-wrap: anywhere; text-align: right; }
+    @media (max-width: 640px) {
+      .merchant-collect-summary { grid-template-columns: minmax(0, 1fr); }
+      .merchant-collect-summary > .merchant-setting + .merchant-setting { border-left: 0; border-top: 1px solid var(--border); }
+    }
+    .merchant-setting > label, .merchant-setting-label { color: var(--text); font-size: 14px; font-weight: 500; }
+    .merchant-switch-control { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    .merchant-switch-state { color: var(--text-secondary); font-size: 13px; }
+    .merchant-switch { appearance: none; -webkit-appearance: none; cursor: pointer; position: relative; width: 44px; height: 44px; margin: 0; border: 0; border-radius: 8px; background: transparent; flex-shrink: 0; }
+    .merchant-switch::before { content: ''; position: absolute; inset: 10px 0; border-radius: 12px; background: var(--border-strong); }
+    .merchant-switch::after { content: ''; position: absolute; top: 13px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--surface); transition: transform .16s ease; }
+    .merchant-switch:checked::before { background: var(--primary); }
+    .merchant-switch:checked::after { transform: translateX(20px); }
+    .merchant-switch:hover:not(:disabled) { background: var(--primary-soft); }
+    .merchant-switch:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+    .merchant-switch:disabled { cursor: not-allowed; opacity: .5; }
+    .merchant-fee-control { display: flex; align-items: center; gap: 8px; width: min(240px, 55%); }
+    .merchant-fee-control .input { min-width: 0; width: 100%; }
+    .merchant-fee-control span { color: var(--text-secondary); font-size: 13px; }
+    .merchant-config-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .merchant-config-fields .field { min-width: 0; }
+    .merchant-config-fields .field.wide { grid-column: 1 / -1; }
+    .merchant-config-fields .input { width: 100%; }
+    .merchant-config-fields .inline-note { font-size: 12px; }
+    .merchant-access-directions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .merchant-access-directions > * { min-width: 0; }
+    .merchant-access-form { padding: 14px; }
+    .merchant-integration-value { padding: 8px 10px; min-height: 36px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-soft); color: var(--text); white-space: pre-wrap; overflow-wrap: anywhere; user-select: text; line-height: 1.6; }
+    .merchant-integration-value:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+    .merchant-integration-label { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; }
+    .merchant-integration-copy { width: 32px; min-width: 32px; height: 32px; min-height: 32px !important; padding: 6px !important; flex-shrink: 0; }
+    .merchant-integration-copy svg { width: 16px; height: 16px; }
+    .merchant-integration-copy:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+    .merchant-integration-panel .sub-panel-headline { flex-wrap: wrap; }
+    .merchant-integration-panel .sub-panel-headline .btn { flex-shrink: 1; min-width: 0; max-width: 100%; white-space: normal; height: auto !important; min-height: 36px !important; }
+    .merchant-panel-actions { padding: 0 14px 14px; display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+    .merchant-payout-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); overflow-x: auto; flex-shrink: 0; }
+    .merchant-payout-tab { border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--text-secondary); min-height: 44px; padding: 0 16px; white-space: nowrap; }
+    .merchant-payout-tab[aria-selected="true"] { color: var(--primary); border-color: var(--primary); font-weight: 600; }
+    .merchant-payout-tab:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+    .merchant-payout-panel { display: grid; gap: 14px; min-width: 0; }
+    .merchant-payout-panel[hidden] { display: none !important; }
+    .merchant-table-scroll { min-width: 0; overflow-x: auto; }
+    .merchant-rates-table { min-width: 560px; }
+
+    .merchant-admin-security { container-type: inline-size; min-width: 0; }
+    .admin-security-account { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+    .admin-security-account > span { color: var(--text-secondary); }
+    .admin-security-account strong { min-width: 0; overflow-wrap: anywhere; }
+    .admin-security-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px 0; border-bottom: 1px solid var(--border); }
+    .admin-security-detail { min-width: 0; }
+    .admin-security-title { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .admin-security-title h3, .admin-security-verify h3 { margin: 0; font-size: 14px; font-weight: 600; }
+    .admin-security-detail p, .admin-security-hint { margin: 8px 0 0; color: var(--text-secondary); font-size: 13px; line-height: 1.6; }
+    .admin-security-row > .btn { flex-shrink: 0; min-height: 44px !important; }
+    .admin-security-verify { padding-top: 24px; }
+    .admin-security-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 16px; }
+    .admin-security-fields .field { min-width: 0; }
+    .admin-security-fields input { width: 100%; min-height: 44px !important; }
+    @container (max-width: 560px) {
+      .admin-security-fields { grid-template-columns: minmax(0, 1fr); }
+      .admin-security-row { align-items: flex-start; flex-direction: column; gap: 12px; }
+      .admin-security-row > .btn { align-self: flex-start; max-width: 100%; white-space: normal; }
+    }
+
+
+    .merchant-inline-rates { min-width: 440px; table-layout: fixed; }
+    .merchant-inline-rates .merchant-rate-input { width: 100%; max-width: 180px; min-width: 0; }
+    .merchant-rate-product th { text-align: left; font-weight: 600; background: var(--surface-soft); white-space: normal; }
+    .merchant-rate-product span { margin-left: 8px; font-weight: 400; color: var(--text-secondary); }
+    .merchant-rate-footer { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; padding: 12px; }
+    .merchant-rate-footer .field { flex: 1; max-width: 440px; min-width: 0; }
+    #merchantRateError.show { margin: 0 12px 12px; }
+    .merchant-security-settings { container-type: inline-size; min-width: 0; }
+    .merchant-security-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 16px; overflow-x: auto; }
+    .merchant-security-tab { min-height: 44px; padding: 0 16px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--text-secondary); white-space: nowrap; }
+    .merchant-security-tab[aria-selected="true"] { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+    .merchant-security-tab:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+    .merchant-security-panel[hidden] { display: none !important; }
+    .merchant-security-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: stretch; }
+    .merchant-security-row { display: flex; flex-direction: column; min-width: 0; padding: 16px; gap: 16px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+    .merchant-security-row h3 { margin: 0; font-size: 14px; line-height: 1.6; font-weight: 600; }
+    .merchant-security-fields { display: grid; gap: 12px; min-width: 0; }
+    .merchant-security-fields .field { min-width: 0; gap: 6px; }
+    .merchant-security-fields .input { width: 100%; min-width: 0; }
+    .merchant-security-fields textarea { min-height: 64px !important; height: 64px; resize: vertical; }
+    .merchant-security-fields .inline-note { font-size: 12px; line-height: 1.6; }
+    .merchant-security-fields .field-error:empty { display: none; }
+    .merchant-security-action { display: flex; justify-content: flex-end; margin-top: auto; }
+    .merchant-security-action .btn { white-space: normal; }
+    .merchant-security-fields .access-whitelist-list { gap: 8px; }
+    .merchant-security-fields .access-whitelist-add { margin-top: 4px; justify-self: start; }
+    .merchant-security-callbacks > .merchant-security-row:first-child { grid-column: 1 / -1; }
+    .merchant-security-callbacks > .merchant-security-row:first-child .merchant-security-fields { max-width: 600px; }
+    .merchant-security-key { max-width: 640px; }
+    @container (max-width: 640px) {
+      .merchant-security-grid { grid-template-columns: minmax(0, 1fr); }
+    }
+
+    .merchant-payout-controls { container-type: inline-size; min-width: 0; }
+    .merchant-payout-controls > h3 { margin: 0 0 8px; font-size: 14px; font-weight: 600; }
+    .merchant-settings.merchant-payout-switches { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 0; border: 0; border-radius: 0; }
+    .merchant-payout-switches > .merchant-setting { flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 4px; min-height: 0; padding: 8px 16px 8px 0; border: 0; }
+    .merchant-payout-switches > .merchant-setting + .merchant-setting { border-top: 0; border-left: 1px solid var(--border); padding-left: 16px; }
+    .merchant-payout-switches .merchant-switch-control { flex-direction: row-reverse; gap: 8px; }
+    .merchant-payout-fee { display: flex; align-items: center; gap: 16px; padding: 16px 0; border-top: 1px solid var(--border); }
+    .merchant-payout-fee > label { font-size: 14px; font-weight: 500; }
+    .merchant-payout-fee .merchant-fee-control { width: 208px; max-width: 100%; }
+    .merchant-payout-fee .merchant-fee-control .input { flex: 0 1 160px; width: 160px; max-width: 160px; min-width: 0; }
+    @container (max-width: 480px) {
+      .merchant-settings.merchant-payout-switches { grid-template-columns: minmax(0, 1fr); }
+      .merchant-payout-switches > .merchant-setting { flex-direction: row; align-items: center; justify-content: space-between; padding: 4px 0; }
+      .merchant-payout-switches > .merchant-setting + .merchant-setting { border-left: 0; padding-left: 0; }
+      .merchant-payout-fee { align-items: flex-start; flex-direction: column; gap: 8px; }
+    }
+
+    .merchant-confirm-changes { display: grid; gap: 8px; margin-bottom: 8px; }
+    .merchant-confirm-change { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px 16px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .merchant-confirm-change > span:last-child { overflow-wrap: anywhere; }
+
+    .merchant-rate-input { width: 120px; min-width: 100px; min-height: 44px; }
+    .merchant-detail-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; max-width: 100%; }
+    @media (max-width: 640px) {
+      .modal-head:has(.merchant-detail-actions) { flex-wrap: wrap; }
+      .merchant-detail-actions { flex: 1 1 100%; justify-content: flex-end; }
+      .merchant-detail-actions > .btn { min-width: 0; white-space: normal; max-width: calc(100% - 40px); }
+    }
+
+
+    .merchant-access-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 24px; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius); }
+    .merchant-access-summary .merchant-access-login { flex: 1 1 280px; min-width: 0; }
+    .merchant-access-summary .k { display: block; color: var(--text-secondary); font-size: 12px; margin-bottom: 5px; }
+    .merchant-access-summary .mono { overflow-wrap: anywhere; font-size: 13px; }
+    .merchant-setting > label { min-width: 0; overflow-wrap: anywhere; }
+    @media (max-width: 480px) {
+      .merchant-setting { flex-wrap: wrap; }
+      .merchant-setting > label { flex: 1 1 100%; }
+      .merchant-switch-control { margin-left: auto; }
+      .merchant-fee-control { width: 100%; }
+    }
+    @media (max-width: 720px) {
+      .merchant-access-directions, .merchant-config-fields { grid-template-columns: minmax(0, 1fr); }
+      .merchant-settings { padding: 0 12px; }
+      .merchant-setting { gap: 10px; }
+    }
+    @media (prefers-reduced-motion: reduce) { .merchant-switch::after { transition: none; } }
+
     .access-whitelist-list { display: grid; gap: 8px; }
     .access-whitelist-row { display: flex; align-items: center; gap: 8px; }
     .access-whitelist-row .input { flex: 1; min-width: 0; }
@@ -21117,6 +21272,8 @@
 
   <script>
     let activeModalTab = "概览";
+    let activePayoutTab = "settings";
+    let activeSecurityTab = "access";
     let activeMerchant = null;
     let activeRateBusiness = "全部";
     let merchantListTemplate = "";
@@ -23401,6 +23558,7 @@
         <option value="${merchant.id}"${item.parentMerchantId === merchant.id ? " selected" : ""}>${escapeHtml(merchant.name)} · ${merchant.id}</option>
       `).join("");
       return `
+        ${renderMerchantCapabilities(item)}
         ${section("基础资料", `
           <div style="padding:12px" class="form-grid">
             <div class="field">
@@ -23446,29 +23604,25 @@
             <button class="btn primary" type="button" id="saveMerchantBasic"><i data-lucide="save"></i>保存资料</button>
           </div>
         `)}
-        ${section("业务能力", `<div style="padding:12px" class="tag-row">${[...new Set(item.capabilities)].map((c) => tag(c)).join("")}</div>`)}
       `;
     }
 
-    function renderCapabilityTab(item) {
+    function renderMerchantCapabilities(item) {
       const rows = merchantCapabilityOptions.map((cap) => {
         const enabled = item.capabilities.includes(cap);
-        const currency = "CNY";
         return `
           <tr>
             <td>${tag(cap)}</td>
             <td>${tag(enabled ? "已开通" : "未开通", enabled ? "green" : "orange")}</td>
-            <td>${currency}</td>
-            <td>当前租户已授权能力</td>
             <td>
               <button class="link-btn ${enabled ? "danger-text" : ""}" type="button" data-capability-toggle="${cap}" data-capability-action="${enabled ? "关闭" : "开通"}">${enabled ? "关闭" : "开通"}</button>
             </td>
           </tr>
         `;
       }).join("");
-      return section("业务权限", `
+      return section("业务能力", `
         <table class="mini-table">
-          <thead><tr><th>能力</th><th>状态</th><th>资产</th><th>来源</th><th>操作</th></tr></thead>
+          <thead><tr><th>业务</th><th>状态</th><th>操作</th></tr></thead>
           <tbody>${rows}</tbody>
         </table>
       `);
@@ -23497,16 +23651,6 @@
             </tbody>
           </table>
         `)}
-        ${section("钱包联动摘要", `
-          <table class="mini-table">
-            <thead><tr><th>钱包</th><th>CNY 可用</th><th>用途</th></tr></thead>
-            <tbody>
-              <tr><td>提款钱包</td><td class="mono">${walletAvailable(item, "提款钱包", "CNY")}</td><td>商户提款申请使用</td></tr>
-              <tr><td>代收钱包</td><td class="mono">${walletAvailable(item, "代收钱包", "CNY")}</td><td>代收订单入账和代收费用扣费</td></tr>
-              <tr><td>代付钱包</td><td class="mono">${walletAvailable(item, "代付钱包", "CNY")}</td><td>代付订单冻结、出款和代付费用扣费</td></tr>
-            </tbody>
-          </table>
-        `)}
       `;
     }
 
@@ -23532,11 +23676,34 @@
 
     function renderCallbackIpField(cfg, mode, enabled) {
       const id = mode === "collect" ? "merchantCollectCallbackIp" : "merchantPayoutCallbackIp";
-      return `<div class="info-item field">
-        <label class="k" for="${id}">回调 IP</label>
-        <textarea class="input mono" id="${id}" rows="2" aria-describedby="${id}Hint" placeholder="请输入公网 IPv4 或 IPv6，多个 IP 用逗号或换行分隔" ${enabled ? "" : "disabled"}>${escapeHtml(merchantCallbackIps(cfg))}</textarea>
-        <span class="inline-note" id="${id}Hint">用于当前商户的${mode === "collect" ? "代收" : "代付"}结果回调，与 API 请求 IP 白名单分别配置；留空表示未配置。</span>
+      return renderMerchantIpEditor(id, "回调 IP", merchantCallbackIps(cfg), "每项一个公网 IPv4 或 IPv6；不支持网段，全部留空表示未配置。", false, enabled);
+    }
+
+    function renderMerchantSwitch(id, label, value, enabled, offLabel = "关闭") {
+      return `<div class="merchant-setting">
+        <label for="${id}">${label}</label>
+        <div class="merchant-switch-control">
+          <span class="merchant-switch-state" id="${id}State">${value === "开启" ? "开启" : offLabel}</span>
+          <input class="merchant-switch" type="checkbox" role="switch" id="${id}" aria-describedby="${id}State" data-merchant-switch data-off-label="${offLabel}" ${value === "开启" ? "checked" : ""} ${enabled ? "" : "disabled"}>
+        </div>
       </div>`;
+    }
+
+    function merchantStatusOffLabel(cfg, enabled) {
+      return !enabled ? "未开通" : cfg.status === "待配置" ? "待配置" : "暂停";
+    }
+
+    function merchantSingleFeeValue(cfg) {
+      const value = String(cfg.singleFee || "").replace(/^CNY\s*/, "").replace(/,/g, "");
+      return /^\d+(?:\.\d{1,2})?$/.test(value) ? value : "";
+    }
+
+    function normalizedMerchantSingleFee(value) {
+      if (!/^\d+(?:\.\d{1,2})?$/.test(value)) return null;
+      const [whole, fraction = ""] = value.split(".");
+      const cents = BigInt(whole) * 100n + BigInt(fraction.padEnd(2, "0"));
+      if (cents > BigInt(Number.MAX_SAFE_INTEGER)) return null;
+      return `CNY ${cents / 100n}.${String(cents % 100n).padStart(2, "0")}`;
     }
 
     function renderCollectConfig(item) {
@@ -23544,11 +23711,9 @@
       const enabled = item.capabilities.includes("法币代收");
       const wallet = walletRow(item, "代收钱包", "CNY");
       return `
-        <div class="info-grid" data-astryx="DescriptionList">
-          <div class="info-item"><div class="k">代收状态</div><div class="v"><select class="select" id="merchantCollectStatus" ${enabled ? "" : "disabled"}><option ${cfg.status === "开启" ? "selected" : ""}>开启</option><option ${cfg.status === "暂停" ? "selected" : ""}>暂停</option><option ${cfg.status === "待配置" ? "selected" : ""}>待配置</option><option ${cfg.status === "未开通" ? "selected" : ""}>未开通</option></select></div></div>
-          <div class="info-item"><div class="k">今日成交</div><div class="v mono">${cfg.today}</div></div>
-          <div class="info-item"><div class="k">账务归属</div><div class="v">租户内部账务，平台不参与</div></div>
-          ${renderCallbackIpField(cfg, "collect", enabled)}
+        <div class="merchant-settings merchant-collect-summary">
+          ${renderMerchantSwitch("merchantCollectStatus", "代收状态", cfg.status, enabled, merchantStatusOffLabel(cfg, enabled))}
+          <div class="merchant-setting"><span class="merchant-setting-label">今日成交</span><strong class="mono">${escapeHtml(cfg.today)}</strong></div>
         </div>
         ${section("代收钱包余额", `
           <table class="mini-table">
@@ -23567,24 +23732,155 @@
         <div class="field wide"><label for="merchantCollectReason">配置变更原因</label><input class="input" id="merchantCollectReason" placeholder="保存变更时必填，将写入操作日志" ${enabled ? "" : "disabled"}></div>
         <div class="field-error" id="modalError" role="alert"></div>
         <div class="toolbar" data-astryx="FooterActions">
-          <button class="btn" type="button" data-product-config="collect" ${enabled ? "" : "disabled"}><i data-lucide="link"></i>配置产品</button>
           <button class="btn primary" type="button" data-business-config-save="collect" ${enabled ? "" : "disabled"}><i data-lucide="save"></i>保存代收配置</button>
         </div>
+        ${renderDirectionAccess(item, "collect")}
       `;
     }
 
-    function renderPayoutConfig(item) {
+    function merchantPayoutProducts(item) {
+      const model = window.HSProviderDemo;
+      if (!model) return [];
+      return model.tenantData(model.tenantId).products.filter((p) => p.direction === "代付" && p.merchantBindings?.[item.id]?.bound);
+    }
+
+    function merchantBoundChannels(product) {
+      const model = window.HSProviderDemo;
+      if (!model) return [];
+      const data = model.tenantData(model.tenantId);
+      return data.channels.filter((channel) => channel.direction === "代付" && product.channelIds.includes(channel.id));
+    }
+
+    function merchantRatePercent(rate) {
+      const value = String(rate ?? "0").trim();
+      const match = value.match(/^\+?(\d+(?:\.\d*)?|\.\d+)(?:e([+-]?\d+))?$/i);
+      if (!match || value.length > 400) return null;
+      const exponent = Number(match[2] || "0");
+      if (!Number.isSafeInteger(exponent) || Math.abs(exponent) > 1000) return null;
+      const [whole, fraction = ""] = match[1].split(".");
+      let digits = (whole + fraction).replace(/^0+/, "");
+      if (!digits) return "0";
+      const shift = 6 + exponent - fraction.length;
+      if (shift >= 0) {
+        if (digits.length + shift > 7) return null;
+        digits += "0".repeat(shift);
+      } else {
+        const places = -shift;
+        if (places >= digits.length || !digits.endsWith("0".repeat(places))) return null;
+        digits = digits.slice(0, -places);
+      }
+      const scaled = BigInt(digits);
+      if (scaled > 1000000n) return null;
+      const text = `${scaled / 10000n}.${String(scaled % 10000n).padStart(4, "0")}`;
+      return text.replace(/\.?0+$/, "") || "0";
+    }
+
+    function renderMerchantPayoutRates(item, draft) {
+      const products = merchantPayoutProducts(item), model = window.HSProviderDemo;
+      const initial = { tenantId: model?.tenantId, merchantId: item.id, productIds: products.map((p) => p.id), rows: products.map((p, index) => ({ id: p.id, index, currency: p.currency, channels: JSON.stringify(p.channelIds), before: JSON.stringify(p.merchantBindings[item.id]) })) };
+      const state = draft || initial;
+      const rows = products.map((p, index) => {
+        const c = p.merchantBindings[item.id], d = draft?.rows.find((row) => row.id === p.id);
+        const allowed = payoutRateContextAllowed(item, { ...initial, rows: [initial.rows[index]] });
+        const percent = merchantRatePercent(d ? d.rate : c.rate), enabled = allowed && percent !== null;
+        return `<tr class="merchant-rate-product"><th colspan="3">[${escapeHtml(p.productNo || p.id)}] ${escapeHtml(p.name)} <span>${escapeHtml(p.currency)}${!allowed ? " · 暂不可配置" : percent === null ? " · 原费率需核对" : ""}</span></th></tr><tr>
+          <td><input class="input mono merchant-rate-input" id="merchantRate-${index}" aria-label="${escapeHtml(p.name)} 商户费率百分比" type="number" min="0" max="100" step="0.0001" value="${escapeHtml(percent ?? "")}" ${enabled ? "" : "disabled"}></td>
+          <td><input class="input mono merchant-rate-input" id="merchantDaily-${index}" aria-label="${escapeHtml(p.name)} 日限额" type="number" min="0" step="0.01" value="${escapeHtml(d?.dailyLimit ?? c.dailyLimit ?? "0")}" ${enabled ? "" : "disabled"}></td>
+          <td><input class="input mono merchant-rate-input" id="merchantFee-${index}" aria-label="${escapeHtml(p.name)} 单笔费用" type="number" min="0" step="0.01" value="${escapeHtml(d?.fee ?? c.fee ?? "0")}" ${enabled ? "" : "disabled"}></td></tr>`;
+      }).join("");
+      const editable = initial.rows.filter((row) => merchantRatePercent(JSON.parse(row.before).rate) !== null && payoutRateContextAllowed(item, { ...initial, rows: [row] }));
+      if (!draft) state.rows = editable;
+      return section("商户代付产品费率", `<div id="merchantPayoutRateForm" data-rate-state="${escapeHtml(JSON.stringify(state))}"><div class="merchant-table-scroll"><table class="mini-table merchant-rates-table merchant-inline-rates"><thead><tr><th>商户费率（%）</th><th>日限额</th><th>单笔费用</th></tr></thead><tbody>${rows || '<tr><td colspan="3">暂无绑定的代付产品</td></tr>'}</tbody></table></div><div class="merchant-rate-footer"><div class="field"><label for="merchantRateReason">调整原因</label><input class="input" id="merchantRateReason" value="${escapeHtml(draft?.reason || "")}" placeholder="请输入调整原因" ${editable.length ? "" : "disabled"}></div><button class="btn primary" type="button" id="merchantRateSave" ${editable.length ? "" : "disabled"}>提交保存</button></div><div class="field-error" id="merchantRateError" role="alert"></div></div>`);
+    }
+
+
+    function normalizeMerchantPayoutRate(value) {
+      if (!/^\d+(?:\.\d{1,4})?$/.test(value)) return null;
+      const [whole, fraction = ""] = value.split(".");
+      const units = BigInt(whole + fraction.padEnd(4, "0"));
+      if (units > 1000000n) return null;
+      return `${units / 1000000n}.${String(units % 1000000n).padStart(6, "0")}`.replace(/0+$/, "").replace(/\.$/, "");
+    }
+
+    function payoutRateContextAllowed(item, state) {
+      const model = window.HSProviderDemo;
+      if (!model || model.tenantId !== state.tenantId || item.id !== state.merchantId || !item.capabilities.includes("法币代付")) return false;
+      if (JSON.stringify(merchantPayoutProducts(item).map((p) => p.id)) !== JSON.stringify(state.productIds)) return false;
+      const products = model.tenantData(state.tenantId).products;
+      return state.rows.every((row) => {
+        const p = products.find((p) => p.id === row.id);
+        return p?.direction === "代付" && JSON.stringify(p.channelIds) === row.channels && p.currency === row.currency && p.merchantBindings?.[item.id]?.bound && JSON.stringify(p.merchantBindings[item.id]) === row.before && merchantBoundChannels(p).some((c) => model.canConfigureChannel(state.tenantId, c.providerId, "代付"));
+      });
+    }
+
+    function bindMerchantPayoutRates(item) {
+      const form = document.getElementById("merchantPayoutRateForm");
+      if (!form) return;
+      const state = JSON.parse(form.dataset.rateState);
+      document.getElementById("merchantRateSave").addEventListener("click", () => {
+        clearInlineError();
+        const fail = (message, field) => showInlineError(message, field, "merchantRateError");
+        if (!state.rows.length) return fail("暂无可配置的代付产品。");
+        if (!payoutRateContextAllowed(item, state)) return fail("绑定关系或业务授权已变化，请重新打开详情核对。");
+        const rows = [], parsedRows = [];
+        for (const row of state.rows) {
+          const i = row.index;
+          const rate = normalizeMerchantPayoutRate(document.getElementById(`merchantRate-${i}`).value.trim());
+          const daily = normalizedMerchantSingleFee(document.getElementById(`merchantDaily-${i}`).value.trim());
+          const fee = normalizedMerchantSingleFee(document.getElementById(`merchantFee-${i}`).value.trim());
+          if (rate === null) return fail("商户费率请输入0至100，最多四位小数。", `merchantRate-${i}`);
+          if (daily === null) return fail("日限额请输入有效非负金额，最多两位小数。", `merchantDaily-${i}`);
+          if (fee === null) return fail("单笔费用请输入有效非负金额，最多两位小数。", `merchantFee-${i}`);
+          parsedRows.push({ ...row, rate, dailyLimit: daily.slice(4), fee: fee.slice(4) });
+          const c = JSON.parse(row.before);
+          if (rate !== normalizeMerchantPayoutRate(merchantRatePercent(c.rate)) || daily !== normalizedMerchantSingleFee(c.dailyLimit ?? "0") || fee !== normalizedMerchantSingleFee(c.fee ?? "0")) rows.push({ ...row, rate, dailyLimit: daily.slice(4), fee: fee.slice(4) });
+        }
+        if (!rows.length) return fail("费率没有变化，无需重复保存。");
+        const reason = document.getElementById("merchantRateReason").value.trim();
+        if (!reason) return fail("请填写调整原因。", "merchantRateReason");
+        openMerchantPayoutRateConfirm(item, { ...state, rows: parsedRows, changes: rows.map((row) => row.id), reason });
+      });
+    }
+
+    function openMerchantPayoutRateConfirm(item, state) {
+      document.getElementById("modal").innerHTML = `<div class="modal-head"><div><h2>确认保存代付费率</h2><p>${escapeHtml(item.name)} · ${escapeHtml(item.id)}</p></div><button class="modal-close" type="button" id="modalClose" aria-label="关闭"><i data-lucide="x"></i></button></div><div class="modal-body">${renderMerchantMfaField("merchantRate2fa")}<div class="field-error" id="modalError" role="alert"></div></div><div class="modal-footer"><button class="btn" type="button" id="merchantRateBack">返回修改</button><button class="btn primary" type="button" id="merchantRateConfirm">确认保存</button></div>`;
+      showModal("small"); bindModalEvents();
+      document.getElementById("merchantRateBack").addEventListener("click", () => { activeModalTab = "代付配置"; activePayoutTab = "rates"; renderDetailModal(item, state); });
+      document.getElementById("merchantRateConfirm").addEventListener("click", () => {
+        clearInlineError();
+        if (!payoutRateContextAllowed(item, state)) return showInlineError("绑定关系或业务授权已变化，费率未保存。");
+        if (!verifyMerchantMfa("merchantRate2fa")) return;
+        document.getElementById("merchantRateConfirm").disabled = true;
+        const model = window.HSProviderDemo, products = model.tenantData(state.tenantId).products;
+        for (const row of state.rows.filter((row) => state.changes.includes(row.id))) {
+          const p = products.find((p) => p.id === row.id), c = p.merchantBindings[item.id];
+          const before = `${merchantRatePercent(c.rate)}% / 日限额 ${c.dailyLimit || "未设置"} / 单笔 ${c.fee || "0"}`;
+          Object.assign(c, { rate: row.rate, dailyLimit: row.dailyLimit, fee: row.fee });
+          item.logs.unshift([nowText(), "设置商户代付费率", currentTenantOperator.account, `${p.name}：${before} → ${merchantRatePercent(c.rate)}% / 日限额 ${c.dailyLimit} / 单笔 ${c.fee}；${state.reason}`]);
+        }
+        model.log("设置商户代付费率", item.id, state.tenantId);
+        activeModalTab = "代付配置"; activePayoutTab = "rates";
+        renderDetailModal(item); showToast("当前商户代付费率已保存");
+      });
+    }
+
+    function renderPayoutConfig(item, rateDraft) {
       const cfg = item.payoutConfig;
       const enabled = item.capabilities.includes("法币代付");
       const wallet = walletRow(item, "代付钱包", "CNY");
-      return `
-        <div class="info-grid" data-astryx="DescriptionList">
-          <div class="info-item"><div class="k">代付功能</div><div class="v"><select class="select" id="merchantPayoutStatus" ${enabled ? "" : "disabled"}><option ${cfg.status === "开启" ? "selected" : ""}>开启</option><option ${cfg.status === "暂停" ? "selected" : ""}>暂停</option><option ${cfg.status === "待配置" ? "selected" : ""}>待配置</option><option ${cfg.status === "未开通" ? "selected" : ""}>未开通</option></select></div></div>
-          <div class="info-item"><div class="k">手动下单</div><div class="v"><select class="select" id="merchantPayoutManual" ${enabled ? "" : "disabled"}><option ${cfg.manualOrder === "开启" ? "selected" : ""}>开启</option><option ${cfg.manualOrder === "关闭" ? "selected" : ""}>关闭</option></select></div></div>
-          <div class="info-item"><div class="k">通道驳回通知</div><div class="v"><select class="select" id="merchantPayoutNotice" ${enabled ? "" : "disabled"}><option ${cfg.rejectNotice === "开启" ? "selected" : ""}>开启</option><option ${cfg.rejectNotice === "关闭" ? "selected" : ""}>关闭</option></select></div></div>
-          <div class="info-item"><div class="k">代付订单单笔费用</div><div class="v mono">${cfg.singleFee}</div></div>
-          ${renderCallbackIpField(cfg, "payout", enabled)}
-        </div>
+      const settings = `
+        <section class="merchant-payout-controls" aria-labelledby="payoutSwitchTitle">
+          <h3 id="payoutSwitchTitle">功能开关</h3>
+          <div class="merchant-settings merchant-payout-switches">
+            ${renderMerchantSwitch("merchantPayoutStatus", "代付功能", cfg.status, enabled, merchantStatusOffLabel(cfg, enabled))}
+            ${renderMerchantSwitch("merchantPayoutManual", "手动下单", cfg.manualOrder, enabled)}
+            ${renderMerchantSwitch("merchantPayoutNotice", "通道驳回通知", cfg.rejectNotice, enabled)}
+          </div>
+          <div class="merchant-payout-fee">
+            <label for="merchantPayoutSingleFee">代付订单单笔费用</label>
+            <div class="merchant-fee-control"><input class="input mono" type="number" inputmode="decimal" min="0" step="0.01" id="merchantPayoutSingleFee" value="${escapeHtml(merchantSingleFeeValue(cfg))}" placeholder="未设置" aria-label="代付订单单笔费用（CNY）" ${enabled ? "" : "disabled"}><span>CNY</span></div>
+          </div>
+        </section>
         ${section("代付钱包余额", `
           <table class="mini-table">
             <thead><tr><th>资产</th><th>当前总额</th><th>冻结金额</th><th>可用余额</th><th>商户单笔费</th><th>操作</th></tr></thead>
@@ -23593,26 +23889,20 @@
             </tbody>
           </table>
         `)}
-        ${section("代付规则与费率", `
-          <div style="padding:12px;display:grid;gap:10px">
-            <div class="notice">平台授权给租户的 CNY 代付通道均可使用；通道在订单审核通过后逐笔选择，不按商户绑定。</div>
-            <table class="mini-table">
-              <thead><tr><th>产品</th><th>资产</th><th>商户费率</th><th>单笔费用</th><th>日限额</th></tr></thead>
-              <tbody>${productRows(cfg.fees, "当前未配置代付费率；请进入统一商户费率页面配置。")}</tbody>
-            </table>
-          </div>
-        `)}
-        <div class="field wide"><label for="merchantPayoutReason">配置变更原因</label><input class="input" id="merchantPayoutReason" placeholder="保存变更时必填，将写入操作日志" ${enabled ? "" : "disabled"}></div>
         <div class="field-error" id="modalError" role="alert"></div>
         <div class="toolbar" data-astryx="FooterActions">
-          <button class="btn" type="button" data-open-page="merchant-rate"><i data-lucide="percent"></i>查看统一费率</button>
           <button class="btn primary" type="button" data-business-config-save="payout" ${enabled ? "" : "disabled"}><i data-lucide="save"></i>保存代付配置</button>
         </div>
       `;
+      const tabs = [["settings", "基础设置"], ["rates", "产品费率"], ["integration", "对接信息"]];
+      return `<div class="merchant-payout-tabs" role="tablist" aria-label="代付配置分类">${tabs.map(([key, label]) => `<button class="merchant-payout-tab" id="payout-tab-${key}" role="tab" type="button" data-payout-tab="${key}" aria-controls="payout-panel-${key}" aria-selected="${activePayoutTab === key}" tabindex="${activePayoutTab === key ? "0" : "-1"}">${label}</button>`).join("")}</div>
+        <div class="merchant-payout-panel" id="payout-panel-settings" role="tabpanel" aria-labelledby="payout-tab-settings" ${activePayoutTab === "settings" ? "" : "hidden"}>${settings}</div>
+        <div class="merchant-payout-panel" id="payout-panel-rates" role="tabpanel" aria-labelledby="payout-tab-rates" ${activePayoutTab === "rates" ? "" : "hidden"}>${renderMerchantPayoutRates(item, rateDraft)}</div>
+        <div class="merchant-payout-panel" id="payout-panel-integration" role="tabpanel" aria-labelledby="payout-tab-integration" ${activePayoutTab === "integration" ? "" : "hidden"}>${renderDirectionAccess(item, "payout")}</div>`;
     }
 
     function renderWallets(item) {
-      return section("钱包账户（租户内部账务）", `
+      return section("钱包账户", `
         <table class="mini-table">
           <thead><tr><th>资产</th><th>钱包类型</th><th>当前总额</th><th>冻结金额</th><th>可用余额</th><th>操作</th></tr></thead>
           <tbody>${walletRows(item).map((row) => `
@@ -23775,63 +24065,238 @@
       return value.split(/[\n,]+/).map((entry) => entry.trim()).filter(Boolean);
     }
 
-    function renderWhitelistRow(value = "") {
+    function renderMerchantIpRow(value, id, index, label, supportsNetwork, enabled = true) {
+      const inputId = id === "accessWhitelist-0" ? `accessWhitelist-${index}` : (index === 0 ? id : `${id}-${index}`);
       return `<div class="access-whitelist-row">
-        <input class="input mono" data-whitelist-entry value="${escapeHtml(value)}" aria-describedby="accessWhitelistHint" placeholder="请输入公网 IP 或明确网段" autocomplete="off" spellcheck="false">
-        <button class="btn" type="button" data-whitelist-remove>删除</button>
+        <input class="input mono" id="${inputId}" data-ip-entry="${id}" ${id === "accessWhitelist-0" ? "data-whitelist-entry" : ""} value="${escapeHtml(value)}" aria-label="${label} ${index + 1}" aria-describedby="${id}Hint" placeholder="${supportsNetwork ? "公网 IP 或网段" : "公网 IP 地址"}" autocomplete="off" spellcheck="false" ${enabled ? "" : "disabled"}>
+        <button class="btn" type="button" data-ip-remove aria-label="删除${label} ${index + 1}" ${enabled ? "" : "disabled"}>删除</button>
       </div>`;
     }
 
-    function updateWhitelistLabels() {
-      document.querySelectorAll("#accessWhitelistList .access-whitelist-row").forEach((row, index) => {
-        const input = row.querySelector("input");
-        input.id = `accessWhitelist-${index}`;
-        input.setAttribute("aria-label", `白名单 IP ${index + 1}`);
-        row.querySelector("button").setAttribute("aria-label", `删除白名单 IP ${index + 1}`);
+    function renderMerchantIpEditor(id, label, value, hint, supportsNetwork = true, enabled = true) {
+      const entries = whitelistEntries(value);
+      const listId = id === "accessWhitelist-0" ? "accessWhitelistList" : `${id}List`;
+      return `<div class="field merchant-ip-editor" data-ip-editor="${id}" data-ip-label="${label}" data-ip-network="${supportsNetwork}" role="group" aria-labelledby="${id}Label">
+        <label id="${id}Label" for="${id}">${label}</label>
+        <div class="access-whitelist-list" id="${listId}">${(entries.length ? entries : [""]).map((entry, index) => renderMerchantIpRow(entry, id, index, label, supportsNetwork, enabled)).join("")}</div>
+        <button class="btn access-whitelist-add" type="button" data-ip-add ${id === "accessWhitelist-0" ? 'id="addAccessWhitelist"' : ""} ${enabled ? "" : "disabled"}>新增 IP</button>
+        <span class="inline-note" id="${id}Hint">${hint}</span>
+      </div>`;
+    }
+
+    function merchantIpInputValue(id) {
+      return [...document.querySelectorAll(`[data-ip-entry="${id}"]`)].map((input) => input.value.trim()).filter(Boolean).join("\n");
+    }
+
+    function bindMerchantIpEditors() {
+      document.querySelectorAll("[data-ip-editor]").forEach((editor) => {
+        const id = editor.dataset.ipEditor, label = editor.dataset.ipLabel;
+        const list = editor.querySelector(".access-whitelist-list");
+        const updateLabels = () => list.querySelectorAll(".access-whitelist-row").forEach((row, index) => {
+          const input = row.querySelector("input");
+          input.id = id === "accessWhitelist-0" ? `accessWhitelist-${index}` : (index === 0 ? id : `${id}-${index}`);
+          input.setAttribute("aria-label", `${label} ${index + 1}`);
+          row.querySelector("button").setAttribute("aria-label", `删除${label} ${index + 1}`);
+        });
+        const append = () => list.insertAdjacentHTML("beforeend", renderMerchantIpRow("", id, list.children.length, label, editor.dataset.ipNetwork === "true"));
+        editor.querySelector("[data-ip-add]").addEventListener("click", () => {
+          append(); updateLabels(); list.lastElementChild.querySelector("input").focus();
+        });
+        list.addEventListener("click", (event) => {
+          const remove = event.target.closest("[data-ip-remove]");
+          if (!remove || remove.disabled) return;
+          const row = remove.closest(".access-whitelist-row"), next = row.nextElementSibling || row.previousElementSibling;
+          row.remove();
+          if (!list.children.length) append();
+          clearInlineError(); updateLabels();
+          (next || list.firstElementChild).querySelector("input").focus();
+        });
       });
     }
 
-    function renderAccess(item) {
-      const merchantLoginAccess = ensureMerchantLoginDomain();
-      return `
-        <div class="info-grid" data-astryx="DescriptionList">
-          <div class="info-item"><div class="k">代收接入</div><div class="v">${tag(item.collectConfig.status)}</div></div>
-          <div class="info-item"><div class="k">代付接入</div><div class="v">${tag(item.payoutConfig.status)}</div></div>
-          <div class="info-item"><div class="k">IP 白名单总状态</div><div class="v">${tag(item.ipStatus === "已确认" ? "已确认" : "IP 待确认", item.ipStatus === "已确认" ? "green" : "orange")}</div></div>
-          <div class="info-item"><div class="k">商户端共享登录地址</div><div class="v mono">https://${escapeHtml(merchantLoginAccess.loginDomain)}/login</div></div>
-          <div class="info-item"><div class="k">共享入口状态</div><div class="v">${tag(merchantLoginAccess.loginDomainStatus, merchantLoginAccess.loginDomainStatus === "可用" ? "green" : "orange")}</div></div>
+    function createMerchantDemoKey() {
+      return `demo_${Array.from(crypto.getRandomValues(new Uint8Array(16)), (part) => part.toString(16).padStart(2, "0")).join("")}`;
+    }
+
+    function merchantIntegrationKey(item) {
+      if (!item.apiKey) item.apiKey = createMerchantDemoKey();
+      return item.apiKey;
+    }
+
+    function renderIntegrationValue(id, label, value, wide = false, copyable = false) {
+      return `<div class="field ${wide ? "wide" : ""}"><div class="merchant-integration-label"><span id="${id}Label">${label}</span>${copyable ? `<button class="btn merchant-integration-copy" type="button" data-copy-value="${escapeHtml(value)}" data-copy-label="${label}" aria-label="复制${label}" title="复制${label}"><i data-lucide="copy" aria-hidden="true"></i></button>` : ""}</div><div class="merchant-integration-value mono" id="${id}" role="textbox" aria-readonly="true" aria-labelledby="${id}Label" tabindex="0">${escapeHtml(value)}</div></div>`;
+    }
+
+    function merchantDirectionAccessFields(item, mode) {
+      const cfg = mode === "collect" ? item.collectConfig : item.payoutConfig;
+      const security = ensureAdminSecurity(item);
+      return [
+        ["name", "商户名称", item.name],
+        ["merchant", "商户号", item.id],
+        ["key", "对接密钥", merchantIntegrationKey(item)],
+        ["order", "下单接口", cfg.orderApi],
+        ["query", "查询接口", cfg.queryApi],
+        ["callback", "回调 IP", merchantCallbackIps(cfg) || "未配置"],
+        ["doc", "API 对接文档", cfg.docUrl || `https://docs.huisheng.example/merchant/${mode}`, true],
+        ["login", "商户登录地址", `https://${ensureMerchantLoginDomain().loginDomain}/login`],
+        ["account", "商户登录账号", security.account],
+        ["password", "登录密码", security.passwordStatus]
+      ];
+    }
+
+    function renderDirectionAccess(item, mode) {
+      const title = `${mode === "collect" ? "代收" : "代付"}对接信息`;
+      const fields = merchantDirectionAccessFields(item, mode);
+      const summary = `${title}\n${fields.map(([, label, value]) => `${label}：${value}`).join("\n")}`;
+      return `<div class="sub-panel merchant-integration-panel" data-astryx="DataPanel">
+        <div class="sub-panel-headline"><h3>${title}</h3><button class="btn" type="button" data-integration-copy="${mode}" data-copy-value="${escapeHtml(summary)}" data-copy-label="${title}" aria-label="复制全部${title}" title="复制全部${title}"><i data-lucide="copy" aria-hidden="true"></i>复制全部</button></div>
+        <div class="merchant-config-fields merchant-access-form">${fields.map(([key, label, value, wide]) => renderIntegrationValue(`access-${mode}-${key}`, label, value, Boolean(wide), true)).join("")}</div>
+      </div>`;
+    }
+
+    function renderMerchantMfaField(id) {
+      return `<div class="field wide"><label for="${id}">当前操作人 Google 2FA</label><input class="input mono" id="${id}" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="请输入6位验证码"></div>`;
+    }
+
+    function verifyMerchantMfa(id) {
+      const input = document.getElementById(id);
+      const valid = input.value.trim() === currentTenantOperator.google2fa;
+      input.value = "";
+      if (!valid) return showInlineError("Google 2FA 验证失败，尚未保存。", id);
+      return true;
+    }
+
+    function openMerchantKeyReset(item) {
+      document.getElementById("modal").innerHTML = `
+        <div class="modal-head"><div><h2>重置对接密钥</h2><p>${escapeHtml(item.name)} · ${escapeHtml(item.id)}</p></div><button class="modal-close" type="button" id="modalClose" aria-label="关闭"><i data-lucide="x"></i></button></div>
+        <div class="modal-body"><div class="notice">重置后原密钥立即失效，请同步更新商户系统的对接配置。</div>${renderMerchantMfaField("merchantKey2fa")}<div class="field-error" id="modalError" role="alert"></div></div>
+        <div class="modal-footer"><button class="btn" type="button" id="merchantKeyCancel">取消</button><button class="btn danger" type="button" id="merchantKeyConfirm">确认重置</button></div>`;
+      showModal("small");
+      bindModalEvents();
+      document.getElementById("merchantKeyCancel").addEventListener("click", () => renderDetailModal(item));
+      document.getElementById("merchantKeyConfirm").addEventListener("click", () => {
+        if (!verifyMerchantMfa("merchantKey2fa")) return;
+        document.getElementById("merchantKeyConfirm").disabled = true;
+        item.apiKey = createMerchantDemoKey();
+        item.logs.unshift([nowText(), "重置对接密钥", currentTenantOperator.account, "原密钥已失效；新密钥已生成"]);
+        renderDetailModal(item);
+        showToast("对接密钥已重置");
+      });
+    }
+
+    function renderSecuritySetting(title, fields, action) {
+      return `<section class="merchant-security-row"><h3>${title}</h3><div class="merchant-security-fields">${fields}</div><div class="merchant-security-action">${action}</div></section>`;
+    }
+
+    function renderLoginWhitelist(item) {
+      return renderSecuritySetting("商户后台登录 IP 白名单", `${renderMerchantIpEditor("loginWhitelistInput", "允许登录的 IP", item.loginWhitelist || "", "每项一个公网 IP 或网段；全部留空不限制登录。")}<div class="field-error" id="loginWhitelistError" role="alert"></div>`, `<button class="btn primary" type="button" id="saveLoginWhitelist">保存登录白名单</button>`);
+    }
+
+    function loginWhitelistIdentity(entry) {
+      const [address, prefixText] = entry.split("/");
+      if ((!address.includes(":") && !/^\d{1,3}(?:\.\d{1,3}){3}$/.test(address)) || !isPublicIpEntry(entry)) return null;
+      const ipv6 = address.includes(":");
+      const bits = ipv6 ? 128 : 32;
+      const prefix = prefixText === undefined ? bits : Number(prefixText);
+      const groups = ipv6 ? expandIpv6(address) : address.split(".").map(Number);
+      const width = ipv6 ? 16n : 8n;
+      const numeric = groups.reduce((result, part) => (result << width) + BigInt(part), 0n);
+      return `${bits}:${prefix}:${numeric >> BigInt(bits - prefix)}`;
+    }
+
+    function validateLoginWhitelist(item) {
+      clearInlineError();
+      const inputValue = merchantIpInputValue("loginWhitelistInput");
+      const entries = whitelistEntries(inputValue).map((value) => value.split("/").map((part) => part.trim()).join("/"));
+      const fail = (message, id = "loginWhitelistInput") => showInlineError(message, id, "loginWhitelistError");
+      const identities = entries.map(loginWhitelistIdentity);
+      if ((inputValue && !entries.length) || identities.some((value) => value === null)) return fail("请输入有效的公网 IPv4、IPv6 或网段。");
+      if (new Set(identities).size !== identities.length) return fail("登录 IP 或网段不能重复。");
+      const next = entries.join("\n");
+      if (next === whitelistEntries(item.loginWhitelist || "").join("\n")) return fail("登录白名单没有变化，无需重复保存。");
+      openLoginWhitelistConfirm(item, next);
+    }
+
+    function openLoginWhitelistConfirm(item, next) {
+      const before = item.loginWhitelist || "";
+      document.getElementById("modal").innerHTML = `
+        <div class="modal-head"><div><h2>确认修改登录 IP 白名单</h2><p>${escapeHtml(item.name)} · ${escapeHtml(item.id)}</p></div><button class="modal-close" type="button" id="modalClose" aria-label="关闭"><i data-lucide="x"></i></button></div>
+        <div class="modal-body">
+          <div class="info-grid"><div class="info-item"><div class="k">当前登录白名单</div><div class="v mono">${escapeHtml(before || "不限制 IP")}</div></div><div class="info-item"><div class="k">修改后</div><div class="v mono">${escapeHtml(next || "不限制 IP")}</div></div></div>
+          ${next ? "" : '<div class="notice">保存后不限制商户后台登录 IP。</div>'}
+          ${renderMerchantMfaField("loginWhitelist2fa")}
+          <div class="field-error" id="modalError" role="alert"></div>
         </div>
-        <div class="notice">商户端域名由平台与运维按租户统一配置，当前租户下全部商户共用；域名先识别租户，再由账号与密码识别具体商户。只有商户自有系统接入 API 时，才需要以下配置。</div>
-        <div class="access-panels">
-          <div class="sub-panel" data-astryx="DataPanel">
-            <div class="sub-panel-headline">
-              <h3>商户自有系统接入</h3>
-              <span>${tag(item.collectConfig.status === "未开通" && item.payoutConfig.status === "未开通" ? "未开通" : "已配置")}</span>
-            </div>
-            <div style="padding:12px" class="form-grid">
-              <div class="field wide"><label>代收下单接口（平台提供）</label><input class="input mono" value="${escapeHtml(item.collectConfig.orderApi)}" readonly></div>
-              <div class="field wide"><label>代收查询接口（平台提供）</label><input class="input mono" value="${escapeHtml(item.collectConfig.queryApi)}" readonly></div>
-              <div class="field wide"><label>代付下单接口（平台提供）</label><input class="input mono" value="${escapeHtml(item.payoutConfig.orderApi)}" readonly></div>
-              <div class="field wide"><label>代付查询接口（平台提供）</label><input class="input mono" value="${escapeHtml(item.payoutConfig.queryApi)}" readonly></div>
-              <div class="field wide"><label for="accessCallback-shared">统一回调 URL</label><input class="input mono" id="accessCallback-shared" value="${escapeHtml(merchantCallback(item))}" placeholder="未部署自有系统可留空"></div>
-              <div class="field wide" role="group" aria-labelledby="accessWhitelistLabel">
-                <label id="accessWhitelistLabel" for="accessWhitelist-0">API 请求 IP 白名单</label>
-                <div class="access-whitelist-list" id="accessWhitelistList">${(whitelistEntries(merchantWhitelist(item)).length ? whitelistEntries(merchantWhitelist(item)) : [""]).map(renderWhitelistRow).join("")}</div>
-                <button class="btn access-whitelist-add" type="button" id="addAccessWhitelist">新增 IP</button>
-                <span class="inline-note" id="accessWhitelistHint">每项填写一个公网 IPv4、IPv6 或明确网段；全部留空表示不限制 IP。</span>
-              </div>
-              <div class="field wide"><label>API 对接文档（平台提供）</label><input class="input" value="ShowDoc / 商户 API" readonly></div>
-              <div class="field"><label>对接密钥</label><input class="input mono" value="平台配置，一户一把，详情脱敏" readonly></div>
-              <div class="field"><label for="access2fa-shared">Google 2FA 验证码</label><input class="input mono" id="access2fa-shared" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="修改 IP 白名单时必填"></div>
-            </div>
-            ${item.pendingCallbacks?.shared ? `<div class="notice" style="margin:0 12px 12px">新回调正在测试：<span class="mono">${escapeHtml(item.pendingCallbacks.shared)}</span>。测试通过前继续使用当前地址。</div>` : ""}
-            <div class="toolbar" style="padding:0 12px 12px" data-astryx="FooterActions">
-              <button class="btn primary" type="button" data-access-save="shared"><i data-lucide="shield-check"></i>保存</button>
-            </div>
-          </div>
-        </div>
+        <div class="modal-footer"><button class="btn" type="button" id="loginWhitelistCancel">取消</button><button class="btn primary" type="button" id="loginWhitelistConfirm">确认保存</button></div>`;
+      showModal("small");
+      bindModalEvents();
+      document.getElementById("loginWhitelistCancel").addEventListener("click", () => renderDetailModal(item));
+      document.getElementById("loginWhitelistConfirm").addEventListener("click", () => {
+        if (!verifyMerchantMfa("loginWhitelist2fa")) return;
+        document.getElementById("loginWhitelistConfirm").disabled = true;
+        item.loginWhitelist = next;
+        item.logs.unshift([nowText(), "修改商户登录 IP 白名单", currentTenantOperator.account, `${before || "不限制 IP"} → ${next || "不限制 IP"}`]);
+        renderDetailModal(item);
+        showToast("登录 IP 白名单已保存");
+      });
+    }
+
+    function renderBusinessCallbackIps(item) {
+      return ["collect", "payout"].map((mode) => {
+        const isCollect = mode === "collect", label = isCollect ? "代收" : "代付";
+        const enabled = item.capabilities.includes(isCollect ? "法币代收" : "法币代付");
+        const cfg = isCollect ? item.collectConfig : item.payoutConfig;
+        const reasonId = isCollect ? "merchantCollectCallbackReason" : "merchantPayoutCallbackReason";
+        return renderSecuritySetting(`${label}回调 IP`, `${renderCallbackIpField(cfg, mode, enabled)}<div class="field"><label for="${reasonId}">变更原因</label><input class="input" id="${reasonId}" placeholder="请输入变更原因" ${enabled ? "" : "disabled"}></div>`, `<button class="btn primary" type="button" data-callback-ip-save="${mode}" ${enabled ? "" : "disabled"}>保存${label}回调 IP</button>`);
+      }).join("");
+    }
+
+    function saveMerchantCallbackIps(item, mode) {
+      clearInlineError();
+      const isCollect = mode === "collect", label = isCollect ? "代收" : "代付";
+      const cfg = isCollect ? item.collectConfig : item.payoutConfig;
+      const capability = isCollect ? "法币代收" : "法币代付";
+      if (!item.capabilities.includes(capability)) return showInlineError(`当前商户未开通${capability}，回调 IP 未保存。`);
+      const callbackIpId = isCollect ? "merchantCollectCallbackIp" : "merchantPayoutCallbackIp";
+      const callbackInput = merchantIpInputValue(callbackIpId);
+      const callbackIps = whitelistEntries(callbackInput);
+      if ((callbackInput && !callbackIps.length) || callbackIps.some((ip) =>
+        ip.includes("/") || (!ip.includes(":") && !/^\d{1,3}(?:\.\d{1,3}){3}$/.test(ip)) || !isPublicIpEntry(ip)
+      )) return showInlineError("每项请输入有效的公网 IPv4 或 IPv6；回调 IP 不支持网段。", callbackIpId);
+      const normalizedIps = callbackIps.map((ip) => ip.includes(":") ? expandIpv6(ip).join(":") : ip.split(".").map(Number).join("."));
+      if (new Set(normalizedIps).size !== normalizedIps.length) return showInlineError("回调 IP 不能重复，请检查后保存。", callbackIpId);
+      const callbackIp = callbackIps.join(", ");
+      const reasonId = isCollect ? "merchantCollectCallbackReason" : "merchantPayoutCallbackReason";
+      const reason = document.getElementById(reasonId).value.trim();
+      if (callbackIp === whitelistEntries(merchantCallbackIps(cfg)).join(", ")) return showInlineError("回调 IP 没有变化，无需重复保存。", callbackIpId);
+      if (!reason) return showInlineError("请填写变更原因。", reasonId);
+      const before = merchantCallbackIps(cfg);
+      const button = document.querySelector(`[data-callback-ip-save="${mode}"]`);
+      button.disabled = true;
+      setTimeout(() => {
+        if (!item.capabilities.includes(capability) || merchantCallbackIps(cfg) !== before) {
+          renderDetailModal(item);
+          return showInlineError("业务能力或回调 IP 已变化，未保存，请重新核对。");
+        }
+        cfg.callbackIp = callbackIp;
+        item.logs.unshift([nowText(), `保存${label}回调 IP`, currentTenantOperator.account, `回调 IP ${before || "未配置"} → ${callbackIp || "未配置"}；${reason}`]);
+        renderDetailModal(item); showToast(`${label}回调 IP 已保存`);
+      }, 350);
+    }
+
+    function renderCommonConfig(item) {
+      const access = `<div class="merchant-security-grid">${renderLoginWhitelist(item)}
+        ${renderSecuritySetting("API 请求 IP 白名单", renderMerchantIpEditor("accessWhitelist-0", "允许请求的 IP", merchantWhitelist(item), "每项一个公网 IP 或网段；全部留空不限制请求。"), `<button class="btn primary" type="button" data-access-save="whitelist">保存 API 白名单</button>`)}</div>`;
+      const callbacks = `<div class="merchant-security-grid merchant-security-callbacks">
+        ${renderSecuritySetting("统一回调 URL", `<div class="field"><label for="accessCallback-shared">回调地址</label><textarea class="input mono" id="accessCallback-shared" rows="2" placeholder="未部署自有系统可留空">${escapeHtml(merchantCallback(item))}</textarea></div>`, `<button class="btn primary" type="button" data-access-save="callback">保存回调 URL</button>`)}
+        ${renderBusinessCallbackIps(item)}</div>`;
+      const key = `<div class="merchant-security-key">${renderSecuritySetting("对接密钥", renderIntegrationValue("accessKeyStatus", "当前密钥", merchantIntegrationKey(item)), `<button class="btn" type="button" id="resetMerchantApiKey">重置密钥</button>`)}</div>`;
+      const tabs = [["access", "访问控制", access], ["callbacks", "业务回调", callbacks], ["key", "对接密钥", key]];
+      return `<div class="merchant-security-settings">
+        <div class="merchant-security-tabs" role="tablist" aria-label="安全配置分类">${tabs.map(([id, title]) => `<button class="merchant-security-tab" type="button" id="security-tab-${id}" data-security-tab="${id}" role="tab" aria-controls="security-panel-${id}" aria-selected="${activeSecurityTab === id}" tabindex="${activeSecurityTab === id ? "0" : "-1"}">${title}</button>`).join("")}</div>
+        ${tabs.map(([id, title, body]) => `<div class="merchant-security-panel" id="security-panel-${id}" role="tabpanel" aria-labelledby="security-tab-${id}" ${activeSecurityTab === id ? "" : "hidden"}>${body}</div>`).join("")}
         <div class="field-error" id="modalError" role="alert"></div>
-      `;
+      </div>`;
     }
 
     function ensureAdminSecurity(item) {
@@ -23850,53 +24315,68 @@
     function renderAdminSecurity(item) {
       const security = ensureAdminSecurity(item);
       return `
-        <div class="info-grid" data-astryx="DescriptionList">
-          <div class="info-item"><div class="k">商户管理员账号</div><div class="v mono">${escapeHtml(security.account)}</div></div>
-          <div class="info-item"><div class="k">登录密码</div><div class="v">${tag(security.passwordStatus, security.passwordStatus === "已设置" ? "green" : "orange")}</div></div>
-          <div class="info-item"><div class="k">Google 2FA</div><div class="v">${tag(security.twoFaStatus, security.twoFaStatus === "已绑定" ? "green" : "orange")}</div></div>
-          <div class="info-item"><div class="k">在线会话</div><div class="v">${escapeHtml(security.sessions)}</div></div>
-        </div>
-        <div class="sub-panel" data-astryx="DataPanel">
-          <h3>租户操作人验证</h3>
-          <div style="padding:12px" class="form-grid">
-            <div class="field">
-              <label for="tenantOperatorPassword">当前租户账号密码</label>
-              <input class="input" id="tenantOperatorPassword" type="password" autocomplete="current-password" placeholder="请输入当前操作人密码">
-            </div>
-            <div class="field">
-              <label for="tenantOperator2fa">当前租户账号 Google 2FA</label>
-              <input class="input mono" id="tenantOperator2fa" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="6 位验证码">
-            </div>
+        <div class="merchant-admin-security">
+          <div class="admin-security-account"><span>商户管理员账号</span><strong class="mono">${escapeHtml(security.account)}</strong></div>
+          <div class="admin-security-row">
+            <div class="admin-security-detail"><div class="admin-security-title"><h3>登录密码</h3>${tag(security.passwordStatus, security.passwordStatus === "已设置" ? "green" : "orange")}</div><p>重置后生成一次性密码，有效期 24 小时。</p></div>
+            <button class="btn danger" type="button" data-admin-reset="password"><i data-lucide="key-round"></i>重置管理员密码</button>
           </div>
-        </div>
-        <div class="notice">重置完成后，该商户管理员的全部在线会话立即失效。密码重置会生成 24 小时有效的一次性密码；2FA 重置后，下次登录必须重新绑定。</div>
-        <div class="field-error" id="modalError" role="alert"></div>
-        <div class="toolbar" data-astryx="FooterActions">
-          <button class="btn danger" type="button" data-admin-reset="password"><i data-lucide="key-round"></i>重置管理员密码</button>
-          <button class="btn" type="button" data-admin-reset="2fa"><i data-lucide="shield-check"></i>重置管理员 2FA</button>
+          <div class="admin-security-row">
+            <div class="admin-security-detail"><div class="admin-security-title"><h3>Google 2FA</h3>${tag(security.twoFaStatus, security.twoFaStatus === "已绑定" ? "green" : "orange")}</div><p>重置后，下次登录需重新绑定。</p></div>
+            <button class="btn" type="button" data-admin-reset="2fa"><i data-lucide="shield-check"></i>重置管理员 2FA</button>
+          </div>
+          <section class="admin-security-verify" aria-labelledby="adminOperatorTitle">
+            <h3 id="adminOperatorTitle">租户操作人验证</h3>
+            <div class="admin-security-fields">
+              <div class="field"><label for="tenantOperatorPassword">当前租户账号密码</label><input class="input" id="tenantOperatorPassword" type="password" autocomplete="current-password" placeholder="请输入当前操作人密码"></div>
+              <div class="field"><label for="tenantOperator2fa">当前租户账号 Google 2FA</label><input class="input mono" id="tenantOperator2fa" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="6 位验证码"></div>
+            </div>
+            <p class="admin-security-hint">重置后，该管理员的现有登录将失效。</p>
+            <div class="field-error" id="modalError" role="alert"></div>
+          </section>
         </div>
       `;
     }
 
     function bindDetailPanelEvents(item) {
-      const whitelistList = document.getElementById("accessWhitelistList");
-      updateWhitelistLabels();
-      document.getElementById("addAccessWhitelist")?.addEventListener("click", () => {
-        whitelistList.insertAdjacentHTML("beforeend", renderWhitelistRow());
-        updateWhitelistLabels();
-        whitelistList.lastElementChild.querySelector("input").focus();
+      bindMerchantPayoutRates(item);
+      document.querySelectorAll("[data-security-tab]").forEach((button) => {
+        button.addEventListener("click", () => {
+          activeSecurityTab = button.dataset.securityTab;
+          document.querySelectorAll("[data-security-tab]").forEach((tab) => { const selected = tab === button; tab.setAttribute("aria-selected", String(selected)); tab.tabIndex = selected ? 0 : -1; });
+          document.querySelectorAll(".merchant-security-panel").forEach((panel) => { panel.hidden = panel.id !== `security-panel-${activeSecurityTab}`; });
+        });
+        button.addEventListener("keydown", (event) => {
+          if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+          event.preventDefault();
+          const tabs = [...document.querySelectorAll("[data-security-tab]")], index = tabs.indexOf(button);
+          const target = tabs[(index + (event.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length];
+          target.click(); target.focus();
+        });
       });
-      whitelistList?.addEventListener("click", (event) => {
-        const remove = event.target.closest("[data-whitelist-remove]");
-        if (!remove) return;
-        const row = remove.closest(".access-whitelist-row");
-        const next = row.nextElementSibling || row.previousElementSibling;
-        row.remove();
-        if (!whitelistList.children.length) whitelistList.insertAdjacentHTML("beforeend", renderWhitelistRow());
-        clearInlineError();
-        updateWhitelistLabels();
-        (next || whitelistList.firstElementChild).querySelector("input").focus();
+
+      document.querySelectorAll("[data-payout-tab]").forEach((button) => {
+        button.addEventListener("click", () => {
+          activePayoutTab = button.dataset.payoutTab;
+          document.querySelectorAll("[data-payout-tab]").forEach((tab) => { const selected = tab === button; tab.setAttribute("aria-selected", String(selected)); tab.tabIndex = selected ? 0 : -1; });
+          document.querySelectorAll(".merchant-payout-panel").forEach((panel) => { panel.hidden = panel.id !== `payout-panel-${activePayoutTab}`; });
+        });
+        button.addEventListener("keydown", (event) => {
+          if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+          event.preventDefault();
+          const tabs = [...document.querySelectorAll("[data-payout-tab]")], index = tabs.indexOf(button);
+          const target = tabs[(index + (event.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length];
+          target.click(); target.focus();
+        });
       });
+      document.getElementById("resetMerchantApiKey")?.addEventListener("click", () => openMerchantKeyReset(item));
+      document.getElementById("saveLoginWhitelist")?.addEventListener("click", () => validateLoginWhitelist(item));
+      document.querySelectorAll("[data-merchant-switch]").forEach((input) => {
+        input.addEventListener("change", () => {
+          document.getElementById(`${input.id}State`).textContent = input.checked ? "开启" : input.dataset.offLabel;
+        });
+      });
+      bindMerchantIpEditors();
       const typeSelect = document.getElementById("merchantBasicType");
       typeSelect?.addEventListener("change", () => {
         const parentField = document.getElementById("merchantBasicParentField");
@@ -23907,11 +24387,9 @@
       document.querySelectorAll("[data-capability-toggle]").forEach((button) => {
         button.addEventListener("click", () => openCapabilityConfirm(item, button.dataset.capabilityToggle, button.dataset.capabilityAction));
       });
+      document.querySelectorAll("[data-callback-ip-save]").forEach((button) => button.addEventListener("click", () => saveMerchantCallbackIps(item, button.dataset.callbackIpSave)));
       document.querySelectorAll("[data-business-config-save]").forEach((button) => {
         button.addEventListener("click", () => saveMerchantBusinessConfig(item, button.dataset.businessConfigSave));
-      });
-      document.querySelectorAll("[data-product-config]").forEach((button) => {
-        button.addEventListener("click", () => openCollectProductConfig(item));
       });
       document.querySelectorAll("[data-open-page]").forEach((button) => {
         button.addEventListener("click", () => {
@@ -23930,98 +24408,97 @@
       });
     }
 
+    function preparePayoutSettingsConfirm(item) {
+      const cfg = item.payoutConfig;
+      if (!item.capabilities.includes("法币代付")) return showInlineError("当前商户未开通法币代付，请先在概览中开通业务能力。");
+      const next = {
+        status: document.getElementById("merchantPayoutStatus").checked ? "开启" : merchantStatusOffLabel(cfg, true),
+        manualOrder: document.getElementById("merchantPayoutManual").checked ? "开启" : "关闭",
+        rejectNotice: document.getElementById("merchantPayoutNotice").checked ? "开启" : "关闭"
+      };
+      const fee = document.getElementById("merchantPayoutSingleFee").value.trim();
+      if (fee !== merchantSingleFeeValue(cfg)) {
+        const singleFee = normalizedMerchantSingleFee(fee);
+        if (singleFee === null) return showInlineError("请输入大于或等于 0 的有效单笔费用，最多保留两位小数。", "merchantPayoutSingleFee");
+        if (singleFee !== cfg.singleFee) next.singleFee = singleFee;
+      }
+      if (!Object.entries(next).some(([key, value]) => cfg[key] !== value)) return showInlineError("当前业务配置没有变化，无需重复保存。");
+      openPayoutSettingsConfirm(item, { next, before: JSON.stringify(cfg), tenantId: window.HSProviderDemo?.tenantId });
+    }
+
+    function returnToPayoutSettings(item, next) {
+      activeModalTab = "代付配置"; activePayoutTab = "settings";
+      renderDetailModal(item);
+      for (const [id, key] of [["merchantPayoutStatus", "status"], ["merchantPayoutManual", "manualOrder"], ["merchantPayoutNotice", "rejectNotice"]]) {
+        const input = document.getElementById(id);
+        input.checked = next[key] === "开启";
+        document.getElementById(`${id}State`).textContent = next[key];
+      }
+      if (next.singleFee !== undefined) document.getElementById("merchantPayoutSingleFee").value = next.singleFee.slice(4);
+    }
+
+    function openPayoutSettingsConfirm(item, state) {
+      const cfg = item.payoutConfig, feeChanged = state.next.singleFee !== undefined;
+      const labels = { status: "代付功能", manualOrder: "手动下单", rejectNotice: "通道驳回通知", singleFee: "代付订单单笔费用" };
+      const changes = Object.entries(state.next).filter(([key, value]) => cfg[key] !== value).map(([key, value]) => `<div class="merchant-confirm-change"><span>${labels[key]}</span><span>${escapeHtml(cfg[key])} → <strong>${escapeHtml(value)}</strong></span></div>`).join("");
+      document.getElementById("modal").innerHTML = `<div class="modal-head"><div><h2>提交代付配置</h2><p>${escapeHtml(item.name)} · ${escapeHtml(item.id)}</p></div><button class="modal-close" type="button" id="modalClose" aria-label="关闭"><i data-lucide="x"></i></button></div><div class="modal-body">
+        <div class="merchant-confirm-changes">${changes}</div>
+        <div class="field"><label for="merchantPayoutReason">配置变更原因</label><input class="input" id="merchantPayoutReason" placeholder="请输入变更原因"></div>
+        ${feeChanged ? renderMerchantMfaField("merchantPayout2fa") : ""}
+        <div class="field-error" id="modalError" role="alert"></div>
+        </div><div class="modal-footer"><button class="btn" type="button" id="payoutSettingsCancel">返回修改</button><button class="btn primary" type="button" id="payoutSettingsConfirm">确认保存</button></div>`;
+      showModal("small"); bindModalEvents();
+      document.getElementById("payoutSettingsCancel").addEventListener("click", () => returnToPayoutSettings(item, state.next));
+      document.getElementById("payoutSettingsConfirm").addEventListener("click", () => {
+        clearInlineError();
+        if (window.HSProviderDemo?.tenantId !== state.tenantId || !item.capabilities.includes("法币代付") || JSON.stringify(cfg) !== state.before) return showInlineError("业务能力或配置已变化，未保存，请重新打开详情核对。");
+        const reason = document.getElementById("merchantPayoutReason").value.trim();
+        if (!reason) return showInlineError("请填写配置变更原因。", "merchantPayoutReason");
+        if (feeChanged && !verifyMerchantMfa("merchantPayout2fa")) return;
+        document.getElementById("payoutSettingsConfirm").disabled = true;
+        const before = `状态 ${cfg.status} / 手动下单 ${cfg.manualOrder} / 驳回通知 ${cfg.rejectNotice} / 单笔费用 ${cfg.singleFee}`;
+        Object.assign(cfg, state.next);
+        const after = `状态 ${cfg.status} / 手动下单 ${cfg.manualOrder} / 驳回通知 ${cfg.rejectNotice} / 单笔费用 ${cfg.singleFee}`;
+        item.logs.unshift([nowText(), "保存代付配置", currentTenantOperator.account, `${before} → ${after}；${reason}`]);
+        activeModalTab = "代付配置"; activePayoutTab = "settings";
+        renderDetailModal(item); showToast("代付配置已保存；只影响后续新订单");
+      });
+    }
+
     function saveMerchantBusinessConfig(item, mode) {
       clearInlineError();
+      if (mode === "payout") return preparePayoutSettingsConfirm(item);
       const isCollect = mode === "collect";
       const cfg = isCollect ? item.collectConfig : item.payoutConfig;
       const capability = isCollect ? "法币代收" : "法币代付";
-      if (!item.capabilities.includes(capability)) return showInlineError(`当前商户未开通${capability}，请先在业务权限中开通。`);
+      if (!item.capabilities.includes(capability)) return showInlineError(`当前商户未开通${capability}，请先在概览中开通业务能力。`);
       const statusId = isCollect ? "merchantCollectStatus" : "merchantPayoutStatus";
       const reasonId = isCollect ? "merchantCollectReason" : "merchantPayoutReason";
-      const callbackIpId = isCollect ? "merchantCollectCallbackIp" : "merchantPayoutCallbackIp";
-      const callbackInput = document.getElementById(callbackIpId).value.trim();
-      const callbackIps = whitelistEntries(callbackInput);
-      if ((callbackInput && !callbackIps.length) || callbackIps.some((ip) =>
-        ip.includes("/") || (!ip.includes(":") && !/^\d{1,3}(?:\.\d{1,3}){3}$/.test(ip)) || !isPublicIpEntry(ip)
-      )) return showInlineError("请输入有效的公网 IPv4 或 IPv6，多个 IP 用逗号或换行分隔；回调 IP 不支持网段。", callbackIpId);
-      const normalizedIps = callbackIps.map((ip) => ip.includes(":") ? expandIpv6(ip).join(":") : ip.split(".").map(Number).join("."));
-      if (new Set(normalizedIps).size !== normalizedIps.length) return showInlineError("回调 IP 不能重复，请检查后保存。", callbackIpId);
-      const callbackIp = callbackIps.join(", ");
-      const status = document.getElementById(statusId).value;
+      const status = document.getElementById(statusId).checked ? "开启" : merchantStatusOffLabel(cfg, true);
       const reason = document.getElementById(reasonId).value.trim();
-      if (status === "未开通") return showInlineError("关闭业务能力请前往业务权限处理；业务配置不能直接改为未开通。", statusId);
-      const next = isCollect ? { status, callbackIp } : {
-        status, callbackIp,
-        manualOrder: document.getElementById("merchantPayoutManual").value,
-        rejectNotice: document.getElementById("merchantPayoutNotice").value
+      if (status === "未开通") return showInlineError("关闭业务能力请前往概览处理；业务配置不能直接改为未开通。", statusId);
+      const next = isCollect ? { status } : {
+        status,
+        manualOrder: document.getElementById("merchantPayoutManual").checked ? "开启" : "关闭",
+        rejectNotice: document.getElementById("merchantPayoutNotice").checked ? "开启" : "关闭"
       };
-      const changed = Object.entries(next).some(([key, value]) => (key === "callbackIp" ? whitelistEntries(merchantCallbackIps(cfg)).join(", ") : cfg[key]) !== value);
+      const changed = Object.entries(next).some(([key, value]) => cfg[key] !== value);
       if (!changed) return showInlineError("当前业务配置没有变化，无需重复保存。");
       if (!reason) return showInlineError("请填写配置变更原因。", reasonId);
       const button = document.querySelector(`[data-business-config-save="${mode}"]`);
       button.disabled = true;
       button.textContent = "保存中…";
       setTimeout(() => {
-        const before = isCollect ? `状态 ${cfg.status}` : `状态 ${cfg.status} / 手动下单 ${cfg.manualOrder} / 驳回通知 ${cfg.rejectNotice}`;
-        const oldCallbackIp = merchantCallbackIps(cfg);
+        if (!item.capabilities.includes(capability)) {
+          renderDetailModal(item);
+          return showInlineError(`当前商户未开通${capability}，配置未保存。`);
+        }
+        const before = isCollect ? `状态 ${cfg.status}` : `状态 ${cfg.status} / 手动下单 ${cfg.manualOrder} / 驳回通知 ${cfg.rejectNotice} / 单笔费用 ${cfg.singleFee}`;
         Object.assign(cfg, next);
-        const after = isCollect ? `状态 ${cfg.status}` : `状态 ${cfg.status} / 手动下单 ${cfg.manualOrder} / 驳回通知 ${cfg.rejectNotice}`;
-        item.logs.unshift([nowText(), `保存${isCollect ? "代收" : "代付"}配置`, currentTenantOperator.account, `${before} → ${after}；回调 IP ${oldCallbackIp || "未配置"} → ${callbackIp || "未配置"}；${reason}`]);
+        const after = isCollect ? `状态 ${cfg.status}` : `状态 ${cfg.status} / 手动下单 ${cfg.manualOrder} / 驳回通知 ${cfg.rejectNotice} / 单笔费用 ${cfg.singleFee}`;
+        item.logs.unshift([nowText(), `保存${isCollect ? "代收" : "代付"}配置`, currentTenantOperator.account, `${before} → ${after}；${reason}`]);
         renderDetailModal(item);
         showToast(`${isCollect ? "代收" : "代付"}配置已保存；只影响后续新订单`);
-      }, 350);
-    }
-
-    function openCollectProductConfig(item) {
-      const cfg = item.collectConfig;
-      const currentNames = new Set(cfg.products.map((product) => product[0]));
-      const available = ["银行卡转账", "CNY-快捷支付", "扫码收款"];
-      document.getElementById("modal").innerHTML = `
-        <div class="modal-head" data-astryx="DialogHeader">
-          <div><h2>配置代收产品</h2><p>${escapeHtml(item.name)} · ${item.id} · CNY</p></div>
-          <button class="modal-close" type="button" id="modalClose" aria-label="关闭"><i data-lucide="x"></i></button>
-        </div>
-        <div class="modal-body" data-astryx="DialogBody">
-          <div class="check-row">
-            ${available.map((name) => `<label class="check-card"><input type="checkbox" data-collect-product value="${name}" ${currentNames.has(name) ? "checked" : ""}>${name}</label>`).join("")}
-          </div>
-          <div class="notice">产品只作用于当前商户；商户费率仍使用当前租户统一费率，不在这里设置单商户费率。</div>
-          <div class="field wide"><label for="collectProductReason">配置原因</label><input class="input" id="collectProductReason" placeholder="必填，将写入操作日志"></div>
-          <div class="field-error" id="modalError" role="alert"></div>
-        </div>
-        <div class="modal-footer" data-astryx="FooterActions">
-          <button class="btn" type="button" id="collectProductCancel">取消</button>
-          <button class="btn primary" type="button" id="collectProductConfirm">保存产品</button>
-        </div>
-      `;
-      showModal("small");
-      bindModalEvents();
-      document.getElementById("collectProductCancel").addEventListener("click", () => renderDetailModal(item));
-      document.getElementById("collectProductConfirm").addEventListener("click", () => applyCollectProductConfig(item));
-    }
-
-    function applyCollectProductConfig(item) {
-      clearInlineError();
-      const names = [...document.querySelectorAll("[data-collect-product]:checked")].map((checkbox) => checkbox.value);
-      const reason = document.getElementById("collectProductReason").value.trim();
-      if (!names.length) return showInlineError("已开通法币代收时至少保留一个代收产品。", null);
-      if (!reason) return showInlineError("请填写产品配置原因。", "collectProductReason");
-      const currentNames = item.collectConfig.products.map((product) => product[0]);
-      if (names.length === currentNames.length && names.every((name) => currentNames.includes(name))) return showInlineError("产品配置没有变化，无需重复保存。");
-      const defaults = {
-        "银行卡转账": ["银行卡转账", "CNY", "统一费率", "按统一费率", "单笔 50,000 / 日 2,000,000"],
-        "CNY-快捷支付": ["CNY-快捷支付", "CNY", "统一费率", "按统一费率", "单笔 20,000 / 日 100,000"],
-        "扫码收款": ["扫码收款", "CNY", "统一费率", "按统一费率", "单笔 20,000 / 日 800,000"]
-      };
-      const button = document.getElementById("collectProductConfirm");
-      button.disabled = true;
-      button.textContent = "保存中…";
-      setTimeout(() => {
-        item.collectConfig.products = names.map((name) => item.collectConfig.products.find((product) => product[0] === name) || defaults[name]);
-        item.logs.unshift([nowText(), "配置代收产品", currentTenantOperator.account, `${currentNames.join("、") || "无"} → ${names.join("、")}；${reason}`]);
-        activeModalTab = "代收配置";
-        renderDetailModal(item);
-        showToast("代收产品已保存；统一费率未改变");
       }, 350);
     }
 
@@ -24100,43 +24577,37 @@
         const cfg = capability === "法币代收" ? item.collectConfig : item.payoutConfig;
         cfg.status = enabled ? "待配置" : "未开通";
         item.logs.unshift([nowText(), `${action}${capability}`, currentTenantOperator.account, `${reason}；不进入平台审核`]);
-        activeModalTab = "业务权限";
+        activeModalTab = "概览";
         renderDetailModal(item);
         showToast(`${capability}已${action === "开通" ? "开通并进入待配置" : "关闭"}；已创建订单不受影响`);
       }, 350);
     }
 
-    function validateAccessChange(item) {
+    function validateAccessChange(item, mode) {
       clearInlineError();
-      const callbackId = "accessCallback-shared";
-      const callback = document.getElementById(callbackId).value.trim();
-      const whitelistInputs = [...document.querySelectorAll("[data-whitelist-entry]")];
-      const whitelist = whitelistInputs.map((input) => input.value.trim()).filter(Boolean).join(", ");
-      const google2fa = document.getElementById("access2fa-shared").value.trim();
       const oldCallback = merchantCallback(item);
       const oldWhitelist = whitelistEntries(merchantWhitelist(item)).join(", ");
+      const callback = mode === "callback" ? document.getElementById("accessCallback-shared").value.trim() : oldCallback;
+      const whitelistInputs = mode === "whitelist" ? [...document.querySelectorAll("[data-whitelist-entry]")] : [];
+      const rawWhitelist = mode === "whitelist" ? merchantIpInputValue("accessWhitelist-0") : "";
+      const entries = whitelistEntries(rawWhitelist).map((entry) => entry.split("/").map((part) => part.trim()).join("/"));
+      const whitelist = mode === "whitelist" ? entries.join(", ") : oldWhitelist;
+      if (mode === "callback" && callback && !isPublicHttpsUrl(callback)) return showInlineError("统一回调 URL 必须使用公网 HTTPS；可以使用合法的非 443 端口。", "accessCallback-shared");
+      if (mode === "whitelist") {
+        const identities = entries.map(loginWhitelistIdentity);
+        if ((rawWhitelist && !entries.length) || identities.some((value) => value === null)) return showInlineError("每项请输入一个有效的公网 IPv4、IPv6 或明确网段。", whitelistInputs[0]?.id);
+        if (new Set(identities).size !== identities.length) return showInlineError("该 IP 或网段已存在，请勿重复添加。", whitelistInputs[0]?.id);
+      }
       const callbackChanged = callback !== oldCallback;
       const whitelistChanged = whitelist !== oldWhitelist;
-
-      if (callback && !isPublicHttpsUrl(callback)) return showInlineError("统一回调 URL 必须使用公网 HTTPS；可以使用合法的非 443 端口。", callbackId);
-      const seen = new Set();
-      for (const input of whitelistInputs) {
-        const value = input.value.trim();
-        if (!value) continue;
-        if (!isPublicIpEntry(value)) return showInlineError("每项请输入一个有效的公网 IPv4、IPv6 或明确网段。", input.id);
-        if (seen.has(value.toLowerCase())) return showInlineError("该 IP 或网段已存在，请勿重复添加。", input.id);
-        seen.add(value.toLowerCase());
-      }
-      if (whitelistChanged && google2fa !== currentTenantOperator.google2fa) return showInlineError("Google 2FA 验证失败，IP 白名单尚未修改。", "access2fa-shared");
       if (!callbackChanged && !whitelistChanged) return showInlineError("当前内容没有变化，无需重复保存。");
-
-      openAccessConfirm(item, { callback, whitelist, oldCallback, oldWhitelist, callbackChanged, whitelistChanged });
+      openAccessConfirm(item, { mode, callback, whitelist, oldCallback, oldWhitelist, callbackChanged, whitelistChanged });
     }
 
     function openAccessConfirm(item, change) {
       document.getElementById("modal").innerHTML = `
         <div class="modal-head" data-astryx="DialogHeader">
-          <div><h2>确认修改自有系统接入配置</h2><p>${escapeHtml(item.name)} · ${item.id}</p></div>
+          <div><h2>${change.mode === "callback" ? "确认修改回调 URL" : "确认修改 API 白名单"}</h2><p>${escapeHtml(item.name)} · ${item.id}</p></div>
           <button class="modal-close" type="button" id="modalClose" aria-label="关闭"><i data-lucide="x"></i></button>
         </div>
         <div class="modal-body" data-astryx="DialogBody">
@@ -24153,6 +24624,7 @@
               <div class="info-item"><div class="k">新 IP 白名单</div><div class="v mono">${escapeHtml(change.whitelist || "不限制")}</div></div>
             </div>
           ` : ""}
+          ${renderMerchantMfaField("access2fa-shared")}
           <div class="field-error" id="modalError" role="alert"></div>
         </div>
         <div class="modal-footer" data-astryx="FooterActions">
@@ -24163,7 +24635,7 @@
       showModal("small");
       bindModalEvents();
       document.getElementById("accessChangeCancel").addEventListener("click", () => renderDetailModal(item));
-      document.getElementById("accessChangeConfirm").addEventListener("click", () => applyAccessChange(item, change));
+      document.getElementById("accessChangeConfirm").addEventListener("click", () => { if (verifyMerchantMfa("access2fa-shared")) applyAccessChange(item, change); });
     }
 
     function applyAccessChange(item, change) {
@@ -24174,11 +24646,13 @@
       if (change.callbackChanged && change.callback) item.pendingCallbacks.shared = change.callback;
 
       setTimeout(() => {
-        item.callback = change.callback || "未配置";
-        item.whitelist = change.whitelist || "未配置";
-        item.payoutConfig.orderIp = change.whitelist || "未配置";
-        item.ipStatus = change.whitelist ? "已确认" : "待确认";
-        delete item.pendingCallbacks.shared;
+        if (change.callbackChanged) item.callback = change.callback || "未配置";
+        if (change.whitelistChanged) {
+          item.whitelist = change.whitelist || "未配置";
+          item.payoutConfig.orderIp = change.whitelist || "未配置";
+          item.ipStatus = change.whitelist ? "已确认" : "待确认";
+        }
+        if (change.callbackChanged && (!change.callback || item.pendingCallbacks.shared === change.callback)) delete item.pendingCallbacks.shared;
         item.logs.unshift([nowText(), "修改自有系统接入配置", currentTenantOperator.account, `${change.callbackChanged ? (change.callback ? "新回调通过三项测试并切换；" : "统一回调已停用；") : ""}${change.whitelistChanged ? "IP 白名单已更新" : ""}`]);
         openAccessResult(item, change);
       }, 500);
@@ -24202,7 +24676,7 @@
           ` : `<div class="notice">${change.callbackChanged ? "统一回调已停用；" : ""}${change.whitelistChanged ? "API 请求将按新白名单校验。" : ""}商户后台和业务结果不受影响。</div>`}
         </div>
         <div class="modal-footer" data-astryx="FooterActions">
-          <button class="btn primary" type="button" id="backToAccess">返回接入信息</button>
+          <button class="btn primary" type="button" id="backToAccess">返回安全配置</button>
         </div>
       `;
       showModal("small");
@@ -24318,43 +24792,44 @@
       `);
     }
 
-    function detailBody(item) {
+    function detailBody(item, rateDraft) {
       const viewMap = {
         "概览": renderOverview,
-        "业务权限": renderCapabilityTab,
         "跑量统计": renderVolumeTab,
         "代收配置": renderCollectConfig,
         "代付配置": renderPayoutConfig,
         "钱包账户": renderWallets,
-        "接入信息": renderAccess,
+        "安全配置": renderCommonConfig,
         "管理员安全": renderAdminSecurity,
         "操作日志": renderLogs
       };
-      return viewMap[activeModalTab](item);
+      return viewMap[activeModalTab](item, rateDraft);
     }
 
     function openDetail(id) {
       const item = merchants.find((merchant) => merchant.id === id);
       activeMerchant = item;
       activeModalTab = "概览";
+      activePayoutTab = "settings";
+      activeSecurityTab = "access";
       renderDetailModal(item);
     }
 
-    function renderDetailModal(item) {
-      const tabs = ["概览", "业务权限", "跑量统计", "代收配置", "代付配置", "钱包账户", "接入信息", "管理员安全", "操作日志"];
+    function renderDetailModal(item, rateDraft) {
+      const tabs = ["概览", "跑量统计", "代收配置", "代付配置", "钱包账户", "安全配置", "管理员安全", "操作日志"];
       document.getElementById("modal").innerHTML = `
         <div class="modal-head" data-astryx="DialogHeader">
           <div>
             <h2>${item.name}</h2>
             <p><span class="mono">${item.id}</span> · ${item.type} · ${item.status}</p>
           </div>
-          <button class="modal-close" type="button" id="modalClose" aria-label="关闭"><i data-lucide="x"></i></button>
+          <div class="merchant-detail-actions"><button class="modal-close" type="button" id="modalClose" aria-label="关闭"><i data-lucide="x"></i></button></div>
         </div>
         <div class="modal-tabs" role="tablist" aria-label="商户详情页签" data-astryx="Tabs">
           ${tabs.map((tab) => `<button class="modal-tab ${tab === activeModalTab ? "active" : ""}" type="button" role="tab" aria-selected="${tab === activeModalTab}" tabindex="${tab === activeModalTab ? "0" : "-1"}" data-tab="${tab}">${tab}</button>`).join("")}
         </div>
         <div class="modal-body" data-astryx="DialogBody">
-          ${detailBody(item)}
+          ${detailBody(item, rateDraft)}
         </div>
       `;
       showModal();

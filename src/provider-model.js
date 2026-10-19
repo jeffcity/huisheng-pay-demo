@@ -32,6 +32,13 @@ const hsProviderFixtures = {"typeRows": [{"id": "CH-FIAT-IN-001", "channelNo": "
           channels.forEach(c => {c.tenantId=id;c.version=1;c.providerId=hsProviderFixtures.rows.vendors.find(p=>p.name===c.vendor)?.id;c.vendor=providers.find(p=>p.id===c.providerId)?.name||c.vendor;c.modified=false;c.collectionTypes?.forEach((t,i)=>t.id=`${c.id}-CODE-${i+1}`);});
           const products = clone(hsProviderFixtures.rows.products);
           products.forEach(p=>{p.tenantId=id;p.status||='开启';p.channelIds=(p.channelIds||channels.filter(c=>c.productId===p.id).map(c=>c.id)).filter(cid=>channels.some(c=>c.id===cid));});
+          // Demo baseline: merchant binding and pricing share the same tenant product records.
+          if(id==='HS-TEN-001') {
+            const payout=products.find(p=>p.id==='PROD-OUT-001');
+            if(payout) payout.merchantBindings=Object.fromEntries(['MCH-2031','MCH-1188','MCH-2209'].map(mid=>[mid,{bound:true,rate:'0.0018',fee:'2.00',dailyLimit:'3000000.00',agentRate:'0'}]));
+            const batch=products.find(p=>p.id==='PROD-OUT-002');
+            if(batch){batch.channelIds=channels.filter(c=>c.id==='CH-FIAT-OUT-004').map(c=>c.id);batch.merchantBindings={'MCH-1188':{bound:true,rate:'0.002',fee:'1.50',dailyLimit:'1000000.00',agentRate:'0'}};}
+          }
           data[id]={channels,products,connectionConfigs:new Map(),codeConfigs:new Map()};
         }
         data[id].channels.forEach(c=>{c.vendor=providers.find(p=>p.id===c.providerId)?.name||c.vendor;});
