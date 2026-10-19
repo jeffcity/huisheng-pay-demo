@@ -233,16 +233,16 @@ test('API独立保存不清理待测试回调，回调保存不改API白名单',
   const f = fixture();
   f.item.callback = 'https://current.demo.example/notify';
   f.item.pendingCallbacks = { shared: 'https://pending.demo.example/notify' };
-  f.api.applyAccessChange(f.item, { direction: 'collect', callbackChanged: false, whitelistChanged: true, callback: f.item.callback, whitelist: '9.9.9.9' });
+  f.api.applyAccessChange(f.item, { direction: 'payout', callbackChanged: false, whitelistChanged: true, callback: f.item.callback, whitelist: '9.9.9.9' });
   f.commit();
   assert.equal(f.item.pendingCallbacks.shared, 'https://pending.demo.example/notify');
   assert.equal(f.item.callback, 'https://current.demo.example/notify');
-  assert.equal(f.item.collectConfig.orderIp, '9.9.9.9');
+  assert.equal(f.item.payoutConfig.orderIp, '9.9.9.9');
   assert.equal(f.item.whitelist, '8.8.8.8');
   f.api.applyAccessChange(f.item, { callbackChanged: true, whitelistChanged: false, callback: 'https://new.demo.example/notify', whitelist: '1.1.1.1' });
   f.commit();
   assert.equal(f.item.callback, 'https://new.demo.example/notify');
-  assert.equal(f.item.collectConfig.orderIp, '9.9.9.9');
+  assert.equal(f.item.payoutConfig.orderIp, '9.9.9.9');
   assert.equal(f.item.whitelist, '8.8.8.8');
   assert.equal(f.item.pendingCallbacks.shared, undefined);
 });
@@ -503,19 +503,19 @@ test('业务开关确认拒绝租户或能力快照变化，重新开通直接�
   assert.match(f.api.renderMerchantCapabilitySwitch(f.item, '法币代付', 'business-payout'), /checked/);
 });
 
-test('业务下单IP按方向保存，清空不回落旧值，后台登录配置不混入', () => {
+test('代收不提供白名单，代付下单与后台登录IP独立，清空不回落旧值', () => {
   const f=fixture();
-  for(const direction of ['collect','payout']) {
-    const html=f.api.renderBusinessWhitelist(f.item,direction);
-    assert.match(html,new RegExp(`${direction==='collect'?'代收':'代付'}下单 IP 白名单`));
-    assert.doesNotMatch(html,/loginWhitelistInput|商户后台登录/);
-  }
+  assert.equal(f.api.renderBusinessWhitelist(f.item,'collect'),'');
+  assert.equal(f.api.businessWhitelistAllowed(f.item,'collect'),false);
+  const html=f.api.renderBusinessWhitelist(f.item,'payout');
+  assert.match(html,/代付下单 IP 白名单/);assert.doesNotMatch(html,/loginWhitelistInput|商户后台登录/);
   f.item.loginWhitelist='1.1.1.1';
-  f.api.applyAccessChange(f.item,{direction:'collect',callbackChanged:false,whitelistChanged:true,whitelist:''});f.commit();
-  assert.equal(f.api.merchantWhitelist(f.item,'collect'),'');
-  assert.equal(f.api.merchantWhitelist(f.item,'payout'),'8.8.8.8');
-  f.api.applyAccessChange(f.item,{direction:'payout',callbackChanged:false,whitelistChanged:true,whitelist:'9.9.9.9'});f.commit();
-  assert.equal(f.api.merchantWhitelist(f.item,'collect'),'');assert.equal(f.api.merchantWhitelist(f.item,'payout'),'9.9.9.9');
+  f.api.applyAccessChange(f.item,{direction:'payout',callbackChanged:false,whitelistChanged:true,whitelist:''});f.commit();
+  assert.equal(f.api.merchantWhitelist(f.item,'payout'),'');
   assert.equal(f.item.loginWhitelist,'1.1.1.1');assert.equal(f.item.whitelist,'8.8.8.8');
-  const before=JSON.stringify(f.item);f.api.applyAccessChange(f.item,{direction:null,whitelistChanged:true,whitelist:'1.0.0.1'});f.commit();assert.equal(JSON.stringify(f.item),before);
+  const before=JSON.stringify(f.item);
+  for(const direction of [null,'collect']) {
+    f.api.applyAccessChange(f.item,{direction,whitelistChanged:true,whitelist:'1.0.0.1'});f.commit();
+    assert.equal(JSON.stringify(f.item),before,'不接受代收或通用入口写入白名单');
+  }
 });
