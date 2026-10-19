@@ -6,7 +6,7 @@ import { webcrypto } from 'node:crypto';
 
 const source = fs.readFileSync(new URL('../surfaces/tenant/public/legacy/sources/merchants.html', import.meta.url), 'utf8');
 const providerSource = fs.readFileSync(new URL('../src/provider-model.js', import.meta.url), 'utf8');
-const names = ['renderMerchantCapabilitySwitch', 'renderCapabilityMatrix', 'capabilityChangeAllowed', 'returnFromCapabilityChange', 'applyCapabilityChange', 'merchantDirectionAccessFields', 'renderMerchantIpRow', 'renderMerchantIpEditor', 'merchantIpInputValue', 'preparePayoutSettingsConfirm', 'returnToPayoutSettings', 'openPayoutSettingsConfirm', 'renderSecuritySetting', 'renderBusinessCallbackIps', 'saveMerchantCallbackIps', 'merchantPayoutProducts', 'merchantBoundChannels', 'merchantRatePercent', 'renderMerchantPayoutRates', 'normalizeMerchantPayoutRate', 'payoutRateContextAllowed', 'bindMerchantPayoutRates', 'openMerchantPayoutRateConfirm', 'merchantCallbackIps', 'merchantStatusOffLabel', 'merchantSingleFeeValue', 'normalizedMerchantSingleFee', 'renderMerchantSwitch', 'renderCallbackIpField', 'renderCollectConfig', 'renderPayoutConfig', 'renderCommonConfig', 'renderLoginWhitelist', 'renderDirectionAccess', 'renderIntegrationValue', 'merchantIntegrationKey', 'createMerchantDemoKey', 'ensureAdminSecurity', 'renderMerchantMfaField', 'verifyMerchantMfa', 'applyAccessChange', 'validateLoginWhitelist', 'loginWhitelistIdentity', 'isForbiddenIpv4', 'expandIpv6', 'isPublicIpEntry', 'saveMerchantBusinessConfig'];
+const names = ['merchantWhitelist','businessMerchantCapability','businessWhitelistAllowed','renderBusinessWhitelist','renderMerchantCapabilitySwitch', 'capabilityChangeAllowed', 'returnFromCapabilityChange', 'applyCapabilityChange', 'merchantDirectionAccessFields', 'renderMerchantIpRow', 'renderMerchantIpEditor', 'merchantIpInputValue', 'preparePayoutSettingsConfirm', 'returnToPayoutSettings', 'openPayoutSettingsConfirm', 'renderSecuritySetting', 'renderBusinessCallbackIps', 'saveMerchantCallbackIps', 'merchantPayoutProducts', 'merchantBoundChannels', 'merchantRatePercent', 'renderMerchantPayoutRates', 'normalizeMerchantPayoutRate', 'payoutRateContextAllowed', 'bindMerchantPayoutRates', 'openMerchantPayoutRateConfirm', 'merchantCallbackIps', 'merchantStatusOffLabel', 'merchantSingleFeeValue', 'normalizedMerchantSingleFee', 'renderMerchantSwitch', 'renderCallbackIpField', 'renderCollectConfig', 'renderPayoutConfig', 'renderCommonConfig', 'renderLoginWhitelist', 'renderDirectionAccess', 'renderIntegrationValue', 'merchantIntegrationKey', 'createMerchantDemoKey', 'ensureAdminSecurity', 'renderMerchantMfaField', 'verifyMerchantMfa', 'applyAccessChange', 'validateLoginWhitelist', 'loginWhitelistIdentity', 'isForbiddenIpv4', 'expandIpv6', 'isPublicIpEntry', 'saveMerchantBusinessConfig'];
 const functions = names.map(name => {
   const start = source.indexOf(`    function ${name}(`);
   assert(start >= 0, name);
@@ -61,6 +61,7 @@ function fixture() {
   el('merchantPayoutManual').checked = true;
   el('merchantPayoutSingleFee').value = '2.00';
   el('merchantPayoutReason').value = '变更配置';
+  context.merchantProfileTenantId = window.HSProviderDemo.tenantId; context.merchants = [item];
   return { api: context, model: window.HSProviderDemo, item, cfg, el, errors, timers, loginChanges, save() { context.saveMerchantBusinessConfig(item, 'payout'); }, confirm(reason = '变更配置', code) { el('merchantPayoutReason').value = reason; if (code !== undefined) el('merchantPayout2fa').value = code; el('payoutSettingsConfirm').handlers.click(); }, commit() { timers.splice(0).forEach(fn => fn()); } };
 }
 
@@ -147,7 +148,8 @@ test('方向接口在对应配置页，安全配置仅保留共用设置及独�
   const f = fixture(), html = f.api.renderCommonConfig(f.item);
   assert.doesNotMatch(html, /代收对接信息|代付对接信息|access-collect-order|access-payout-order/);
   assert.match(html, /商户后台登录 IP 白名单/);
-  for (const id of ['loginWhitelistInput', 'accessCallback-shared', 'accessWhitelistList']) assert.equal(html.split(`id="${id}"`).length - 1, 1);
+  assert.doesNotMatch(html,/accessWhitelist|API 请求 IP 白名单/);
+  for (const id of ['loginWhitelistInput', 'accessCallback-shared']) assert.equal(html.split(`id="${id}"`).length - 1, 1);
   const collect = f.api.renderCollectConfig(f.item), payout = f.api.renderPayoutConfig(f.item);
   assert.match(collect, /id="access-collect-order"[^>]*>https:\/\/demo\.example\/collect\/create/);
   assert.doesNotMatch(collect, /access-payout-order|账务归属|平台不参与/);
@@ -191,7 +193,7 @@ test('安全配置无内联验证码，验证函数失败清空且不提交敏�
   const f = fixture(), html = f.api.renderCommonConfig(f.item);
   assert.doesNotMatch(html, /id="(?:loginWhitelist2fa|access2fa-shared)"/);
   assert.match(html, /data-access-save="callback"/);
-  assert.match(html, /data-access-save="whitelist"/);
+  assert.doesNotMatch(html, /data-access-save="whitelist"/);
   f.el('mfa').value = '000000';
   assert.equal(f.api.verifyMerchantMfa('mfa'), undefined);
   assert.equal(f.el('mfa').value, '');
@@ -231,15 +233,17 @@ test('API独立保存不清理待测试回调，回调保存不改API白名单',
   const f = fixture();
   f.item.callback = 'https://current.demo.example/notify';
   f.item.pendingCallbacks = { shared: 'https://pending.demo.example/notify' };
-  f.api.applyAccessChange(f.item, { callbackChanged: false, whitelistChanged: true, callback: f.item.callback, whitelist: '9.9.9.9' });
+  f.api.applyAccessChange(f.item, { direction: 'collect', callbackChanged: false, whitelistChanged: true, callback: f.item.callback, whitelist: '9.9.9.9' });
   f.commit();
   assert.equal(f.item.pendingCallbacks.shared, 'https://pending.demo.example/notify');
   assert.equal(f.item.callback, 'https://current.demo.example/notify');
-  assert.equal(f.item.whitelist, '9.9.9.9');
+  assert.equal(f.item.collectConfig.orderIp, '9.9.9.9');
+  assert.equal(f.item.whitelist, '8.8.8.8');
   f.api.applyAccessChange(f.item, { callbackChanged: true, whitelistChanged: false, callback: 'https://new.demo.example/notify', whitelist: '1.1.1.1' });
   f.commit();
   assert.equal(f.item.callback, 'https://new.demo.example/notify');
-  assert.equal(f.item.whitelist, '9.9.9.9');
+  assert.equal(f.item.collectConfig.orderIp, '9.9.9.9');
+  assert.equal(f.item.whitelist, '8.8.8.8');
   assert.equal(f.item.pendingCallbacks.shared, undefined);
 });
 
@@ -410,11 +414,11 @@ test('代付主表无原因和验证码，费用变更才在提交弹窗显示MF
 
 test('登录、API、两业务回调IP共用列表编辑，多个输入都参与校验且不跨区读取', () => {
   const f = fixture(), html = f.api.renderCommonConfig(f.item);
-  for (const id of ['loginWhitelistInput', 'accessWhitelist-0', 'merchantCollectCallbackIp', 'merchantPayoutCallbackIp']) {
+  for (const id of ['loginWhitelistInput', 'merchantCollectCallbackIp', 'merchantPayoutCallbackIp']) {
     assert(html.includes(`data-ip-editor="${id}"`));
     assert(html.includes(`data-ip-entry="${id}"`));
   }
-  assert.equal((html.match(/data-ip-add/g) || []).length, 4);
+  assert.equal((html.match(/data-ip-add/g) || []).length, 3);
   assert.doesNotMatch(html, /<textarea[^>]*id="(?:loginWhitelistInput|merchantCollectCallbackIp|merchantPayoutCallbackIp)"/);
   f.el('loginWhitelistInput').value = '8.8.8.8';
   f.el('loginWhitelistInput-1').value = '8.8.8.8/32';
@@ -458,10 +462,10 @@ test('对接资料整组复制与页面共用字段，各业务方向及当前�
 });
 
 
-test('列表与详情业务开关共用能力状态，确认前不改变数据，确认后只改变目标业务', () => {
+test('方向列表业务开关共用能力状态，确认前不改变数据，确认后只改变目标业务', () => {
   const f = fixture();
-  const state = { source: 'list', tenantId: f.model.tenantId, before: JSON.stringify(f.item.capabilities) };
-  assert.match(f.api.renderCapabilityMatrix(f.item), /data-list-capability="法币代付"/);
+  const state = { source: 'business-payout', tenantId: f.model.tenantId, before: JSON.stringify(f.item.capabilities) };
+  assert.match(f.api.renderMerchantCapabilitySwitch(f.item, '法币代付', 'business-payout'), /data-business-capability="法币代付"/);
   assert.match(f.api.renderMerchantCapabilitySwitch(f.item, '法币代付'), /role="switch".*data-capability-toggle="法币代付"[^>]*checked/);
   f.api.applyCapabilityChange(f.item, '法币代付', '关闭', state);
   assert.match(f.errors[0].message, /原因/);
@@ -477,12 +481,12 @@ test('列表与详情业务开关共用能力状态，确认前不改变数据�
   assert.equal(f.cfg.status, '未开通');
   assert.equal(f.item.logs.length, 1);
   assert.doesNotMatch(f.api.renderMerchantCapabilitySwitch(f.item, '法币代付'), /checked/);
-  assert.doesNotMatch(f.api.renderMerchantCapabilitySwitch(f.item, '法币代付', 'list'), /checked/);
+  assert.doesNotMatch(f.api.renderMerchantCapabilitySwitch(f.item, '法币代付', 'business-payout'), /checked/);
 });
 
-test('业务开关确认拒绝租户或能力快照变化，重新开通仅进入待配置', () => {
+test('业务开关确认拒绝租户或能力快照变化，重新开通直接开启方向业务', () => {
   for (const mutate of [f => { f.model.tenantId = 'HS-TEN-002'; }, f => { f.item.capabilities = ['法币代收']; }]) {
-    const f = fixture(), state = {source:'list', tenantId:f.model.tenantId, before:JSON.stringify(f.item.capabilities)};
+    const f = fixture(), state = {source:'business-payout', tenantId:f.model.tenantId, before:JSON.stringify(f.item.capabilities)};
     f.el('capabilityReason').value = '调整';
     f.api.applyCapabilityChange(f.item, '法币代付', '关闭', state);
     mutate(f); f.commit();
@@ -491,10 +495,27 @@ test('业务开关确认拒绝租户或能力快照变化，重新开通仅进�
     assert.equal(f.cfg.status, '开启');
   }
   const f = fixture(); f.item.capabilities = ['法币代收']; f.cfg.status = '未开通';
-  const state = {source:'detail', tenantId:f.model.tenantId, before:JSON.stringify(f.item.capabilities)};
+  const state = {source:'business-payout', tenantId:f.model.tenantId, before:JSON.stringify(f.item.capabilities)};
   f.el('capabilityReason').value = '详情开通';
   f.api.applyCapabilityChange(f.item, '法币代付', '开通', state); f.commit();
-  assert.equal(f.cfg.status, '待配置');
+  assert.equal(f.cfg.status, '开启');
   assert(f.item.capabilities.includes('法币代付'));
-  assert.match(f.api.renderMerchantCapabilitySwitch(f.item, '法币代付', 'list'), /checked/);
+  assert.match(f.api.renderMerchantCapabilitySwitch(f.item, '法币代付', 'business-payout'), /checked/);
+});
+
+test('业务下单IP按方向保存，清空不回落旧值，后台登录配置不混入', () => {
+  const f=fixture();
+  for(const direction of ['collect','payout']) {
+    const html=f.api.renderBusinessWhitelist(f.item,direction);
+    assert.match(html,new RegExp(`${direction==='collect'?'代收':'代付'}下单 IP 白名单`));
+    assert.doesNotMatch(html,/loginWhitelistInput|商户后台登录/);
+  }
+  f.item.loginWhitelist='1.1.1.1';
+  f.api.applyAccessChange(f.item,{direction:'collect',callbackChanged:false,whitelistChanged:true,whitelist:''});f.commit();
+  assert.equal(f.api.merchantWhitelist(f.item,'collect'),'');
+  assert.equal(f.api.merchantWhitelist(f.item,'payout'),'8.8.8.8');
+  f.api.applyAccessChange(f.item,{direction:'payout',callbackChanged:false,whitelistChanged:true,whitelist:'9.9.9.9'});f.commit();
+  assert.equal(f.api.merchantWhitelist(f.item,'collect'),'');assert.equal(f.api.merchantWhitelist(f.item,'payout'),'9.9.9.9');
+  assert.equal(f.item.loginWhitelist,'1.1.1.1');assert.equal(f.item.whitelist,'8.8.8.8');
+  const before=JSON.stringify(f.item);f.api.applyAccessChange(f.item,{direction:null,whitelistChanged:true,whitelist:'1.0.0.1'});f.commit();assert.equal(JSON.stringify(f.item),before);
 });

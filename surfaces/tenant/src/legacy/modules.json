@@ -15,6 +15,22 @@
     "sourceName": "01-商户运营 / 01-商户管理",
     "initialHash": "merchant-list"
   },
+  "merchantCollect": {
+    "label": "代收商户管理",
+    "group": "商户运营",
+    "module": "merchants",
+    "sourceKey": "merchants",
+    "sourceName": "01-商户运营 / 代收商户管理",
+    "initialHash": "merchant-collect"
+  },
+  "merchantPayout": {
+    "label": "代付商户管理",
+    "group": "商户运营",
+    "module": "merchants",
+    "sourceKey": "merchants",
+    "sourceName": "01-商户运营 / 代付商户管理",
+    "initialHash": "merchant-payout"
+  },
   "merchantFunding": {
     "label": "商户资金申请",
     "group": "商户运营",

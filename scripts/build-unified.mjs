@@ -4,6 +4,9 @@ import { readFile, readdir, mkdir, writeFile, rm } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+// The dev-server watcher inherits NODE_ENV=development; embedded delivery bundles must stay production.
+process.env.NODE_ENV = 'production';
+
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const json = value => JSON.stringify(value).replace(/</g, '\\u003c');
 const script = value => value.replace(/<\/script/gi, '<\\/script');
