@@ -6,7 +6,7 @@ import { webcrypto } from 'node:crypto';
 
 const source = fs.readFileSync(new URL('../surfaces/tenant/public/legacy/sources/merchants.html', import.meta.url), 'utf8');
 const providerSource = fs.readFileSync(new URL('../src/provider-model.js', import.meta.url), 'utf8');
-const names = ['merchantDirectionAccessFields', 'renderMerchantIpRow', 'renderMerchantIpEditor', 'merchantIpInputValue', 'preparePayoutSettingsConfirm', 'returnToPayoutSettings', 'openPayoutSettingsConfirm', 'renderSecuritySetting', 'renderBusinessCallbackIps', 'saveMerchantCallbackIps', 'merchantPayoutProducts', 'merchantBoundChannels', 'merchantRatePercent', 'renderMerchantPayoutRates', 'normalizeMerchantPayoutRate', 'payoutRateContextAllowed', 'bindMerchantPayoutRates', 'openMerchantPayoutRateConfirm', 'merchantCallbackIps', 'merchantStatusOffLabel', 'merchantSingleFeeValue', 'normalizedMerchantSingleFee', 'renderMerchantSwitch', 'renderCallbackIpField', 'renderCollectConfig', 'renderPayoutConfig', 'renderCommonConfig', 'renderLoginWhitelist', 'renderDirectionAccess', 'renderIntegrationValue', 'merchantIntegrationKey', 'createMerchantDemoKey', 'ensureAdminSecurity', 'renderMerchantMfaField', 'verifyMerchantMfa', 'applyAccessChange', 'validateLoginWhitelist', 'loginWhitelistIdentity', 'isForbiddenIpv4', 'expandIpv6', 'isPublicIpEntry', 'saveMerchantBusinessConfig'];
+const names = ['renderMerchantCapabilitySwitch', 'renderCapabilityMatrix', 'capabilityChangeAllowed', 'returnFromCapabilityChange', 'applyCapabilityChange', 'merchantDirectionAccessFields', 'renderMerchantIpRow', 'renderMerchantIpEditor', 'merchantIpInputValue', 'preparePayoutSettingsConfirm', 'returnToPayoutSettings', 'openPayoutSettingsConfirm', 'renderSecuritySetting', 'renderBusinessCallbackIps', 'saveMerchantCallbackIps', 'merchantPayoutProducts', 'merchantBoundChannels', 'merchantRatePercent', 'renderMerchantPayoutRates', 'normalizeMerchantPayoutRate', 'payoutRateContextAllowed', 'bindMerchantPayoutRates', 'openMerchantPayoutRateConfirm', 'merchantCallbackIps', 'merchantStatusOffLabel', 'merchantSingleFeeValue', 'normalizedMerchantSingleFee', 'renderMerchantSwitch', 'renderCallbackIpField', 'renderCollectConfig', 'renderPayoutConfig', 'renderCommonConfig', 'renderLoginWhitelist', 'renderDirectionAccess', 'renderIntegrationValue', 'merchantIntegrationKey', 'createMerchantDemoKey', 'ensureAdminSecurity', 'renderMerchantMfaField', 'verifyMerchantMfa', 'applyAccessChange', 'validateLoginWhitelist', 'loginWhitelistIdentity', 'isForbiddenIpv4', 'expandIpv6', 'isPublicIpEntry', 'saveMerchantBusinessConfig'];
 const functions = names.map(name => {
   const start = source.indexOf(`    function ${name}(`);
   assert(start >= 0, name);
@@ -17,12 +17,12 @@ const functions = names.map(name => {
 function fixture() {
   const elements = new Map(), timers = [], errors = [], loginChanges = [];
   const el = id => {
-    if (!elements.has(id)) elements.set(id, { value: '', checked: false, disabled: false, textContent: '', handlers: {}, dataset: {}, addEventListener(type, fn) { this.handlers[type] = fn; } });
+    if (!elements.has(id)) elements.set(id, { value: '', checked: false, disabled: false, textContent: '', handlers: {}, dataset: {}, focus() {}, addEventListener(type, fn) { this.handlers[type] = fn; } });
     return elements.get(id);
   };
   const window = { document: {} }; window.top = window;
   const context = vm.createContext({
-    window, activeSecurityTab: 'access', activePayoutTab: 'settings', activeModalTab: '代付配置', showModal() {}, bindModalEvents() {},
+    window, merchantCapabilityOptions: ['法币代收', '法币代付'], renderRows() {}, closeModal() {}, activeSecurityTab: 'access', activePayoutTab: 'settings', activeModalTab: '代付配置', showModal() {}, bindModalEvents() {},
     document: { getElementById: el, querySelector: el, querySelectorAll(selector) {
       const match = selector.match(/^\[data-ip-entry="([^"]+)"\]$/);
       return match ? [el(match[1]), ...[...elements].filter(([id]) => id.startsWith(match[1] + '-')).map(([, value]) => value)] : [];
@@ -455,4 +455,46 @@ test('对接资料整组复制与页面共用字段，各业务方向及当前�
   const before = f.item.apiKey;
   f.item.apiKey = f.api.createMerchantDemoKey();
   assert.notEqual(before, f.api.merchantDirectionAccessFields(f.item, 'payout').find(([key]) => key === 'key')[2]);
+});
+
+
+test('列表与详情业务开关共用能力状态，确认前不改变数据，确认后只改变目标业务', () => {
+  const f = fixture();
+  const state = { source: 'list', tenantId: f.model.tenantId, before: JSON.stringify(f.item.capabilities) };
+  assert.match(f.api.renderCapabilityMatrix(f.item), /data-list-capability="法币代付"/);
+  assert.match(f.api.renderMerchantCapabilitySwitch(f.item, '法币代付'), /role="switch".*data-capability-toggle="法币代付"[^>]*checked/);
+  f.api.applyCapabilityChange(f.item, '法币代付', '关闭', state);
+  assert.match(f.errors[0].message, /原因/);
+  assert.equal(f.item.capabilities.includes('法币代付'), true);
+  f.el('capabilityReason').value = '列表关闭代付';
+  f.api.applyCapabilityChange(f.item, '法币代付', '关闭', state);
+  f.api.applyCapabilityChange(f.item, '法币代付', '关闭', state);
+  assert.equal(f.timers.length, 1, '重复确认只调度一次保存');
+  assert.equal(f.item.capabilities.includes('法币代付'), true, '等待提交期间仍未改变');
+  f.commit();
+  assert.equal(f.item.capabilities.includes('法币代付'), false);
+  assert.equal(f.item.capabilities.includes('法币代收'), true);
+  assert.equal(f.cfg.status, '未开通');
+  assert.equal(f.item.logs.length, 1);
+  assert.doesNotMatch(f.api.renderMerchantCapabilitySwitch(f.item, '法币代付'), /checked/);
+  assert.doesNotMatch(f.api.renderMerchantCapabilitySwitch(f.item, '法币代付', 'list'), /checked/);
+});
+
+test('业务开关确认拒绝租户或能力快照变化，重新开通仅进入待配置', () => {
+  for (const mutate of [f => { f.model.tenantId = 'HS-TEN-002'; }, f => { f.item.capabilities = ['法币代收']; }]) {
+    const f = fixture(), state = {source:'list', tenantId:f.model.tenantId, before:JSON.stringify(f.item.capabilities)};
+    f.el('capabilityReason').value = '调整';
+    f.api.applyCapabilityChange(f.item, '法币代付', '关闭', state);
+    mutate(f); f.commit();
+    assert.match(f.errors.at(-1).message, /已变化/);
+    assert.equal(f.item.logs.length, 0);
+    assert.equal(f.cfg.status, '开启');
+  }
+  const f = fixture(); f.item.capabilities = ['法币代收']; f.cfg.status = '未开通';
+  const state = {source:'detail', tenantId:f.model.tenantId, before:JSON.stringify(f.item.capabilities)};
+  f.el('capabilityReason').value = '详情开通';
+  f.api.applyCapabilityChange(f.item, '法币代付', '开通', state); f.commit();
+  assert.equal(f.cfg.status, '待配置');
+  assert(f.item.capabilities.includes('法币代付'));
+  assert.match(f.api.renderMerchantCapabilitySwitch(f.item, '法币代付', 'list'), /checked/);
 });
