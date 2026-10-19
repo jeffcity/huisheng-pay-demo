@@ -24548,7 +24548,8 @@
       if (source === "list") closeModal();
       else { activeModalTab = "概览"; renderDetailModal(item); }
       const mode = capability === "法币代收" ? "collect" : "payout";
-      document.getElementById(`merchant-capability-${source}-${item.id}-${mode}`)?.focus();
+      const target = document.getElementById(`merchant-capability-${source}-${item.id}-${mode}`);
+      (target || (source === "list" ? document.getElementById("capabilityFilter") : null))?.focus();
     }
 
     function capabilityChangeAllowed(item, capability, action, state) {
