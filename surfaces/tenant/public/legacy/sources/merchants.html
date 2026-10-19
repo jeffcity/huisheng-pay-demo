@@ -20541,6 +20541,48 @@
     .merchant-access-directions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
     .merchant-access-directions > * { min-width: 0; }
     .merchant-access-form { padding: 14px; }
+    .payout-direct-ops { width: 290px; display: flex; flex-wrap: wrap !important; gap: 3px 10px !important; }
+    .payout-direct-ops .link-btn { min-height: 32px; }
+    .payout-test-link { color: #238636; }
+    .modal-body .payout-direct-rate-table { min-width: 600px; }
+    .payout-direct-rate-table input { width: 100%; min-width: 78px; }
+    @container (max-width: 400px) { .payout-direct-ops { width: 110px; } }
+    .modal-body .payout-channel-binding-table { min-width: 760px; }
+    .payout-channel-binding-table input[data-payout-channel-weight] { width: 70px; }
+    .business-merchant-page { padding: 0; overflow: hidden; container-type: inline-size; }
+    .business-merchant-filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; padding: 16px; border-bottom: 1px solid var(--border); }
+    .business-merchant-filters .field { min-width: 0; flex: 0 1 240px; }
+    .business-merchant-filters .field:nth-child(2) { flex-basis: 160px; }
+    .business-merchant-filters .input, .business-merchant-filters .select { width: 100%; min-height: 38px; }
+    .business-merchant-count { padding: 12px 16px; color: var(--text-secondary); }
+    .business-merchant-page .business-merchant-table { min-width: 940px; table-layout: auto; }
+    .business-merchant-page .business-merchant-table th, .business-merchant-page .business-merchant-table td { white-space: nowrap; }
+    .business-merchant-table td:first-child { min-width: 110px; }
+    .business-merchant-table th:first-child, .business-merchant-table td:first-child { position: sticky; left: 0; background: var(--bg-card, #fff); z-index: 1; box-shadow: 1px 0 var(--border); }
+    .business-merchant-table th:first-child { background: var(--bg-table-header, #f6f7f9); }
+    .business-merchant-table th:last-child, .business-merchant-table td:last-child { z-index: 2; }
+    .business-merchant-table .ops .btn { min-height: 36px; padding: 5px 9px; white-space: nowrap; }
+    .business-merchant-table .collect-action-test { color: #fff; background: #238636; border-color: #238636; }
+    .business-merchant-table .collect-action-integration { color: #fff; background: #ad6500; border-color: #ad6500; }
+    .modal-body .collect-products-table { min-width: 720px; }
+    [data-collect-panel-body][hidden] { display: none !important; }
+    .collect-editable { border: 1px dashed var(--border); border-radius: 4px; background: transparent; padding: 6px 10px; min-height: 36px; cursor: pointer; color: inherit; }
+    .collect-editable:hover, .collect-editable:focus-visible { border-color: var(--primary); color: var(--primary); }
+    .collect-price-input { width: 110px; min-width: 80px; }
+    @container (max-width: 400px) {
+      .merchant-business-capability { display: flex; align-items: center; gap: 6px; font-size: 12px; cursor: pointer; }
+    .business-merchant-table .ops { flex-direction: column; align-items: stretch; gap: 3px; }
+      .business-merchant-table .ops .btn { font-size: 12px; }
+      .business-merchant-table th:first-child, .business-merchant-table td:first-child { position: static; }
+    }
+    .collect-product-toolbar { justify-content: flex-start; flex-wrap: wrap; margin-top: 12px; }
+    #collectTestOpenPay[aria-disabled="true"] { pointer-events: none; opacity: .5; }
+
+    .business-merchant-table th:last-child, .business-merchant-table td:last-child { position: sticky; right: 0; background: var(--bg-card, #fff); box-shadow: -1px 0 var(--border); }
+    .business-merchant-table th:last-child { background: var(--bg-table-header, #f6f7f9); }
+    .business-merchant-table .ops { gap: 12px; flex-wrap: nowrap; }
+    .business-merchant-table .link-btn { min-height: 44px; white-space: nowrap; }
+    @media (max-width: 480px) { .business-merchant-filters .field, .business-merchant-filters .field:nth-child(2) { flex-basis: 100%; } }
     .merchant-integration-value { padding: 8px 10px; min-height: 36px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-soft); color: var(--text); white-space: pre-wrap; overflow-wrap: anywhere; user-select: text; line-height: 1.6; }
     .merchant-integration-value:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
     .merchant-integration-label { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; }
@@ -20609,6 +20651,7 @@
     .merchant-security-callbacks > .merchant-security-row:first-child { grid-column: 1 / -1; }
     .merchant-security-callbacks > .merchant-security-row:first-child .merchant-security-fields { max-width: 600px; }
     .merchant-security-key { max-width: 640px; }
+    .merchant-security-single { max-width: 560px; min-width: 0; }
     @container (max-width: 640px) {
       .merchant-security-grid { grid-template-columns: minmax(0, 1fr); }
     }
@@ -21151,6 +21194,8 @@
         </button>
         <div class="nav-children">
           <button class="nav-button active" type="button" data-page="merchant-list"><i data-lucide="building-2"></i><span>商户管理</span></button>
+          <button class="nav-button" type="button" data-page="merchant-collect"><i data-lucide="download"></i><span>代收商户管理</span></button>
+          <button class="nav-button" type="button" data-page="merchant-payout"><i data-lucide="send"></i><span>代付商户管理</span></button>
           <button class="nav-button" type="button" data-page="merchant-funding"><i data-lucide="wallet-cards"></i><span>商户资金申请</span></button>
           <button class="nav-button" type="button" data-page="merchant-rate"><i data-lucide="percent"></i><span>商户费率</span></button>
         </div>
@@ -21212,14 +21257,6 @@
               </select>
             </div>
             <div class="field">
-              <label for="capabilityFilter">业务能力</label>
-              <select class="select" id="capabilityFilter">
-                <option>全部能力</option>
-                <option>法币代收</option>
-                <option>法币代付</option>
-              </select>
-            </div>
-            <div class="field">
               <label for="statusFilter">商户状态</label>
               <select class="select" id="statusFilter">
                 <option>全部状态</option>
@@ -21254,7 +21291,6 @@
                   <th><label class="table-check"><input type="checkbox" id="selectAllMerchants" aria-label="选择当前结果全部商户"></label></th>
                   <th>商户</th>
                   <th>类型 / 关系</th>
-                  <th>业务能力</th>
                   <th>今日跑量</th>
                   <th>状态</th>
                   <th>钱包摘要</th>
@@ -21277,8 +21313,14 @@
   <script>
     let activeModalTab = "概览";
     let activePayoutTab = "settings";
+    let activePayoutAction = "rates";
     let activeSecurityTab = "access";
     let activeMerchant = null;
+    let activeBusinessPageMode = null;
+    let activeBusinessDialogMode = null;
+    let activeCollectPanel = "products";
+    let activeCollectProductQuery = "";
+    let collectTestPayUrl = null;
     let activeRateBusiness = "全部";
     let merchantListTemplate = "";
     let merchantModalReturnFocus = null;
@@ -21406,7 +21448,7 @@
       return value.split(/[\n,]+/).map((item) => item.trim()).filter(Boolean).every(isPublicIpEntry);
     }
 
-    const merchants = [
+    const merchantProfileFixtures = [
       {
         id: "MCH-2031",
         name: "星河游戏",
@@ -21724,6 +21766,13 @@
         ]
       }
     ];
+
+    const merchantProfileModel = window.HSProviderDemo;
+    const merchantProfileTenantId = merchantProfileModel?.tenantId || "HS-TEN-001";
+    const merchantProfileTenantData = merchantProfileModel?.tenantData(merchantProfileTenantId);
+    const merchants = merchantProfileTenantData
+      ? (merchantProfileTenantData.merchantProfiles ||= merchantProfileTenantId === "HS-TEN-001" ? merchantProfileFixtures : [])
+      : merchantProfileFixtures;
 
     const tenantMerchantLoginAccess = {
       loginDomain: "tenant-001.merchant.hs-pay.com",
@@ -22350,24 +22399,15 @@
       return `<span class="tag ${cls}">${label}</span>`;
     }
 
-    const capabilityGroups = [
-      ["CNY", ["法币代收", "法币代付"]]
-    ];
-
     function renderMerchantCapabilitySwitch(item, capability, source = "detail") {
       const enabled = item.capabilities.includes(capability);
       const mode = capability === "法币代收" ? "collect" : "payout";
-      return `<input class="merchant-switch" type="checkbox" role="switch" id="merchant-capability-${source}-${escapeHtml(item.id)}-${mode}" ${source === "list" ? `data-list-capability="${capability}" data-capability-merchant="${escapeHtml(item.id)}"` : `data-capability-toggle="${capability}"`} data-capability-action="${enabled ? "关闭" : "开通"}" aria-label="${escapeHtml(item.name)} ${capability}业务能力" ${enabled ? "checked" : ""}>`;
-    }
-
-    function renderCapabilityMatrix(item) {
-      return `<div class="capability-matrix merchant-capability-list"><span class="capability-kind">CNY</span>${merchantCapabilityOptions.map((capability) => `<label class="merchant-capability-line" for="merchant-capability-list-${escapeHtml(item.id)}-${capability === "法币代收" ? "collect" : "payout"}"><span>${capability === "法币代收" ? "代收" : "代付"}</span>${renderMerchantCapabilitySwitch(item, capability, "list")}</label>`).join("")}</div>`;
+      return `<input class="merchant-switch" type="checkbox" role="switch" id="merchant-capability-${source}-${escapeHtml(item.id)}-${mode}" ${source.startsWith("business-") ? `data-business-capability="${capability}" data-capability-merchant="${escapeHtml(item.id)}"` : source === "list" ? `data-list-capability="${capability}" data-capability-merchant="${escapeHtml(item.id)}"` : `data-capability-toggle="${capability}"`} data-capability-action="${enabled ? "关闭" : "开通"}" aria-label="${escapeHtml(item.name)} ${capability}业务能力" ${enabled ? "checked" : ""}>`;
     }
 
     function filteredMerchants() {
       const keyword = document.getElementById("keyword").value.trim().toLowerCase();
       const type = document.getElementById("merchantType").value;
-      const capability = document.getElementById("capabilityFilter").value;
       const status = document.getElementById("statusFilter").value;
 
       return merchants.filter((item) => {
@@ -22375,12 +22415,13 @@
         const byKeyword = !keyword || text.includes(keyword);
         const byType = type === "全部类型" || item.type === type;
         const byStatus = status === "全部状态" || item.status === status;
-        const byCapability = capability === "全部能力" || item.capabilities.includes(capability);
-        return byKeyword && byType && byStatus && byCapability;
+        return byKeyword && byType && byStatus;
       }).sort((a, b) => a.id.localeCompare(b.id));
     }
 
     function renderRows() {
+      if (activeBusinessPageMode) return renderBusinessMerchantRows();
+      if (!document.getElementById("merchantRows")) return;
       const list = filteredMerchants();
       const selectedCount = selectedMerchantIds.size;
       document.getElementById("resultInfo").textContent = selectedCount ? `共 ${list.length} 个商户，已选 ${selectedCount} 个` : `共 ${list.length} 个商户`;
@@ -22408,7 +22449,6 @@
                 <span class="muted">${relation}</span>
               </div>
             </td>
-            <td>${renderCapabilityMatrix(item)}</td>
             <td class="volume-cell">${renderVolumeSummary(item)}</td>
             <td>
               <div class="tag-row">
@@ -23511,6 +23551,12 @@
     }
 
     function renderModulePage(pageKey) {
+      if (["merchant-collect", "merchant-payout"].includes(pageKey)) {
+        renderBusinessMerchantPage(pageKey === "merchant-collect" ? "collect" : "payout");
+        return;
+      }
+      activeBusinessPageMode = null;
+      activeBusinessDialogMode = null;
       const config = modulePages[pageKey];
       if (config.custom === "funding") {
         renderMerchantFundingPage(config);
@@ -23704,12 +23750,6 @@
             </tbody>
           </table>
         `)}
-        ${section("代收产品", `
-          <table class="mini-table">
-            <thead><tr><th>产品</th><th>资产</th><th>商户费率</th><th>单笔费</th><th>金额范围</th></tr></thead>
-            <tbody>${productRows(cfg.products, "当前未配置代收产品；请先申请开通或绑定产品。")}</tbody>
-          </table>
-        `)}
         <div class="field wide"><label for="merchantCollectReason">配置变更原因</label><input class="input" id="merchantCollectReason" placeholder="保存变更时必填，将写入操作日志" ${enabled ? "" : "disabled"}></div>
         <div class="field-error" id="modalError" role="alert"></div>
         <div class="toolbar" data-astryx="FooterActions">
@@ -23806,15 +23846,19 @@
         const rows = [], parsedRows = [];
         for (const row of state.rows) {
           const i = row.index;
-          const rate = normalizeMerchantPayoutRate(document.getElementById(`merchantRate-${i}`).value.trim());
+          const rawRate = document.getElementById(`merchantRate-${i}`).value.trim();
+          const decimal = form.dataset.rateUnit === "decimal";
+          const rate = decimal ? (/^\d+(?:\.\d{1,6})?$/.test(rawRate) && Number(rawRate) <= 1 ? normalizeMerchantPayoutRate(merchantRatePercent(rawRate)) : null) : normalizeMerchantPayoutRate(rawRate);
+          const extras = decimal ? {agentProfit:document.getElementById(`merchantProfit-${i}`).value.trim(),agentRate:document.getElementById(`merchantAgent-${i}`).value.trim()} : {};
+          if (decimal && Object.values(extras).some(value=>!/^\d+(?:\.\d{1,6})?$/.test(value)||Number(value)>1)) return fail("代理利润与代理费率请输入0至1的小数，最多六位。",`merchantAgent-${i}`);
           const daily = normalizedMerchantSingleFee(document.getElementById(`merchantDaily-${i}`).value.trim());
           const fee = normalizedMerchantSingleFee(document.getElementById(`merchantFee-${i}`).value.trim());
-          if (rate === null) return fail("商户费率请输入0至100，最多四位小数。", `merchantRate-${i}`);
+          if (rate === null) return fail(decimal ? "商户费率请输入0至1的小数，最多六位。" : "商户费率请输入0至100，最多四位小数。", `merchantRate-${i}`);
           if (daily === null) return fail("日限额请输入有效非负金额，最多两位小数。", `merchantDaily-${i}`);
           if (fee === null) return fail("单笔费用请输入有效非负金额，最多两位小数。", `merchantFee-${i}`);
-          parsedRows.push({ ...row, rate, dailyLimit: daily.slice(4), fee: fee.slice(4) });
+          parsedRows.push({ ...row, rate, dailyLimit: daily.slice(4), fee: fee.slice(4), ...extras });
           const c = JSON.parse(row.before);
-          if (rate !== normalizeMerchantPayoutRate(merchantRatePercent(c.rate)) || daily !== normalizedMerchantSingleFee(c.dailyLimit ?? "0") || fee !== normalizedMerchantSingleFee(c.fee ?? "0")) rows.push({ ...row, rate, dailyLimit: daily.slice(4), fee: fee.slice(4) });
+          if (rate !== normalizeMerchantPayoutRate(merchantRatePercent(c.rate)) || daily !== normalizedMerchantSingleFee(c.dailyLimit ?? "0") || fee !== normalizedMerchantSingleFee(c.fee ?? "0") || (decimal && Object.entries(extras).some(([key,value])=>Number(value)!==Number(c[key]||"0")))) rows.push({ ...row, rate, dailyLimit: daily.slice(4), fee: fee.slice(4), ...extras });
         }
         if (!rows.length) return fail("费率没有变化，无需重复保存。");
         const reason = document.getElementById("merchantRateReason").value.trim();
@@ -23836,7 +23880,7 @@
         for (const row of state.rows.filter((row) => state.changes.includes(row.id))) {
           const p = products.find((p) => p.id === row.id), c = p.merchantBindings[item.id];
           const before = `${merchantRatePercent(c.rate)}% / 日限额 ${c.dailyLimit || "未设置"} / 单笔 ${c.fee || "0"}`;
-          Object.assign(c, { rate: row.rate, dailyLimit: row.dailyLimit, fee: row.fee });
+          Object.assign(c, { rate: row.rate, dailyLimit: row.dailyLimit, fee: row.fee }, row.agentRate !== undefined ? {agentRate:row.agentRate,agentProfit:row.agentProfit} : {});
           item.logs.unshift([nowText(), "设置商户代付费率", currentTenantOperator.account, `${p.name}：${before} → ${merchantRatePercent(c.rate)}% / 日限额 ${c.dailyLimit} / 单笔 ${c.fee}；${state.reason}`]);
         }
         model.log("设置商户代付费率", item.id, state.tenantId);
@@ -24037,8 +24081,9 @@
       return item.callback && !["待配置", "未配置"].includes(item.callback) ? item.callback : "";
     }
 
-    function merchantWhitelist(item) {
-      const value = item.whitelist || "";
+    function merchantWhitelist(item, direction = null) {
+      const cfg = direction === "collect" ? item.collectConfig : direction === "payout" ? item.payoutConfig : null;
+      const value = (cfg ? cfg.orderIp ?? item.whitelist : item.whitelist) || "";
       return ["待配置", "待补充", "待确认", "未配置", "未开通"].includes(value) ? "" : value;
     }
 
@@ -24200,6 +24245,7 @@
 
     function openLoginWhitelistConfirm(item, next) {
       const before = item.loginWhitelist || "";
+      const tenantId=window.HSProviderDemo?.tenantId, payoutSource=activeBusinessDialogMode === "payout";
       document.getElementById("modal").innerHTML = `
         <div class="modal-head"><div><h2>确认修改登录 IP 白名单</h2><p>${escapeHtml(item.name)} · ${escapeHtml(item.id)}</p></div><button class="modal-close" type="button" id="modalClose" aria-label="关闭"><i data-lucide="x"></i></button></div>
         <div class="modal-body">
@@ -24213,6 +24259,7 @@
       bindModalEvents();
       document.getElementById("loginWhitelistCancel").addEventListener("click", () => renderDetailModal(item));
       document.getElementById("loginWhitelistConfirm").addEventListener("click", () => {
+        if(window.HSProviderDemo?.tenantId!==tenantId || (item.loginWhitelist||"")!==before || (payoutSource&&!payoutMerchantContext(item)))return showInlineError("租户、业务或原白名单已变化，未保存。");
         if (!verifyMerchantMfa("loginWhitelist2fa")) return;
         document.getElementById("loginWhitelistConfirm").disabled = true;
         item.loginWhitelist = next;
@@ -24266,8 +24313,7 @@
     }
 
     function renderCommonConfig(item) {
-      const access = `<div class="merchant-security-grid">${renderLoginWhitelist(item)}
-        ${renderSecuritySetting("API 请求 IP 白名单", renderMerchantIpEditor("accessWhitelist-0", "允许请求的 IP", merchantWhitelist(item), "每项一个公网 IP 或网段；全部留空不限制请求。"), `<button class="btn primary" type="button" data-access-save="whitelist">保存 API 白名单</button>`)}</div>`;
+      const access = `<div class="merchant-security-single">${renderLoginWhitelist(item)}</div>`;
       const callbacks = `<div class="merchant-security-grid merchant-security-callbacks">
         ${renderSecuritySetting("统一回调 URL", `<div class="field"><label for="accessCallback-shared">回调地址</label><textarea class="input mono" id="accessCallback-shared" rows="2" placeholder="未部署自有系统可留空">${escapeHtml(merchantCallback(item))}</textarea></div>`, `<button class="btn primary" type="button" data-access-save="callback">保存回调 URL</button>`)}
         ${renderBusinessCallbackIps(item)}</div>`;
@@ -24388,7 +24434,7 @@
 
     function preparePayoutSettingsConfirm(item) {
       const cfg = item.payoutConfig;
-      if (!item.capabilities.includes("法币代付")) return showInlineError("当前商户未开通法币代付，请先在商户列表开通业务能力。");
+      if (!item.capabilities.includes("法币代付")) return showInlineError("当前商户未开通法币代付，请先在对应的代收或代付商户管理页面开通业务。");
       const next = {
         status: document.getElementById("merchantPayoutStatus").checked ? "开启" : merchantStatusOffLabel(cfg, true),
         manualOrder: document.getElementById("merchantPayoutManual").checked ? "开启" : "关闭",
@@ -24449,12 +24495,12 @@
       const isCollect = mode === "collect";
       const cfg = isCollect ? item.collectConfig : item.payoutConfig;
       const capability = isCollect ? "法币代收" : "法币代付";
-      if (!item.capabilities.includes(capability)) return showInlineError(`当前商户未开通${capability}，请先在商户列表开通业务能力。`);
+      if (!item.capabilities.includes(capability)) return showInlineError(`当前商户未开通${capability}，请先在对应的代收或代付商户管理页面开通业务。`);
       const statusId = isCollect ? "merchantCollectStatus" : "merchantPayoutStatus";
       const reasonId = isCollect ? "merchantCollectReason" : "merchantPayoutReason";
       const status = document.getElementById(statusId).checked ? "开启" : merchantStatusOffLabel(cfg, true);
       const reason = document.getElementById(reasonId).value.trim();
-      if (status === "未开通") return showInlineError("关闭业务能力请前往商户列表处理；业务配置不能直接改为未开通。", statusId);
+      if (status === "未开通") return showInlineError("关闭业务能力请前往对应的代收或代付商户管理列表处理；业务配置不能直接改为未开通。", statusId);
       const next = isCollect ? { status } : {
         status,
         manualOrder: document.getElementById("merchantPayoutManual").checked ? "开启" : "关闭",
@@ -24473,6 +24519,7 @@
         }
         const before = isCollect ? `状态 ${cfg.status}` : `状态 ${cfg.status} / 手动下单 ${cfg.manualOrder} / 驳回通知 ${cfg.rejectNotice} / 单笔费用 ${cfg.singleFee}`;
         Object.assign(cfg, next);
+        document.getElementById(reasonId).value = "";
         const after = isCollect ? `状态 ${cfg.status}` : `状态 ${cfg.status} / 手动下单 ${cfg.manualOrder} / 驳回通知 ${cfg.rejectNotice} / 单笔费用 ${cfg.singleFee}`;
         item.logs.unshift([nowText(), `保存${isCollect ? "代收" : "代付"}配置`, currentTenantOperator.account, `${before} → ${after}；${reason}`]);
         renderDetailModal(item);
@@ -24526,10 +24573,10 @@
             <div class="info-item"><div class="k">调整范围</div><div class="v">仅当前商户</div></div>
             <div class="info-item"><div class="k">平台审核</div><div class="v">不需要</div></div>
             <div class="info-item"><div class="k">当前能力</div><div class="v">${tag(capability)}</div></div>
-            <div class="info-item"><div class="k">目标状态</div><div class="v">${tag(action === "开通" ? "待配置" : "未开通")}</div></div>
+            <div class="info-item"><div class="k">目标状态</div><div class="v">${tag(action === "开通" ? "开启" : "未开通")}</div></div>
           </div>
           <div class="field wide"><label for="capabilityReason">调整原因</label><input class="input" id="capabilityReason" placeholder="必填，将写入永久操作日志"></div>
-          <div class="notice">${action === "关闭" ? "关闭后不再接受该业务的新订单；已经创建的订单继续按原流程完成。" : "开通后先进入待配置状态，完成产品、费率和接入配置后才能正常接单。"}</div>
+          <div class="notice">${action === "关闭" ? "关闭后不再接受该业务的新订单；已经创建的订单继续按原流程完成。" : "开通后该业务开关开启；下单仍需有效的产品与通道配置。"}</div>
           <div class="field-error" id="modalError" role="alert"></div>
         </div>
         <div class="modal-footer" data-astryx="FooterActions">
@@ -24545,15 +24592,16 @@
 
     function returnFromCapabilityChange(item, capability, source) {
       renderRows();
-      if (source === "list") closeModal();
+      if (source === "list" || source.startsWith("business-")) closeModal();
       else { activeModalTab = "概览"; renderDetailModal(item); }
       const mode = capability === "法币代收" ? "collect" : "payout";
       const target = document.getElementById(`merchant-capability-${source}-${item.id}-${mode}`);
-      (target || (source === "list" ? document.getElementById("capabilityFilter") : null))?.focus();
+      (target || (source.startsWith("business-") ? document.getElementById("businessMerchantStatus") : source === "list" ? document.getElementById("capabilityFilter") : null))?.focus();
     }
 
     function capabilityChangeAllowed(item, capability, action, state) {
       return state && window.HSProviderDemo?.tenantId === state.tenantId &&
+        (!state.source?.startsWith("business-") || (state.tenantId === merchantProfileTenantId && merchants.includes(item))) &&
         merchantCapabilityOptions.includes(capability) && ["开通", "关闭"].includes(action) &&
         JSON.stringify(item.capabilities) === state.before &&
         item.capabilities.includes(capability) === (action === "关闭");
@@ -24577,17 +24625,19 @@
         const enabled = action === "开通";
         item.capabilities = enabled ? [...new Set([...item.capabilities, capability])] : item.capabilities.filter((itemCapability) => itemCapability !== capability);
         const cfg = capability === "法币代收" ? item.collectConfig : item.payoutConfig;
-        cfg.status = enabled ? "待配置" : "未开通";
+        cfg.status = enabled ? "开启" : "未开通";
         item.logs.unshift([nowText(), `${action}${capability}`, currentTenantOperator.account, `${reason}；不进入平台审核`]);
         returnFromCapabilityChange(item, capability, state.source);
-        showToast(`${capability}已${action === "开通" ? "开通并进入待配置" : "关闭"}；已创建订单不受影响`);
+        showToast(`${capability}已${action === "开通" ? "开通" : "关闭"}；已创建订单不受影响`);
       }, 350);
     }
 
     function validateAccessChange(item, mode) {
       clearInlineError();
+      const direction = mode === "whitelist" ? activeBusinessDialogMode : null;
+      if (mode === "whitelist" && !businessWhitelistAllowed(item, direction)) return showInlineError("租户或业务已变化，请从对应商户管理重新打开。");
       const oldCallback = merchantCallback(item);
-      const oldWhitelist = whitelistEntries(merchantWhitelist(item)).join(", ");
+      const oldWhitelist = whitelistEntries(merchantWhitelist(item, direction)).join(", ");
       const callback = mode === "callback" ? document.getElementById("accessCallback-shared").value.trim() : oldCallback;
       const whitelistInputs = mode === "whitelist" ? [...document.querySelectorAll("[data-whitelist-entry]")] : [];
       const rawWhitelist = mode === "whitelist" ? merchantIpInputValue("accessWhitelist-0") : "";
@@ -24602,13 +24652,15 @@
       const callbackChanged = callback !== oldCallback;
       const whitelistChanged = whitelist !== oldWhitelist;
       if (!callbackChanged && !whitelistChanged) return showInlineError("当前内容没有变化，无需重复保存。");
-      openAccessConfirm(item, { mode, callback, whitelist, oldCallback, oldWhitelist, callbackChanged, whitelistChanged });
+      openAccessConfirm(item, { mode, direction, callback, whitelist, oldCallback, oldWhitelist, callbackChanged, whitelistChanged });
     }
 
     function openAccessConfirm(item, change) {
+      const sourceContext={tenantId:window.HSProviderDemo?.tenantId,direction:change.direction,before:merchantWhitelist(item,change.direction)};
+      const label = change.direction === "collect" ? "代收" : "代付";
       document.getElementById("modal").innerHTML = `
         <div class="modal-head" data-astryx="DialogHeader">
-          <div><h2>${change.mode === "callback" ? "确认修改回调 URL" : "确认修改 API 白名单"}</h2><p>${escapeHtml(item.name)} · ${item.id}</p></div>
+          <div><h2>${change.mode === "callback" ? "确认修改回调 URL" : `确认修改${label}下单 IP 白名单`}</h2><p>${escapeHtml(item.name)} · ${item.id}</p></div>
           <button class="modal-close" type="button" id="modalClose" aria-label="关闭"><i data-lucide="x"></i></button>
         </div>
         <div class="modal-body" data-astryx="DialogBody">
@@ -24635,11 +24687,13 @@
       `;
       showModal("small");
       bindModalEvents();
-      document.getElementById("accessChangeCancel").addEventListener("click", () => renderDetailModal(item));
-      document.getElementById("accessChangeConfirm").addEventListener("click", () => { if (verifyMerchantMfa("access2fa-shared")) applyAccessChange(item, change); });
+      document.getElementById("accessChangeCancel").addEventListener("click", () => returnToMerchantAccess(item, change.direction));
+      document.getElementById("accessChangeConfirm").addEventListener("click", () => { if (verifyMerchantMfa("access2fa-shared")) applyAccessChange(item, change, sourceContext); });
     }
 
-    function applyAccessChange(item, change) {
+    function applyAccessChange(item, change, sourceContext = null) {
+      const allowed=()=> (!change.whitelistChanged || businessWhitelistAllowed(item, change.direction)) && (!sourceContext || (window.HSProviderDemo?.tenantId===sourceContext.tenantId && merchants.includes(item) && merchantWhitelist(item,sourceContext.direction)===sourceContext.before));
+      if(!allowed())return showInlineError("租户、业务或原白名单已变化，未保存。");
       const button = document.getElementById("accessChangeConfirm");
       button.disabled = true;
       button.textContent = change.callbackChanged && change.callback ? "正在进行三项测试…" : "正在保存…";
@@ -24647,14 +24701,15 @@
       if (change.callbackChanged && change.callback) item.pendingCallbacks.shared = change.callback;
 
       setTimeout(() => {
+        if(!allowed()){button.disabled=false;button.textContent="确认保存";return showInlineError("租户、业务或原白名单已变化，未保存。");}
         if (change.callbackChanged) item.callback = change.callback || "未配置";
         if (change.whitelistChanged) {
-          item.whitelist = change.whitelist || "未配置";
-          item.payoutConfig.orderIp = change.whitelist || "未配置";
-          item.ipStatus = change.whitelist ? "已确认" : "待确认";
+          const cfg = change.direction === "collect" ? item.collectConfig : item.payoutConfig;
+          cfg.orderIp = change.whitelist || "未配置";
+          cfg.orderIpStatus = change.whitelist ? "已确认" : "待确认";
         }
         if (change.callbackChanged && (!change.callback || item.pendingCallbacks.shared === change.callback)) delete item.pendingCallbacks.shared;
-        item.logs.unshift([nowText(), "修改自有系统接入配置", currentTenantOperator.account, `${change.callbackChanged ? (change.callback ? "新回调通过三项测试并切换；" : "统一回调已停用；") : ""}${change.whitelistChanged ? "IP 白名单已更新" : ""}`]);
+        item.logs.unshift([nowText(), change.whitelistChanged ? `修改${change.direction === "collect" ? "代收" : "代付"}下单 IP 白名单` : "修改自有系统接入配置", currentTenantOperator.account, `${change.callbackChanged ? (change.callback ? "新回调通过三项测试并切换；" : "统一回调已停用；") : ""}${change.whitelistChanged ? "IP 白名单已更新" : ""}`]);
         openAccessResult(item, change);
       }, 500);
     }
@@ -24662,7 +24717,7 @@
     function openAccessResult(item, change) {
       document.getElementById("modal").innerHTML = `
         <div class="modal-head" data-astryx="DialogHeader">
-          <div><h2>自有系统接入配置已保存</h2><p>${escapeHtml(item.name)} · ${item.id}</p></div>
+          <div><h2>${change.whitelistChanged ? `${change.direction === "collect" ? "代收" : "代付"}下单 IP 白名单已保存` : "自有系统接入配置已保存"}</h2><p>${escapeHtml(item.name)} · ${item.id}</p></div>
           <button class="modal-close" type="button" id="modalClose" aria-label="关闭"><i data-lucide="x"></i></button>
         </div>
         <div class="modal-body" data-astryx="DialogBody">
@@ -24674,15 +24729,15 @@
               <div class="info-item"><div class="k">当前有效回调</div><div class="v mono">${escapeHtml(change.callback)}</div></div>
             </div>
             <div class="notice">新回调已生效，原回调已停止接收后续结果通知。</div>
-          ` : `<div class="notice">${change.callbackChanged ? "统一回调已停用；" : ""}${change.whitelistChanged ? "API 请求将按新白名单校验。" : ""}商户后台和业务结果不受影响。</div>`}
+          ` : `<div class="notice">${change.callbackChanged ? "统一回调已停用；" : ""}${change.whitelistChanged ? `${change.direction === "collect" ? "代收" : "代付"}下单请求将按新白名单校验。` : ""}商户后台和业务结果不受影响。</div>`}
         </div>
         <div class="modal-footer" data-astryx="FooterActions">
-          <button class="btn primary" type="button" id="backToAccess">返回安全配置</button>
+          <button class="btn primary" type="button" id="backToAccess">${change.direction ? "返回 IP 白名单" : "返回安全配置"}</button>
         </div>
       `;
       showModal("small");
       bindModalEvents();
-      document.getElementById("backToAccess").addEventListener("click", () => renderDetailModal(item));
+      document.getElementById("backToAccess").addEventListener("click", () => returnToMerchantAccess(item, change.direction));
     }
 
     function validateAdminReset(item, kind) {
@@ -24808,6 +24863,7 @@
     }
 
     function openDetail(id) {
+      activeBusinessDialogMode = null;
       const item = merchants.find((merchant) => merchant.id === id);
       activeMerchant = item;
       activeModalTab = "概览";
@@ -24817,7 +24873,9 @@
     }
 
     function renderDetailModal(item, rateDraft) {
-      const tabs = ["概览", "跑量统计", "代收配置", "代付配置", "钱包账户", "安全配置", "管理员安全", "操作日志"];
+      if (activeBusinessDialogMode) return renderBusinessMerchantModal(item, activeBusinessDialogMode, rateDraft);
+      document.getElementById("modal").dataset.merchantId = item.id;
+      const tabs = ["概览", "跑量统计", "钱包账户", "安全配置", "管理员安全", "操作日志"];
       document.getElementById("modal").innerHTML = `
         <div class="modal-head" data-astryx="DialogHeader">
           <div>
@@ -24981,7 +25039,7 @@
 
       submit.disabled = true;
       submit.textContent = "创建中…";
-      const nextNumber = Math.max(...merchants.map((merchant) => Number(merchant.id.replace(/\D/g, "")) || 0)) + 1;
+      const nextNumber = Math.max(0, ...merchants.map((merchant) => Number(merchant.id.replace(/\D/g, "")) || 0)) + 1;
       const id = `MCH-${nextNumber}`;
       const oneTimePassword = `Hs!${String(nextNumber).padStart(4, "0")}A9`;
       const created = nowText();
@@ -25005,11 +25063,11 @@
           payout: { amount: "CNY 0.00", rate: "-", count: 0, product: capabilities.includes("法币代付") ? "待配置" : "未开通" }
         },
         collectConfig: {
-          status: capabilities.includes("法币代收") ? "待配置" : "未开通", today: "CNY 0.00", cnyBalance: "0.00", cnyPrepay: "0.00", cnyRemain: "0.00", products: [],
+          status: capabilities.includes("法币代收") ? "开启" : "未开通", today: "CNY 0.00", cnyBalance: "0.00", cnyPrepay: "0.00", cnyRemain: "0.00", products: [],
           orderApi: "https://gateway.huisheng.example/collect/create", queryApi: "https://gateway.huisheng.example/collect/query", doc: "ShowDoc / 代收 API", callbackIp: ""
         },
         payoutConfig: {
-          status: capabilities.includes("法币代付") ? "待配置" : "未开通", manualOrder: "关闭", rejectNotice: "关闭", singleFee: "-", cnyFrozenLimit: "0.00", cnyLimit: "0.00", cnyRemainPrepay: "0.00", cnyTotalPrepay: "0.00", channels: [], fees: [],
+          status: capabilities.includes("法币代付") ? "开启" : "未开通", manualOrder: "关闭", rejectNotice: "关闭", singleFee: "-", cnyFrozenLimit: "0.00", cnyLimit: "0.00", cnyRemainPrepay: "0.00", cnyTotalPrepay: "0.00", channels: [], fees: [],
           orderApi: "https://gateway.huisheng.example/payout/create", queryApi: "https://gateway.huisheng.example/payout/query", doc: "ShowDoc / 代付 API", orderIp: whitelist || "未配置", callbackIp: ""
         },
         created,
@@ -25063,6 +25121,7 @@
 
     function showModal(size) {
       const modal = document.getElementById("modal");
+      if (modal.__payoutAccessGuard) {modal.removeEventListener("click",modal.__payoutAccessGuard,true);modal.__payoutAccessGuard=null;}
       const opening = !modal.classList.contains("open");
       if (opening) merchantModalReturnFocus = document.activeElement;
       modal.classList.toggle("small-modal", size === "small");
@@ -25147,7 +25206,7 @@
       document.querySelectorAll("[data-wallet-adjust]").forEach((button) => {
         button.addEventListener("click", () => {
           const item = merchants.find((merchant) => merchant.id === button.dataset.walletAdjust);
-          const fromDetail = Boolean(document.querySelector(".modal-tab[data-tab]"));
+          const fromDetail = Boolean(document.querySelector(".modal-tab[data-tab]") || activeBusinessDialogMode);
           openWalletAdjustment(item, button.dataset.adjustWallet, () => fromDetail ? renderDetailModal(item) : openWalletModal(item.id));
         });
       });
@@ -25220,7 +25279,368 @@
       if (trigger) trigger.setAttribute("aria-expanded", String(!collapsed));
     }
 
+    function businessMerchantCapability(mode) {
+      return mode === "collect" ? "法币代收" : "法币代付";
+    }
+
+    function businessMerchantRows(mode, keyword = "", status = "全部状态") {
+      const query = keyword.trim().toLowerCase();
+      return merchants.filter((item) => (!query || `${item.name} ${item.id}`.toLowerCase().includes(query)) &&
+        (status === "全部状态" || (item.capabilities.includes(businessMerchantCapability(mode)) ? (mode === "collect" ? item.collectConfig : item.payoutConfig).status : "未开通") === status));
+    }
+
+    function renderBusinessMerchantPage(mode) {
+      activeBusinessPageMode = mode;
+      activeBusinessDialogMode = null;
+      const label = mode === "collect" ? "代收" : "代付", title = `${label}商户管理`;
+      updateCrumbs(title); setActiveNav(`merchant-${mode}`);
+      document.querySelector(".content").innerHTML = `<div class="page-head"><div><h1>${title}</h1></div></div>
+        <section class="panel business-merchant-page" data-business-page="${mode}">
+          <form class="business-merchant-filters" id="businessMerchantFilters">
+            <div class="field"><label for="businessMerchantKeyword">商户名称／商户号</label><input class="input" id="businessMerchantKeyword" placeholder="请输入名称或商户号" autocomplete="off"></div>
+            <div class="field"><label for="businessMerchantStatus">${label}状态</label><select class="select" id="businessMerchantStatus"><option>全部状态</option><option>开启</option><option>暂停</option><option>待配置</option><option>未开通</option></select></div>
+            <button class="btn primary" type="submit"><i data-lucide="search"></i>查询</button><button class="btn" type="reset">重置</button>
+          </form>
+          <div class="business-merchant-count" id="businessMerchantCount" role="status"></div>
+          <div class="merchant-table-scroll"><table class="mini-table business-merchant-table"><thead><tr><th>商户</th><th>${label}${mode === "payout" ? "功能" : "状态"}</th>${mode === "payout" ? "<th>手动下单</th><th>通道驳回通知</th><th>单笔费用</th><th>冻结额度</th><th>代付额度</th><th>代付剩余预付</th><th>代付总预付</th>" : "<th>今日成交／成功率</th><th>CNY 总额</th><th>冻结金额</th><th>可用余额</th>"}<th>操作</th></tr></thead><tbody id="businessMerchantRows"></tbody></table></div>
+        </section>`;
+      const form = document.getElementById("businessMerchantFilters");
+      form.addEventListener("submit", (event) => {event.preventDefault();renderBusinessMerchantRows();});
+      form.addEventListener("reset", () => {document.getElementById("businessMerchantKeyword").value = "";document.getElementById("businessMerchantStatus").value = "全部状态";renderBusinessMerchantRows();});
+      document.getElementById("businessMerchantRows").addEventListener("click", (event) => {
+        const inline = event.target.closest("button[data-payout-inline]");
+        if (inline) return openPayoutInlineEdit(merchants.find(item=>item.id===inline.dataset.merchant), inline.dataset.payoutInline);
+        const funds = event.target.closest("[data-business-wallet-adjust]");
+        if (funds) {
+          const item=merchants.find(item=>item.id===funds.dataset.businessWalletAdjust);
+          activeBusinessDialogMode=null;
+          return openWalletAdjustment(item, mode === "payout" ? "代付钱包" : "代收钱包", () => {closeModal();renderBusinessMerchantRows();document.querySelector(`[data-business-wallet-adjust="${item.id}"]`)?.focus();});
+        }
+        const button = event.target.closest("[data-business-merchant-open]");
+        if (button) openBusinessMerchant(button.dataset.businessMerchantOpen, mode, button.dataset.businessTarget || "settings");
+      });
+      document.getElementById("businessMerchantRows").addEventListener("change", event => {
+        const setting=event.target.closest("input[data-payout-inline]");
+        if(setting){const item=merchants.find(item=>item.id===setting.dataset.merchant), next=setting.checked?"开启":"关闭";setting.checked=item.payoutConfig[setting.dataset.payoutInline]==="开启";return openPayoutInlineEdit(item,setting.dataset.payoutInline,next);}
+        const input = event.target.closest("[data-business-capability]");
+        if (!input) return;
+        const item = merchants.find(merchant => merchant.id === input.dataset.capabilityMerchant);
+        if (!item) return;
+        const capability = businessMerchantCapability(mode);
+        input.checked = item.capabilities.includes(capability);
+        if (window.HSProviderDemo?.tenantId !== merchantProfileTenantId) return showToast("租户已变化，请重新进入页面");
+        openCapabilityConfirm(item, capability, input.checked ? "关闭" : "开通", `business-${mode}`);
+      });
+      renderBusinessMerchantRows();
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function renderBusinessMerchantRows() {
+      if (!activeBusinessPageMode || !document.getElementById("businessMerchantRows")) return;
+      const mode = activeBusinessPageMode, label = mode === "collect" ? "代收" : "代付";
+      const returnButton = merchantModalReturnFocus?.dataset?.businessMerchantOpen
+        ? {id: merchantModalReturnFocus.dataset.businessMerchantOpen, target: merchantModalReturnFocus.dataset.businessTarget} : null;
+      const rows = businessMerchantRows(mode, document.getElementById("businessMerchantKeyword").value, document.getElementById("businessMerchantStatus").value);
+      document.getElementById("businessMerchantCount").textContent = `共 ${rows.length} 个${label}商户`;
+      document.getElementById("businessMerchantRows").innerHTML = rows.map((item) => {
+        const cfg = mode === "collect" ? item.collectConfig : item.payoutConfig;
+        const enabled = item.capabilities.includes(businessMerchantCapability(mode));
+        const volume = mode === "collect" ? item.volume.collect : item.volume.payout;
+        const wallet = walletRow(item, `${label}钱包`, "CNY");
+        if (mode === "payout") return renderDirectPayoutRow(item, enabled, wallet);
+        const action = (target, text) => `<button class="link-btn" type="button" data-business-merchant-open="${escapeHtml(item.id)}" data-business-target="${target}" aria-label="${escapeHtml(item.name)} ${text}" ${enabled ? "" : "disabled"}>${text}</button>`;
+        return `<tr data-business-merchant-row="${escapeHtml(item.id)}"><td><div class="stack"><strong>${escapeHtml(item.name)}</strong><span class="mono muted">${escapeHtml(item.id)}</span></div></td><td><div class="stack"><label class="merchant-business-capability">${renderMerchantCapabilitySwitch(item, businessMerchantCapability(mode), `business-${mode}`)}<span>${enabled ? "已开通" : "未开通"}</span></label>${enabled ? `<span class="muted">${escapeHtml(cfg.status)}</span>` : ""}</div></td><td><div class="stack"><span class="mono">${escapeHtml(volume.amount)}</span><span class="muted">${escapeHtml(volume.rate)}</span></div></td><td class="mono">${escapeHtml(wallet[2])}</td><td class="mono">${escapeHtml(wallet[3])}</td><td class="mono">${escapeHtml(wallet[4])}</td>${mode === "payout" ? `<td class="mono">${escapeHtml(cfg.singleFee)}</td>` : ""}<td><div class="ops">${mode === "collect" ? `<button class="btn primary" type="button" data-business-merchant-open="${escapeHtml(item.id)}" data-business-target="products" aria-label="${escapeHtml(item.name)} 代收产品" ${enabled ? "" : "disabled"}>代收产品</button><button class="btn collect-action-test" type="button" data-business-merchant-open="${escapeHtml(item.id)}" data-business-target="test" aria-label="${escapeHtml(item.name)} 测试下单" ${enabled ? "" : "disabled"}>测试下单</button><button class="btn collect-action-integration" type="button" data-business-merchant-open="${escapeHtml(item.id)}" data-business-target="integration" aria-label="${escapeHtml(item.name)} 对接" ${enabled ? "" : "disabled"}>对接</button>${action("whitelist", "IP白名单")}` : `${action("settings", "配置")}${action("rates", "产品费率")}${action("integration", "对接信息")}`}</div></td></tr>`;
+      }).join("") || `<tr><td colspan="${mode === "payout" ? 10 : 7}"><div class="empty-state">暂无符合条件的${label}商户</div></td></tr>`;
+      if (returnButton) merchantModalReturnFocus = [...document.querySelectorAll("[data-business-merchant-open]")].find(button => button.dataset.businessMerchantOpen === returnButton.id && button.dataset.businessTarget === returnButton.target) || document.getElementById("businessMerchantKeyword");
+    }
+
+    function openBusinessMerchant(id, mode, target = "settings") {
+      const item = merchants.find((merchant) => merchant.id === id);
+      if (!item || !item.capabilities.includes(businessMerchantCapability(mode))) return showToast("请先在当前列表打开对应业务开关");
+      activeMerchant = item; activeBusinessDialogMode = mode;
+      activeModalTab = mode === "collect" ? "代收配置" : "代付配置";
+      activePayoutTab = target === "integration" ? "integration" : "rates";
+      activePayoutAction = ["whitelist","channels","rates","integration","settle","test"].includes(target) ? target : "rates";
+      if (mode === "collect") {activeCollectPanel = ["products", "test", "integration", "whitelist"].includes(target) ? target : "products"; activeCollectProductQuery = "";}
+      renderBusinessMerchantModal(item, mode);
+
+    }
+
+    function renderDirectPayoutRow(item, enabled, wallet) {
+      const cfg=item.payoutConfig;
+      const action=(target,text)=>`<button class="link-btn ${target === "test" ? "payout-test-link" : ""}" type="button" data-business-merchant-open="${escapeHtml(item.id)}" data-business-target="${target}" aria-label="${escapeHtml(item.name)} ${text}" ${enabled ? "" : "disabled"}>${text}</button>`;
+      const toggle=(key,text)=>`<label class="merchant-business-capability"><input class="merchant-switch" type="checkbox" role="switch" data-payout-inline="${key}" data-merchant="${escapeHtml(item.id)}" aria-label="${escapeHtml(item.name)} ${text}" ${cfg[key] === "开启" ? "checked" : ""} ${enabled ? "" : "disabled"}><span>${escapeHtml(key === "rejectNotice" ? cfg[key] === "开启" ? "启用" : "禁用" : cfg[key])}</span></label>`;
+      return `<tr data-business-merchant-row="${escapeHtml(item.id)}"><td><div class="stack"><strong>${escapeHtml(item.name)}</strong><span class="mono muted">${escapeHtml(item.id)}</span></div></td><td><div class="stack"><label class="merchant-business-capability">${renderMerchantCapabilitySwitch(item,"法币代付","business-payout")}<span>${enabled ? "已开通" : "未开通"}</span></label>${enabled ? `<span class="muted">${escapeHtml(cfg.status)}</span>` : ""}</div></td><td>${toggle("manualOrder","手动下单")}</td><td>${toggle("rejectNotice","通道驳回通知")}</td><td><span class="mono">${escapeHtml(cfg.singleFee)}</span> <button class="link-btn" data-payout-inline="singleFee" data-merchant="${escapeHtml(item.id)}" ${enabled?"":"disabled"}>编辑</button></td><td class="mono">${escapeHtml(cfg.cnyFrozenLimit || wallet[3])}</td><td class="mono">${escapeHtml(cfg.cnyLimit || wallet[2])}</td><td><span class="mono">${escapeHtml(wallet[4])}</span> <button class="link-btn" data-business-wallet-adjust="${escapeHtml(item.id)}">资金调整</button></td><td class="mono">${escapeHtml(wallet[2])}</td><td><div class="ops payout-direct-ops">${[["whitelist","IP白名单"],["channels","绑定代付通道"],["rates","设置代付费率"],["integration","对接信息"],["settle","单独清算"],["test","USDT下单测试"]].map(([key,text])=>action(key,text)).join("")}</div></td></tr>`;
+    }
+
+    function renderBusinessMerchantModal(item, mode, rateDraft) {
+      const titles = mode === "collect" ? {products:"代收产品配置",test:"测试下单",integration:"代收对接信息",whitelist:"代收下单 IP 白名单"} : {whitelist:"代付下单 IP 白名单",channels:"绑定代付通道",rates:"设置代付费率",integration:"对接信息",settle:"单独清算",test:"USDT下单测试"};
+      const target=mode === "collect" ? activeCollectPanel : activePayoutAction;
+      if (document.getElementById("modal").classList.contains("open")) renderBusinessMerchantRows();
+      document.getElementById("modal").dataset.merchantId=item.id;
+      const body=target === "whitelist" ? renderBusinessWhitelist(item,mode) : mode === "collect" ? target === "products" ? renderCollectProductConfiguration(item) : target === "test" ? renderCollectTestOrder(item) : renderDirectionAccess(item,"collect") : target === "channels" ? renderPayoutChannelBinding(item) : target === "rates" ? renderPayoutDirectRates(item,rateDraft) : target === "integration" ? renderDirectionAccess(item,"payout") : target === "settle" ? renderPayoutSettlementPreview(item) : renderPayoutUsdtTest(item);
+      document.getElementById("modal").innerHTML=`<div class="modal-head"><div><h2>${escapeHtml(item.name)} · ${titles[target]}</h2><p>${escapeHtml(item.id)}</p></div><button class="modal-close" type="button" id="modalClose" aria-label="关闭"><i data-lucide="x"></i></button></div><div class="modal-body">${body}</div>`;
+      showModal(target === "whitelist" ? "small" : undefined);bindModalEvents();bindDetailPanelEvents(item);
+      if(mode === "collect"){bindCollectProductConfiguration(item);bindCollectTestOrder(item);}else bindPayoutDirectActions(item);
+    }
+
+    function renderPayoutDirectRates(item, draft) {
+      const products=merchantPayoutProducts(item), model=window.HSProviderDemo;
+      const initial={tenantId:model?.tenantId,merchantId:item.id,productIds:products.map(p=>p.id),rows:products.map((p,index)=>({id:p.id,index,currency:p.currency,channels:JSON.stringify(p.channelIds),before:JSON.stringify(p.merchantBindings[item.id])}))};
+      const state=draft||initial;
+      const rows=products.map((p,index)=>{
+        const c=p.merchantBindings[item.id],d=draft?.rows.find(row=>row.id===p.id),enabled=payoutRateContextAllowed(item,{...initial,rows:[initial.rows[index]]});
+        return `<tr class="merchant-rate-product"><th colspan="5">产品：[${escapeHtml(p.productNo||p.id)}] ${escapeHtml(p.name)} · ${escapeHtml(p.currency)}</th></tr><tr>${[["merchantRate",d?.rate??c.rate??"0","商户费率"],["merchantDaily",d?.dailyLimit??c.dailyLimit??"0","限额/日"],["merchantFee",d?.fee??c.fee??"0","单笔费用"],["merchantProfit",d?.agentProfit??c.agentProfit??"0","代理利润"],["merchantAgent",d?.agentRate??c.agentRate??"0","代理（总）"]].map(([prefix,value,label])=>`<td><input class="input mono merchant-rate-input" id="${prefix}-${index}" aria-label="${escapeHtml(p.name)} ${label}" value="${escapeHtml(value)}" inputmode="decimal" ${enabled?"":"disabled"}></td>`).join("")}</tr>`;
+      }).join("");
+      if(!draft)state.rows=initial.rows.filter(row=>payoutRateContextAllowed(item,{...initial,rows:[row]}));
+      return `<p class="muted">费率使用小数，0.03表示3%；代理费率0沿用默认、1表示不给该类型代理费率。</p><div id="merchantPayoutRateForm" data-rate-unit="decimal" data-rate-state="${escapeHtml(JSON.stringify(state))}"><div class="merchant-table-scroll"><table class="mini-table payout-direct-rate-table"><thead><tr><th>商户费率</th><th>限额/日</th><th>单笔费用</th><th>代理利润</th><th>代理（总）</th></tr></thead><tbody>${rows||'<tr><td colspan="5">请先绑定代付通道。</td></tr>'}</tbody></table></div><div class="merchant-rate-footer"><div class="field"><label for="merchantRateReason">调整原因</label><input class="input" id="merchantRateReason" value="${escapeHtml(draft?.reason||"")}" ${state.rows.length?"":"disabled"}></div><button class="btn primary" id="merchantRateSave" type="button" ${state.rows.length?"":"disabled"}>保存提交</button></div><div class="field-error" id="merchantRateError" role="alert"></div></div>`;
+    }
+
+    function payoutMerchantContext(item, before) {
+      return window.HSProviderDemo?.tenantId === merchantProfileTenantId && merchants.includes(item) && item.capabilities.includes("法币代付") && (!before || JSON.stringify(item.payoutConfig) === before);
+    }
+
+    function payoutMerchantProducts() {
+      return window.HSProviderDemo.tenantData(merchantProfileTenantId).products.filter(p => p.direction === "代付");
+    }
+
+    function payoutBindingChannels(product) {
+      return window.HSProviderDemo.tenantData(merchantProfileTenantId).channels.filter(c => c.direction === "代付" && product.channelIds.includes(c.id));
+    }
+
+    function payoutMerchantChannelConfig(product, item, channel) {
+      const binding = product.merchantBindings?.[item.id];
+      return binding?.channelBindings?.[channel.id] || {bound: Boolean(binding?.bound), weight: String(channel.weight || "1")};
+    }
+
+    function renderPayoutChannelBinding(item) {
+      const products = payoutMerchantProducts(), model = window.HSProviderDemo;
+      const state = {tenantId: merchantProfileTenantId, products: products.map(p => ({id:p.id, channels: JSON.stringify(p.channelIds), before: JSON.stringify(p.merchantBindings?.[item.id] || null)}))};
+      return `<div id="payoutChannelForm" data-state="${escapeHtml(JSON.stringify(state))}">${products.map(p => {
+        const binding = p.merchantBindings?.[item.id] || {};
+        return `<section class="sub-panel"><h3>[${escapeHtml(p.productNo || p.id)}] ${escapeHtml(p.name)}</h3><p class="muted">商户费率：${escapeHtml(binding.rate || "0")} · 商户代理（总）：${escapeHtml(binding.agentRate || "0")}</p><div class="merchant-table-scroll"><table class="mini-table payout-channel-binding-table"><thead><tr><th>绑定</th><th>通道代码</th><th>通道名称</th><th>权重</th><th>通道费率</th><th>代理费率（总）</th><th>利润</th></tr></thead><tbody>${payoutBindingChannels(p).map(c => {
+          const cfg = payoutMerchantChannelConfig(p,item,c), allowed = model.canConfigureChannel(merchantProfileTenantId,c.providerId,"代付");
+          return `<tr data-payout-channel="${escapeHtml(c.id)}" data-product="${escapeHtml(p.id)}"><td><input type="checkbox" data-payout-channel-bound aria-label="绑定${escapeHtml(p.name)} ${escapeHtml(c.name)}" ${cfg.bound ? "checked" : ""} ${allowed ? "" : "disabled"}></td><td>${escapeHtml(c.thirdCode || c.id)}</td><td>${escapeHtml(c.name)}${c.status !== "开启" ? ` · ${escapeHtml(c.status)}` : ""}</td><td><input class="input mono" data-payout-channel-weight aria-label="${escapeHtml(p.name)} ${escapeHtml(c.name)}权重" inputmode="numeric" value="${escapeHtml(cfg.weight)}" ${allowed ? "" : "disabled"}></td><td>${escapeHtml(c.rate || "0")}</td><td>${escapeHtml(binding.agentRate || "0")}</td><td>${escapeHtml(binding.agentProfit || "0")}</td></tr>`;
+        }).join("") || '<tr><td colspan="7">暂无绑定通道，请在代付产品管理维护通道关联。</td></tr>'}</tbody></table></div></section>`;
+      }).join("")}<div class="field-error" id="modalError" role="alert"></div><div class="toolbar"><button class="btn" type="button" data-payout-channels-all="true">一键全选</button><button class="btn" type="button" data-payout-channels-all="false">一键取消</button><button class="btn primary" type="button" id="payoutChannelsSave">保存提交</button></div></div>`;
+    }
+
+    function bindPayoutChannelBinding(item) {
+      const form = document.getElementById("payoutChannelForm"); if (!form) return;
+      const state = JSON.parse(form.dataset.state);
+      document.querySelectorAll("[data-payout-channels-all]").forEach(button => button.addEventListener("click", () => document.querySelectorAll("[data-payout-channel-bound]:not(:disabled)").forEach(input => {input.checked = button.dataset.payoutChannelsAll === "true";})));
+      document.getElementById("payoutChannelsSave").addEventListener("click", () => {
+        clearInlineError(); const model = window.HSProviderDemo, products = payoutMerchantProducts();
+        if (!payoutMerchantContext(item) || state.tenantId !== model.tenantId || JSON.stringify(products.map(p=>p.id)) !== JSON.stringify(state.products.map(p=>p.id)) || state.products.some(row => {const p=products.find(p=>p.id===row.id); return JSON.stringify(p.channelIds)!==row.channels || JSON.stringify(p.merchantBindings?.[item.id] || null)!==row.before;})) return showInlineError("租户、业务或绑定关系已变化，请重新打开。");
+        const changes = [];
+        for (const row of state.products) {
+          const product = products.find(p=>p.id===row.id), before = product.merchantBindings?.[item.id] || {bound:false,rate:"0",agentRate:"0",agentProfit:"0",fee:"0",dailyLimit:"0"};
+          const channelBindings = {};
+          for (const tr of document.querySelectorAll(`[data-payout-channel][data-product="${product.id}"]`)) {
+            const channel = payoutBindingChannels(product).find(c=>c.id===tr.dataset.payoutChannel), bound = tr.querySelector("[data-payout-channel-bound]").checked, weight = tr.querySelector("[data-payout-channel-weight]").value.trim();
+            if (!/^\d+$/.test(weight) || Number(weight)<1 || Number(weight)>10000) return showInlineError("通道权重须为1至10000的整数。");
+            const original = payoutMerchantChannelConfig(product,item,channel);
+            if ((bound !== Boolean(original.bound) || weight !== String(original.weight)) && !model.canConfigureChannel(merchantProfileTenantId,channel.providerId,"代付")) return showInlineError("通道授权已失效，未保存。");
+            channelBindings[channel.id] = {bound,weight};
+          }
+          changes.push({product, next:{...before,bound:Object.values(channelBindings).some(c=>c.bound),channelBindings}});
+        }
+        changes.forEach(({product,next}) => {product.merchantBindings ||= {};product.merchantBindings[item.id]=next;});
+        item.logs.unshift([nowText(),"绑定代付通道",currentTenantOperator.account,"当前商户产品通道与权重已保存"]); model.log("绑定代付通道",item.id,merchantProfileTenantId);
+        renderBusinessMerchantModal(item,"payout");showToast("代付通道绑定已保存");
+      });
+    }
+
+    function businessWhitelistAllowed(item, direction) {
+      return ["collect", "payout"].includes(direction) && window.HSProviderDemo?.tenantId === merchantProfileTenantId && merchants.includes(item) && item.capabilities.includes(businessMerchantCapability(direction));
+    }
+
+    function returnToMerchantAccess(item, direction) {
+      if (!direction) return renderDetailModal(item);
+      if (!businessWhitelistAllowed(item, direction)) {closeModal();return showToast("租户或业务已变化，请重新进入商户列表。");}
+      if (direction === "collect") activeCollectPanel = "whitelist"; else activePayoutAction = "whitelist";
+      renderBusinessMerchantModal(item, direction);
+    }
+
+    function renderBusinessWhitelist(item, direction) {
+      const label = direction === "collect" ? "代收" : "代付";
+      return `<div class="merchant-security-single">${renderSecuritySetting(`${label}下单 IP 白名单`, renderMerchantIpEditor("accessWhitelist-0","允许请求的 IP",merchantWhitelist(item,direction),"每项一个公网 IP 或网段；全部留空不限制请求。"), `<button class="btn primary" type="button" data-access-save="whitelist">保存${label}下单白名单</button>`)}</div><div class="field-error" id="modalError" role="alert"></div>`;
+    }
+
+    function openPayoutInlineEdit(item, key, value) {
+      const labels = {manualOrder:"手动下单",rejectNotice:"通道驳回通知",singleFee:"单笔费用"}, before = JSON.stringify(item.payoutConfig);
+      if (!payoutMerchantContext(item)) return showToast("请先开通当前商户代付业务");
+      activeMerchant=item; activeBusinessDialogMode="payout"; activePayoutAction="inline";
+      document.getElementById("modal").dataset.merchantId=item.id;
+      document.getElementById("modal").innerHTML=`<div class="modal-head"><div><h2>修改${labels[key]}</h2><p>${escapeHtml(item.name)} · ${escapeHtml(item.id)}</p></div><button class="modal-close" type="button" id="modalClose" aria-label="关闭"><i data-lucide="x"></i></button></div><div class="modal-body"><div class="field"><label for="payoutInlineValue">${labels[key]}</label>${key === "singleFee" ? `<input class="input mono" id="payoutInlineValue" inputmode="decimal" value="${escapeHtml(merchantSingleFeeValue(item.payoutConfig))}">` : `<div class="merchant-business-capability"><input id="payoutInlineValue" type="checkbox" class="merchant-switch" role="switch" aria-describedby="payoutInlineState" ${value === "开启" ? "checked" : ""}><span id="payoutInlineState">${key === "rejectNotice" ? value === "开启" ? "启用" : "禁用" : value}</span></div>`}</div><div class="field"><label for="payoutInlineReason">变更原因</label><input class="input" id="payoutInlineReason"></div>${key === "singleFee" ? renderMerchantMfaField("payoutInlineMfa") : ""}<div class="field-error" id="modalError" role="alert"></div></div><div class="modal-footer"><button class="btn primary" type="button" id="payoutInlineSave">提交保存</button></div>`;
+      showModal("small");bindModalEvents();
+      if (key !== "singleFee") document.getElementById("payoutInlineValue").addEventListener("change", event => {
+        document.getElementById("payoutInlineState").textContent = key === "rejectNotice" ? event.target.checked ? "启用" : "禁用" : event.target.checked ? "开启" : "关闭";
+      });
+      document.getElementById("payoutInlineSave").addEventListener("click", () => {
+        clearInlineError();if(!payoutMerchantContext(item,before))return showInlineError("租户或配置已变化，未保存。");
+        const input=document.getElementById("payoutInlineValue"), next=key==="singleFee"?normalizedMerchantSingleFee(input.value.trim()):input.checked?"开启":"关闭";
+        if(next===null)return showInlineError("费用须为非负金额，最多两位小数。","payoutInlineValue");
+        if(next===item.payoutConfig[key])return showInlineError("当前配置没有变化。");
+        const reason=document.getElementById("payoutInlineReason").value.trim();if(!reason)return showInlineError("请填写变更原因。","payoutInlineReason");
+        if(key==="singleFee"&&!verifyMerchantMfa("payoutInlineMfa"))return;
+        item.payoutConfig[key]=next;item.logs.unshift([nowText(),`修改${labels[key]}`,currentTenantOperator.account,reason]);closeModal();renderBusinessMerchantRows();document.querySelector(`[data-payout-inline="${key}"][data-merchant="${item.id}"]`)?.focus();showToast("代付设置已保存");
+      });
+    }
+
+    function renderPayoutSettlementPreview(item) {
+      const wallet=walletRow(item,"代付钱包","CNY");
+      return `<div class="info-grid"><div class="info-item"><span>资产</span><strong>CNY</strong></div><div class="info-item"><span>当前总额</span><strong>${escapeHtml(wallet[2])}</strong></div><div class="info-item"><span>冻结金额</span><strong>${escapeHtml(wallet[3])}</strong></div><div class="info-item"><span>可用余额</span><strong>${escapeHtml(wallet[4])}</strong></div></div><p>Demo清算预览，不写入真实资金或钱包。</p><div class="field-error" id="modalError" role="alert"></div><div class="toolbar"><button class="btn primary" type="button" id="payoutSettlementPreview">确认清算预览</button></div><div id="payoutSettlementResult" role="status"></div>`;
+    }
+
+    function payoutUsdtTestProducts(item) {
+      const model=window.HSProviderDemo;
+      return payoutMerchantContext(item)?payoutMerchantProducts().filter(p=>p.currency==="USDT"&&p.status==="开启"&&p.merchantBindings?.[item.id]?.bound&&payoutBindingChannels(p).some(c=>payoutMerchantChannelConfig(p,item,c).bound&&c.status==="开启"&&model.canConfigureChannel(merchantProfileTenantId,c.providerId,"代付"))):[];
+    }
+
+    function renderPayoutUsdtTest(item) {
+      const products=payoutUsdtTestProducts(item);
+      return `<form id="payoutUsdtTestForm"><div class="form-grid"><div class="field wide"><label for="payoutTestProduct">产品类型</label><select class="select" id="payoutTestProduct"><option value="">请选择产品类型</option>${products.map(p=>`<option value="${escapeHtml(p.id)}">${escapeHtml(p.name)}</option>`).join("")}</select>${products.length?"":'<span class="muted">请先绑定可用的USDT代付产品通道。</span>'}</div><div class="field"><label for="payoutTestAmount">金额（USDT）</label><input class="input mono" id="payoutTestAmount" placeholder="USDT数量，最多6位小数"></div><div class="field"><label for="payoutTestChain">协议链</label><select class="select" id="payoutTestChain"><option>TRC20</option></select></div><div class="field wide"><label for="payoutTestAddress">钱包地址</label><input class="input mono" id="payoutTestAddress"></div><div class="field wide"><label for="payoutTestExtra">扩展参数</label><textarea class="textarea mono" id="payoutTestExtra" placeholder="JSON对象，可留空"></textarea></div></div><p class="muted">仅模拟请求，不发送真实支付、不扣减预付或钱包。</p><div class="field-error" id="modalError" role="alert"></div><div class="toolbar"><button class="btn primary" type="submit" ${products.length?"":"disabled"}>发起支付测试</button></div></form><div role="status" id="payoutTestResult"></div>`;
+    }
+
+    function bindPayoutDirectActions(item) {
+      const modal=document.getElementById("modal");
+      modal.__payoutAccessGuard=event=>{if(event.target.closest("#saveLoginWhitelist, [data-access-save]")&&!payoutMerchantContext(item)){event.preventDefault();event.stopImmediatePropagation();showInlineError("租户或业务已变化，请重新打开。");}};
+      modal.addEventListener("click",modal.__payoutAccessGuard,true);
+      bindPayoutChannelBinding(item);
+      document.getElementById("payoutSettlementPreview")?.addEventListener("click", () => {if(!payoutMerchantContext(item))return showInlineError("租户或业务已变化，请重新打开。");document.getElementById("payoutSettlementResult").textContent="清算预览已确认，钱包未发生变动。";});
+      document.getElementById("payoutUsdtTestForm")?.addEventListener("submit",event=>{
+        event.preventDefault();clearInlineError();document.getElementById("payoutTestResult").textContent="";
+        if(!payoutUsdtTestProducts(item).some(p=>p.id===document.getElementById("payoutTestProduct").value))return showInlineError("请选择有效的已绑定产品。","payoutTestProduct");
+        const amount=document.getElementById("payoutTestAmount").value.trim(),address=document.getElementById("payoutTestAddress").value.trim(),extra=document.getElementById("payoutTestExtra").value.trim();
+        if(!/^\d+(?:\.\d{1,6})?$/.test(amount)||Number(amount)<=0||!Number.isFinite(Number(amount)))return showInlineError("请输入大于0且最多6位小数的USDT金额。","payoutTestAmount");
+        if(!/^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(address))return showInlineError("请输入有效格式的TRC20钱包地址。","payoutTestAddress");
+        if(extra){try{const parsed=JSON.parse(extra);if(!parsed||Array.isArray(parsed)||typeof parsed!=="object")throw 0;}catch{return showInlineError("扩展参数须为JSON对象。","payoutTestExtra");}}
+        document.getElementById("payoutTestResult").textContent=`模拟测试请求成功 · USDT ${amount} · TRC20；未发送真实支付。`;
+      });
+    }
+
+
+    function merchantCollectProducts() {
+      const model = window.HSProviderDemo;
+      return model ? model.tenantData(merchantProfileTenantId).products.filter(p => p.direction === "代收" && p.currency === "CNY") : [];
+    }
+
+    function merchantCollectBinding(product, item) {
+      return product.merchantBindings?.[item.id] || {bound: false, rate: product.defaultRate || "0", agentRate: "0", fee: "0"};
+    }
+
+    function merchantCollectProductAllowed(product, item) {
+      const model = window.HSProviderDemo;
+      return Boolean(model && model.tenantId === merchantProfileTenantId && merchants.includes(item) && item.capabilities.includes("法币代收") &&
+        merchantCollectProducts().includes(product) && model.tenantData(merchantProfileTenantId).channels.some(c => product.channelIds.includes(c.id) && c.direction === "代收" && model.canConfigureChannel(merchantProfileTenantId, c.providerId, "代收")));
+    }
+
+    function merchantCollectTestProducts(item) {
+      return merchantCollectProducts().filter(p => merchantCollectBinding(p, item).bound && p.status === "开启" && merchantCollectProductAllowed(p, item) &&
+        window.HSProviderDemo.tenantData(merchantProfileTenantId).channels.some(c => p.channelIds.includes(c.id) && c.direction === "代收" && c.status === "开启" && window.HSProviderDemo.canConfigureChannel(merchantProfileTenantId, c.providerId, "代收")));
+    }
+
+    function renderCollectProductConfiguration(item) {
+      const products = merchantCollectProducts().filter(p => `${p.name} ${p.productNo}`.toLowerCase().includes(activeCollectProductQuery.toLowerCase()));
+      return `<form class="business-merchant-filters" id="collectProductSearch"><div class="field"><label for="collectProductKeyword">产品名称／编码</label><input class="input" id="collectProductKeyword" value="${escapeHtml(activeCollectProductQuery)}" placeholder="请输入产品名称或编码"></div><button class="btn" type="submit">查询</button><button class="btn" type="reset">重置</button></form>
+        <div class="toolbar collect-product-toolbar"><button class="btn" type="button" data-collect-bind-all="true">列表中全部绑定</button><button class="btn" type="button" data-collect-bind-all="false">列表中全部解绑</button><span class="muted">共 ${products.length} 个产品</span></div>
+        <p class="muted">费率使用小数，0.01 表示 1%；双击数值或按回车编辑，失焦或回车保存，Esc 取消。</p>
+        <div class="field-error" id="collectProductError" role="alert"></div><div class="merchant-table-scroll"><table class="mini-table collect-products-table"><thead><tr><th>产品名称</th><th>产品编码</th><th>商户费率</th><th>代理费率</th><th>单笔费用（CNY）</th><th>配置</th></tr></thead><tbody>${products.map(p => {
+          const c = merchantCollectBinding(p, item), allowed = merchantCollectProductAllowed(p, item);
+          return `<tr data-collect-product="${escapeHtml(p.id)}"><td>${escapeHtml(p.name)}${p.status !== "开启" ? `<span class="muted"> · ${escapeHtml(p.status)}</span>` : ""}</td><td class="mono">${escapeHtml(p.productNo || p.id)}</td>${["rate", "agentRate", "fee"].map((prop, i) => `<td><button class="collect-editable mono" type="button" data-collect-price="${prop}" data-collect-product-id="${escapeHtml(p.id)}" data-before="${escapeHtml(JSON.stringify(c))}" aria-label="编辑${escapeHtml(p.name)}${["商户费率", "代理费率", "单笔费用"][i]}" ${allowed ? "" : "disabled"}>${escapeHtml(c[prop] ?? "0")}</button></td>`).join("")}<td><input class="merchant-switch" type="checkbox" role="switch" data-collect-bind="${escapeHtml(p.id)}" data-before="${escapeHtml(JSON.stringify(c))}" aria-label="绑定${escapeHtml(p.name)}" ${c.bound ? "checked" : ""} ${allowed ? "" : "disabled"}></td></tr>`;
+        }).join("") || '<tr><td colspan="6">暂无匹配的代收产品</td></tr>'}</tbody></table></div>`;
+    }
+
+    function collectProductChangeAllowed(item, product, before) {
+      return product && merchantCollectProductAllowed(product, item) && JSON.stringify(merchantCollectBinding(product, item)) === before;
+    }
+
+    function applyCollectProductChange(item, product, next, action) {
+      product.merchantBindings ||= {};
+      product.merchantBindings[item.id] = next;
+      if(next.bound && item.collectConfig.status === "待配置")item.collectConfig.status="开启";
+      item.logs.unshift([nowText(), action, currentTenantOperator.account, `${product.productNo || product.id} · 仅当前商户`]);
+      window.HSProviderDemo.log(action, `${item.id}/${product.id}`, merchantProfileTenantId);
+    }
+
+    function bindCollectProductConfiguration(item) {
+      const form = document.getElementById("collectProductSearch");
+      if (!form) return;
+      const refresh = () => renderBusinessMerchantModal(item, "collect");
+      form.addEventListener("submit", e => {e.preventDefault(); activeCollectProductQuery = document.getElementById("collectProductKeyword").value.trim(); refresh();});
+      form.addEventListener("reset", () => {activeCollectProductQuery = ""; refresh();});
+      const visible = [...document.querySelectorAll("[data-collect-bind]")].map(input => ({id: input.dataset.collectBind, before: input.dataset.before}));
+      document.querySelectorAll("[data-collect-bind-all]").forEach(button => button.addEventListener("click", () => {
+        clearInlineError();
+        const changes = visible.map(row => ({...row, product: merchantCollectProducts().find(p => p.id === row.id)}));
+        if (!changes.length) return showInlineError("当前列表没有可配置产品。", null, "collectProductError");
+        if (changes.some(row => !collectProductChangeAllowed(item, row.product, row.before))) return showInlineError("业务授权或产品配置已变化，请关闭后重新打开。", null, "collectProductError");
+        const bound = button.dataset.collectBindAll === "true";
+        changes.forEach(row => {const before = merchantCollectBinding(row.product, item); if (Boolean(before.bound) !== bound) applyCollectProductChange(item, row.product, {...before, bound}, bound ? "绑定代收产品" : "解绑代收产品");});
+        refresh(); showToast(bound ? "当前列表产品已绑定" : "当前列表产品已解绑");
+      }));
+      document.querySelectorAll("[data-collect-bind]").forEach(input => input.addEventListener("change", () => {
+        clearInlineError();
+        const p = merchantCollectProducts().find(p => p.id === input.dataset.collectBind);
+        if (!collectProductChangeAllowed(item, p, input.dataset.before)) {input.checked = !input.checked; return showInlineError("业务授权或产品配置已变化，请关闭后重新打开。", null, "collectProductError");}
+        applyCollectProductChange(item, p, {...merchantCollectBinding(p, item), bound: input.checked}, input.checked ? "绑定代收产品" : "解绑代收产品");
+        refresh(); document.querySelector(`[data-collect-bind="${p.id}"]`)?.focus(); showToast("代收产品配置已保存");
+      }));
+      document.querySelectorAll("[data-collect-price]").forEach(button => {
+        const edit = () => {
+          if (!button.isConnected) return;
+          const p = merchantCollectProducts().find(p => p.id === button.dataset.collectProductId), prop = button.dataset.collectPrice, before = button.dataset.before;
+          const input = document.createElement("input"); input.className = "input mono collect-price-input"; input.value = button.textContent; input.setAttribute("aria-label", button.getAttribute("aria-label")); input.inputMode = "decimal";
+          button.replaceWith(input); input.focus(); input.select(); let done = false;
+          const cancel = () => {if (done) return; done = true; input.replaceWith(button); button.focus();};
+          const save = () => {
+            if (done) return;
+            clearInlineError();
+            const value = input.value.trim(), valid = prop === "fee" ? normalizedMerchantSingleFee(value) !== null : /^\d+(?:\.\d{1,6})?$/.test(value) && Number(value) <= 1;
+            if (!valid) {showInlineError(prop === "fee" ? "单笔费用须为非负金额，最多两位小数。" : "费率须为0至1的小数，最多六位小数。", null, "collectProductError"); return;}
+            if (!collectProductChangeAllowed(item, p, before)) {showInlineError("业务授权或产品配置已变化，请关闭后重新打开。", null, "collectProductError"); return;}
+            done = true;
+            const c = merchantCollectBinding(p, item);
+            if (Number(c[prop]) !== Number(value)) applyCollectProductChange(item, p, {...c, [prop]: value}, "修改代收产品费率");
+            refresh(); document.querySelector(`[data-collect-product-id="${p.id}"][data-collect-price="${prop}"]`)?.focus(); showToast("费率已保存");
+          };
+          input.addEventListener("blur", save);
+          input.addEventListener("keydown", e => {if (e.key === "Enter") {e.preventDefault();save();} else if (e.key === "Escape") {e.preventDefault();e.stopPropagation();cancel();}});
+        };
+        button.addEventListener("dblclick", edit);
+        button.addEventListener("keydown", e => {if (e.key === "Enter" || e.key === " ") {e.preventDefault();edit();}});
+      });
+    }
+
+    function renderCollectTestOrder(item) {
+      const products = merchantCollectTestProducts(item);
+      return `<form id="collectTestOrderForm"><div class="form-grid"><div class="field wide"><label for="collectTestProduct">代收产品</label><select class="select" id="collectTestProduct"><option value="">请选择产品</option>${products.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.name)} · ${escapeHtml(p.productNo)}</option>`).join("")}</select>${products.length ? "" : '<p class="muted">暂无已绑定且启用的代收产品，请先在代收产品中配置。</p>'}</div><div class="field"><label for="collectTestAmount">支付金额</label><input class="input mono" id="collectTestAmount" inputmode="decimal" value="0.01"></div><div class="field"><label for="collectTestCurrency">币种</label><input class="input" id="collectTestCurrency" value="CNY" readonly></div></div><div class="field-error" id="modalError" role="alert"></div><div class="toolbar"><button class="btn primary" type="submit" ${products.length ? "" : "disabled"}>发起测试请求</button></div></form><p class="muted">Demo模拟，不请求真实通道，不计入正式订单或钱包。</p><div class="field"><label for="collectTestPayUrl">支付地址</label><textarea class="textarea mono" id="collectTestPayUrl" readonly></textarea></div><div class="toolbar"><a class="btn" id="collectTestOpenPay" aria-disabled="true" target="_blank" rel="noopener">在新页面打开支付地址</a></div><div role="status" id="collectTestStatus"></div>`;
+    }
+
+    function bindCollectTestOrder(item) {
+      document.getElementById("collectTestOrderForm")?.addEventListener("submit", event => {
+        event.preventDefault(); clearInlineError();
+        document.getElementById("collectTestPayUrl").value = "";
+        const link = document.getElementById("collectTestOpenPay"); link.removeAttribute("href"); link.setAttribute("aria-disabled", "true");
+        document.getElementById("collectTestStatus").textContent = "";
+        const product = merchantCollectTestProducts(item).find(p => p.id === document.getElementById("collectTestProduct").value);
+        if (!product || item.collectConfig.status !== "开启") return showInlineError("请选择已绑定且可用的产品，并确认商户代收状态已开启。", "collectTestProduct");
+        const amount = parseCnyInput(document.getElementById("collectTestAmount").value.trim());
+        if (amount === null) return showInlineError("支付金额须大于0，最多两位小数。", "collectTestAmount");
+        const documentText = `<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Demo测试收银台</title><body style="font-family:PingFang SC,Microsoft YaHei;margin:48px;color:#1e293b"><h1>Demo测试收银台</h1><p>商户：${escapeHtml(item.name)} · ${escapeHtml(item.id)}</p><p>产品：${escapeHtml(product.name)}</p><h2>CNY ${escapeHtml(Number(amount).toFixed(2))}</h2><p>此页面仅演示测试订单，不会发起实际扣款。</p><\/body><\/html>`;
+        if (collectTestPayUrl) URL.revokeObjectURL(collectTestPayUrl);
+        collectTestPayUrl = URL.createObjectURL(new Blob([documentText], {type: "text/html"}));
+        document.getElementById("collectTestPayUrl").value = collectTestPayUrl;
+        link.href = collectTestPayUrl; link.setAttribute("aria-disabled", "false");
+        document.getElementById("collectTestStatus").textContent = `测试请求已模拟成功 · ${product.name} · CNY ${Number(amount).toFixed(2)}`;
+      });
+    }
+
+
     function renderMerchantListPage() {
+      activeBusinessPageMode = null;
+      activeBusinessDialogMode = null;
       document.querySelector(".content").innerHTML = merchantListTemplate;
       updateCrumbs("商户管理");
       setActiveNav("merchant-list");
@@ -25231,7 +25651,7 @@
     }
 
     function bindMerchantListEvents() {
-      ["keyword", "merchantType", "capabilityFilter", "statusFilter", "dateFilter"].forEach((id) => {
+      ["keyword", "merchantType", "statusFilter", "dateFilter"].forEach((id) => {
         document.getElementById(id).addEventListener("input", renderRows);
       });
 
@@ -25255,15 +25675,6 @@
       });
 
       document.getElementById("merchantRows").addEventListener("change", (event) => {
-        const capabilitySwitch = event.target.closest("[data-list-capability]");
-        if (capabilitySwitch) {
-          const item = merchants.find((merchant) => merchant.id === capabilitySwitch.dataset.capabilityMerchant);
-          if (!item) return;
-          const capability = capabilitySwitch.dataset.listCapability;
-          capabilitySwitch.checked = item.capabilities.includes(capability);
-          openCapabilityConfirm(item, capability, capabilitySwitch.checked ? "关闭" : "开通", "list");
-          return;
-        }
         const checkbox = event.target.closest("[data-merchant-select]");
         if (!checkbox) return;
         if (checkbox.checked) selectedMerchantIds.add(checkbox.dataset.merchantSelect);
@@ -25369,7 +25780,8 @@
     };
     bindShellEvents();
     const initialPage = window.__UNIFIED_DEMO_HASH || window.location.hash.replace("#", "");
-    if (modulePages[initialPage]) renderModulePage(initialPage);
+    if (["merchant-collect", "merchant-payout"].includes(initialPage)) renderModulePage(initialPage);
+    else if (modulePages[initialPage]) renderModulePage(initialPage);
     else renderMerchantListPage();
     if (window.lucide) window.lucide.createIcons();
   </script>
