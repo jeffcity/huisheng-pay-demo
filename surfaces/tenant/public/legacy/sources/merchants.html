@@ -23849,16 +23849,14 @@
           const rawRate = document.getElementById(`merchantRate-${i}`).value.trim();
           const decimal = form.dataset.rateUnit === "decimal";
           const rate = decimal ? (/^\d+(?:\.\d{1,6})?$/.test(rawRate) && Number(rawRate) <= 1 ? normalizeMerchantPayoutRate(merchantRatePercent(rawRate)) : null) : normalizeMerchantPayoutRate(rawRate);
-          const extras = decimal ? {agentProfit:document.getElementById(`merchantProfit-${i}`).value.trim(),agentRate:document.getElementById(`merchantAgent-${i}`).value.trim()} : {};
-          if (decimal && Object.values(extras).some(value=>!/^\d+(?:\.\d{1,6})?$/.test(value)||Number(value)>1)) return fail("代理利润与代理费率请输入0至1的小数，最多六位。",`merchantAgent-${i}`);
           const daily = normalizedMerchantSingleFee(document.getElementById(`merchantDaily-${i}`).value.trim());
           const fee = normalizedMerchantSingleFee(document.getElementById(`merchantFee-${i}`).value.trim());
           if (rate === null) return fail(decimal ? "商户费率请输入0至1的小数，最多六位。" : "商户费率请输入0至100，最多四位小数。", `merchantRate-${i}`);
           if (daily === null) return fail("日限额请输入有效非负金额，最多两位小数。", `merchantDaily-${i}`);
           if (fee === null) return fail("单笔费用请输入有效非负金额，最多两位小数。", `merchantFee-${i}`);
-          parsedRows.push({ ...row, rate, dailyLimit: daily.slice(4), fee: fee.slice(4), ...extras });
+          parsedRows.push({ ...row, rate, dailyLimit: daily.slice(4), fee: fee.slice(4) });
           const c = JSON.parse(row.before);
-          if (rate !== normalizeMerchantPayoutRate(merchantRatePercent(c.rate)) || daily !== normalizedMerchantSingleFee(c.dailyLimit ?? "0") || fee !== normalizedMerchantSingleFee(c.fee ?? "0") || (decimal && Object.entries(extras).some(([key,value])=>Number(value)!==Number(c[key]||"0")))) rows.push({ ...row, rate, dailyLimit: daily.slice(4), fee: fee.slice(4), ...extras });
+          if (rate !== normalizeMerchantPayoutRate(merchantRatePercent(c.rate)) || daily !== normalizedMerchantSingleFee(c.dailyLimit ?? "0") || fee !== normalizedMerchantSingleFee(c.fee ?? "0")) rows.push({ ...row, rate, dailyLimit: daily.slice(4), fee: fee.slice(4) });
         }
         if (!rows.length) return fail("费率没有变化，无需重复保存。");
         const reason = document.getElementById("merchantRateReason").value.trim();
@@ -23880,7 +23878,7 @@
         for (const row of state.rows.filter((row) => state.changes.includes(row.id))) {
           const p = products.find((p) => p.id === row.id), c = p.merchantBindings[item.id];
           const before = `${merchantRatePercent(c.rate)}% / 日限额 ${c.dailyLimit || "未设置"} / 单笔 ${c.fee || "0"}`;
-          Object.assign(c, { rate: row.rate, dailyLimit: row.dailyLimit, fee: row.fee }, row.agentRate !== undefined ? {agentRate:row.agentRate,agentProfit:row.agentProfit} : {});
+          Object.assign(c, { rate: row.rate, dailyLimit: row.dailyLimit, fee: row.fee });
           item.logs.unshift([nowText(), "设置商户代付费率", currentTenantOperator.account, `${p.name}：${before} → ${merchantRatePercent(c.rate)}% / 日限额 ${c.dailyLimit} / 单笔 ${c.fee}；${state.reason}`]);
         }
         model.log("设置商户代付费率", item.id, state.tenantId);
@@ -25390,10 +25388,10 @@
       const state=draft||initial;
       const rows=products.map((p,index)=>{
         const c=p.merchantBindings[item.id],d=draft?.rows.find(row=>row.id===p.id),enabled=payoutRateContextAllowed(item,{...initial,rows:[initial.rows[index]]});
-        return `<tr class="merchant-rate-product"><th colspan="5">产品：[${escapeHtml(p.productNo||p.id)}] ${escapeHtml(p.name)} · ${escapeHtml(p.currency)}</th></tr><tr>${[["merchantRate",d?.rate??c.rate??"0","商户费率"],["merchantDaily",d?.dailyLimit??c.dailyLimit??"0","限额/日"],["merchantFee",d?.fee??c.fee??"0","单笔费用"],["merchantProfit",d?.agentProfit??c.agentProfit??"0","代理利润"],["merchantAgent",d?.agentRate??c.agentRate??"0","代理（总）"]].map(([prefix,value,label])=>`<td><input class="input mono merchant-rate-input" id="${prefix}-${index}" aria-label="${escapeHtml(p.name)} ${label}" value="${escapeHtml(value)}" inputmode="decimal" ${enabled?"":"disabled"}></td>`).join("")}</tr>`;
+        return `<tr class="merchant-rate-product"><th colspan="3">产品：[${escapeHtml(p.productNo||p.id)}] ${escapeHtml(p.name)} · ${escapeHtml(p.currency)}</th></tr><tr>${[["merchantRate",d?.rate??c.rate??"0","商户费率"],["merchantDaily",d?.dailyLimit??c.dailyLimit??"0","限额/日"],["merchantFee",d?.fee??c.fee??"0","单笔费用"]].map(([prefix,value,label])=>`<td><input class="input mono merchant-rate-input" id="${prefix}-${index}" aria-label="${escapeHtml(p.name)} ${label}" value="${escapeHtml(value)}" inputmode="decimal" ${enabled?"":"disabled"}></td>`).join("")}</tr>`;
       }).join("");
       if(!draft)state.rows=initial.rows.filter(row=>payoutRateContextAllowed(item,{...initial,rows:[row]}));
-      return `<p class="muted">费率使用小数，0.03表示3%；代理费率0沿用默认、1表示不给该类型代理费率。</p><div id="merchantPayoutRateForm" data-rate-unit="decimal" data-rate-state="${escapeHtml(JSON.stringify(state))}"><div class="merchant-table-scroll"><table class="mini-table payout-direct-rate-table"><thead><tr><th>商户费率</th><th>限额/日</th><th>单笔费用</th><th>代理利润</th><th>代理（总）</th></tr></thead><tbody>${rows||'<tr><td colspan="5">请先绑定代付通道。</td></tr>'}</tbody></table></div><div class="merchant-rate-footer"><div class="field"><label for="merchantRateReason">调整原因</label><input class="input" id="merchantRateReason" value="${escapeHtml(draft?.reason||"")}" ${state.rows.length?"":"disabled"}></div><button class="btn primary" id="merchantRateSave" type="button" ${state.rows.length?"":"disabled"}>保存提交</button></div><div class="field-error" id="merchantRateError" role="alert"></div></div>`;
+      return `<p class="muted">费率使用小数，0.03表示3%。</p><div id="merchantPayoutRateForm" data-rate-unit="decimal" data-rate-state="${escapeHtml(JSON.stringify(state))}"><div class="merchant-table-scroll"><table class="mini-table payout-direct-rate-table"><thead><tr><th>商户费率</th><th>限额/日</th><th>单笔费用</th></tr></thead><tbody>${rows||'<tr><td colspan="3">请先绑定代付通道。</td></tr>'}</tbody></table></div><div class="merchant-rate-footer"><div class="field"><label for="merchantRateReason">调整原因</label><input class="input" id="merchantRateReason" value="${escapeHtml(draft?.reason||"")}" ${state.rows.length?"":"disabled"}></div><button class="btn primary" id="merchantRateSave" type="button" ${state.rows.length?"":"disabled"}>保存提交</button></div><div class="field-error" id="merchantRateError" role="alert"></div></div>`;
     }
 
     function payoutMerchantContext(item, before) {
