@@ -20650,6 +20650,17 @@
     .merchant-security-fields .access-whitelist-add { margin-top: 4px; justify-self: start; }
     .merchant-security-callbacks > .merchant-security-row:first-child { grid-column: 1 / -1; }
     .merchant-security-callbacks > .merchant-security-row:first-child .merchant-security-fields { max-width: 600px; }
+    .merchant-more-menu { position: fixed; z-index: 1000; width: 184px; max-width: calc(100vw - 16px); max-height: calc(100vh - 16px); overflow-y: auto; padding: 4px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); box-shadow: 0 8px 24px rgba(16,24,40,.14); }
+    .merchant-more-menu > button { display: block; width: 100%; min-height: 36px; padding: 7px 12px; border: 0; border-radius: 4px; background: transparent; color: var(--text); text-align: left; font: inherit; cursor: pointer; }
+    .merchant-more-menu > button:hover, .merchant-more-menu > button:focus-visible { background: var(--primary-light, #eef0ff); outline: 2px solid transparent; }
+    .merchant-more-menu > button:focus-visible { outline-color: var(--primary); outline-offset: -2px; }
+    .merchant-more-menu > button.danger-text { color: var(--danger, #d92d20); border-top: 1px solid var(--border); border-radius: 0; margin-top: 4px; }
+    .merchant-more-menu > button:disabled { opacity: .45; cursor: not-allowed; }
+    .merchant-more-body { gap: 16px; }
+    .more-test-payout[hidden] { display: none !important; }
+    .more-test-order-control { display: flex; gap: 8px; min-width: 0; }
+    .more-test-order-control > input { flex: 1; min-width: 0; }
+    .more-test-order-control > button { flex-shrink: 0; }
     .merchant-security-key { max-width: 640px; }
     .merchant-security-single { max-width: 560px; min-width: 0; }
     @container (max-width: 640px) {
@@ -22288,22 +22299,6 @@
         effective: "2026-07-01 00:00",
         updated: "2026-07-01 Alice",
         note: "人民币代收统一费率"
-      },
-      {
-        id: "RATE-OUT-CNY",
-        business: "代付业务",
-        asset: "CNY",
-        chargeType: "组合",
-        formula: "0.18% + CNY 2.00",
-        minMax: "最低 CNY 2.00 / 封顶 CNY 18.00",
-        wallet: "商户代付钱包扣费",
-        chargeTiming: "代付受理时冻结，成功时扣",
-        scope: "全部商户",
-        status: "已启用",
-        version: "v4",
-        effective: "2026-07-01 00:00",
-        updated: "2026-07-01 Alice",
-        note: "人民币代付统一费率"
       }
     ];
 
@@ -22410,7 +22405,7 @@
       const type = document.getElementById("merchantType").value;
       const status = document.getElementById("statusFilter").value;
 
-      return merchants.filter((item) => {
+      return merchants.filter((item) => !item.deletedAt).filter((item) => {
         const text = `${item.id} ${item.name} ${item.owner}`.toLowerCase();
         const byKeyword = !keyword || text.includes(keyword);
         const byType = type === "全部类型" || item.type === type;
@@ -22419,7 +22414,194 @@
       }).sort((a, b) => a.id.localeCompare(b.id));
     }
 
+    let merchantMoreTrigger = null;
+    let merchantMoreEventsBound = false;
+    const merchantMoreActions = [["edit","修改"],["serviceFee","服务费配置"],["password","编辑密码"],["key","查看密钥"],["exchange","设置汇率"],["test","通道测试"],["prepaid","调整预付服务费"],["unbind","解绑"],["delete","删除"]];
+
+    function closeMerchantMore(restore = false) {
+      document.getElementById("merchantMoreMenu")?.remove();
+      const trigger = merchantMoreTrigger;
+      merchantMoreTrigger = null;
+      trigger?.setAttribute("aria-expanded", "false");
+      if (restore && trigger?.isConnected) trigger.focus();
+    }
+
+    function openMerchantMore(trigger) {
+      const wasOpen = merchantMoreTrigger === trigger;
+      closeMerchantMore();
+      if (wasOpen) return trigger.focus();
+      const item = merchants.find(m => m.id === trigger.dataset.merchantMore);
+      if (!merchantMoreAllowed(item)) return showToast("租户或商户已变化，请重新进入列表");
+      merchantMoreTrigger = trigger;
+      trigger.setAttribute("aria-expanded", "true");
+      const menu = document.createElement("div");
+      menu.id = "merchantMoreMenu"; menu.className = "merchant-more-menu";
+      menu.setAttribute("role", "menu"); menu.setAttribute("aria-label", `${item.name} 更多操作`);
+      menu.innerHTML = merchantMoreActions.map(([key,label]) => `<button type="button" role="menuitem" data-merchant-more-action="${key}" class="${key === "delete" ? "danger-text" : ""}" ${key === "unbind" && (item.type !== "子商户" || !item.parentMerchantId) ? 'disabled title="当前商户没有上级主商户关系"' : ""}>${label}</button>`).join("");
+      document.body.appendChild(menu);
+      positionMerchantMore();
+      menu.addEventListener("click", event => {
+        const button=event.target.closest("[data-merchant-more-action]"); if(!button || button.disabled)return;
+        closeMerchantMore(true);openMerchantMoreAction(item,button.dataset.merchantMoreAction);
+      });
+      menu.addEventListener("keydown", event => {
+        const buttons=[...menu.querySelectorAll("button:not(:disabled)")],i=buttons.indexOf(document.activeElement);
+        if(event.key === "Escape"){event.preventDefault();closeMerchantMore(true);}
+        else if(event.key === "Tab")closeMerchantMore(true);
+        else if(["ArrowDown","ArrowUp","Home","End"].includes(event.key)){
+          event.preventDefault();buttons[event.key==="Home"?0:event.key==="End"?buttons.length-1:(i+(event.key==="ArrowDown"?1:buttons.length-1))%buttons.length]?.focus();
+        }
+      });
+      menu.querySelector("button:not(:disabled)")?.focus();
+    }
+
+    function positionMerchantMore() {
+      const menu=document.getElementById("merchantMoreMenu"),trigger=merchantMoreTrigger;
+      if(!menu||!trigger?.isConnected)return;
+      const rect=trigger.getBoundingClientRect();
+      if(rect.bottom<0||rect.top>innerHeight)return closeMerchantMore();
+      menu.style.left=`${Math.max(8,Math.min(rect.right-menu.offsetWidth,innerWidth-menu.offsetWidth-8))}px`;
+      menu.style.top=`${Math.max(8,Math.min(rect.bottom+4,innerHeight-menu.offsetHeight-8))}px`;
+    }
+
+    function merchantMoreAllowed(item, snapshot = null) {
+      return Boolean(item && window.HSProviderDemo?.tenantId === merchantProfileTenantId && merchants.includes(item) && !item.deletedAt && (!snapshot || JSON.stringify(item) === snapshot));
+    }
+
+    function merchantMoreSettings(item) {
+      return item.moreSettings ||= {serviceFee:{mode:"fixed",value:"0"},prepaidCny:"0.00",serviceBalanceUsdt:"0.0000",fixedRate:"",rateNote:"",credentials:{},tests:[]};
+    }
+
+    function merchantMoreDecimal(value, precision) {
+      value=String(value).trim();
+      if(!new RegExp(`^\\d{1,14}(?:\\.\\d{1,${precision}})?$`).test(value))return null;
+      const [whole,fraction=""]=value.split("."),units=BigInt(whole+fraction.padEnd(precision,"0"));
+      return units <= 9007199254740991n ? units : null;
+    }
+
+    function merchantMoreFormat(units, precision) {
+      const base=10n**BigInt(precision);
+      return `${units/base}.${String(units%base).padStart(precision,"0")}`;
+    }
+
+    function merchantMoreDialog(item,title,body,footer="",size="small") {
+      activeMerchant=item;activeBusinessDialogMode=null;
+      const modal=document.getElementById("modal");modal.dataset.merchantId=item.id;
+      modal.innerHTML=`<div class="modal-head"><div><h2>${title}</h2><p>${escapeHtml(item.name)} · ${escapeHtml(item.id)}</p></div><button class="modal-close" type="button" id="modalClose" aria-label="关闭"><i data-lucide="x"></i></button></div><div class="modal-body merchant-more-body">${body}<div class="field-error" id="modalError" role="alert"></div></div>${footer?`<div class="modal-footer">${footer}</div>`:""}`;
+      showModal(size);bindModalEvents();
+      document.getElementById("merchantMoreCancel")?.addEventListener("click",closeModal);
+    }
+
+    function finishMerchantMore(item,action,detail) {
+      item.logs.unshift([nowText(),action,currentTenantOperator.account,detail]);
+      closeModal();renderRows();
+      document.querySelector(`[data-merchant-more="${CSS.escape(item.id)}"]`)?.focus();
+      showToast(`${action}已保存`);
+    }
+
+    function openMerchantMoreAction(item,action) {
+      if(!merchantMoreAllowed(item))return showToast("租户或商户已变化，请重新进入列表");
+      if(action === "edit")return openDetail(item.id);
+      if(action === "test")return openMerchantChannelTest(item);
+      if(action === "delete")return openMerchantDelete(item);
+      if(action === "unbind")return openMerchantRelationshipUnbind(item);
+      const settings=merchantMoreSettings(item);
+      if(action === "key"){
+        merchantMoreDialog(item,"查看密钥",renderIntegrationValue("merchantMoreKey","当前密钥",merchantIntegrationKey(item),true,true));
+        return;
+      }
+      const snapshot=JSON.stringify(item),allowed=()=>merchantMoreAllowed(item,snapshot) || showInlineError("租户、商户或原配置已变化，请重新打开。");
+      const cancel='<button class="btn" type="button" id="merchantMoreCancel">取消</button>';
+      if(action === "serviceFee"){
+        merchantMoreDialog(item,"配置自有地址服务费",`<div class="info-grid"><div class="info-item"><span>预付服务费余额</span><strong>${escapeHtml(settings.serviceBalanceUsdt)} USDT</strong></div><div class="info-item"><span>当前收费方式</span><strong>${settings.serviceFee.mode==="fixed"?"每笔固定服务费":"按订单金额比例"}</strong></div></div><div class="field"><label for="moreServiceMode">收费方式</label><select class="select" id="moreServiceMode"><option value="fixed" ${settings.serviceFee.mode==="fixed"?"selected":""}>每笔固定服务费</option><option value="percent" ${settings.serviceFee.mode==="percent"?"selected":""}>按订单金额比例</option></select></div><div class="field"><label for="moreServiceValue" id="moreServiceValueLabel"></label><input class="input mono" id="moreServiceValue" inputmode="decimal" value="${escapeHtml(settings.serviceFee.value)}"></div><div class="field"><label for="moreServiceTrial">试算订单金额（USDT）</label><input class="input mono" id="moreServiceTrial" inputmode="decimal" value="1000"></div><div class="toolbar"><button class="btn" type="button" id="moreServiceCalculate">试算</button><span id="moreServiceResult" role="status"></span></div>`,`${cancel}<button class="btn primary" id="moreServiceSave">保存配置</button>`);
+        const mode=document.getElementById("moreServiceMode"),value=document.getElementById("moreServiceValue");
+        const update=()=>{document.getElementById("moreServiceValueLabel").textContent=mode.value==="fixed"?"固定服务费金额（USDT）":"服务费比例（%）";document.getElementById("moreServiceResult").textContent="";};
+        update();mode.addEventListener("change",update);value.addEventListener("input",()=>document.getElementById("moreServiceResult").textContent="");document.getElementById("moreServiceTrial").addEventListener("input",()=>document.getElementById("moreServiceResult").textContent="");
+        const parse=()=>{const precision=mode.value==="fixed"?4:6,n=merchantMoreDecimal(value.value,precision);if(n===null || (mode.value==="percent"&&n>100000000n)){showInlineError(mode.value==="fixed"?"请输入非负服务费，最多4位小数。":"比例须为0至100，最多6位小数。","moreServiceValue");return null;}return n;};
+        document.getElementById("moreServiceCalculate").addEventListener("click",()=>{clearInlineError();const n=parse(),amount=merchantMoreDecimal(document.getElementById("moreServiceTrial").value,4);if(n===null)return;if(amount===null||amount<=0n)return showInlineError("请输入大于0的试算金额，最多4位小数。","moreServiceTrial");const fee=mode.value==="fixed"?n:(amount*n+50000000n)/100000000n;document.getElementById("moreServiceResult").textContent=`服务费 ${merchantMoreFormat(fee,4)} USDT`;});
+        document.getElementById("moreServiceSave").addEventListener("click",()=>{clearInlineError();if(!allowed())return;const n=parse();if(n===null)return;settings.serviceFee={mode:mode.value,value:merchantMoreFormat(n,mode.value==="fixed"?4:6)};finishMerchantMore(item,"服务费配置",`${mode.value} ${settings.serviceFee.value}`);});
+      }else if(action === "exchange"){
+        merchantMoreDialog(item,"设置汇率",`<p class="muted">当前平台默认汇率：平台实时参考</p><div class="field"><label for="moreFixedRate">固定汇率（CNY/USDT）</label><input class="input mono" id="moreFixedRate" inputmode="decimal" value="${escapeHtml(settings.fixedRate)}"><span class="inline-note">必须大于0，最多6位小数。</span></div><div class="field"><label for="moreRateNote">备注（选填）</label><textarea class="input" id="moreRateNote" maxlength="200">${escapeHtml(settings.rateNote)}</textarea></div>`,`<button class="btn" id="moreRateDefault">恢复默认</button>${cancel}<button class="btn primary" id="moreRateSave">确认</button>`);
+        document.getElementById("moreRateSave").addEventListener("click",()=>{clearInlineError();if(!allowed())return;const value=merchantMoreDecimal(document.getElementById("moreFixedRate").value,6);if(value===null||value<=0n)return showInlineError("固定汇率必须大于0，最多6位小数。","moreFixedRate");settings.fixedRate=merchantMoreFormat(value,6);settings.rateNote=document.getElementById("moreRateNote").value.trim();finishMerchantMore(item,"设置汇率",settings.fixedRate);});
+        document.getElementById("moreRateDefault").addEventListener("click",()=>{if(!allowed())return;settings.fixedRate="";settings.rateNote="";finishMerchantMore(item,"设置汇率","恢复平台默认汇率");});
+      }else if(action === "password"){
+        merchantMoreDialog(item,"编辑密码",`<div class="field"><label for="moreLoginPassword">登录密码</label><input class="input" id="moreLoginPassword" type="password" autocomplete="new-password" maxlength="64"></div><div class="field"><label for="morePaymentPassword">支付密码</label><input class="input" id="morePaymentPassword" type="password" autocomplete="new-password" maxlength="64"></div>${renderMerchantMfaField("morePassword2fa")}<p class="muted">留空表示不修改。仅本地Demo模拟，不修改开发环境登录凭据。</p>`,`${cancel}<button class="btn primary" id="morePasswordSave">确定</button>`);
+        document.getElementById("morePasswordSave").addEventListener("click",async()=>{
+          clearInlineError();if(!allowed())return;
+          const login=document.getElementById("moreLoginPassword").value,payment=document.getElementById("morePaymentPassword").value;
+          if(!login&&!payment)return showInlineError("请至少填写一项密码。","moreLoginPassword");
+          if([login,payment].some(value=>value&&(value.length<6||value.length>64)))return showInlineError("密码长度须为6至64位。");
+          if(!verifyMerchantMfa("morePassword2fa"))return;
+          const button=document.getElementById("morePasswordSave");button.disabled=true;
+          const hash=async value=>Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(value))),byte=>byte.toString(16).padStart(2,"0")).join("");
+          try{const hashes={};if(login)hashes.login=await hash(login);if(payment)hashes.payment=await hash(payment);if(!allowed()){button.disabled=false;return;}Object.assign(settings.credentials,hashes);const security=ensureAdminSecurity(item);if(login)security.passwordStatus="已设置";security.sessions="0 个在线会话";finishMerchantMore(item,"编辑密码",`${login?"登录密码已修改；":""}${payment?"支付密码已修改；":""}现有会话已失效`);}catch{button.disabled=false;showInlineError("本地密码处理失败，请重试。");}
+        });
+      }else if(action === "prepaid"){
+        const before=merchantMoreDecimal(settings.prepaidCny,2);
+        merchantMoreDialog(item,"调整预付服务费余额",`<div class="info-item"><span>当前余额</span><strong class="mono">${escapeHtml(settings.prepaidCny)} CNY</strong></div><div class="field"><label for="morePrepaidDirection">调整类型</label><select class="select" id="morePrepaidDirection"><option value="add">调增</option><option value="subtract">调减</option></select></div><div class="field"><label for="morePrepaidAmount">调整金额（CNY）</label><input class="input mono" id="morePrepaidAmount" inputmode="decimal"></div><div class="field"><label for="morePrepaidReason">调整原因</label><textarea class="input" id="morePrepaidReason" maxlength="200">运营调整预付服务费余额</textarea></div><div id="morePrepaidPreview" role="status"></div><p class="muted">仅调整本地Demo预付服务费，不改变商户收付钱包。</p>`,`${cancel}<button class="btn primary" id="morePrepaidSave">保存调整</button>`);
+        const preview=()=>{const amount=merchantMoreDecimal(document.getElementById("morePrepaidAmount").value,2),subtract=document.getElementById("morePrepaidDirection").value==="subtract";document.getElementById("morePrepaidPreview").textContent=amount!==null&&before!==null&&(!subtract||before>=amount)?`调整后余额 ${merchantMoreFormat(before+(subtract?-amount:amount),2)} CNY`:"调整后余额 —";};
+        document.getElementById("morePrepaidAmount").addEventListener("input",preview);document.getElementById("morePrepaidDirection").addEventListener("change",preview);preview();
+        document.getElementById("morePrepaidSave").addEventListener("click",()=>{clearInlineError();if(!allowed())return;const amount=merchantMoreDecimal(document.getElementById("morePrepaidAmount").value,2),direction=document.getElementById("morePrepaidDirection").value,reason=document.getElementById("morePrepaidReason").value.trim();if(amount===null||amount<=0n)return showInlineError("调整金额须大于0，最多2位小数。","morePrepaidAmount");if(!reason)return showInlineError("请填写调整原因。","morePrepaidReason");const after=before+(direction==="subtract"?-amount:amount);if(after<0n||after>9007199254740991n)return showInlineError("调整后余额超出可用范围。");document.getElementById("morePrepaidSave").disabled=true;settings.prepaidCny=merchantMoreFormat(after,2);(settings.prepaidRecords||=[]).unshift({time:nowText(),direction,amount:merchantMoreFormat(amount,2),before:merchantMoreFormat(before,2),after:settings.prepaidCny,reason});finishMerchantMore(item,"调整预付服务费",`${direction} ${merchantMoreFormat(amount,2)} CNY；${reason}`);});
+      }
+    }
+
+    function merchantChannelTestProducts(item,direction) {
+      if(!merchantMoreAllowed(item)||!item.capabilities.includes(direction==="collect"?"法币代收":"法币代付"))return [];
+      if(direction==="collect")return merchantCollectTestProducts(item);
+      const model=window.HSProviderDemo;
+      return merchantPayoutProducts(item).filter(p=>p.currency==="CNY"&&p.status==="开启"&&payoutBindingChannels(p).some(c=>payoutMerchantChannelConfig(p,item,c).bound&&c.status==="开启"&&model.canConfigureChannel(merchantProfileTenantId,c.providerId,"代付")));
+    }
+
+    function openMerchantChannelTest(item) {
+      const settings=merchantMoreSettings(item),snapshot=JSON.stringify(item);
+      merchantMoreDialog(item,"通道测试",`<form id="moreChannelTestForm"><div class="form-grid"><div class="field"><label for="moreTestDirection">业务类型</label><select class="select" id="moreTestDirection"><option value="payout">代付 PAYOUT</option><option value="collect">支付 PAY</option></select></div><div class="field"><label for="moreTestAmount">下单金额（元）</label><input class="input mono" id="moreTestAmount" value="100" inputmode="decimal"></div><div class="field"><label for="moreTestOrder">商户订单号</label><div class="more-test-order-control"><input class="input mono" id="moreTestOrder" readonly><button class="btn" type="button" id="moreTestGenerateOrder">生成</button></div></div><div class="field"><label for="moreTestProduct">产品编码</label><input class="input mono" id="moreTestProduct" list="moreTestProductOptions"><datalist id="moreTestProductOptions"></datalist></div><div class="field more-test-payout"><label for="moreTestName">收款人姓名</label><input class="input" id="moreTestName" value="测试"></div><div class="field more-test-payout"><label for="moreTestAccount">收款账号</label><input class="input mono" id="moreTestAccount"></div><div class="field more-test-payout"><label for="moreTestBank">收款银行</label><input class="input" id="moreTestBank"></div></div><p class="muted">仅本地模拟，不请求真实通道，不生成正式订单或扣减钱包。</p><div class="toolbar"><button class="btn primary" type="submit">提交测试</button></div></form><div id="moreChannelTestResult" role="status"></div>`,"",undefined);
+      let orderSequence = Date.now();
+      const generateOrder = () => {
+        const input = document.getElementById("moreTestOrder");
+        let order;
+        do { order = `TEST${orderSequence++}`; } while (order === input.value || settings.tests.some(test => test.order === order));
+        input.value = order;
+      };
+      document.getElementById("moreTestGenerateOrder").addEventListener("click", generateOrder);
+      generateOrder();
+      const update=()=>{const direction=document.getElementById("moreTestDirection").value;document.getElementById("moreTestProductOptions").innerHTML=merchantChannelTestProducts(item,direction).map(p=>`<option value="${escapeHtml(p.productNo||p.id)}">${escapeHtml(p.name)}</option>`).join("");document.querySelectorAll(".more-test-payout").forEach(el=>{el.hidden=direction!=="payout";});document.getElementById("moreChannelTestResult").textContent="";};update();document.getElementById("moreTestDirection").addEventListener("change",update);
+      document.getElementById("moreChannelTestForm").addEventListener("submit",event=>{event.preventDefault();clearInlineError();if(!merchantMoreAllowed(item,snapshot))return showInlineError("租户或商户已变化，请重新打开。");const direction=document.getElementById("moreTestDirection").value,code=document.getElementById("moreTestProduct").value.trim(),amount=parseCnyInput(document.getElementById("moreTestAmount").value),order=document.getElementById("moreTestOrder").value.trim();if(!merchantChannelTestProducts(item,direction).some(p=>(p.productNo||p.id)===code))return showInlineError("请选择已绑定、启用且授权有效的产品编码。","moreTestProduct");if(amount===null||amount<=0)return showInlineError("请输入大于0且最多2位小数的金额。","moreTestAmount");if(!/^[A-Za-z0-9_-]{1,64}$/.test(order))return showInlineError("订单号限1至64位字母、数字、下划线或短横线。","moreTestOrder");if(direction==="payout"&&["moreTestName","moreTestAccount","moreTestBank"].some(id=>!document.getElementById(id).value.trim()))return showInlineError("请完整填写收款人、账号和银行。");if(settings.tests.some(t=>t.order===order))return showInlineError("该商户订单号已测试，请更换订单号。","moreTestOrder");settings.tests.unshift({order,direction,amount,code,time:nowText()});document.getElementById("moreChannelTestForm").querySelector('[type="submit"]').disabled=true;document.getElementById("moreTestGenerateOrder").disabled=true;document.getElementById("moreChannelTestResult").textContent=`模拟测试成功 · ${order} · CNY ${amount.toFixed(2)}；未发起真实下单。`;});
+    }
+
+    function openMerchantRelationshipUnbind(item) {
+      const parent=merchants.find(m=>!m.deletedAt&&m.id===item.parentMerchantId);
+      if(item.type!=="子商户"||!parent)return showToast("当前商户没有可解绑的上级关系");
+      const snapshot=JSON.stringify(item),parentId=parent.id;
+      merchantMoreDialog(item,"解绑主／子商户关系",`<div class="info-grid"><div class="info-item"><span>当前上级主商户</span><strong>${escapeHtml(parent.name)} · ${escapeHtml(parent.id)}</strong></div><div class="info-item"><span>解绑后类型</span><strong>独立商户</strong></div></div><p>确认解除当前子商户与上级主商户的关系？商户资料、业务配置、钱包和历史记录保留。</p>`, '<button class="btn" id="merchantMoreCancel">取消</button><button class="btn danger" id="moreUnbindConfirm">确认解绑</button>');
+      document.getElementById("moreUnbindConfirm").addEventListener("click",()=>{
+        if(!merchantMoreAllowed(item,snapshot)||item.type!=="子商户"||item.parentMerchantId!==parentId||!merchants.includes(parent)||parent.deletedAt)return showInlineError("租户、商户或上级关系已变化，未解绑。");
+        document.getElementById("moreUnbindConfirm").disabled=true;
+        item.type="独立商户";item.parentMerchantId="";
+        parent.logs.unshift([nowText(),"解绑子商户",currentTenantOperator.account,`${item.name} · ${item.id} 已解除关联`]);
+        finishMerchantMore(item,"解绑商户关系",`解除与 ${parent.name} · ${parentId} 的主子关系，改为独立商户`);
+      });
+    }
+
+    function merchantDeleteHasFunds(item) {
+      return item.wallets.some(row=>num(row[2])!==0||num(row[3])!==0) || num(item.moreSettings?.prepaidCny || "0")!==0 || num(item.moreSettings?.serviceBalanceUsdt || "0")!==0;
+    }
+
+    function openMerchantDelete(item) {
+      const snapshot=JSON.stringify(item),hasChildren=merchants.some(m=>!m.deletedAt&&m.parentMerchantId===item.id),hasFunds=merchantDeleteHasFunds(item);
+      merchantMoreDialog(item,"删除商户",`<p>确认从当前租户列表移除 ${escapeHtml(item.name)}（${escapeHtml(item.id)}）？</p>${hasChildren||hasFunds?'<p class="danger-text">商户存在子商户、非零钱包或预付服务费余额，暂不可删除。</p>':'<p class="muted">仅本地Demo移除，保留历史记录，完成后可撤销。</p>'}`,`<button class="btn" id="merchantMoreCancel">取消</button><button class="btn danger" id="moreDeleteConfirm" ${hasChildren||hasFunds?"disabled":""}>确认删除</button>`);
+      document.getElementById("moreDeleteConfirm").addEventListener("click",()=>{if(!merchantMoreAllowed(item,snapshot))return showInlineError("租户或商户已变化，请重新打开。");if(merchants.some(m=>!m.deletedAt&&m.parentMerchantId===item.id)||merchantDeleteHasFunds(item))return showInlineError("存在子商户或非零余额，未删除。");const deletedAt=nowText();item.deletedAt=deletedAt;selectedMerchantIds.delete(item.id);item.logs.unshift([deletedAt,"删除商户",currentTenantOperator.account,"Demo移除，历史记录保留"]);renderRows();merchantMoreDialog(item,"商户已删除",'<p>已从当前租户列表移除，历史记录保留。</p>','<button class="btn" id="moreDeleteUndo">撤销删除</button><button class="btn primary" id="merchantMoreCancel">返回列表</button>');document.getElementById("moreDeleteUndo").addEventListener("click",()=>{if(window.HSProviderDemo?.tenantId!==merchantProfileTenantId||!merchants.includes(item)||item.deletedAt!==deletedAt)return showInlineError("租户或商户已变化，请重新进入列表。");delete item.deletedAt;finishMerchantMore(item,"恢复商户","撤销Demo删除");});});
+    }
+
+    function bindMerchantMoreEvents() {
+      if(merchantMoreEventsBound)return;merchantMoreEventsBound=true;
+      document.addEventListener("pointerdown",event=>{if(!event.target.closest("#merchantMoreMenu, [data-merchant-more]"))closeMerchantMore();});
+      window.addEventListener("resize",()=>closeMerchantMore());
+      document.addEventListener("scroll",event=>{if(!event.target.closest?.("#merchantMoreMenu"))positionMerchantMore();},true);
+    }
+
+
     function renderRows() {
+      closeMerchantMore();
       if (activeBusinessPageMode) return renderBusinessMerchantRows();
       if (!document.getElementById("merchantRows")) return;
       const list = filteredMerchants();
@@ -22427,7 +22609,7 @@
       document.getElementById("resultInfo").textContent = selectedCount ? `共 ${list.length} 个商户，已选 ${selectedCount} 个` : `共 ${list.length} 个商户`;
       document.getElementById("merchantRows").innerHTML = list.map((item) => {
         const parent = item.parentMerchantId ? merchants.find((merchant) => merchant.id === item.parentMerchantId) : null;
-        const childCount = merchants.filter((merchant) => merchant.parentMerchantId === item.id).length;
+        const childCount = merchants.filter((merchant) => !merchant.deletedAt && merchant.parentMerchantId === item.id).length;
         const relation = item.type === "主商户"
           ? `直属子商户 ${childCount} 个`
           : item.type === "子商户"
@@ -22435,18 +22617,18 @@
             : "无上级关系";
         return `
           <tr>
-            <td><label class="table-check"><input type="checkbox" data-merchant-select="${item.id}" aria-label="选择 ${item.name}" ${selectedMerchantIds.has(item.id) ? "checked" : ""}></label></td>
+            <td><label class="table-check"><input type="checkbox" data-merchant-select="${item.id}" aria-label="选择 ${escapeHtml(item.name)}" ${selectedMerchantIds.has(item.id) ? "checked" : ""}></label></td>
             <td>
               <div class="stack">
-                <strong>${item.name}</strong>
+                <strong>${escapeHtml(item.name)}</strong>
                 <span class="mono muted">${item.id}</span>
-                <span class="muted">${item.owner} · ${item.phone}</span>
+                <span class="muted">${escapeHtml(item.owner)} · ${escapeHtml(item.phone)}</span>
               </div>
             </td>
             <td>
               <div class="stack">
                 ${tag(item.type)}
-                <span class="muted">${relation}</span>
+                <span class="muted">${escapeHtml(relation)}</span>
               </div>
             </td>
             <td class="volume-cell">${renderVolumeSummary(item)}</td>
@@ -22461,6 +22643,7 @@
               <div class="ops">
                 <button class="link-btn" type="button" data-detail="${item.id}">详情</button>
                 <button class="link-btn ${item.status === "停用" ? "" : "danger-text"}" type="button" data-merchant-toggle="${item.id}">${item.status === "停用" ? "启用" : "停用"}</button>
+                <button class="link-btn" type="button" data-merchant-more="${escapeHtml(item.id)}" aria-haspopup="menu" aria-expanded="false" aria-controls="merchantMoreMenu">更多</button>
               </div>
             </td>
           </tr>
@@ -23100,9 +23283,9 @@
           item.tiers ? item.tiers.map((tier) => `${escapeHtml(tier.start)}${tier.badge ? " " + escapeHtml(tier.badge) : ""} → ${escapeHtml(tier.fee)}`).join("<br>") : escapeHtml(item.minMax),
           escapeHtml(item.wallet),
           escapeHtml(item.chargeTiming),
-          `${tag(item.status)}<br><span class="mono muted">${escapeHtml(item.version || "v1")}</span>`,
+          tag(item.status),
           `<span class="mono">${escapeHtml(item.effective)}</span><br><span class="muted">${escapeHtml(item.updated)}</span>`,
-          `<div class="ops"><button class="link-btn" type="button" data-rate-edit="${item.id}">编辑</button><button class="link-btn" type="button" data-rate-history="${item.id}">版本</button><button class="link-btn ${statusAction === "停用" ? "danger-text" : ""}" type="button" data-rate-status="${item.id}" data-rate-status-action="${statusAction}">${statusAction}</button></div>`
+          `<div class="ops"><button class="link-btn" type="button" data-rate-edit="${item.id}">编辑</button><button class="link-btn ${statusAction === "停用" ? "danger-text" : ""}" type="button" data-rate-status="${item.id}" data-rate-status-action="${statusAction}">${statusAction}</button></div>`
         ];
       });
     }
@@ -23129,27 +23312,20 @@
             <h1>${config.title}</h1>
             <p>当前租户对全部商户统一收取的 CNY 费用；平台套餐费率和通道成本不在此配置。</p>
           </div>
-          <div class="toolbar" data-astryx="ActionGroup">
-            <button class="btn primary" type="button" id="ratePolicyBtn"><i data-lucide="shield-check"></i>费率生效规则</button>
-          </div>
         </div>
         <section class="panel" data-astryx="DataPanel">
           <div class="panel-head" data-astryx="PanelHeader">
             <div class="panel-title"><i data-lucide="percent"></i>统一费率配置</div>
             <div class="segment" aria-label="费率业务类型">
-              ${["全部", "商户提款", "代收业务", "代付业务"].map((business) => `<button class="seg-btn ${activeRateBusiness === business ? "active" : ""}" type="button" data-rate-filter="${business}">${business}</button>`).join("")}
+              ${["全部", "商户提款", "代收业务"].map((business) => `<button class="seg-btn ${activeRateBusiness === business ? "active" : ""}" type="button" data-rate-filter="${business}">${business}</button>`).join("")}
             </div>
           </div>
           <div class="table-actions" data-astryx="ActionToolbar">
             <div class="selection-info">${rateRows().length} 条配置 · 每个业务方向仅一条当前配置 · 统一按 UTC+8 生效</div>
           </div>
           <div class="rate-table">
-            ${dataTable(["业务类型", "币种 / 范围", "计费方式 / 当前费率", "最低 / 封顶 / 档位", "扣费钱包", "扣费时点", "状态 / 版本", "生效时间 / 操作人", "操作"], rateRows())}
+            ${dataTable(["业务类型", "币种 / 范围", "计费方式 / 当前费率", "最低 / 封顶 / 档位", "扣费钱包", "扣费时点", "状态", "生效时间 / 操作人", "操作"], rateRows())}
           </div>
-        </section>
-        <section class="panel" data-astryx="DataPanel">
-          <div class="panel-head"><div class="panel-title"><i data-lucide="history"></i>费率版本记录</div><div class="selection-info">变更确认后立即影响新订单；已创建订单继续使用创建时费率快照</div></div>
-          ${dataTable(["变更记录", "类型 / 业务", "变更前", "变更后", "操作人", "版本", "状态", "生效时间 / 原因"], rateHistoryRows())}
         </section>
       `;
       bindRateEvents();
@@ -23157,9 +23333,7 @@
     }
 
     function bindRateEvents() {
-      document.getElementById("ratePolicyBtn")?.addEventListener("click", openRatePolicyModal);
       document.querySelectorAll("[data-rate-edit]").forEach((btn) => btn.addEventListener("click", () => openRateModal(btn.dataset.rateEdit)));
-      document.querySelectorAll("[data-rate-history]").forEach((btn) => btn.addEventListener("click", () => openRateHistoryModal(btn.dataset.rateHistory)));
       document.querySelectorAll("[data-rate-filter]").forEach((btn) => {
         btn.addEventListener("click", () => {
           activeRateBusiness = btn.dataset.rateFilter;
@@ -23255,7 +23429,7 @@
         <div class="modal-body">
           <div class="notice">有费率管理权限的租户账号填写原因并通过 Google 2FA 后，可在同一账号完成二次确认；首版不生成费率审核单。</div>
           <div class="info-grid">
-            <div class="info-item"><div class="k">配置范围</div><div class="v">商户提款、代收、代付各一条 CNY 当前配置</div></div>
+            <div class="info-item"><div class="k">配置范围</div><div class="v">商户提款、代收各一条 CNY 当前配置；代付费率在代付商户管理设置</div></div>
             <div class="info-item"><div class="k">新订单</div><div class="v">确认后按 UTC+8 立即使用新版本</div></div>
             <div class="info-item"><div class="k">已创建订单</div><div class="v">继续使用建单时锁定的费率快照</div></div>
             <div class="info-item"><div class="k">留痕</div><div class="v">版本、前后值、原因、账号、IP、时间永久保存</div></div>
@@ -23278,8 +23452,6 @@
         </div>
         <div class="modal-tabs" data-astryx="ContextStrip">
           <span class="modal-tab active" aria-current="page">阶梯规则</span>
-          <span class="modal-tab">生效后生成不可覆盖的新版本</span>
-          <span class="modal-tab">有权限账号通过 2FA 后二次确认</span>
         </div>
         <div class="modal-body" data-astryx="DialogBody">
           <div class="form-grid compact">
@@ -23356,7 +23528,7 @@
 
     function openRateModal(rateId) {
       const item = rateSettings.find((setting) => setting.id === rateId);
-      if (!item) return showToast("首版三项 CNY 统一费率已完整，请编辑对应业务的当前配置。")
+      if (!item) return showToast("请编辑商户提款或代收业务的当前配置。")
       if (item.tiers) {
         openTierRateModal(item);
         return;
@@ -23371,8 +23543,6 @@
         </div>
         <div class="modal-tabs" data-astryx="ContextStrip">
           <span class="modal-tab active" aria-current="page">费率配置</span>
-          <span class="modal-tab">生效后生成不可覆盖的新版本</span>
-          <span class="modal-tab">有权限账号通过 2FA 后二次确认</span>
         </div>
         <div class="modal-body" data-astryx="DialogBody">
           <div class="form-grid">
@@ -23380,7 +23550,6 @@
               <label for="rateBusiness">业务类型</label>
               <select class="select" id="rateBusiness">
                 <option ${item.business === "代收业务" ? "selected" : ""}>代收业务</option>
-                <option ${item.business === "代付业务" ? "selected" : ""}>代付业务</option>
               </select>
             </div>
             <div class="field">
@@ -23463,7 +23632,7 @@
       if (google2fa !== currentTenantOperator.google2fa) return showInlineError("Google 2FA 验证失败，费率尚未变化。", "rateChange2fa");
       const after = {
         ...item,
-        business: document.getElementById("rateBusiness").value,
+        business: item.business,
         asset: "CNY",
         chargeType: document.getElementById("rateChargeType").value,
         formula,
@@ -23491,7 +23660,7 @@
       document.getElementById("modal").innerHTML = `
         <div class="modal-head"><div><h2>确认${change.changeType}统一费率</h2><p>${escapeHtml(change.target.business)} · CNY · ${change.target.id}</p></div><button class="modal-close" type="button" id="modalClose" aria-label="关闭"><i data-lucide="x"></i></button></div>
         <div class="modal-body">
-          <div class="notice">确认后立即生成 ${version} 并对之后创建的新订单生效；历史订单继续使用原费率快照。本次不会生成审核单。</div>
+          <div class="notice">确认后对之后创建的新订单生效，已创建订单不受影响。</div>
           ${dataTable(["变更前", "变更后", "变更原因"], [[change.before ? rateSnapshotSummary(change.before) : "无", rateSnapshotSummary(change.after), escapeHtml(change.reason)]])}
           <div class="info-grid"><div class="info-item"><div class="k">操作账号</div><div class="v">${escapeHtml(currentTenantOperator.account)}</div></div><div class="info-item"><div class="k">生效时区</div><div class="v">UTC+8</div></div><div class="info-item"><div class="k">影响范围</div><div class="v">当前租户全部商户的新订单</div></div><div class="info-item"><div class="k">审计</div><div class="v">前后值、原因、账号、IP、时间永久保存</div></div></div>
         </div>
@@ -23510,7 +23679,7 @@
       rateChangeHistory.unshift({ id, targetId: change.target.id, changeType: change.changeType, business: change.target.business, before: change.before, after: change.after, operator: currentTenantOperator.account, version, status: "已生效", created: now, reason: change.reason });
       closeModal();
       renderMerchantRatePage(modulePages["merchant-rate"]);
-      showToast(`${change.target.business}统一费率 ${version} 已生效；只影响之后创建的新订单，审计日志已永久保存`);
+      showToast(`${change.target.business}统一费率已生效`);
     }
 
     function openRateStatusModal(rateId, action) {
@@ -23518,7 +23687,7 @@
       document.getElementById("modal").innerHTML = `
         <div class="modal-head"><div><h2>${action}统一费率</h2><p>${item.business} · ${item.asset} · ${item.id}</p></div><button class="modal-close" type="button" id="modalClose" aria-label="关闭"><i data-lucide="x"></i></button></div>
         <div class="modal-body">
-          <div class="notice">${action === "停用" ? "停用后该业务的新订单会因没有可用统一费率而被阻断；已创建订单不受影响。" : "启用后该业务的新订单立即使用当前费率版本。"}</div>
+          <div class="notice">${action === "停用" ? "停用后该业务的新订单会因没有可用统一费率而被阻断；已创建订单不受影响。" : "启用后该业务的新订单立即使用当前费率。"}</div>
           <div class="info-grid"><div class="info-item"><div class="k">当前状态</div><div class="v">${tag(item.status)}</div></div><div class="info-item"><div class="k">目标状态</div><div class="v">${tag(action === "停用" ? "已停用" : "已启用")}</div></div><div class="info-item"><div class="k">影响范围</div><div class="v">当前租户全部商户的新订单</div></div><div class="info-item"><div class="k">执行方式</div><div class="v">同一有权限账号二次确认后直接生效</div></div></div>
           <div class="form-grid"><div class="field wide"><label for="rateStatusReason">操作原因</label><input class="input" id="rateStatusReason" placeholder="必填，将写入永久审计日志"></div><div class="field"><label for="rateStatus2fa">Google 2FA 验证码</label><input class="input mono" id="rateStatus2fa" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="6 位验证码"></div></div>
           <div class="field-error" id="modalError" role="alert"></div>
@@ -23602,7 +23771,7 @@
       const typeOptions = ["独立商户", "主商户", "子商户"].map((type) => `
         <option${item.type === type ? " selected" : ""}>${type}</option>
       `).join("");
-      const parentOptions = merchants.filter((merchant) => merchant.id !== item.id && merchant.type !== "子商户").map((merchant) => `
+      const parentOptions = merchants.filter((merchant) => !merchant.deletedAt && merchant.id !== item.id && merchant.type !== "子商户").map((merchant) => `
         <option value="${merchant.id}"${item.parentMerchantId === merchant.id ? " selected" : ""}>${escapeHtml(merchant.name)} · ${merchant.id}</option>
       `).join("");
       return `
@@ -24527,13 +24696,15 @@
 
     function saveMerchantBasic(item) {
       clearInlineError();
+      if (!merchantMoreAllowed(item)) return showInlineError("租户或商户已变化，请重新打开。");
+      const snapshot = JSON.stringify(item);
       const button = document.getElementById("saveMerchantBasic");
       const name = document.getElementById("merchantBasicName").value.trim();
       const type = document.getElementById("merchantBasicType").value;
       const owner = document.getElementById("merchantBasicOwner").value.trim();
       const phone = document.getElementById("merchantBasicPhone").value.trim();
       const parentMerchantId = document.getElementById("merchantBasicParent").value;
-      const childCount = merchants.filter((merchant) => merchant.parentMerchantId === item.id).length;
+      const childCount = merchants.filter((merchant) => !merchant.deletedAt && merchant.parentMerchantId === item.id).length;
 
       if (!name) return showInlineError("请填写商户名称。", "merchantBasicName");
       if (merchants.some((merchant) => merchant.id !== item.id && merchant.name.toLowerCase() === name.toLowerCase())) return showInlineError("当前租户已存在同名商户。", "merchantBasicName");
@@ -24548,6 +24719,7 @@
       button.disabled = true;
       button.textContent = "保存中…";
       setTimeout(() => {
+        if (!merchantMoreAllowed(item, snapshot)) {button.disabled=false;return showToast("租户或商户资料已变化，未保存");}
         item.name = name;
         item.type = type;
         item.owner = owner;
@@ -24877,7 +25049,7 @@
       document.getElementById("modal").innerHTML = `
         <div class="modal-head" data-astryx="DialogHeader">
           <div>
-            <h2>${item.name}</h2>
+            <h2>${escapeHtml(item.name)}</h2>
             <p><span class="mono">${item.id}</span> · ${item.type} · ${item.status}</p>
           </div>
           <div class="merchant-detail-actions"><button class="modal-close" type="button" id="modalClose" aria-label="关闭"><i data-lucide="x"></i></button></div>
@@ -25283,7 +25455,7 @@
 
     function businessMerchantRows(mode, keyword = "", status = "全部状态") {
       const query = keyword.trim().toLowerCase();
-      return merchants.filter((item) => (!query || `${item.name} ${item.id}`.toLowerCase().includes(query)) &&
+      return merchants.filter(item => !item.deletedAt).filter((item) => (!query || `${item.name} ${item.id}`.toLowerCase().includes(query)) &&
         (status === "全部状态" || (item.capabilities.includes(businessMerchantCapability(mode)) ? (mode === "collect" ? item.collectConfig : item.payoutConfig).status : "未开通") === status));
     }
 
@@ -25650,11 +25822,14 @@
     }
 
     function bindMerchantListEvents() {
+      bindMerchantMoreEvents();
       ["keyword", "merchantType", "statusFilter", "dateFilter"].forEach((id) => {
         document.getElementById(id).addEventListener("input", renderRows);
       });
 
       document.getElementById("merchantRows").addEventListener("click", (event) => {
+        const more=event.target.closest("[data-merchant-more]");
+        if(more){openMerchantMore(more);return;}
         const walletDetail = event.target.closest("[data-wallet-detail]");
         if (walletDetail) {
           openWalletModal(walletDetail.dataset.walletDetail);
