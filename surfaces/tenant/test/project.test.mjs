@@ -39,7 +39,8 @@ test("账户管理提供补单限制且不再展示数据范围列", async () =>
   const accounts = html.slice(html.indexOf('id="view-accounts"'), html.indexOf('id="view-roles"'));
   assert.doesNotMatch(accounts, /<th>数据范围<\/th>/);
   for (const key of ['repairDailyCount', 'repairDailyAmount', 'repairSingleAmount']) assert.ok(html.includes(key));
-  assert.match(html, /保存补单限制/);
+  assert.match(html, /modalShell\('补单设置'/);
+  assert.match(html, /type="submit">确认提交/);
 });
 
 test("租户钱包与资金划转导航及业务对象口径一致", async () => {
