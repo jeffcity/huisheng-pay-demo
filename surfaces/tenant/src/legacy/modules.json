@@ -127,6 +127,22 @@
     "sourceName": "运营中心 / 日终统计",
     "initialHash": "merchant-payout-daily"
   },
+  "channel-pay-change": {
+    "label": "代收通道流水记录",
+    "group": "运营中心",
+    "module": "channel-records",
+    "sourceKey": "channel-records",
+    "sourceName": "运营中心 / 通道流水记录",
+    "initialHash": "channel-pay-change"
+  },
+  "channel-payout-change": {
+    "label": "代付通道流水记录",
+    "group": "运营中心",
+    "module": "channel-records",
+    "sourceKey": "channel-records",
+    "sourceName": "运营中心 / 通道流水记录",
+    "initialHash": "channel-payout-change"
+  },
   "order-tracking": {
     "label": "全局订单追踪",
     "group": "运营中心",

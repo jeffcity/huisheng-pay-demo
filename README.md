@@ -171,3 +171,7 @@ npm run smoke     # 本机 Chrome：单文件、切端、子目录和离线验�
 先选租户，展示全部已接入通道商，支持名称/编号、已授权/未授权筛选与代收/代付方向快速勾选；草稿跨筛选保留，多项变更统一填写原因并验证Google MFA后提交。保存复验账号权限、租户范围、接入方向及原授权，失败整批不写入；切换租户或刷新先保护草稿。导出当前范围已保存授权。编辑源为平台business.html。
 
 [平台端通道商授权开发任务清单](docs/delivery/2026-10-20-platform-provider-authorization/README.md)随统一Demo提交为GitHub交付快照，包含租户范围、列表快速勾选、统一验证保存及验收清单。
+
+## 租户运营中心通道流水
+
+运营中心新增代收通道流水记录、代付通道流水记录，仅保留CNY，按蓝盛实页复刻。页面源为surfaces/tenant/public/legacy/sources/channel-records.html，模型为surfaces/tenant/src/channel-records-model.js。使用虚构数据和本地CSV，真实接口及正式导出由开发沿用蓝盛代码迁移；不修改钱包、订单或通道配置。需求见docs/delivery/2026-10-21-channel-ledger-migration/。

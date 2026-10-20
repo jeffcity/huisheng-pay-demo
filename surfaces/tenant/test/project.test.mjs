@@ -8,8 +8,8 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const modules = JSON.parse(await readFile(path.join(root, "src/legacy/modules.json"), "utf8"));
 
-test("页面注册表包含 29 个页面", () => {
-  assert.equal(Object.keys(modules).length, 29);
+test("页面注册表包含 31 个页面", () => {
+  assert.equal(Object.keys(modules).length, 31);
   assert.equal(modules.todos, undefined);
   assert.equal(modules.tickets, undefined);
 });
@@ -92,7 +92,7 @@ test("登录页提供 2FA 已绑定与未绑定两条可验证流程", async () 
 
 test("每个页面的源文件存在于 public/legacy/sources", async () => {
   const keys = new Set(Object.values(modules).map(m => m.sourceKey));
-  assert.equal(keys.size, 7);
+  assert.equal(keys.size, 8);
   for (const key of keys) {
     await stat(path.join(root, "public/legacy/sources", `${key}.html`));
   }
