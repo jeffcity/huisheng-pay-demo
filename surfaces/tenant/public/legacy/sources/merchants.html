@@ -21332,7 +21332,6 @@
     let activeCollectPanel = "products";
     let activeCollectProductQuery = "";
     let collectTestPayUrl = null;
-    let activeRateBusiness = "全部";
     let merchantListTemplate = "";
     let merchantModalReturnFocus = null;
     const selectedMerchantIds = new Set();
@@ -22283,22 +22282,6 @@
           { start: "0", fee: "CNY 1.00", interval: "提款 [0, 2000) 手续费 CNY 1.00", badge: "起始档" },
           { start: "2000", fee: "免费", interval: "提款 >= 2000 免手续费", badge: "" }
         ]
-      },
-      {
-        id: "RATE-IN-CNY",
-        business: "代收业务",
-        asset: "CNY",
-        chargeType: "组合",
-        formula: "0.62% + CNY 1.00",
-        minMax: "最低 CNY 1.00 / 封顶 CNY 80.00",
-        wallet: "商户代收钱包扣费",
-        chargeTiming: "代收订单成功时扣",
-        scope: "全部商户",
-        status: "已启用",
-        version: "v5",
-        effective: "2026-07-01 00:00",
-        updated: "2026-07-01 Alice",
-        note: "人民币代收统一费率"
       }
     ];
 
@@ -23274,7 +23257,7 @@
     }
 
     function rateRows() {
-      return rateSettings.filter((item) => activeRateBusiness === "全部" || item.business === activeRateBusiness).map((item) => {
+      return rateSettings.map((item) => {
         const statusAction = item.status === "已停用" ? "启用" : "停用";
         return [
           `${tag(item.business)}<br><span class="mono muted">${item.id}</span>`,
@@ -23310,18 +23293,15 @@
         <div class="page-head" data-astryx="PageHeader">
           <div>
             <h1>${config.title}</h1>
-            <p>当前租户对全部商户统一收取的 CNY 费用；平台套餐费率和通道成本不在此配置。</p>
+            <p>设置当前租户全部商户的 CNY 提款手续费。</p>
           </div>
         </div>
         <section class="panel" data-astryx="DataPanel">
           <div class="panel-head" data-astryx="PanelHeader">
             <div class="panel-title"><i data-lucide="percent"></i>统一费率配置</div>
-            <div class="segment" aria-label="费率业务类型">
-              ${["全部", "商户提款", "代收业务"].map((business) => `<button class="seg-btn ${activeRateBusiness === business ? "active" : ""}" type="button" data-rate-filter="${business}">${business}</button>`).join("")}
-            </div>
           </div>
           <div class="table-actions" data-astryx="ActionToolbar">
-            <div class="selection-info">${rateRows().length} 条配置 · 每个业务方向仅一条当前配置 · 统一按 UTC+8 生效</div>
+            <div class="selection-info">${rateRows().length} 条商户提款手续费配置 · 统一按 UTC+8 生效</div>
           </div>
           <div class="rate-table">
             ${dataTable(["业务类型", "币种 / 范围", "计费方式 / 当前费率", "最低 / 封顶 / 档位", "扣费钱包", "扣费时点", "状态", "生效时间 / 操作人", "操作"], rateRows())}
@@ -23334,12 +23314,6 @@
 
     function bindRateEvents() {
       document.querySelectorAll("[data-rate-edit]").forEach((btn) => btn.addEventListener("click", () => openRateModal(btn.dataset.rateEdit)));
-      document.querySelectorAll("[data-rate-filter]").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          activeRateBusiness = btn.dataset.rateFilter;
-          renderMerchantRatePage(modulePages["merchant-rate"]);
-        });
-      });
       document.querySelectorAll("[data-rate-status]").forEach((btn) => btn.addEventListener("click", () => openRateStatusModal(btn.dataset.rateStatus, btn.dataset.rateStatusAction)));
     }
 
@@ -23421,24 +23395,6 @@
           interval: value.fee === "免费" ? `${range} 免手续费` : `${range} 手续费 ${value.fee}`
         };
       });
-    }
-
-    function openRatePolicyModal() {
-      document.getElementById("modal").innerHTML = `
-        <div class="modal-head"><div><h2>统一商户费率生效规则</h2><p>租户只维护自己向商户收取的费用</p></div><button class="modal-close" type="button" id="modalClose" aria-label="关闭"><i data-lucide="x"></i></button></div>
-        <div class="modal-body">
-          <div class="notice">有费率管理权限的租户账号填写原因并通过 Google 2FA 后，可在同一账号完成二次确认；首版不生成费率审核单。</div>
-          <div class="info-grid">
-            <div class="info-item"><div class="k">配置范围</div><div class="v">商户提款、代收各一条 CNY 当前配置；代付费率在代付商户管理设置</div></div>
-            <div class="info-item"><div class="k">新订单</div><div class="v">确认后按 UTC+8 立即使用新版本</div></div>
-            <div class="info-item"><div class="k">已创建订单</div><div class="v">继续使用建单时锁定的费率快照</div></div>
-            <div class="info-item"><div class="k">留痕</div><div class="v">版本、前后值、原因、账号、IP、时间永久保存</div></div>
-          </div>
-        </div>
-        <div class="modal-footer"><button class="btn primary" type="button" id="ratePolicyClose">知道了</button></div>`;
-      showModal("small");
-      bindModalEvents();
-      document.getElementById("ratePolicyClose").addEventListener("click", closeModal);
     }
 
     function openTierRateModal(item) {
@@ -23528,127 +23484,8 @@
 
     function openRateModal(rateId) {
       const item = rateSettings.find((setting) => setting.id === rateId);
-      if (!item) return showToast("请编辑商户提款或代收业务的当前配置。")
-      if (item.tiers) {
-        openTierRateModal(item);
-        return;
-      }
-      document.getElementById("modal").innerHTML = `
-        <div class="modal-head" data-astryx="DialogHeader">
-          <div>
-            <h2>编辑统一费率</h2>
-            <p>适用范围：当前租户全部商户 · 不支持单商户独立费率</p>
-          </div>
-          <button class="modal-close" type="button" id="modalClose" aria-label="关闭"><i data-lucide="x"></i></button>
-        </div>
-        <div class="modal-tabs" data-astryx="ContextStrip">
-          <span class="modal-tab active" aria-current="page">费率配置</span>
-        </div>
-        <div class="modal-body" data-astryx="DialogBody">
-          <div class="form-grid">
-            <div class="field">
-              <label for="rateBusiness">业务类型</label>
-              <select class="select" id="rateBusiness">
-                <option ${item.business === "代收业务" ? "selected" : ""}>代收业务</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="rateAsset">币种 / 资产</label>
-              <select class="select" id="rateAsset">
-                <option ${item.asset === "CNY" ? "selected" : ""}>CNY</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="rateChargeType">计费方式</label>
-              <select class="select" id="rateChargeType"><option>${item.chargeType}</option><option>固定</option><option>百分比</option><option>组合</option></select>
-            </div>
-            <div class="field">
-              <label for="rateFormula">费率公式</label>
-              <input class="input" id="rateFormula" value="${item.formula}">
-            </div>
-            <div class="field">
-              <label for="rateMinMax">最低 / 封顶</label>
-              <input class="input" id="rateMinMax" value="${item.minMax}">
-            </div>
-            <div class="field">
-              <label for="rateWallet">扣费钱包</label>
-              <input class="input" id="rateWallet" value="${item.wallet}" readonly>
-            </div>
-            <div class="field">
-              <label for="rateChargeTiming">扣费时点</label>
-              <input class="input" id="rateChargeTiming" value="${item.chargeTiming}">
-            </div>
-            <div class="field">
-              <label>最近变更</label>
-              <input class="input" value="${item.updated}" readonly>
-            </div>
-            <div class="field wide">
-              <label for="rateNote">配置说明</label>
-              <input class="input" id="rateNote" value="${item.note}">
-            </div>
-            <div class="field wide">
-              <label for="rateChangeReason">变更原因</label>
-              <input class="input" id="rateChangeReason" placeholder="必填，将写入永久审计日志">
-            </div>
-            <div class="field">
-              <label for="rateChange2fa">Google 2FA 验证码</label>
-              <input class="input mono" id="rateChange2fa" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="6 位验证码">
-            </div>
-          </div>
-          <div class="sub-panel" data-astryx="DataPanel">
-            <h3>范围校验</h3>
-            <div style="padding:12px" class="info-grid" data-astryx="DescriptionList">
-              <div class="info-item"><div class="k">适用范围</div><div class="v">${tag("全商户", "green")}</div></div>
-              <div class="info-item"><div class="k">提款限制</div><div class="v">商户提款仅编辑现有 CNY 阶梯</div></div>
-              <div class="info-item"><div class="k">当前状态</div><div class="v">${tag(item.status)}</div></div>
-              <div class="info-item"><div class="k">风险提示</div><div class="v">费率调整影响全部商户</div></div>
-            </div>
-          </div>
-          <div class="field-error" id="modalError" role="alert"></div>
-        </div>
-        <div class="modal-footer" data-astryx="FooterActions">
-          <button class="btn" type="button" id="cancelRateChange">取消</button>
-          <button class="btn primary" type="button" id="submitRateChange"><i data-lucide="arrow-right"></i>继续确认</button>
-        </div>
-      `;
-      showModal();
-      bindModalEvents();
-      document.getElementById("cancelRateChange").addEventListener("click", closeModal);
-      document.getElementById("submitRateChange").addEventListener("click", () => submitRateChange(item));
-    }
-
-    function submitRateChange(item) {
-      clearInlineError();
-      const formula = document.getElementById("rateFormula").value.trim();
-      const minMax = document.getElementById("rateMinMax").value.trim();
-      const chargeTiming = document.getElementById("rateChargeTiming").value.trim();
-      const note = document.getElementById("rateNote").value.trim();
-      const reason = document.getElementById("rateChangeReason").value.trim();
-      const google2fa = document.getElementById("rateChange2fa").value.trim();
-      if (!formula) return showInlineError("请填写费率公式。", "rateFormula");
-      if (!minMax) return showInlineError("请填写最低或封顶规则。", "rateMinMax");
-      if (!chargeTiming) return showInlineError("请填写扣费时点。", "rateChargeTiming");
-      if (!reason) return showInlineError("请填写费率变更原因。", "rateChangeReason");
-      if (google2fa !== currentTenantOperator.google2fa) return showInlineError("Google 2FA 验证失败，费率尚未变化。", "rateChange2fa");
-      const after = {
-        ...item,
-        business: item.business,
-        asset: "CNY",
-        chargeType: document.getElementById("rateChargeType").value,
-        formula,
-        minMax,
-        wallet: document.getElementById("rateWallet").value,
-        chargeTiming,
-        note,
-        status: "已启用"
-      };
-      openRateApplyConfirm({
-        target: item,
-        changeType: "编辑",
-        before: { formula: item.formula, minMax: item.minMax, wallet: item.wallet, chargeTiming: item.chargeTiming, note: item.note },
-        after,
-        reason
-      });
+      if (!item || !item.tiers) return showToast("请编辑商户提款手续费的当前配置。");
+      openTierRateModal(item);
     }
 
     function nextRateVersion(item) {
