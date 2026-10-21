@@ -202,6 +202,7 @@
       .bot-form-grid .full { grid-column: auto; }
       .bot-form-actions { padding: 0 16px 16px; }
     }
+    .notify-bot-table{min-width:1050px}.notify-remark{white-space:pre-wrap;min-width:120px;max-width:260px;overflow-wrap:anywhere}.token-eye{display:inline-flex;vertical-align:middle;margin-left:5px}.token-eye:focus-visible{outline:2px solid var(--primary)}#notifyBotForm .field+.field{margin-top:16px}#notifyBotForm textarea{min-height:90px}#testNotifyBotMask .preview{min-height:72px}
   </style>
 </head>
 <body>
@@ -209,7 +210,7 @@
     <header class="page-head">
       <div>
         <h1>通知中心</h1>
-        <p>查看当前租户已推送至 TG 机器人的历史消息，并维护 TG 通知目标、消息模板与查单机器人。</p>
+        <p>查看当前租户已推送至 TG 机器人的历史消息，并维护 TG 通知目标、消息模板、通知机器人与查单机器人。</p>
       </div>
       <div class="tenant-scope"><span class="scope-dot"></span><span>当前租户：HS-TEN-001 汇盛东南亚</span></div>
     </header>
@@ -217,6 +218,7 @@
     <nav class="tabs" role="tablist" aria-label="通知中心页签">
       <button class="tab active" id="messagesTab" role="tab" type="button" aria-selected="true" aria-controls="messagesPanel" data-tab="messages">发送的消息 <span class="count-pill" id="messageTabCount">8</span></button>
       <button class="tab" id="configTab" role="tab" type="button" aria-selected="false" aria-controls="configPanel" data-tab="config">通知配置 <span class="count-pill" id="configTabCount">9</span></button>
+      <button class="tab" id="notifyBotsTab" role="tab" type="button" aria-selected="false" aria-controls="notifyBotsPanel" data-tab="notifyBots">通知机器人配置</button>
       <button class="tab" id="queryBotsTab" role="tab" type="button" aria-selected="false" aria-controls="queryBotsPanel" data-tab="queryBots">查单机器人配置</button>
     </nav>
 
@@ -243,15 +245,11 @@
     </section>
 
     <section class="panel" id="configPanel" role="tabpanel" aria-labelledby="configTab" hidden>
-      <div class="scope-note">
-        <span class="scope-dot"></span>
-        <div><strong>当前租户配置范围</strong>通知机器人由平台授权，租户只维护接收群、启停状态与消息模板；同一消息类型可配置多个目标群。</div>
-      </div>
       <section class="card filter-card config-filter" aria-label="通知配置筛选">
         <div class="field"><label for="configType">消息类型</label><select class="control" id="configType"><option value="">全部类型</option></select></div>
         <div class="field"><label for="configStatus">状态</label><select class="control" id="configStatus"><option value="">全部状态</option><option value="on">启用</option><option value="off">停用</option></select></div>
         <div class="field"><label for="configRisk">风险等级</label><select class="control" id="configRisk"><option value="">全部风险</option><option>高风险</option><option>中风险</option><option>低风险</option></select></div>
-        <div class="field"><label for="configRobot">通知机器人</label><select class="control" id="configRobot"><option value="">全部机器人</option><option>汇盛通知 A</option><option>汇盛资金审核</option><option>汇盛风控</option><option>测试机器人</option></select></div>
+        <div class="field"><label for="configRobot">通知机器人</label><select class="control" id="configRobot"><option value="">全部机器人</option></select></div>
         <div class="field"><label for="configGroup">TG 群 ID</label><input class="control" id="configGroup" placeholder="请输入 TG 群 ID"></div>
         <div class="filter-actions"><button class="btn" id="resetConfigs" type="button">重置</button><button class="btn primary" id="searchConfigs" type="button">搜索</button></div>
       </section>
@@ -276,6 +274,15 @@
           <div class="field"><label for="ipThreshold">IP 数量阈值</label><input class="control" id="ipThreshold" type="number" min="1" value="2"></div>
         </div>
         <div class="special-actions"><button class="btn" id="cancelSpecial" type="button">取消</button><button class="btn primary" id="saveSpecial" type="button">保存专属配置</button></div>
+      </section>
+    </section>
+
+    <section class="panel" id="notifyBotsPanel" role="tabpanel" aria-labelledby="notifyBotsTab" hidden>
+      <section class="card" aria-label="通知机器人配置">
+        <header class="card-head"><h2>通知机器人</h2></header>
+        <form class="operator-toolbar" id="notifyBotSearchForm"><input class="control" id="notifyBotSearch" placeholder="请输入名称" aria-label="通知机器人名称"><button class="btn primary" type="submit">搜索</button><button class="btn primary" id="addNotifyBot" type="button">新增</button></form>
+        <div class="table-wrap"><table class="notify-bot-table" aria-label="通知机器人列表"><thead><tr><th>序号</th><th>名称</th><th>Token</th><th>状态</th><th>备注</th><th>创建时间</th><th>操作</th></tr></thead><tbody id="notifyBotRows"></tbody></table></div>
+        <nav class="pager" aria-label="通知机器人分页"><span id="notifyBotTotal"></span><select class="control operator-page-size" id="notifyBotPageSize" aria-label="通知机器人每页条数"><option value="10">10条/页</option><option value="20">20条/页</option><option value="50">50条/页</option></select><button class="page-btn" id="notifyBotPrevious" type="button" aria-label="通知机器人上一页">‹</button><span class="row-actions" id="notifyBotPages"></span><button class="page-btn" id="notifyBotNext" type="button" aria-label="通知机器人下一页">›</button><label for="notifyBotJump">前往</label><input class="control operator-page-jump" id="notifyBotJump" type="number" min="1" value="1" aria-label="通知机器人页码"><span>页</span></nav>
       </section>
     </section>
 
@@ -333,7 +340,7 @@
         <div class="modal-grid">
           <div class="field"><label for="modalType">消息类型</label><select class="control" id="modalType"><option value="">请选择消息类型</option></select><span class="field-error" id="modalTypeError">请选择消息类型</span></div>
           <div class="field"><label for="modalGroup">TG 群 ID</label><input class="control mono" id="modalGroup" placeholder="请输入当前租户 TG 群 ID"><span class="field-error" id="modalGroupError">请输入 TG 群 ID</span></div>
-          <div class="field"><label for="modalRobot">通知机器人</label><select class="control" id="modalRobot"><option value="">请选择通知机器人</option><option>汇盛通知 A</option><option>汇盛资金审核</option><option>汇盛风控</option><option>测试机器人</option></select><span class="field-error" id="modalRobotError">请选择通知机器人</span></div>
+          <div class="field"><label for="modalRobot">通知机器人</label><select class="control" id="modalRobot"><option value="">请选择通知机器人</option></select><span class="field-error" id="modalRobotError">请选择通知机器人</span></div>
           <div class="field"><label>风险等级</label><div class="readonly" id="modalRisk"><span class="tag gray">请选择消息类型</span><span class="muted">系统自动判定</span></div></div>
           <div class="field full"><label>可用变量</label><div class="variables" id="modalVariables"><span class="muted">请选择消息类型</span></div></div>
           <div class="field full"><label for="modalTemplate">消息模板</label><textarea class="control" id="modalTemplate" placeholder="支持 ${变量名} 占位符"></textarea><span class="hint">只能使用当前消息类型提供的变量。</span><span class="field-error" id="modalTemplateError">请输入消息模板</span></div>
@@ -342,6 +349,27 @@
       </div>
       <footer class="modal-actions"><button class="btn" id="cancelConfigModal" type="button">取消</button><button class="btn primary" id="submitConfigModal" type="button">保存配置</button></footer>
     </div>
+  </div>
+
+  <div class="mask" id="notifyBotMask" role="dialog" aria-modal="true" aria-labelledby="notifyBotModalTitle">
+    <form class="modal small" id="notifyBotForm" novalidate>
+      <header class="modal-head"><h3 id="notifyBotModalTitle">新增通知机器人</h3><button class="close" id="closeNotifyBot" type="button" aria-label="关闭通知机器人弹窗">×</button></header>
+      <div class="modal-body">
+        <div class="field"><label for="notifyBotName"><span class="operator-required">*</span>名称</label><input class="control" id="notifyBotName" maxlength="30" placeholder="1-30字符，可中英文" required autocomplete="off"></div>
+        <div class="field"><label for="notifyBotToken"><span class="operator-required">*</span>Token</label><input class="control mono" id="notifyBotToken" type="password" placeholder="数字:字母数字字符串" required autocomplete="off" spellcheck="false"></div>
+        <div class="field"><label for="notifyBotRemark">备注</label><textarea class="control" id="notifyBotRemark" maxlength="200" placeholder="请输入备注"></textarea></div>
+        <div class="field"><label id="notifyBotOnLabel"><span class="operator-required">*</span>状态</label><div class="bot-switch-field"><button class="switch on" id="notifyBotOn" type="button" role="switch" aria-checked="true" aria-labelledby="notifyBotOnLabel"></button><span id="notifyBotOnText">启用</span></div></div>
+        <p class="field-error" id="notifyBotError" role="alert"></p>
+      </div>
+      <footer class="modal-actions"><button class="btn" id="cancelNotifyBot" type="button">取消</button><button class="btn primary" type="submit">立即提交</button></footer>
+    </form>
+  </div>
+  <div class="mask" id="testNotifyBotMask" role="dialog" aria-modal="true" aria-labelledby="testNotifyBotTitle">
+    <form class="modal small" id="testNotifyBotForm" novalidate>
+      <header class="modal-head"><h3 id="testNotifyBotTitle">测试发送</h3><button class="close" id="closeTestNotifyBot" type="button" aria-label="关闭测试发送弹窗">×</button></header>
+      <div class="modal-body"><div class="field"><label for="testNotifyBotGroup"><span class="operator-required">*</span>测试群ID</label><input class="control mono" id="testNotifyBotGroup" placeholder="请输入测试群ID" autocomplete="off"></div><p class="muted">测试消息内容预览：</p><div class="preview" id="testNotifyBotPreview"></div><p class="field-error" id="testNotifyBotError" role="alert"></p></div>
+      <footer class="modal-actions"><button class="btn" id="cancelTestNotifyBot" type="button">取消</button><button class="btn primary" type="submit">发送测试</button></footer>
+    </form>
   </div>
 
   <div class="mask" id="operatorMask" role="dialog" aria-modal="true" aria-labelledby="operatorModalTitle">
@@ -373,6 +401,8 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script>
+    const notificationModel=window.HSNotificationBots;
+    const notificationTenantId=window.HSProviderDemo?.tenantId||"HS-TEN-001";
     // TG 消息历史按推送当时的模板快照保存；后续修改配置不会回写已发送内容。
     const messageData = [
       { type: "商户资金划转", group: "-5211818661", time: "2026-09-02 10:30:00", date: "2026-09-02", template: "【商户资金划转】\n划转单号：${transferOrderNo}\n从：${sourceMerchantName}\n到：${targetMerchantName}\n划转金额：${transferAmount} ${currency}\n手续费：${feeAmount} ${currency}\n状态：${orderStatus}", values: { transferOrderNo: "TRF202609020006", sourceMerchantName: "星河游戏", targetMerchantName: "东盛电商", transferAmount: "18,000.00", feeAmount: "20.00", currency: "CNY", orderStatus: "已完成" } },
@@ -421,6 +451,11 @@
       { type: "商户钱包地址变更", group: "-5211818661", robot: "汇盛风控", on: true, time: "2026-08-28 16:35:50" }
     ];
     configData.forEach(function (item) { item.template = item.template || typeMeta[item.type].template; });
+    const notificationOwner=window.HSProviderDemo?.tenantData(notificationTenantId)||{};
+    const notificationState=notificationOwner.notificationCenter ||= notificationModel.createState(notificationTenantId,notificationTenantId==='HS-TEN-001'?configData:[]);
+    configData=notificationState.configs;
+    if(notificationTenantId!=='HS-TEN-001')messageData.length=0;
+
 
     let filteredMessages = messageData.slice();
     let filteredConfigs = configData.slice();
@@ -445,7 +480,8 @@
     }
 
     function setActiveTab(name) {
-      ["messages", "config", "queryBots"].forEach(function (key) {
+      if(name!=="notifyBots")maskNotifyTokens();
+      ["messages", "config", "notifyBots", "queryBots"].forEach(function (key) {
         const active = key === name;
         byId(key + "Tab").classList.toggle("active", active);
         byId(key + "Tab").setAttribute("aria-selected", String(active));
@@ -492,7 +528,7 @@
         const summary = item.template.replace(/\n/g, " / ");
         return '<tr><td>' + (visibleIndex + 1) + '</td><td><span class="tag blue">' + escapeHtml(item.type) + '</span>' + (item.special ? '<span class="tag special">特殊类型</span>' : '') + '</td>' +
           '<td><span class="tag ' + riskTone[meta.risk] + '">' + meta.risk + '</span></td><td class="mono">' + escapeHtml(item.group) + '</td>' +
-          '<td><div class="stack"><span>' + escapeHtml(item.robot) + '</span><span class="muted">平台授权机器人池</span></div></td>' +
+          '<td><div class="stack"><span>' + escapeHtml(robotName(item)) + '</span>' + (notificationModel.find(notificationState,item.robotId)?.on===false?'<span class="muted">已停用</span>':'') + '</div></td>' +
           '<td><button class="switch ' + (item.on ? 'on' : '') + '" type="button" role="switch" aria-checked="' + item.on + '" aria-label="' + (item.on ? '停用' : '启用') + ' ' + escapeHtml(item.type) + '" data-config-toggle="' + index + '"></button><span class="switch-label">' + (item.on ? '启用' : '停用') + '</span></td>' +
           '<td><span class="template-summary" title="' + escapeHtml(summary) + '">' + escapeHtml(summary) + '</span></td><td>' + item.time + '</td>' +
           '<td><div class="row-actions"><button class="link-btn" type="button" data-config-edit="' + index + '">修改</button>' + (item.special ? '<button class="link-btn" type="button" data-config-special="' + index + '">专属配置</button>' : '') + '<button class="link-btn danger" type="button" data-config-delete="' + index + '">删除</button></div></td></tr>';
@@ -502,17 +538,17 @@
       byId("configTabCount").textContent = configData.length;
     }
 
-    function searchConfigs() {
+    function searchConfigs(quiet) {
       const type = byId("configType").value;
       const status = byId("configStatus").value;
       const risk = byId("configRisk").value;
       const robot = byId("configRobot").value;
       const group = byId("configGroup").value.trim();
       filteredConfigs = configData.filter(function (item) {
-        return (!type || item.type === type) && (!status || (status === "on") === item.on) && (!risk || typeMeta[item.type].risk === risk) && (!robot || item.robot === robot) && (!group || item.group.includes(group));
+        return (!type || item.type === type) && (!status || (status === "on") === item.on) && (!risk || typeMeta[item.type].risk === risk) && (!robot || item.robotId === robot) && (!group || item.group.includes(group));
       });
       renderConfigs();
-      toast("已找到 " + filteredConfigs.length + " 条通知配置");
+      if(quiet!==true)toast("已找到 " + filteredConfigs.length + " 条通知配置");
     }
 
     function resetConfigs() {
@@ -550,13 +586,16 @@
     }
 
     function openConfigModal(index) {
+      if(!notificationContextValid())return;
       editingConfigIndex = Number.isInteger(index) ? index : null;
       const row = editingConfigIndex === null ? null : configData[editingConfigIndex];
       byId("configModalTitle").textContent = row ? "修改通知配置" : "新增通知配置";
       byId("modalType").disabled = Boolean(row);
       byId("modalType").value = row ? row.type : "";
       byId("modalGroup").value = row ? row.group : "";
-      byId("modalRobot").value = row ? row.robot : "";
+      byId("modalRobot").value="";
+      refreshRobotSelectors();
+      byId("modalRobot").value = row ? row.robotId : "";
       byId("modalTemplate").value = row ? row.template : "";
       clearConfigErrors();
       updateModalMeta();
@@ -570,6 +609,7 @@
     }
 
     function submitConfigModal() {
+      if(!notificationContextValid())return;
       clearConfigErrors();
       const values = {
         type: byId("modalType").value,
@@ -586,6 +626,9 @@
         }
       });
       if (!valid) return;
+      const original=editingConfigIndex===null?null:configData[editingConfigIndex];
+      const selectedRobot=notificationModel.find(notificationState,values.robot);
+      if(!typeMeta[values.type]||(!selectedRobot&&values.robot!==original?.robotId)){byId('modalRobotError').textContent='请选择当前租户的通知机器人';byId('modalRobotError').classList.add('show');return}
       const allowed = new Set(typeMeta[values.type].vars);
       const used = Array.from(values.template.matchAll(/\$\{(\w+)\}/g)).map(function (match) { return match[1]; });
       const unsupported = used.find(function (variable) { return !allowed.has(variable); });
@@ -595,7 +638,7 @@
         byId("modalTemplateError").classList.add("show");
         return;
       }
-      const row = { type: values.type, group: values.group, robot: values.robot, template: values.template, on: editingConfigIndex === null ? true : configData[editingConfigIndex].on, time: "2026-09-02 10:30:00", special: values.type === "恶意拉单预警" };
+      const row = { type: values.type, group: values.group, robotId: values.robot, robot: selectedRobot?.name||original.robot, template: values.template, on: editingConfigIndex === null ? true : configData[editingConfigIndex].on, time: notificationModel.now(), special: values.type === "恶意拉单预警" };
       const added = editingConfigIndex === null;
       if (added) configData.unshift(row); else configData[editingConfigIndex] = row;
       filteredConfigs = configData.slice();
@@ -625,7 +668,8 @@
     }
 
     function exportCsv(filename, header, rows) {
-      const csv = "\ufeff" + [header].concat(rows).join("\n");
+      const csvCell=value=>{let s=String(value??'');if(/^[\s]*[=+@-]/.test(s)&&!/^[-+]?\d+(?:\.\d+)?$/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"'};
+      const csv = "\ufeff" + [header.split(','),...rows].map(row=>row.map(csvCell).join(',')).join('\r\n');
       const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
       const link = document.createElement("a");
       link.href = url;
@@ -643,7 +687,7 @@
     byId("refreshMessages").addEventListener("click", function () { filteredMessages = messageData.slice(); renderMessages(); toast("TG 推送记录已刷新"); });
     byId("messageGroup").addEventListener("keydown", function (event) { if (event.key === "Enter") searchMessages(); });
     byId("exportMessages").addEventListener("click", function () {
-      exportCsv("汇盛租户端-TG推送记录.csv", "推送时间,推送事件,推送内容", filteredMessages.map(function (item) { return [item.time, item.type, renderPushedContent(item).replace(/\n/g, " / ")].join(","); }));
+      exportCsv("汇盛租户端-TG推送记录.csv", "推送时间,推送事件,推送内容", filteredMessages.map(function (item) { return [item.time, item.type, renderPushedContent(item).replace(/\n/g, " / ")]; }));
       toast("已按当前筛选条件导出 TG 推送记录");
     });
 
@@ -653,11 +697,12 @@
     byId("configGroup").addEventListener("keydown", function (event) { if (event.key === "Enter") searchConfigs(); });
     byId("addConfig").addEventListener("click", function () { openConfigModal(); });
     byId("exportConfigs").addEventListener("click", function () {
-      exportCsv("汇盛租户端-通知配置.csv", "消息类型,风险等级,TG群ID,通知机器人,状态,更新时间", filteredConfigs.map(function (item) { return [item.type, typeMeta[item.type].risk, item.group, item.robot, item.on ? "启用" : "停用", item.time].join(","); }));
+      exportCsv("汇盛租户端-通知配置.csv", "消息类型,风险等级,TG群ID,通知机器人,状态,更新时间", filteredConfigs.map(function (item) { return [item.type, typeMeta[item.type].risk, item.group, robotName(item), item.on ? "启用" : "停用", item.time]; }));
       toast("已按当前筛选条件导出通知配置");
     });
 
     byId("configRows").addEventListener("click", function (event) {
+      if(!notificationContextValid())return;
       const edit = event.target.closest("[data-config-edit]");
       const toggle = event.target.closest("[data-config-toggle]");
       const special = event.target.closest("[data-config-special]");
@@ -671,8 +716,9 @@
         const index = Number(toggle.dataset.configToggle);
         const item = configData[index];
         openConfirm(item.on ? "停用通知配置" : "启用通知配置", (item.on ? "停用后，该目标群不再接收此消息类型。" : "启用后，后续符合条件的消息将发送到该目标群。"), function () {
+          if(!notificationContextValid())return;
           item.on = !item.on;
-          item.time = "2026-09-02 10:34:00";
+          item.time = notificationModel.now();
           filteredConfigs = configData.slice();
           renderConfigs();
           toast(item.on ? "通知配置已启用" : "通知配置已停用");
@@ -682,6 +728,7 @@
         const index = Number(remove.dataset.configDelete);
         const item = configData[index];
         openConfirm("删除通知配置", "删除后，TG 群 " + item.group + " 不再接收「" + item.type + "」消息；历史发送记录保留。", function () {
+          if(!notificationContextValid())return;
           configData.splice(index, 1);
           filteredConfigs = configData.slice();
           renderConfigs();
@@ -941,6 +988,69 @@
     });
     renderOperators();
 
+    let notifyBotPage=1,notifyBotKeyword='',editingNotifyBotId=null,testingNotifyBotId=null,notifyBotOpener=null;
+    const revealedNotifyTokens=new Set();
+    function notificationContextValid(){
+      try{notificationModel.guard(notificationState,notificationTenantId,window.HSProviderDemo?.tenantId||'HS-TEN-001');return true}
+      catch(error){closeNotifyBotModal();closeTestNotifyBot();closeConfigModal();closeConfirm();toast(error.message);return false}
+    }
+    function robotName(item){return notificationModel.label(notificationState,item)}
+    function refreshRobotSelectors(){
+      const chosen=byId('configRobot').value;
+      byId('configRobot').innerHTML='<option value="">全部机器人</option>'+notificationState.bots.map(b=>'<option value="'+escapeHtml(b.id)+'">'+escapeHtml(b.name)+(b.on?'':'（已停用）')+'</option>').join('');
+      byId('configRobot').value=notificationModel.find(notificationState,chosen)?chosen:'';
+      const original=editingConfigIndex===null?null:configData[editingConfigIndex];
+      const selected=byId('modalRobot').value||original?.robotId||'';
+      byId('modalRobot').innerHTML='<option value="">请选择通知机器人</option>'+notificationState.bots.map(b=>'<option value="'+escapeHtml(b.id)+'">'+escapeHtml(b.name)+(b.on?'':'（已停用）')+'</option>').join('');
+      if(original?.robotId&&!notificationModel.find(notificationState,original.robotId))byId('modalRobot').insertAdjacentHTML('beforeend','<option value="'+escapeHtml(original.robotId)+'">'+escapeHtml(original.robot)+'（记录已删除）</option>');
+      byId('modalRobot').value=selected;
+    }
+    function renderNotifyBots(){
+      const result=notificationModel.list(notificationState,notifyBotKeyword,notifyBotPage,byId('notifyBotPageSize').value);notifyBotPage=result.page;
+      const size=Number(byId('notifyBotPageSize').value);
+      byId('notifyBotRows').innerHTML=result.rows.map((b,i)=>'<tr><td>'+((notifyBotPage-1)*size+i+1)+'</td><td>'+escapeHtml(b.name)+'</td><td class="mono"><span>'+escapeHtml(revealedNotifyTokens.has(b.id)?b.token:notificationModel.masked(b.token))+'</span><button class="link-btn token-eye" type="button" data-notify-action="reveal" data-notify-id="'+escapeHtml(b.id)+'" aria-label="'+(revealedNotifyTokens.has(b.id)?'隐藏':'显示')+' '+escapeHtml(b.name)+' Token" aria-pressed="'+revealedNotifyTokens.has(b.id)+'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></td><td><button class="switch '+(b.on?'on':'')+'" type="button" role="switch" aria-checked="'+b.on+'" aria-label="'+escapeHtml(b.name)+' 状态" data-notify-action="toggle" data-notify-id="'+escapeHtml(b.id)+'"></button></td><td class="notify-remark">'+escapeHtml(b.remark||'—')+'</td><td class="mono">'+escapeHtml(b.createdAt)+'</td><td><div class="row-actions">'+[['edit','修改'],['delete','删除'],['test','测试发送']].map(([action,label])=>'<button class="link-btn '+(action==='delete'?'danger':'')+'" type="button" data-notify-action="'+action+'" data-notify-id="'+escapeHtml(b.id)+'">'+label+'</button>').join('')+'</div></td></tr>').join('')||'<tr><td class="empty" colspan="7">暂无通知机器人</td></tr>';
+      byId('notifyBotTotal').textContent='共 '+result.total+' 条';byId('notifyBotJump').value=result.page;byId('notifyBotJump').max=result.pages;
+      byId('notifyBotPrevious').disabled=result.page===1;byId('notifyBotNext').disabled=result.page===result.pages;
+      const first=Math.max(1,Math.min(result.page-2,result.pages-4));
+      byId('notifyBotPages').innerHTML=Array.from({length:Math.min(5,result.pages)},(_,i)=>{const page=first+i;return '<button class="page-btn '+(page===result.page?'active':'')+'" type="button" data-notify-page="'+page+'" aria-label="通知机器人第 '+page+' 页"'+(page===result.page?' aria-current="page"':'')+'>'+page+'</button>'}).join('');
+    }
+    function maskNotifyTokens(){revealedNotifyTokens.clear();renderNotifyBots()}
+    function syncNotifyBots(){maskNotifyTokens();refreshRobotSelectors();searchConfigs(true)}
+    function setNotifyBotOn(on){byId('notifyBotOn').setAttribute('aria-checked',String(on));byId('notifyBotOn').classList.toggle('on',on);byId('notifyBotOnText').textContent=on?'启用':'停用'}
+    function openNotifyBotModal(row,opener){
+      if(!notificationContextValid())return;editingNotifyBotId=row?.id||null;notifyBotOpener=opener;
+      byId('notifyBotModalTitle').textContent=row?'修改通知机器人':'新增通知机器人';byId('notifyBotName').value=row?.name||'';byId('notifyBotToken').value=row?.token||'';byId('notifyBotToken').type='password';byId('notifyBotRemark').value=row?.remark||'';setNotifyBotOn(row?row.on:true);byId('notifyBotError').textContent='';byId('notifyBotError').classList.remove('show');byId('notifyBotMask').classList.add('show');byId('notifyBotName').focus();
+    }
+    function closeNotifyBotModal(){byId('notifyBotMask').classList.remove('show');byId('notifyBotForm').reset();byId('notifyBotToken').value='';editingNotifyBotId=null;if(notifyBotOpener?.isConnected)notifyBotOpener.focus()}
+    function closeTestNotifyBot(){byId('testNotifyBotMask').classList.remove('show');byId('testNotifyBotForm').reset();testingNotifyBotId=null;if(notifyBotOpener?.isConnected)notifyBotOpener.focus()}
+    byId('notifyBotForm').addEventListener('submit',function(event){
+      event.preventDefault();if(!notificationContextValid())return;
+      try{const edit=Boolean(editingNotifyBotId);notificationModel.save(notificationState,notificationTenantId,window.HSProviderDemo?.tenantId||'HS-TEN-001',editingNotifyBotId,{name:byId('notifyBotName').value,token:byId('notifyBotToken').value,remark:byId('notifyBotRemark').value,on:byId('notifyBotOn').getAttribute('aria-checked')==='true'});notifyBotPage=1;closeNotifyBotModal();syncNotifyBots();toast(edit?'通知机器人已修改':'通知机器人已新增')}
+      catch(error){byId('notifyBotError').textContent=error.message;byId('notifyBotError').classList.add('show')}
+    });
+    byId('notifyBotOn').addEventListener('click',()=>setNotifyBotOn(byId('notifyBotOn').getAttribute('aria-checked')!=='true'));
+    byId('addNotifyBot').addEventListener('click',function(){openNotifyBotModal(null,this)});
+    ['closeNotifyBot','cancelNotifyBot'].forEach(id=>byId(id).addEventListener('click',closeNotifyBotModal));
+    ['closeTestNotifyBot','cancelTestNotifyBot'].forEach(id=>byId(id).addEventListener('click',closeTestNotifyBot));
+    byId('notifyBotRows').addEventListener('click',function(event){
+      const button=event.target.closest('[data-notify-action]');if(!button||!notificationContextValid())return;const row=notificationModel.find(notificationState,button.dataset.notifyId);if(!row)return;notifyBotOpener=button;
+      if(button.dataset.notifyAction==='reveal'){if(revealedNotifyTokens.has(row.id))revealedNotifyTokens.delete(row.id);else revealedNotifyTokens.add(row.id);renderNotifyBots()}
+      if(button.dataset.notifyAction==='edit')openNotifyBotModal(row,button);
+      if(button.dataset.notifyAction==='toggle'){try{notificationModel.toggle(notificationState,notificationTenantId,window.HSProviderDemo?.tenantId||'HS-TEN-001',row.id);syncNotifyBots();toast(row.on?'通知机器人已启用':'通知机器人已停用')}catch(error){toast(error.message)}}
+      if(button.dataset.notifyAction==='delete')openConfirm('删除通知机器人','删除后不可恢复；若已绑定商户将无法删除。',function(){if(!notificationContextValid())return;try{notificationModel.remove(notificationState,notificationTenantId,window.HSProviderDemo?.tenantId||'HS-TEN-001',row.id);syncNotifyBots();toast('通知机器人已删除')}catch(error){toast(error.message)}},false,true);
+      if(button.dataset.notifyAction==='test'){testingNotifyBotId=row.id;byId('testNotifyBotTitle').textContent='测试发送 — '+row.name;byId('testNotifyBotGroup').value='';byId('testNotifyBotPreview').textContent='【测试】通知机器人「'+row.name+'」连通正常 — '+notificationModel.now();byId('testNotifyBotError').textContent='';byId('testNotifyBotError').classList.remove('show');byId('testNotifyBotMask').classList.add('show');byId('testNotifyBotGroup').focus()}
+    });
+    byId('testNotifyBotForm').addEventListener('submit',function(event){event.preventDefault();if(!notificationContextValid())return;try{notificationModel.test(notificationState,notificationTenantId,window.HSProviderDemo?.tenantId||'HS-TEN-001',testingNotifyBotId,byId('testNotifyBotGroup').value);closeTestNotifyBot();toast('测试发送已模拟完成')}catch(error){byId('testNotifyBotError').textContent=error.message;byId('testNotifyBotError').classList.add('show')}});
+    byId('notifyBotSearchForm').addEventListener('submit',function(event){event.preventDefault();notifyBotKeyword=byId('notifyBotSearch').value;notifyBotPage=1;maskNotifyTokens()});
+    byId('notifyBotPageSize').addEventListener('change',()=>{notifyBotPage=1;maskNotifyTokens()});
+    byId('notifyBotPrevious').addEventListener('click',()=>{notifyBotPage--;maskNotifyTokens()});byId('notifyBotNext').addEventListener('click',()=>{notifyBotPage++;maskNotifyTokens()});
+    byId('notifyBotPages').addEventListener('click',event=>{const button=event.target.closest('[data-notify-page]');if(button){notifyBotPage=Number(button.dataset.notifyPage);maskNotifyTokens()}});
+    function jumpNotifyBot(){notifyBotPage=Number(byId('notifyBotJump').value);maskNotifyTokens()}
+    byId('notifyBotJump').addEventListener('change',jumpNotifyBot);byId('notifyBotJump').addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();jumpNotifyBot()}});
+    ['notifyBotMask','testNotifyBotMask'].forEach(id=>byId(id).addEventListener('click',event=>{if(event.target===byId(id)){if(id==='notifyBotMask')closeNotifyBotModal();else closeTestNotifyBot()}}));
+    document.addEventListener('keydown',function(event){const mask=['notifyBotMask','testNotifyBotMask'].map(byId).find(e=>e.classList.contains('show'));if(!mask)return;if(event.key==='Escape'){event.preventDefault();if(mask.id==='notifyBotMask')closeNotifyBotModal();else closeTestNotifyBot()}if(event.key==='Tab'){const nodes=Array.from(mask.querySelectorAll('button,input,select,textarea')).filter(e=>!e.disabled&&e.getClientRects().length);const first=nodes[0],last=nodes[nodes.length-1];if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}}});
+    refreshRobotSelectors();renderNotifyBots();
+
     const notificationTabs = Array.from(document.querySelectorAll("[data-tab]"));
     notificationTabs.forEach(function (button, index) {
       button.addEventListener("keydown", function (event) {
@@ -955,6 +1065,8 @@
         notificationTabs[next].focus();
       });
     });
+    const tenantName=window.HSProviderDemo?.tenants?.find(item=>item.id===notificationTenantId)?.name||notificationTenantId;
+    document.querySelector(".tenant-scope span:last-child").textContent="当前租户："+notificationTenantId+" "+tenantName;
     setActiveTab("messages");
 
     renderMessages();
