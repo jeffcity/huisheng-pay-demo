@@ -1829,12 +1829,14 @@
         showToast("无法进入后台", "登录完成上下文未建立，请重新登录。");
         return { authResult: "authenticated", routeResult: "authentication_context_unavailable", permissionVersion: route.permissionVersion, target: null };
       }
+      window.parent.__HSOwnAccountDemo?.setCurrent(account, 'DemoPass2026', Object.values(profiles).find(p => p.account === account)?.otp || '246810');
       renderPlatformLoginRoute(route);
       showToast(options.afterBind ? "绑定成功" : "登录成功", "已记录认证与权限路由结果。");
       return route;
     }
 
-    function submitLogin(event) {
+    let loginSubmission = 0;
+    async function submitLogin(event) {
       event.preventDefault();
       platformLoginIssuer?.clearAuthenticationAttempt();
       clearPlatformLoginRoute();
@@ -1859,7 +1861,19 @@
         return;
       }
 
-      const authenticationAttempt = platformLoginIssuer?.beginAuthentication(event, { account: els.account.value });
+      const submission = ++loginSubmission;
+      const account = els.account.value.trim().toLowerCase(), password = els.password.value, otp = els.otp.value, scenario = activeScenario;
+      const isCurrentSubmission = () => submission === loginSubmission && account === els.account.value.trim().toLowerCase() && password === els.password.value && otp === els.otp.value && scenario === activeScenario;
+      let passwordAccepted;
+      try { passwordAccepted = !window.parent.__HSOwnAccountDemo || await window.parent.__HSOwnAccountDemo.verifyLogin(account, password); }
+      catch { passwordAccepted = false; }
+      if (!isCurrentSubmission()) return;
+      if (!passwordAccepted) {
+        els.password.value = '';
+        window.HSFormFeedback?.report('账号或密码不正确，请重试', els.password);
+        return;
+      }
+      const authenticationAttempt = platformLoginIssuer?.beginAuthentication(event, { account });
       if (!authenticationAttempt?.ok) {
         renderException("permission");
         showToast("无法验证登录", "登录流程未建立，请重新提交。");
@@ -1868,9 +1882,10 @@
 
       setLoading(true);
       window.setTimeout(() => {
+        if (!isCurrentSubmission()) { if (submission === loginSubmission) { setLoading(false); platformLoginIssuer?.clearAuthenticationAttempt(); } return; }
         setLoading(false);
         if (needsBind) {
-          authenticatedLoginAccount = els.account.value.trim().toLowerCase();
+          authenticatedLoginAccount = account;
           clearLoginSecrets();
           setPanelTag("warning", "需绑定");
           setView("bind");
@@ -1878,8 +1893,8 @@
           return;
         }
 
-        const otpRejected = els.otp.value === "000000";
-        if (activeScenario === "blocked" || otpRejected) {
+        const otpRejected = otp === "000000";
+        if (scenario === "blocked" || otpRejected) {
           platformLoginIssuer?.clearAuthenticationAttempt();
           authenticatedLoginAccount = "";
           clearLoginSecrets();
@@ -1888,7 +1903,7 @@
           return;
         }
 
-        authenticatedLoginAccount = els.account.value.trim().toLowerCase();
+        authenticatedLoginAccount = account;
         completePlatformLogin(authenticatedLoginAccount);
       }, 520);
     }

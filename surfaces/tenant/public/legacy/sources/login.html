@@ -21185,11 +21185,14 @@
       }
       loginButton.disabled = true;
       loginButton.textContent = "校验中…";
-      window.setTimeout(() => {
+      window.setTimeout(async () => {
         loginButton.disabled = false;
         loginButton.innerHTML = '<i data-lucide="log-in"></i> 登录';
         const permissionFact = tenantLoginAccounts.get(account);
-        if (!permissionFact || password !== permissionFact.password) {
+        let passwordAccepted = false;
+        try { passwordAccepted = Boolean(permissionFact) && (window.parent.__HSOwnAccountDemo ? await window.parent.__HSOwnAccountDemo.verifyLogin(account, password, permissionFact.password) : password === permissionFact.password); } catch {}
+        if (document.getElementById("account").value.trim() !== account || passwordInput.value !== password) return;
+        if (!passwordAccepted) {
           formError.textContent = "账号或密码不正确，请检查后重试。";
           formError.classList.remove("hidden");
           passwordInput.value = "";
@@ -21226,6 +21229,7 @@
       otpInputs.forEach(input => { input.value = ""; });
       verifyButton.disabled = true;
       const route = resolveTenantLoginRoute(authenticatedLoginAccount);
+      if (!route.noPermission) { const fact = tenantLoginAccounts.get(authenticatedLoginAccount); window.parent.__HSOwnAccountDemo?.setCurrent(authenticatedLoginAccount, fact.password, fact.demoOtp || '246810'); }
       verifyResult.className = `alert ${route.noPermission ? "warning" : "success"}`;
       verifyResultIcon.setAttribute("data-lucide", route.noPermission ? "shield-alert" : "circle-check");
       verifyResultTitle.textContent = route.title;
@@ -21262,6 +21266,7 @@
       bindOtpInputs.forEach(input => { input.value = ""; });
       bindButton.disabled = true;
       const route = resolveTenantLoginRoute(authenticatedLoginAccount);
+      if (!route.noPermission) { const fact = tenantLoginAccounts.get(authenticatedLoginAccount); window.parent.__HSOwnAccountDemo?.setCurrent(authenticatedLoginAccount, fact.password, fact.demoOtp || '246810'); }
       bindResult.className = `alert ${route.noPermission ? "warning" : "success"}`;
       bindResultCopy.textContent = route.noPermission
         ? "Google 2FA 已绑定，但当前账号没有任何可访问页面，请联系租户管理员。"
