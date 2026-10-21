@@ -42,7 +42,7 @@ npm run smoke     # 本机 Chrome：单文件、切端、子目录和离线验�
 
 ## 租户端日终统计
 
-运营中心提供代付通道、代收通道、商户代收、商户代付四个日终统计入口。编辑源为 `surfaces/tenant/public/legacy/sources/reports.html`，通过模块注册表接入统一入口。商户钱包期初／期末余额在列表展示，冻结与可用在当前页只读明细弹窗展示；不提供流水跳转。当前按 CNY、USD、PHP、THB 展示分币种交互样例，正式币种以租户配置为准。
+运营中心提供代付通道、代收通道、商户代收、商户代付四个日终统计入口。编辑源为 `surfaces/tenant/public/legacy/sources/reports.html`，通过模块注册表接入统一入口。商户钱包期初／期末余额在列表展示，不展示钱包明细列或弹窗入口。当前四张报表仅展示CNY；通道报表展示服务费和利润，不展示代理费。商户代收展示商户服务费、通道服务费及CNY预付栏位，商户代付展示商户服务费及CNY预付栏位。
 
 2026-10-05 报表交互修订：四页币种Tab、移除序号、通道备注可编辑并浏览器本地保存；资金中心原日终报表入口已退场。
 
@@ -175,3 +175,7 @@ npm run smoke     # 本机 Chrome：单文件、切端、子目录和离线验�
 ## 租户运营中心通道流水
 
 运营中心新增代收通道流水记录、代付通道流水记录，仅保留CNY，按蓝盛实页复刻。页面源为surfaces/tenant/public/legacy/sources/channel-records.html，模型为surfaces/tenant/src/channel-records-model.js。使用虚构数据和本地CSV，真实接口及正式导出由开发沿用蓝盛代码迁移；不修改钱包、订单或通道配置。需求见docs/delivery/2026-10-21-channel-ledger-migration/。
+
+## 日终统计CNY栏位
+
+[日终统计CNY栏位需求说明](docs/delivery/2026-10-21-tenant-daily-report-cny-fields/README.md)为本次只读交付说明；四张报表均仅CNY，商户报表不展示钱包明细入口。

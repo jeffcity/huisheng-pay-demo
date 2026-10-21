@@ -12,7 +12,6 @@
     .table-wrap{width:100%;overflow:auto}table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:13px;min-width:1040px}th,td{padding:13px 15px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap}th{background:var(--bg);color:var(--muted);font-weight:600;height:44px}tbody tr:hover{background:#f7fbff}.money,.number{text-align:right}.money{font-family:"SFMono-Regular",Consolas,monospace}.merchant{min-width:130px}.sub{display:block;color:var(--hint);font-size:12px;margin-top:3px}.link-btn{border:0;background:transparent;padding:4px 0;color:var(--primary);white-space:nowrap}.link-btn:hover{color:var(--primary-hover);text-decoration:underline}tfoot td{background:#f2f7ff;font-weight:600;border-top:1px solid #c3d9ff;border-bottom:0}.empty{text-align:center;padding:65px 20px;color:var(--hint)}.pagination{display:flex;justify-content:flex-end;align-items:center;flex-wrap:wrap;gap:8px;padding:16px 20px;border-top:1px solid var(--border);font-size:13px;color:var(--muted)}.pagination .control{width:auto}.page-number{min-width:30px;padding:0 7px;height:30px;border:1px solid transparent;background:transparent;border-radius:4px;color:var(--muted)}.page-number:hover{background:var(--soft)}.page-number[aria-current="page"]{background:var(--soft);color:var(--primary);font-weight:600}.jump{width:56px!important}.footnote{margin:12px 0 0;color:var(--hint);font-size:12px}
     dialog{width:min(580px,calc(100vw - 32px));max-height:calc(100vh - 48px);padding:0;border:0;border-radius:10px;box-shadow:0 16px 64px #1d212933;color:var(--text);background:var(--surface)}dialog::backdrop{background:#1d212966}.dialog-head{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:20px}.dialog-head h2{margin:0;font-size:18px}.close-icon{border:0;background:transparent;color:var(--muted);font-size:24px;width:32px;height:32px;border-radius:4px}.close-icon:hover{background:var(--bg)}.dialog-body{padding:20px 24px}.dialog-context{margin-bottom:20px;color:var(--muted);font-size:13px}.wallet-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.wallet-item{border:1px solid var(--border);border-radius:6px;padding:14px 16px;background:var(--bg)}.wallet-item span{display:block;font-size:13px;color:var(--muted);margin-bottom:7px}.wallet-item strong{font-size:19px;font-weight:600;font-variant-numeric:tabular-nums}.dialog-note{color:var(--hint);font-size:12px;margin:14px 0 0}.dialog-footer{border-top:1px solid var(--border);padding:14px 24px;text-align:right}.toast{position:fixed;left:50%;top:20px;transform:translateX(-50%);z-index:5;background:var(--surface);border:1px solid var(--border);padding:10px 18px;border-radius:6px;box-shadow:0 5px 20px #1d21291a;color:var(--text);font-size:13px}
     .currency-tabs{display:flex;gap:28px;padding:0 20px;border-bottom:1px solid var(--border);overflow:auto}.currency-tab{border:0;border-bottom:2px solid transparent;background:transparent;padding:14px 2px 12px;color:var(--muted);white-space:nowrap}.currency-tab[aria-selected="true"]{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}.currency-tab:hover{color:var(--primary)}.remark-cell{min-width:190px;max-width:250px}.remark-text{display:block;white-space:pre-wrap;overflow-wrap:anywhere}.remark-field label{display:block;margin-bottom:8px;color:var(--muted)}textarea.control{height:140px;padding:10px;resize:vertical;line-height:1.6}.dialog-footer .btn+.btn{margin-left:8px}
-    body[data-report^="merchant"] th:last-child,body[data-report^="merchant"] td:last-child{position:sticky;right:0;background:var(--surface);box-shadow:-1px 0 0 var(--border)}body[data-report^="merchant"] th:last-child{background:var(--bg)}body[data-report^="merchant"] tfoot td:last-child{background:#f2f7ff}
     @media(max-width:700px){.page{padding:16px}.page-head{flex-direction:column;gap:10px}.filters{padding:16px;gap:12px}.field{flex:1;min-width:135px}.field.wide{flex-basis:100%;min-width:0}.dates input{width:calc(50% - 14px)}.actions{flex-basis:100%;flex-wrap:wrap}.meta{flex-direction:column;gap:4px;padding:12px 16px}.pagination{padding:12px}.wallet-grid{grid-template-columns:1fr}.dialog-head,.dialog-body{padding:16px}}
   </style>
 </head>
@@ -35,11 +34,6 @@
     </section>
     <p class="footnote" id="reportNote"></p>
   </main>
-  <dialog id="walletDialog" aria-labelledby="walletDialogTitle">
-    <div class="dialog-head"><h2 id="walletDialogTitle">钱包明细</h2><button class="close-icon" type="button" id="closeWalletIcon" aria-label="关闭钱包明细">×</button></div>
-    <div class="dialog-body"><div class="dialog-context" id="walletContext"></div><div class="wallet-grid" id="walletValues"></div><p class="dialog-note">期初、期末余额为钱包总额；期末可用余额 = 期末余额 − 期末冻结金额。</p></div>
-    <div class="dialog-footer"><button class="btn primary" type="button" id="closeWallet">关闭</button></div>
-  </dialog>
   <dialog id="remarkDialog" aria-labelledby="remarkDialogTitle">
     <form id="remarkForm">
       <div class="dialog-head"><h2 id="remarkDialogTitle">编辑备注</h2><button class="close-icon" type="button" id="closeRemarkIcon" aria-label="关闭编辑备注">×</button></div>
@@ -90,24 +84,21 @@
           merchantRows.push({date:reportDate,merchantId:merchant.id,merchant:merchant.name,currency:'CNY',amount,orderAmount:amount+notAmount,notAmount,total,success,notPaid,rate:(success/total*100).toFixed(2)+'%',walletStart,walletEnd,frozen,available:walletEnd-frozen});
         });
       }
-      // Independent fixtures for the currencies already present in the unified Demo.
-      // These are review samples, not exchange-rate conversions or business grants.
-      const currencies = ['CNY','USD','PHP','THB'];
-      const extraChannelRows=[],extraMerchantRows=[];
-      currencies.slice(1).forEach((currency,index)=>{
-        const scale=[0.19,3.4,2.1][index];
-        channelRows.filter((row,i)=>i%(index+2)!==0).forEach(row=>{
-          const total=row.total+index+4,success=total-(index+5);
-          extraChannelRows.push({...row,currency,amount:Math.round(row.amount*scale),total,success,rate:(success/total*100).toFixed(2)+'%'});
-        });
-        merchantRows.filter((row,i)=>i%(index+2)!==0).forEach(row=>{
-          const copy={...row,currency,total:row.total+index+8,success:row.success+index+3};
-          ['amount','notAmount','walletStart','walletEnd','frozen'].forEach(key=>copy[key]=Math.round(row[key]*scale));
-          copy.orderAmount=copy.amount+copy.notAmount;copy.available=copy.walletEnd-copy.frozen;
-          copy.notPaid=copy.total-copy.success;copy.rate=(copy.success/copy.total*100).toFixed(2)+'%';extraMerchantRows.push(copy);
-        });
+      // Only CNY is available in this review scope; no hidden-currency fixtures are created.
+      const currencies = ['CNY'];
+      // Independent display fixtures. Production fees, profit and prepayment values
+      // must be migrated from LanSheng, not calculated from these sample amounts.
+      channelRows.forEach((row,index)=>{
+        row.serviceFee=[16840,22560,0,19320,25480,14560][index%6]+Math.floor(index/6)*320;
+        row.profit=[9450,-1280,0,11360,15620,7840][index%6]+Math.floor(index/6)*160;
       });
-      channelRows.push(...extraChannelRows);merchantRows.push(...extraMerchantRows);
+      merchantRows.forEach((row,index)=>{
+        row.merchantServiceFee=[32460,41820,0,35680,46720,28940][index%6];
+        row.channelServiceFee=[18240,25760,0,21680,27480,15320][index%6];
+        row.prepayStart=1584200+(index%3)*623400+Math.floor(index/3)*18400;
+        row.prepayEnd=row.prepayStart+[16340,-24860,0,18720,-15640,23680][index%6];
+        row.prepayDetail=0;
+      });
       const remarkStorageKey='huisheng-demo:HS-TEN-001:daily-report-remarks:v1';
       const remarkId=row=>JSON.stringify([config.direction,row.currency,row.date,row.merchantId,row.channel]);
       function readRemarks(){const parsed=JSON.parse(window.top.localStorage.getItem(remarkStorageKey)||'{}');return parsed&&typeof parsed==='object'&&!Array.isArray(parsed)?parsed:{}}
@@ -121,27 +112,29 @@
         ...(payout ? [['orderAmount','订单总金额']] : []),['amount','成交金额'],
         ...(payout ? [['notAmount','未成交金额']] : []),['total','总单量'],['success','成功数'],
         ...(payout ? [['notPaid','未支付']] : []),['rate','成交率'],
-        ['walletStart',walletName+'期初余额'],['walletEnd',walletName+'期末余额'],['detail','钱包明细']
-      ] : [['date','日期'],['merchantId','商户号'],['merchant','商户名称'],['channel','通道名称'],['amount','成交金额'],['total','总单量'],['rate','成交率'],['remark','备注']];
-      const moneyFields = new Set(['amount','orderAmount','notAmount','walletStart','walletEnd']);
+        ['merchantServiceFee','商户服务费'],...(!payout ? [['channelServiceFee','通道服务费']] : []),
+        ['walletStart',walletName+'期初余额'],['walletEnd',walletName+'期末余额'],
+        ['prepayStart','初期预付'],['prepayEnd','末期预付'],['prepayDetail','预付明细']
+      ] : [['date','日期'],['merchantId','商户号'],['merchant','商户名称'],['channel','通道名称'],['amount','成交金额'],['total','总单量'],['rate','成交率'],['serviceFee','服务费'],['profit','利润'],['remark','备注']];
+      const moneyFields = new Set(['amount','orderAmount','notAmount','walletStart','walletEnd','serviceFee','profit','merchantServiceFee','channelServiceFee','prepayStart','prepayEnd','prepayDetail']);
       const countFields = new Set(['total','success','notPaid']);
-      const sumFields = new Set(['amount','orderAmount','notAmount','total','success','notPaid']);
+      const sumFields = new Set(['amount','orderAmount','notAmount','total','success','notPaid','serviceFee','profit','merchantServiceFee','channelServiceFee']);
       const $ = id => document.getElementById(id);
       const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
       const money = value => (value/100).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});
       const fieldClass = key => moneyFields.has(key)?'money':countFields.has(key)||key==='rate'?'number':'';
-      let applied = {entity:'',start:'',end:'',currency:'CNY'}, page=1, pageSize=10, toastTimer, returnFocus, activeRemarkRow;
+      let applied = {entity:'',start:'',end:'',currency:'CNY'}, page=1, pageSize=10, toastTimer, activeRemarkRow;
       document.title = '汇盛支付租户端 · '+config.title;
       document.body.dataset.report = requested in reportConfigs ? requested : 'payout-channel-daily';
       $('reportTitle').textContent = config.title;
       $('reportDescription').textContent = merchantPage ? '按商户查看每日交易结果与'+walletName+'日终余额。' : '按日期、商户和通道查看每日交易结果。';
-      $('reportNote').textContent = merchantPage ? '钱包余额包含已记账的订单、费用、划转及资金调整；钱包明细仅供查看。' : '合计按当前筛选范围汇总，不受分页影响。';
+      $('reportNote').textContent = merchantPage ? '钱包余额包含已记账的订单、费用、划转及资金调整。' : '合计按当前筛选范围汇总，不受分页影响。';
       $('currencyTabs').innerHTML=currencies.map((currency,i)=>'<button class="currency-tab" id="currency-'+currency+'" type="button" role="tab" aria-controls="currencyPanel" aria-selected="'+(i===0)+'" tabindex="'+(i===0?'0':'-1')+'" data-currency="'+currency+'">'+currency+'</button>').join('');
       $('entityLabel').textContent = merchantPage ? '商户' : '通道';
       const options = merchantPage ? merchants.map(m=>[m.id,m.name+' · '+m.id]) : channels.map(c=>[c,c]);
       $('entityFilter').innerHTML = '<option value="">'+(merchantPage?'全部商户':'全部渠道')+'</option>'+options.map(([value,label])=>'<option value="'+escapeHtml(value)+'">'+escapeHtml(label)+'</option>').join('');
       $('reportHead').innerHTML = '<tr>'+columns.map(([key,label])=>'<th scope="col" class="'+fieldClass(key)+'">'+escapeHtml(label)+'</th>').join('')+'</tr>';
-      $('reportTable').style.minWidth = merchantPage ? (payout?'1560px':'1200px') : '1040px';
+      $('reportTable').style.minWidth = merchantPage ? (payout?'2060px':'1660px') : '1280px';
       const filtered = () => sourceRows.filter(row=>(!applied.entity||(merchantPage?row.merchantId:row.channel)===applied.entity)&&(!applied.start||row.date>=applied.start)&&(!applied.end||row.date<=applied.end)&&row.currency===applied.currency);
       function render() {
         document.querySelectorAll('[data-currency]').forEach(button=>{const selected=button.dataset.currency===applied.currency;button.setAttribute('aria-selected',String(selected));button.tabIndex=selected?0:-1});
@@ -150,7 +143,6 @@
         const visible=rows.slice((page-1)*pageSize,page*pageSize);
         $('resultCount').textContent='共 '+rows.length+' 条 · '+applied.currency;
         $('reportRows').innerHTML=visible.length?visible.map(row=>'<tr data-row-key="'+row.key+'">'+columns.map(([key])=>{
-          if(key==='detail') return '<td><button class="link-btn" type="button" data-wallet-key="'+row.key+'" aria-label="查看 '+escapeHtml(row.merchant)+' '+row.date+' 钱包明细">钱包明细</button></td>';
           if(key==='remark') return '<td class="remark-cell"><span class="remark-text">'+escapeHtml(row.remark||'—')+'</span><button class="link-btn" type="button" data-remark-key="'+row.key+'" aria-label="编辑 '+escapeHtml(row.merchant)+' '+row.date+' '+escapeHtml(row.channel)+' '+row.currency+' 备注">编辑</button></td>';
           return '<td class="'+fieldClass(key)+'">'+(moneyFields.has(key)?money(row[key]):escapeHtml(row[key]|| (typeof row[key]==='number'?0:'—')))+'</td>';
         }).join('')+'</tr>').join(''):'<tr><td colspan="'+columns.length+'" class="empty">当前筛选条件下暂无数据</td></tr>';
@@ -190,16 +182,7 @@
           $('remarkContext').textContent=row.date+' · '+row.merchant+'（'+row.merchantId+'） · '+row.channel+' · '+row.currency;
           $('remarkDialog').showModal();$('remarkInput').focus();return;
         }
-        const button=event.target.closest('[data-wallet-key]');if(!button)return;
-        const row=filtered().find(r=>r.key===button.dataset.walletKey);if(!row)return;
-        returnFocus=button;$('walletDialogTitle').textContent=walletName+' · 钱包明细';
-        $('walletContext').textContent=row.merchant+'（'+row.merchantId+'） · '+row.date+' · '+row.currency+(row.date===demoToday?' · 截至 16:30（UTC+8）':' · UTC+8 日终');
-        $('walletValues').innerHTML=[['期初余额',row.walletStart],['期末余额',row.walletEnd],['期末冻结金额',row.frozen],['期末可用余额',row.available]].map(([label,value])=>'<div class="wallet-item"><span>'+label+'</span><strong>'+row.currency+' '+money(value)+'</strong></div>').join('');
-        $('walletDialog').showModal();$('closeWalletIcon').focus();
       });
-      ['closeWallet','closeWalletIcon'].forEach(id=>$(id).addEventListener('click',()=>{$('walletDialog').close()}));
-      $('walletDialog').addEventListener('close',()=>{returnFocus?.focus()});
-      $('walletDialog').addEventListener('click',event=>{if(event.target!==$('walletDialog'))return;const rect=$('walletDialog').getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)$('walletDialog').close()});
       $('remarkForm').addEventListener('submit',event=>{
         event.preventDefault();if(!activeRemarkRow)return;const value=$('remarkInput').value.trim();
         try{const remarks=readRemarks();if(value)remarks[remarkId(activeRemarkRow)]=value;else delete remarks[remarkId(activeRemarkRow)];window.top.localStorage.setItem(remarkStorageKey,JSON.stringify(remarks))}
@@ -210,7 +193,7 @@
       $('remarkDialog').addEventListener('close',()=>{if(activeRemarkRow)document.querySelector('[data-remark-key="'+activeRemarkRow.key+'"]')?.focus();activeRemarkRow=null});
       $('exportReport').addEventListener('click',()=>{
         const rows=filtered();if(!rows.length)return;
-        const exportColumns=columns.filter(([key])=>key!=='detail');
+        const exportColumns=columns;
         const csvCell=value=>'"'+String(value??'').replace(/"/g,'""')+'"';
         const records=[exportColumns.map(([,label])=>label),...rows.map(row=>exportColumns.map(([key])=>moneyFields.has(key)?(row[key]/100).toFixed(2):key==='remark'&&/^[\s]*[=+@-]/.test(row[key])?"'"+row[key]:row[key])),exportColumns.map(([key],i)=>i===0?'合计':sumFields.has(key)?(moneyFields.has(key)?(rows.reduce((sum,r)=>sum+r[key],0)/100).toFixed(2):rows.reduce((sum,r)=>sum+r[key],0)):'')];
         const blob=new Blob(['\ufeff'+records.map(record=>record.map(csvCell).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob);
