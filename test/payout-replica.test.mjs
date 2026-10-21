@@ -11,9 +11,9 @@ function fixture(){
  const window={document:{}};window.top=window;
  const ctx=vm.createContext({window,Map,Set,URL,setTimeout(){},document:{querySelector:el,querySelectorAll:selector=>selector==='[data-payout-apply]:checked'?applies:[],addEventListener(type,fn){if(!listeners.has(type))listeners.set(type,[]);listeners.get(type).push(fn);}}});vm.runInContext(providerSource,ctx);
  const script=source.slice(source.lastIndexOf('<script>')+8,source.lastIndexOf('</script>'));
- const modified=script.replace(/ function close\(\)\{[^\n]+\}/,' function close(){context=null;}').replace(/ function finish\(text,object\)\{[^\n]+\}/,' function finish(text,object){model.log(text,object,tenantId);}').replace(/ render\(\);\s*\}\)\(\);\s*$/,`window.payoutTest={productBindingRows,bindingsFor,availableBindings,setCodeBinding,saveBindingEdit,openBindCodes,openBindMerchants,saveMerchantRate,renderProductRow,saveCollectionCode,configurationActionAllowed,productAction,savePayoutChannel,savePayoutDev,savePayoutBulk,savePayoutLimit,setPayoutType,confirmPayoutDelete,runPayoutMoney,runPayoutTest,saveReplicaProduct,setContext(value){context=value;}};})();`);
+ const modified=script.replace(/ function close\(\)\{[^\n]+\}/,' function close(){context=null;}').replace(/ function finish\(text,object\)\{[^\n]+\}/,' function finish(text,object){model.log(text,object,tenantId);}').replace(/ render\(\);\s*\}\)\(\);\s*$/,`window.payoutTest={productBindingRows,bindingsFor,availableBindings,setCodeBinding,saveBindingEdit,openBindCodes,openBindMerchants,saveMerchantRate,renderProductRow,saveCollectionCode,collectionRateAction,confirmDeleteProduct,configurationActionAllowed,productAction,savePayoutChannel,savePayoutDev,savePayoutBulk,savePayoutLimit,setPayoutType,confirmPayoutDelete,runPayoutMoney,runPayoutTest,saveReplicaProduct,setContext(value){context=value;}};})();`);
  assert.notEqual(modified,script);vm.runInContext(modified,ctx);
- return {change(target){target.hasAttribute||=()=>false;for(const fn of listeners.get('change')||[])fn({target});},noModalFeedback(){feedbackAbsent=true;},click(action,id,extra={}){const button={dataset:{action,id,...extra},closest(){return null;}};const event={target:{closest(selector){return selector==='button'?button:null;}}};for(const fn of listeners.get('click')||[])fn(event);},el,ctx,model:window.HSProviderDemo,api:window.payoutTest,applies,set:(id,value)=>el('#'+id).value=value};
+ return {key(event){for(const fn of listeners.get('keydown')||[])fn(event);},change(target){target.hasAttribute||=()=>false;for(const fn of listeners.get('change')||[])fn({target});},noModalFeedback(){feedbackAbsent=true;},click(action,id,extra={}){const button={dataset:{action,id,...extra},closest(){return null;}};const event={target:{closest(selector){return selector==='button'?button:null;}}};for(const fn of listeners.get('click')||[])fn(event);},el,ctx,model:window.HSProviderDemo,api:window.payoutTest,applies,set:(id,value)=>el('#'+id).value=value};
 }
 function setTenantGrantDirections(model,tenantId,directions){for(const g of model.grants.filter(g=>g.tenantId===tenantId))g.directions=directions.filter(d=>model.providers.find(p=>p.id===g.providerId).directions.includes(d));}
 function limitForm(f,r={}){const c=f.model.tenantData().payoutLimits.get(r.id)||{};const b=(r.limit||'1 - 10000').replaceAll(',','').split(/\s*-\s*/);for(const [id,v] of Object.entries({plMin:c.min||b[0],plMax:c.max||b[1],plDaily:c.dailyAmount||'0',plFixed:c.fixedAmounts||'',plExcluded:c.excludedAmounts||'',plIps:c.submitIpBlacklist||'',plStart:c.start||'00:00',plEnd:c.end||'23:59',plCallbackTime:r.callbackTime||'0',plCallbackStatus:r.callbackStatus||'接受'}))f.set(id,v);f.el('#plEnabled').checked=r.limitStatus==='开启';}
@@ -174,4 +174,66 @@ test('代付编辑权重加减限制1至9，状态单选提交保存且保留限
  const f=fixture(),r=f.model.tenantData().channels.find(c=>c.direction==='代付');channelForm(f,r);f.api.setContext({kind:'payoutChannel',id:r.id});
  f.set('pcWeight','9');f.click('payoutWeightStep','',{step:'1'});assert.equal(f.el('#pcWeight').value,'9');f.set('pcWeight','1');f.click('payoutWeightStep','',{step:'-1'});assert.equal(f.el('#pcWeight').value,'1');f.click('payoutWeightStep','',{step:'1'});assert.equal(f.el('#pcWeight').value,'2');
  f.change({name:'pcStatusChoice',value:'关闭',dataset:{}});assert.equal(f.el('#pcStatus').value,'关闭');f.set('pcGroup','DEMO-GROUP');f.api.savePayoutChannel();assert.equal(r.status,'关闭');assert.equal(r.weight,'2');assert.equal(r.tgGroup,'DEMO-GROUP');assert.equal(r.limitStatus,'开启');
+});
+
+
+test('代收商户批量操作仅作用已搜索的列表，未搜索输入不改变目标',()=>{
+ const f=fixture(),p=f.model.tenantData().products.find(p=>p.direction==='代收');f.api.openBindMerchants(p.id);
+ f.set('bindingMerchant','远航');f.click('merchantSearch');f.click('bindAllMerchants');assert(p.merchantBindings['DEMO-MCH-002'].bound);assert(!p.merchantBindings['DEMO-MCH-003']);
+ f.set('bindingMerchant','不存在');f.click('unbindAllMerchants');assert.equal(p.merchantBindings['DEMO-MCH-002'].bound,false);
+ f.click('merchantSearch');const before=JSON.stringify(p.merchantBindings);f.click('bindAllMerchants');assert.equal(JSON.stringify(p.merchantBindings),before);
+});
+test('代收产品按通道与编码备注组合搜索，批量绑定仅作用搜索结果',()=>{
+ const f=fixture(),d=f.model.tenantData(),p=d.products.find(p=>p.direction==='代收');f.api.openBindCodes(p.id);f.click('unbindAllCodes');const r=d.channels.find(c=>c.direction==='代收'&&c.collectionTypes.length>1&&f.model.canConfigureChannel(f.model.tenantId,c.providerId,'代收')),code=r.collectionTypes[0];
+ f.set('bindingChannel',r.id);f.set('bindingCode',code.name);f.click('bindingSearch');const rows=f.api.availableBindings();assert.equal(rows.length,1);assert.equal(rows[0].code.id,code.id);
+ f.set('bindingCode','未执行搜索');f.click('bindAllCodes');assert.equal(p.codeBindings[code.id].bound,true);assert.equal(Object.values(p.codeBindings).filter(b=>b.bound).length,1);
+ f.set('bindingCode',code.code.toLowerCase());f.click('bindingSearch');assert.equal(f.api.availableBindings()[0].code.id,code.id);f.set('bindingChannel','不存在');f.click('bindingSearch');assert.equal(f.api.availableBindings().length,0);
+});
+test('代收编码回车复用确定保存和校验，组合输入及长按不提交',()=>{
+ const f=fixture(),r=f.model.tenantData().channels.find(c=>c.direction==='代收'&&c.collectionTypes.length),c=r.collectionTypes[0],before=c.rate;
+ f.api.setContext({kind:'collectionCode',id:r.id,codeId:c.id});for(const [k,v] of Object.entries({childName:c.name,childCode:c.code,childRange:c.rule,childRate:'-1'}))f.set(k,v);
+ f.el('#modalBackdrop').classList.contains=()=>true;let attempts=0,prevented=0;f.el('#modalFoot [data-action="saveCollectionCode"]').click=()=>{attempts++;f.click('saveCollectionCode');};const event={key:'Enter',target:{matches:selector=>selector==='#modalBody input'},preventDefault(){prevented++;}};
+ f.key(event);assert.equal(c.rate,before);assert.match(f.el('#modalFeedback').textContent,/有效费率/);f.set('childRate','0.0123');f.key({...event,isComposing:true});f.key({...event,repeat:true});assert.equal(c.rate,before);assert.equal(attempts,1);
+ f.key(event);assert.equal(c.rate,'0.0123');assert.equal(attempts,2);assert.equal(prevented,3);
+ f.model.grantFor(f.model.tenantId,r.providerId).directions=['代付'];f.set('childRate','0.04');f.key(event);assert.equal(c.rate,'0.0123');
+});
+test('代收产品删除可预览自动解绑，取消或配置变化不会部分解绑',()=>{
+ const f=fixture(),d=f.model.tenantData(),p=d.products.find(p=>p.direction==='代收'),before=JSON.stringify(p),channelsBefore=JSON.stringify(d.channels),count=d.products.length;
+ f.click('deleteProduct',p.id);assert.match(f.el('#modalBody').innerHTML,/自动解除/);f.click('close');assert.equal(d.products.length,count);assert.equal(JSON.stringify(p),before);
+ f.click('deleteProduct',p.id);p.merchantBindings||={};p.merchantBindings.TEST={bound:true};f.click('confirmDeleteProduct');assert(d.products.includes(p));assert.match(f.el('#modalFeedback').textContent,/配置已变化/);assert.equal(JSON.stringify(d.channels),channelsBefore);assert(p.merchantBindings.TEST.bound);
+ f.api.setContext({kind:'deleteProduct',id:'MISSING'});f.api.confirmDeleteProduct();assert.equal(d.products.length,count);
+});
+test('删除代收产品自动清除自身商户及编码绑定，保留通道和其他产品，编码可重新创建',()=>{
+ const f=fixture(),d=f.model.tenantData(),p=d.products.find(p=>p.direction==='代收'),code=p.productNo,related=d.channels.find(c=>p.channelIds.includes(c.id)),channelCount=d.channels.length,codeBefore=JSON.stringify(related.collectionTypes),balance=related.balance,otherProduct=d.products.find(x=>x.id!==p.id),otherProductBefore=JSON.stringify(otherProduct),otherBefore=JSON.stringify(f.model.tenantData('HS-TEN-017'));
+ f.api.bindingsFor(p);p.merchantBindings={OLD:{bound:true,rate:'0.9'}};d.codeConfigs.set(related.collectionTypes[0].id,{secret:'DEMO-KEEP'});f.model.log('历史订单审计样例',p.id,f.model.tenantId);const audit=f.model.audits[0];f.click('deleteProduct',p.id);f.click('confirmDeleteProduct');
+ assert(!d.products.includes(p));assert.equal(p.channelIds.length,0);assert.equal(Object.keys(p.merchantBindings).length,0);assert.equal(Object.keys(p.codeBindings).length,0);assert.equal(d.channels.length,channelCount);assert.equal(JSON.stringify(related.collectionTypes),codeBefore);assert.equal(related.balance,balance);assert.equal(d.codeConfigs.get(related.collectionTypes[0].id).secret,'DEMO-KEEP');assert(related.modified);assert.equal(JSON.stringify(otherProduct),otherProductBefore);assert(f.model.audits.includes(audit));
+ f.api.setContext({kind:'replicaProduct',direction:'代收'});for(const [k,v] of Object.entries({rpName:'同编码新产品',rpCode:code,rpCurrency:'CNY',rpRate:'0.01'}))f.set(k,v);f.api.saveReplicaProduct();const fresh=d.products.find(x=>x.productNo===code&&x.direction==='代收');assert(fresh);assert.notEqual(fresh.id,p.id);assert.equal(fresh.merchantBindings,undefined);assert.equal(fresh.codeBindings,undefined);assert.equal(fresh.channelIds.length,0);assert.equal(JSON.stringify(f.model.tenantData('HS-TEN-017')),otherBefore);
+});
+test('代收产品确认删除前授权或租户变化时不删除、不解绑',()=>{
+ const f=fixture(),d=f.model.tenantData(),p=d.products.find(p=>p.direction==='代收');f.click('deleteProduct',p.id);const before=JSON.stringify(p);f.model.tenantId='HS-TEN-017';f.api.confirmDeleteProduct();assert(d.products.includes(p));assert.equal(JSON.stringify(p),before);f.model.tenantId='HS-TEN-001';for(const g of f.model.grants.filter(g=>g.tenantId==='HS-TEN-001'))g.directions=['代付'];f.click('confirmDeleteProduct');assert(d.products.includes(p));assert.equal(JSON.stringify(p),before);
+});
+
+function inlineRateEditor(f,r,c){
+ const feedback={textContent:''},controls=Object.fromEntries(['edit','save','cancel'].map(a=>[a+'CollectionRate',{hidden:a!=='edit',focus(){}}]));
+ const input={value:c.rate,readOnly:true,dataset:{collectionRate:c.id,channelId:r.id},focus(){},select(){},setAttribute(k,v){this[k]=v},removeAttribute(k){delete this[k]},matches:s=>s==='[data-collection-rate]',closest:()=>editor};
+ const editor={querySelector(s){if(s==='[data-collection-rate]')return input;if(s==='.collection-rate-error')return feedback;return controls[s.match(/data-action="([^"]+)"/)[1]];}};
+ for(const [a,b] of Object.entries(controls)){b.closest=()=>editor;b.click=()=>f.api.collectionRateAction(a,r.id,c.id,b);}
+ return {input,feedback,controls,run:a=>controls[a+'CollectionRate'].click(),key:(key,extra={})=>f.key({key,target:input,preventDefault(){},...extra})};
+}
+test('列表费率须先点击修改，回车校验并仅保存目标编码',()=>{
+ const f=fixture(),d=f.model.tenantData(),r=d.channels.find(c=>c.direction==='代收'&&c.collectionTypes.length>1),c=r.collectionTypes[0],other=r.collectionTypes[1].rate,old=c.rate,tenantBefore=JSON.stringify(f.model.tenantData('HS-TEN-017')),e=inlineRateEditor(f,r,c);
+ e.input.value='0.2';e.run('save');assert.equal(c.rate,old);e.run('edit');assert.equal(e.input.readOnly,false);e.input.value='-1';e.key('Enter');assert.equal(c.rate,old);assert.match(e.feedback.textContent,/非负费率/);e.input.value='0.0123';e.key('Enter',{isComposing:true});e.key('Enter',{repeat:true});assert.equal(c.rate,old);e.key('Enter');assert.equal(c.rate,'0.0123');assert.equal(e.input.readOnly,true);assert.equal(e.controls.editCollectionRate.hidden,false);assert.equal(r.collectionTypes[1].rate,other);assert.equal(JSON.stringify(f.model.tenantData('HS-TEN-017')),tenantBefore);
+});
+test('列表费率取消或Escape恢复原值，失焦不写入',()=>{
+ const f=fixture(),r=f.model.tenantData().channels.find(c=>c.direction==='代收'&&c.collectionTypes.length),c=r.collectionTypes[0],old=c.rate,e=inlineRateEditor(f,r,c);
+ e.run('edit');e.input.value='0.5';assert.equal(c.rate,old);e.run('cancel');assert.equal(e.input.value,old);assert(e.input.readOnly);e.run('edit');e.input.value='0.8';e.key('Escape');assert.equal(c.rate,old);assert.equal(e.input.value,old);assert.equal(e.feedback.textContent,'');
+});
+test('列表费率保存复验记录、授权及租户，失败不覆盖现值',()=>{
+ const f=fixture(),r=f.model.tenantData().channels.find(c=>c.direction==='代收'&&c.collectionTypes.length),c=r.collectionTypes[0],e=inlineRateEditor(f,r,c);
+ e.run('edit');e.input.value='0.2';c.rate='0.3';e.run('save');assert.equal(c.rate,'0.3');assert.match(e.feedback.textContent,/记录已变化/);e.run('cancel');assert.equal(e.input.value,'0.3');e.run('edit');e.input.value='0.4';f.model.grantFor(f.model.tenantId,r.providerId).directions=['代付'];e.run('save');assert.equal(c.rate,'0.3');e.run('cancel');f.model.grantFor(f.model.tenantId,r.providerId).directions=['代收'];e.run('edit');e.input.value='0.5';f.model.tenantId='HS-TEN-017';e.run('save');assert.equal(c.rate,'0.3');
+});
+
+test('代收产品删除确认期间仅部分关联通道商撤权也不执行，既有撤权关系仍可重新确认清理',()=>{
+ const f=fixture(),d=f.model.tenantData(),p=d.products.find(p=>p.direction==='代收'),r=d.channels.find(c=>p.channelIds.includes(c.id)),grant=f.model.grantFor(f.model.tenantId,r.providerId);f.click('deleteProduct',p.id);const before=JSON.stringify(p),channels=JSON.stringify(d.channels);grant.directions=['代付'];assert(f.model.tenantBusinessDirections(f.model.tenantId).includes('代收'));f.click('confirmDeleteProduct');assert(d.products.includes(p));assert.equal(JSON.stringify(p),before);assert.equal(JSON.stringify(d.channels),channels);assert.match(f.el('#modalFeedback').textContent,/授权已变化/);
+ f.click('close');f.click('deleteProduct',p.id);f.click('confirmDeleteProduct');assert(!d.products.includes(p));assert(d.channels.includes(r));
 });
