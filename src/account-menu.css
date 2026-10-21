@@ -1,0 +1,10 @@
+.shell-account-button.arco-btn { flex:0 0 32px; width:32px; height:32px; padding:0; border:1px solid #e3e8ef; background:#f7f8fa; color:#4e5969; }
+.shell-account-button.arco-btn:hover { color:#3246d2; border-color:#a7b1f3; background:#eef0ff; }
+.shell-account-button.arco-btn:focus-visible { outline:2px solid #3246d2; outline-offset:2px; }
+.shell-password-modal .arco-modal-header { height:48px; }
+.shell-password-modal .arco-modal-title { font-size:16px; }
+.shell-password-modal .arco-modal-body { padding:20px 24px 4px; }
+.shell-password-modal .arco-form-item { margin-bottom:18px; }
+.shell-password-modal .arco-form-label-item { padding-bottom:6px; }
+.shell-password-modal .arco-input-wrapper { min-height:32px; }
+.shell-current-account { margin-bottom:18px; color:#86909c; font-size:12px; overflow-wrap:anywhere; }

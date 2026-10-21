@@ -1,4 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import AccountMenu from './AccountMenu.jsx';
+import { createOwnAccountSession } from './own-account-session.js';
 import { mountFrameDocument } from './frame-document.js';
 import { Layout, Menu, Breadcrumb, Input, Tag, Spin, Result } from '@arco-design/web-react';
 import {
@@ -7,6 +9,9 @@ import {
 } from '@arco-design/web-react/icon';
 import { MODULES, NAV_GROUPS } from './modules.js';
 import { prepareEmbeddedDocument } from './embed.js';
+
+const accountSession = createOwnAccountSession({ account: 'platform.ops.demo', baselinePassword: 'DemoPass2026', otp: '246810' });
+window.__HSOwnAccountDemo = accountSession;
 
 const Sider = Layout.Sider;
 const Header = Layout.Header;
@@ -88,6 +93,18 @@ export default function App() {
     target.focus();
   };
 
+  const logout = () => {
+    try {
+      const storage = window.sessionStorage;
+      for (let i = storage.length - 1; i >= 0; i--) {
+        const key = storage.key(i);
+        if (key === 'hs.platform.auth-route.current-fact' || key?.startsWith('hs.platform.auth-route.ticket.')) storage.removeItem(key);
+      }
+    } catch {}
+    openModule('login-form');
+  };
+
+  const isAuthenticationEntry = activeModule === 'login-form';
   const activeTarget = MODULES[activeModule] || MODULES.home;
   const navLabel = (id) => {
     const item = NAV_GROUPS.flatMap(g => [...(g.items || []), ...(g.subgroups || []).flatMap(s => s.items)])
@@ -97,7 +114,7 @@ export default function App() {
 
   return (
     <Layout className="platform-shell" style={{ height: '100vh' }}>
-      <Sider className="platform-sider" width={220} style={{ display: 'flex', flexDirection: 'column' }}>
+      {!isAuthenticationEntry && <Sider className="platform-sider" width={220} style={{ display: 'flex', flexDirection: 'column' }}>
         <div className="platform-brand">
           <Tag color="arcoblue" style={{ fontWeight: 600 }}>HS</Tag>
           <span><strong>汇盛支付</strong><br /><small style={{ color: 'var(--color-text-3)' }}>平台端控制台</small></span>
@@ -123,8 +140,9 @@ export default function App() {
             </ItemGroup>
           ))}
         </Menu>
-      </Sider>
+      </Sider>}
       <Layout>
+        {!isAuthenticationEntry && <>
         <Header className="platform-header">
           <h1>{navLabel(activeTarget.navId || activeModule)}</h1>
           <div className="platform-header-actions">
@@ -136,6 +154,7 @@ export default function App() {
             />
             <Tag color="green">生产只读</Tag>
             <Tag color="arcoblue">平台超管</Tag>
+            <AccountMenu session={accountSession} onLogout={logout} />
           </div>
         </Header>
         <div className="platform-pagebar">
@@ -144,6 +163,7 @@ export default function App() {
             <Breadcrumb.Item>{navLabel(activeTarget.navId || activeModule)}</Breadcrumb.Item>
           </Breadcrumb>
         </div>
+        </>}
         <Content style={{ position: 'relative', flex: 1, minHeight: 0 }}>
           {loading && !error && (
             <div className="frame-overlay"><Spin tip="正在载入审查页面" /></div>

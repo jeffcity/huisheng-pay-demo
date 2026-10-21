@@ -1,8 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { mountFrameDocument } from '../../../src/frame-document.js';
 import { Layout, Menu, Breadcrumb, Spin, Result, Tag, Button } from '@arco-design/web-react';
+import AccountMenu from '../../../src/AccountMenu.jsx';
+import { createOwnAccountSession } from '../../../src/own-account-session.js';
 import { MODULES, NAV_GROUPS, UTILITY_ITEMS } from './modules.js';
 import { prepareEmbeddedDocument } from './embed.js';
+
+const accountSession = createOwnAccountSession({ account: 'admin@tenant.example', baselinePassword: 'Tenant#2026', otp: '246810' });
+window.__HSOwnAccountDemo = accountSession;
 
 const Sider = Layout.Sider;
 const Header = Layout.Header;
@@ -128,7 +133,7 @@ export default function App() {
         {!isAuthenticationEntry && <>
           <Header className="tenant-header">
             <h1>{config.label}</h1>
-            <span className="tenant-header-brand">汇盛支付 · 租户端</span>
+            <AccountMenu session={accountSession} onLogout={() => openPage('login')} />
           </Header>
           <div className="tenant-pagebar">
             <Breadcrumb>
