@@ -5,7 +5,8 @@ import vm from 'node:vm';
 const source=fs.readFileSync(new URL('../surfaces/tenant/public/legacy/sources/system.html',import.meta.url),'utf8');
 function fixture(){
  const security=[['办公网络','192.0.2.1','启用','2026-10-01 10:00:00'],['财务专线','192.0.2.2','停用','2026-10-02 10:00:00']];
- const ctx=vm.createContext({security,URL,Set,Map,Date,JSON,Error,esc:value=>String(value),modalShell(){},toast(){},now:()=> '2026-10-26 11:00:00'});
+ const accounts=[['admin@hs-pay','','',['超级管理员'],'正常']],roles=[['超级管理员','SUPER','','','','启用']],tenantRoleGrants={SUPER:{pages:['security'],actions:['sec_view_logins','sec_list_transfer',...['whitelist','blacklist'].flatMap(kind=>['add','edit','delete','toggle','unlock'].map(action=>'sec_'+kind+'_'+action))]}};
+ const ctx=vm.createContext({security,accounts,roles,tenantRoleGrants,accountRoleNames:row=>row[3],URL,Set,Map,Date,JSON,Error,esc:value=>String(value),modalShell(){},toast(){},now:()=> '2026-10-26 11:00:00'});
  const ipStart=source.indexOf('function ipv4ToNumber('),ipEnd=source.indexOf('\n',ipStart);vm.runInContext(source.slice(ipStart,ipEnd),ctx);
  const start=source.indexOf('// Security whitelist management:'),end=source.indexOf("document.addEventListener('submit',event=>{",start);vm.runInContext(source.slice(start,end),ctx);
  return {run:code=>vm.runInContext(code,ctx),state:()=>JSON.stringify(vm.runInContext('security',ctx))};
@@ -95,4 +96,12 @@ test('转入已有白名单保留目标ID/备注/创建时间和登录保护，�
 test('反向转入取消或目标白名单变化时保留两份名单，不改变已有会话',()=>{
  const f=fixture();f.run("const tenantExistingSession={active:true};securityWhitelistUi.edit={kind:'black',name:'',snapshot:''};saveSecurityWhitelist({ip:'192.0.2.1',remark:''});securityWhitelistUi.kind='black'");const capture=()=>f.run('JSON.stringify({white:security,black:securityBlacklist})');const before=capture();f.run("openSecurityWhitelistAction('transfer',[securityBlacklist[0][0]])");assert.equal(capture(),before);
  f.run("security[0][2]='停用'");const changed=capture();assert.throws(()=>f.run('applySecurityWhitelistAction()'),/已变化/);assert.equal(capture(),changed);assert.equal(f.run('tenantExistingSession.active'),true);
+});
+
+test('名单提交复验操作权限，失效时两份名单不部分修改',()=>{
+ for(const action of ['transfer','delete','toggle']){
+  const f=fixture();f.run("openSecurityWhitelistAction('"+action+"',['办公网络']);tenantRoleGrants.SUPER.actions=[]");const before=f.run('JSON.stringify({white:security,black:securityBlacklist})');
+  assert.throws(()=>f.run('applySecurityWhitelistAction()'),/权限/);assert.equal(f.run('JSON.stringify({white:security,black:securityBlacklist})'),before);
+ }
+ const f=fixture();f.run("securityWhitelistUi.edit={kind:'black',name:'',snapshot:''};accounts[0][4]='停用'");assert.throws(()=>f.run("saveSecurityWhitelist({ip:'192.0.2.3',remark:''})"),/权限/);assert.equal(f.run('securityBlacklist.length'),0);
 });

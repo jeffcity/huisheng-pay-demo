@@ -33,7 +33,7 @@ test('开发展示表单允许不填初始IP，生成商户域名，仍仅保存
 });
 test('初始IP接受IPv4/CIDR且立即启用，格式错误或重复域名时不部分创建', () => {
   for (const ip of ['192.0.2.1', '192.0.2.0/24']) { const f = fixture(); f.el('initialLoginIpInput').value = ip; f.save(); assert.equal(f.errors.length, 0); assert.equal(f.profiles[0].loginIpRules[0].status, '启用'); }
-  for (const [id, value] of [['initialLoginIpInput', '999.1.1.1'], ['initialLoginIpInput', '192.0.2.0/33'], ['domainInput', 'tenant.example.com/path'], ['merchantDomainInput', 'tenant-new.example.com']]) {
+  for (const [id, value] of [['initialLoginIpInput', '999.1.1.1'], ['initialLoginIpInput', '192.0.2.0/33'], ['initialLoginIpInput', '192.0.2.1/24/path'], ['initialLoginIpInput', '192.0.2.1/24/'], ['initialLoginIpInput', '192.0.2.1/24/99'], ['domainInput', 'tenant.example.com/path'], ['merchantDomainInput', 'tenant-new.example.com']]) {
     const f = fixture(); f.el(id).value = value; const before = JSON.stringify(f.model.tenants); f.save(); assert.equal(f.errors.length, 1, value); assert.equal(f.profiles.length, 0, value); assert.equal(JSON.stringify(f.model.tenants), before, value);
   }
 });

@@ -2581,7 +2581,9 @@
 
     function validApiIpRule(value) {
       if (validCompleteIpv4(value)) return true;
-      const [ip, prefix] = String(value || '').split('/');
+      const parts = String(value || '').split('/');
+      if (parts.length !== 2) return false;
+      const [ip, prefix] = parts;
       return validCompleteIpv4(ip) && /^\d{1,2}$/.test(prefix || '') && Number(prefix) >= 0 && Number(prefix) <= 32;
     }
 
