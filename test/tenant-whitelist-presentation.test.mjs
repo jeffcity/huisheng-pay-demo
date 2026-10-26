@@ -5,7 +5,7 @@ import vm from 'node:vm';
 const source=fs.readFileSync(new URL('../surfaces/tenant/public/legacy/sources/system.html',import.meta.url),'utf8');
 function fixture({seeded=false}={}){
  const security=[['办公网络','192.0.2.1','启用','2026-10-01 10:00:00'],['财务专线','192.0.2.2','停用','2026-10-02 10:00:00']];
- const accounts=[['admin@hs-pay','','',['超级管理员'],'正常']],roles=[['超级管理员','SUPER','','','','启用']],tenantRoleGrants={SUPER:{pages:['security'],actions:['sec_view_logins','sec_list_transfer','sec_auto_blacklist_view','sec_auto_blacklist_manage',...['whitelist','blacklist'].flatMap(kind=>['add','edit','delete','toggle','unlock'].map(action=>'sec_'+kind+'_'+action))]}};
+ const accounts=[['admin@hs-pay','','',['超级管理员'],'正常']],roles=[['超级管理员','SUPER','','','','启用']],tenantRoleGrants={SUPER:{pages:['security'],actions:['sec_view_logins','sec_list_transfer','sec_auto_blacklist_view','sec_auto_blacklist_manage','sec_auto_blacklist_release',...['whitelist','blacklist'].flatMap(kind=>['add','edit','delete','toggle','unlock'].map(action=>'sec_'+kind+'_'+action))]}};
  const policyStorage=new Map();const sessionStorage={getItem:key=>policyStorage.get(key)||null,setItem:(key,value)=>policyStorage.set(key,value)};
  const ctx=vm.createContext({security,accounts,roles,tenantRoleGrants,sessionStorage,accountRoleNames:row=>row[3],URL,Set,Map,Date,JSON,Error,esc:value=>String(value),modalShell(){},toast(){},now:()=> '2026-10-26 11:00:00'});
  const ipStart=source.indexOf('function ipv4ToNumber('),ipEnd=source.indexOf('\n',ipStart);vm.runInContext(source.slice(ipStart,ipEnd),ctx);
@@ -33,24 +33,25 @@ test('批量删除仅作用确认快照中的行，陈旧快照整批拒绝',()=
  const f=fixture();f.run("securityWhitelistUi.pending={kind:'delete',rows:security.map(row=>({name:row[0],snapshot:JSON.stringify(row)}))};security[1][2]='启用'");const before=f.state();assert.throws(()=>f.run('applySecurityWhitelistAction()'),/已变化/);assert.equal(f.state(),before);
  f.run("securityWhitelistUi.pending={kind:'delete',rows:[{name:security[0][0],snapshot:JSON.stringify(security[0])}]}");f.run('applySecurityWhitelistAction()');assert.equal(f.run('security.length'),1);assert.equal(f.run('security[0][0]'),'财务专线');
 });
-test('解除IP封锁不改变白名单启用状态',()=>{
- const f=fixture();f.run("securityMetadata(security[1]).locked=true;securityWhitelistUi.pending={kind:'unlock',rows:[{name:security[1][0],snapshot:JSON.stringify(security[1])}]}");f.run('applySecurityWhitelistAction()');assert.equal(f.run('securityMetadata(security[1]).locked'),false);assert.equal(f.run('security[1][2]'),'停用');
+test('后台必须命中启用白名单，空白名单和全部停用均拒绝',()=>{
+ const f=fixture(),start=source.indexOf('function evaluateTenantWhitelistLogin('),end=source.indexOf('function renderTenantWhitelistDecision(',start);f.run(source.slice(start,end));
+ assert.equal(f.run("evaluateTenantWhitelistLogin('192.0.2.1').allowed"),true);
+ for(const ip of ['192.0.2.2','192.0.2.99'])assert.equal(f.run("evaluateTenantWhitelistLogin('"+ip+"').allowed"),false);
+ f.run("security.forEach(row=>row[2]='停用')");assert.equal(f.run("evaluateTenantWhitelistLogin('192.0.2.1').code"),'NO_ENABLED_WHITELIST');
+ f.run('security=[]');assert.equal(f.run("evaluateTenantWhitelistLogin('192.0.2.99').allowed"),false);
 });
 
-test('IP登录保护解除后恢复原有白名单匹配，不改变其他启停规则',()=>{
- const f=fixture();
- const start=source.indexOf('function evaluateTenantWhitelistLogin('),end=source.indexOf('function renderTenantWhitelistDecision(',start);
- f.run(source.slice(start,end));f.run('securityMetadata(security[0]).locked=true');assert.equal(f.run("evaluateTenantWhitelistLogin('192.0.2.1').code"),'LOGIN_LOCKED');
- f.run("securityWhitelistUi.pending={kind:'unlock',rows:[{name:security[0][0],snapshot:JSON.stringify(security[0])}]};applySecurityWhitelistAction()");assert.equal(f.run("evaluateTenantWhitelistLogin('192.0.2.1').allowed"),true);assert.equal(f.run("evaluateTenantWhitelistLogin('192.0.2.2').allowed"),false);
- f.run("security.forEach(row=>row[2]='停用')");assert.equal(f.run("evaluateTenantWhitelistLogin('192.0.2.99').code"),'NO_ENABLED_RULE');
+test('白名单不再提供独立封锁状态或解除封锁入口',()=>{
+ assert.doesNotMatch(source,/data-security-unlock|label:'解除封锁'|code:'LOGIN_LOCKED'/);
+ const f=fixture();f.run("securityWhitelistUi.pending={kind:'unlock',rows:[{name:security[0][0],snapshot:JSON.stringify(security[0])}]}");const before=f.state();assert.throws(()=>f.run('applySecurityWhitelistAction()'),/不支持/);assert.equal(f.state(),before);
 });
 
 test('黑名单优先于白名单且不依赖白名单是否启用，停用黑名单后恢复原校验',()=>{
  const f=fixture();const start=source.indexOf('function evaluateTenantWhitelistLogin('),end=source.indexOf('function renderTenantWhitelistDecision(',start);f.run(source.slice(start,end));
  f.run("securityWhitelistUi.edit={kind:'black',name:'',snapshot:''};saveSecurityWhitelist({ip:'192.0.2.1',remark:'拒绝登录'})");assert.equal(f.run('securityBlacklist[0][2]'),'停用');assert.equal(f.run("evaluateTenantWhitelistLogin('192.0.2.1').allowed"),true);
  f.run("securityBlacklist[0][2]='启用'");assert.equal(f.run("evaluateTenantWhitelistLogin('192.0.2.1').code"),'BLACKLIST_MATCH');
- f.run("security.forEach(row=>row[2]='停用')");assert.equal(f.run("evaluateTenantWhitelistLogin('192.0.2.1').code"),'BLACKLIST_MATCH');assert.equal(f.run("evaluateTenantWhitelistLogin('192.0.2.99').code"),'NO_ENABLED_RULE');
- f.run("securityBlacklist[0][2]='停用'");assert.equal(f.run("evaluateTenantWhitelistLogin('192.0.2.1').allowed"),true);
+ f.run("security.forEach(row=>row[2]='停用')");assert.equal(f.run("evaluateTenantWhitelistLogin('192.0.2.1').code"),'BLACKLIST_MATCH');assert.equal(f.run("evaluateTenantWhitelistLogin('192.0.2.99').code"),'NO_ENABLED_WHITELIST');
+ f.run("securityBlacklist[0][2]='停用'");assert.equal(f.run("evaluateTenantWhitelistLogin('192.0.2.1').allowed"),false);
 });
 test('黑名单与白名单可保存同一IP，等价IPv6在黑名单内不允许重复',()=>{
  const f=fixture();f.run("securityWhitelistUi.edit={kind:'black',name:'',snapshot:''};saveSecurityWhitelist({ip:'2001:db8::a',remark:'黑名单'})");
@@ -154,22 +155,39 @@ test('登录安全初始样例覆盖手动启停、IPv6、自动拦截、到期�
  const expiry=f.run("securityMetadata(securityBlacklist.find(r=>r[1]==='192.0.2.61')).expiresAt");
  assert.equal(f.run("securityBlacklistState(securityBlacklist.find(r=>r[1]==='192.0.2.61'),"+expiry+")"),'已到期');
 });
-test('到期和已解除样例不拦截登录，手动黑名单优先级保持',()=>{
- const f=fixture({seeded:true});const start=source.indexOf('function evaluateTenantWhitelistLogin('),end=source.indexOf('function renderTenantWhitelistDecision(',start);f.run(source.slice(start,end));
- f.run("security.push(['重叠名单示例','203.0.113.46','启用','2026-10-25 09:20'])");assert.equal(f.run("evaluateTenantWhitelistLogin('203.0.113.46').code"),'BLACKLIST_MATCH');
- f.run("security.forEach(r=>r[2]='停用')");
- for(const ip of ['192.0.2.62','192.0.2.63','198.51.100.73'])assert.equal(f.run("evaluateTenantWhitelistLogin('"+ip+"').allowed"),true,ip);
+test('到期或已解除自动样例回白名单，停用手动黑名单不会放行陌生IP',()=>{
+ const f=fixture({seeded:true}),start=source.indexOf('function evaluateTenantWhitelistLogin('),end=source.indexOf('function renderTenantWhitelistDecision(',start);f.run(source.slice(start,end));
+ for(const ip of ['192.0.2.62','192.0.2.63']){assert.equal(f.run("evaluateTenantWhitelistLogin('"+ip+"').allowed"),true);assert.equal(f.run("securityBlacklist.some(row=>row[1]==='"+ip+"')"),false);}
+ assert.equal(f.run("evaluateTenantWhitelistLogin('198.51.100.73').allowed"),false);
+ f.run("security.forEach(row=>row[2]='停用')");assert.equal(f.run("evaluateTenantWhitelistLogin('192.0.2.62').allowed"),false);
  assert.equal(f.run("evaluateTenantWhitelistLogin('192.0.2.61').code"),'BLACKLIST_MATCH');
- assert.equal(f.run("evaluateTenantWhitelistLogin('2001:db8::45').code"),'BLACKLIST_MATCH');
 });
 
-test('历史自动记录人工启用或作为转入目标后成为有效手动规则，保留原标识及备注',()=>{
- for(const ip of ['192.0.2.62','192.0.2.63'])for(const action of ['toggle','transfer']){
-  const f=fixture({seeded:true});f.run("const target=securityBlacklist.find(r=>r[1]==='"+ip+"');const id=securityMetadata(target).id,remark=securityMetadata(target).remark,created=securityMetadata(target).created");
-  if(action==='toggle')f.run("securityWhitelistUi.kind='black';openSecurityWhitelistAction('toggle',[target[0]]);applySecurityWhitelistAction()");
-  else f.run("security.push(['新增白名单','"+ip+"','启用','2026-10-26 14:00']);openSecurityWhitelistAction('transfer',['新增白名单']);applySecurityWhitelistAction()");
-  assert.equal(f.run('securityBlacklistEffective(target)'),true,ip+action);assert.equal(f.run('securityMetadata(target).origin'),'manual');assert.equal(f.run('securityMetadata(target).expiresAt'),null);assert.equal(f.run('securityMetadata(target).releasedAt'),null);
-  assert.equal(f.run('securityMetadata(target).id===id&&securityMetadata(target).remark===remark&&securityMetadata(target).created===created'),true);
-  const start=source.indexOf('function evaluateTenantWhitelistLogin('),end=source.indexOf('function renderTenantWhitelistDecision(',start);f.run(source.slice(start,end));assert.equal(f.run("evaluateTenantWhitelistLogin('"+ip+"').code"),'BLACKLIST_MATCH');
+test('临时黑名单提前解除恢复原白名单，保留身份备注及创建时间',()=>{
+ const f=fixture({seeded:true});f.run("settleTemporaryBlacklists();const row=securityBlacklist.find(r=>r[1]==='192.0.2.61'),saved=JSON.stringify(securityMetadata(row).returnWhitelist);securityWhitelistUi.kind='black';openSecurityWhitelistAction('return',[row[0]])");
+ assert.throws(()=>f.run("applySecurityWhitelistAction('')"),/原因/);f.run("applySecurityWhitelistAction('本人核实通过')");
+ assert.equal(f.run("securityBlacklist.some(r=>r[1]==='192.0.2.61')"),false);
+ assert.equal(f.run("JSON.stringify(security.find(r=>r[1]==='192.0.2.61'))===JSON.stringify(JSON.parse(saved).row)"),true);
+ assert.equal(f.run("securityMetadata(security.find(r=>r[1]==='192.0.2.61')).remark===JSON.parse(saved).meta.remark"),true);
+});
+
+test('已有临时记录到期自动恢复原白名单状态，不恢复为永久黑名单',()=>{
+ const f=fixture({seeded:true});f.run("settleTemporaryBlacklists();const row=securityBlacklist.find(r=>r[1]==='192.0.2.61');securityMetadata(row).returnWhitelist.row[2]='停用';const expiry=securityMetadata(row).expiresAt");f.run('settleTemporaryBlacklists(expiry)');
+ assert.equal(f.run("securityBlacklist.some(r=>r[1]==='192.0.2.61')"),false);assert.equal(f.run("security.find(r=>r[1]==='192.0.2.61')[2]"),'停用');
+});
+test('提前解除取消、授权撤销或资料变化时不部分恢复',()=>{
+ for(const failure of ['cancel','permission','changed']){
+  const f=fixture({seeded:true});f.run("settleTemporaryBlacklists();const row=securityBlacklist.find(r=>r[1]==='192.0.2.61');securityWhitelistUi.kind='black';openSecurityWhitelistAction('return',[row[0]])");
+  if(failure==='permission')f.run('tenantRoleGrants.SUPER.actions=[]');if(failure==='changed')f.run("securityMetadata(row).remark='已修改'");const before=f.run('JSON.stringify({security,securityBlacklist})');
+  if(failure!=='cancel')assert.throws(()=>f.run("applySecurityWhitelistAction('核实通过')"),/权限|变化/);assert.equal(f.run('JSON.stringify({security,securityBlacklist})'),before);
+ }
+});
+test('临时记录不能使用编辑启停删除或永久转换绕过恢复流程',()=>{
+ for(const kind of ['toggle','delete','transfer']){const f=fixture({seeded:true});f.run("settleTemporaryBlacklists();const row=securityBlacklist.find(r=>r[1]==='192.0.2.61');securityWhitelistUi.pending={kind:'"+kind+"',listKind:'black',rows:[{name:row[0],snapshot:JSON.stringify(row)}]}");const before=f.run('JSON.stringify({security,securityBlacklist})');assert.throws(()=>f.run('applySecurityWhitelistAction()'),/提前解除/);assert.equal(f.run('JSON.stringify({security,securityBlacklist})'),before);}
+});
+
+test('原白名单元数据损坏或身份冲突时不恢复、不删除临时黑名单且继续拒绝',()=>{
+ for(const change of ["m.returnWhitelist.meta=null","m.returnWhitelist.meta.id=0","m.returnWhitelist.meta.created='invalid'","m.returnWhitelist.meta.remark={}","m.returnWhitelist.row[0]=''","m.returnWhitelist.meta.id=securityMetadata(security[0]).id"]){
+  const f=fixture({seeded:true});f.run("settleTemporaryBlacklists();const row=securityBlacklist.find(r=>r[1]==='192.0.2.61'),m=securityMetadata(row);"+change);const before=f.state();f.run('settleTemporaryBlacklists(m.expiresAt)');assert.equal(f.state(),before,change);assert.equal(f.run('securityBlacklist.includes(row)'),true);assert.equal(f.run('securityBlacklistEffective(row)'),true);
  }
 });

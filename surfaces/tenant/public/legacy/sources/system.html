@@ -439,7 +439,7 @@
       </section>
 
       <section class="view" id="view-security">
-        <div class="security-list-tabs" role="tablist" aria-label="登录IP名单"><button type="button" role="tab" aria-selected="true" data-security-list="white">白名单</button><button type="button" role="tab" aria-selected="false" data-security-list="black">黑名单</button></div><div class="notice security-notice"><i data-lucide="info"></i><span id="securityListNotice">管理当前租户后台登录 IP 名单；启用的黑名单优先拦截新登录，不影响API及已登录会话。</span></div>
+        <div class="security-list-tabs" role="tablist" aria-label="登录IP名单"><button type="button" role="tab" aria-selected="true" data-security-list="white">白名单</button><button type="button" role="tab" aria-selected="false" data-security-list="black">黑名单</button></div><div class="notice security-notice"><i data-lucide="info"></i><span id="securityListNotice">后台仅允许启用白名单 IP 登录；临时黑名单到期或提前解除后恢复原白名单，不影响API及已登录会话。</span></div>
         <div class="panel security-search">
           <form id="securitySearchForm" class="security-filters">
             <div class="field"><label for="securityIpFilter">IP地址</label><input id="securityIpFilter" placeholder="请输入IP地址"></div>
@@ -449,7 +449,7 @@
             <div class="security-tools"><button class="btn primary" type="submit">搜索</button><button class="btn" type="button" data-security-action="reset">重置</button><button class="btn primary" type="button" data-security-action="add" id="securityAddButton">新增白名单</button><button class="btn" type="button" data-security-action="policy" id="securityAutoPolicyButton" hidden>自动拉黑设置</button><span class="security-auto-status" id="securityAutoPolicyStatus" hidden></span><button class="btn" type="button" data-security-action="export">导出</button><button class="btn danger" id="securityBatchDelete" type="button" data-security-action="batch-delete" disabled>批量删除</button></div>
           </form>
         </div>
-        <div class="panel security-list"><div class="table-wrap"><table class="data-table" aria-label="登录IP白名单"><thead><tr><th><input id="securitySelectAll" type="checkbox" aria-label="全选当前页白名单"></th><th>ID</th><th>IP地址</th><th>启用状态</th><th id="securityProtectionHead">登录保护</th><th data-security-black-only hidden>来源</th><th data-security-black-only hidden>触发原因</th><th data-security-black-only hidden>到期时间</th><th>备注</th><th>创建时间</th><th>操作</th></tr></thead><tbody id="securityRows"></tbody></table></div>
+        <div class="panel security-list"><div class="table-wrap"><table class="data-table" aria-label="登录IP白名单"><thead><tr><th><input id="securitySelectAll" type="checkbox" aria-label="全选当前页白名单"></th><th>ID</th><th>IP地址</th><th>启用状态</th><th id="securityProtectionHead" hidden>拦截状态</th><th data-security-black-only hidden>来源</th><th data-security-black-only hidden>触发原因</th><th data-security-black-only hidden>到期时间</th><th>备注</th><th>创建时间</th><th>操作</th></tr></thead><tbody id="securityRows"></tbody></table></div>
           <div class="security-pagination"><span id="securityTotal"></span><button class="btn" data-security-action="prev" aria-label="上一页">‹</button><span id="securityPage"></span><button class="btn" data-security-action="next" aria-label="下一页">›</button><select id="securityPageSize" aria-label="每页条数"><option value="10">10条/页</option><option value="20">20条/页</option><option value="50">50条/页</option></select><label for="securityGoPage">前往</label><input id="securityGoPage" type="number" min="1" value="1" aria-label="前往页码"><span>页</span></div>
         </div>
       </section>
@@ -482,7 +482,7 @@ const views={accounts:{title:'账户管理',desc:'管理当前租户后台账号
 const tenantScopeMerchants=[{id:'HS-MER-001',name:'星河贸易'},{id:'HS-MER-002',name:'云帆电商'},{id:'HS-MER-003',name:'东辰科技'}];
 let accounts=[['admin@hs-pay','陈南','管理部',['租户超级管理员','租户安全负责人'],'正常','已绑定','103.88.42.18','2026-07-05 10:31','system','正常',4,11,'tenant.current',[]],['finance01','林婉','财务部',['租户财务','只读审计'],'正常','已绑定','103.88.42.21','2026-07-05 10:22','admin','正常',6,7,'tenant.allowed_merchants',['HS-MER-002']],['ops_lee','李卓','运营部',['租户运营'],'锁定','待重新绑定','58.247.19.8','2026-07-04 21:03','admin','正常',9,5,'tenant.allowed_merchants',['HS-MER-001','HS-MER-002']],['risk_view','周琪','安全组',['只读审计'],'停用','已绑定','-','2026-06-29 14:12','admin','正常',7,4,'tenant.allowed_merchants',['HS-MER-003']],['tech_safe','何言','技术安全',['租户安全负责人','租户运营'],'正常','待绑定','103.88.42.88','2026-07-05 09:41','admin','首次改密',2,6,'tenant.current',[]]];
 let roles=[['租户超级管理员','TENANT_SUPER_ADMIN','当前租户全部数据','1','全部页面与全部按钮权限','启用','2026-07-05 10:20','tenant.current',[]],['租户财务','TENANT_FINANCE','指定商户：星河贸易、云帆电商','5','用户自建角色','启用','2026-07-05 09:55','tenant.allowed_merchants',['HS-MER-001','HS-MER-002']],['租户运营','TENANT_OPS','当前租户全部数据','11','用户自建角色','启用','2026-07-04 18:31','tenant.current',[]],['租户安全负责人','TENANT_SECURITY','当前租户全部数据','2','用户自建角色','启用','2026-07-05 09:40','tenant.current',[]],['只读审计','TENANT_AUDITOR','指定商户：云帆电商、东辰科技','1','用户自建角色','停用','2026-06-30 12:10','tenant.allowed_merchants',['HS-MER-002','HS-MER-003']]];
-let security=[['办公网络','103.88.42.18','启用','2026-07-01 11:06'],['财务专线','58.247.19.18','启用','2026-07-03 15:18'],['临时远程','122.224.8.18','停用','2026-07-05 09:40'],['重叠名单示例','203.0.113.46','启用','2026-10-25 09:20'],['临时封锁示例','192.0.2.83','启用','2026-10-25 10:10'],['IPv6办公网络','2001:db8::88','启用','2026-10-25 11:30']];
+let security=[['办公网络','103.88.42.18','启用','2026-07-01 11:06'],['财务专线','58.247.19.18','启用','2026-07-03 15:18'],['临时远程','122.224.8.18','停用','2026-07-05 09:40'],['重叠名单示例','203.0.113.46','启用','2026-10-25 09:20'],['IPv6办公网络','2001:db8::88','启用','2026-10-25 11:30']];
 const securityLoginRecords={
   '办公网络':[['2026-07-05 10:31','103.88.42.18','admin@hs-pay','成功'],['2026-07-05 09:56','103.88.42.18','finance01','成功'],['2026-07-04 18:20','103.88.42.18','ops_lee','成功']],
   '财务专线':[['2026-07-05 10:22','58.247.19.18','finance01','成功'],['2026-07-04 17:46','58.247.19.18','finance02','成功'],['2026-07-04 09:13','58.247.19.18','finance01','成功']],
@@ -491,6 +491,7 @@ const securityLoginRecords={
 const tenantExistingSession={sessionId:'TENANT-SESSION-ADMIN-001',account:'admin@hs-pay',sourceIp:'103.88.42.18',active:true,startedAt:'2026-07-20 09:00:00'};
 let tenantLastLoginDecision=null;
 function evaluateTenantWhitelistLogin(sourceIp){
+  settleTemporaryBlacklists();
   const ip=String(sourceIp||'').trim();
   const enabled=security.filter(row=>row[2]==='启用');
   const ipKey=securityIpKey(ip);
@@ -498,9 +499,8 @@ function evaluateTenantWhitelistLogin(sourceIp){
   if(!ipKey)return {allowed:false,code:'INVALID_IP',sourceIp:ip,enabledCount:enabled.length,matchedName:'',reason:'来源地址不是有效的单个 IPv4 / IPv6。'};
   const blocked=securityBlacklist.find(row=>securityBlacklistEffective(row)&&securityIpKey(row[1])===ipKey);
   if(blocked)return {allowed:false,code:'BLACKLIST_MATCH',sourceIp:ip,enabledCount:enabled.length,matchedName:blocked[0],reason:'命中启用的IP黑名单，本次后台登录被拒绝。'};
-  if(enabled.length===0)return {allowed:true,code:'NO_ENABLED_RULE',sourceIp:ip,enabledCount:0,matchedName:'',reason:'当前没有启用的白名单条目，新登录不受限制。'};
+  if(enabled.length===0)return {allowed:false,code:'NO_ENABLED_WHITELIST',sourceIp:ip,enabledCount:0,matchedName:'',reason:'当前没有启用的白名单条目，拒绝后台新登录。'};
   const matched=enabled.find(row=>securityIpKey(row[1])===ipKey);
-  if(matched&&securityMetadata(matched).locked)return {allowed:false,code:'LOGIN_LOCKED',sourceIp:ip,enabledCount:enabled.length,matchedName:matched[0],reason:'该IP处于临时登录封锁状态。'};
   if(matched)return {allowed:true,code:'EXACT_ENABLED_MATCH',sourceIp:ip,enabledCount:enabled.length,matchedName:matched[0],reason:`精确命中启用条目「${matched[0]}」。`};
   return {allowed:false,code:disabledExact?'DISABLED_ONLY_MATCH':'NOT_IN_ENABLED_WHITELIST',sourceIp:ip,enabledCount:enabled.length,matchedName:'',reason:disabledExact?'只命中停用条目，不能登录。':'未精确命中任何启用条目。'};
 }
@@ -523,13 +523,13 @@ const securityBlacklistSamples=[
 ];
 let securityBlacklist=securityBlacklistSamples.map(row=>['BL-SAMPLE-'+row.id,row.ip,row.status,row.created]);
 const securityWhitelistUi={kind:'white',page:1,size:10,filters:{ip:'',enabled:'',remark:'',start:'',end:''},selected:new Set(),meta:new Map(),sequence:207,edit:null,pending:null};
-security.forEach((row,index)=>securityWhitelistUi.meta.set(row[0],{id:101+index,created:row[3],remark:row[0],locked:row[0]==='临时封锁示例'}));
-securityBlacklistSamples.forEach(row=>securityWhitelistUi.meta.set('BL-SAMPLE-'+row.id,{id:row.id,created:row.created,remark:row.remark,locked:false,origin:row.origin||'manual',reason:row.reason||'',expiresAt:row.expiresAt||null,releasedAt:row.releasedAt||null}));
+security.forEach((row,index)=>securityWhitelistUi.meta.set(row[0],{id:101+index,created:row[3],remark:row[0],locked:false}));
+securityBlacklistSamples.forEach(row=>securityWhitelistUi.meta.set('BL-SAMPLE-'+row.id,{id:row.id,created:row.created,remark:row.remark,locked:false,origin:row.origin||'manual',reason:row.reason||'',expiresAt:row.expiresAt||null,releasedAt:row.releasedAt||null,returnWhitelist:row.origin==='auto'?{row:['AUTO-RETURN-'+row.id,row.ip,'启用','2026-10-25 08:30'],meta:{id:row.id-97,created:'2026-10-25 08:30',remark:row.id===205?'临时拉黑到期恢复（样例）':row.id===206?'提前解除后恢复（样例）':'原白名单资料（样例）',locked:false}}:null}));
 function securityListActionAllowed(kind,action){
  // Match the current Demo operator used by system exports; production authenticates on the server.
  const account=accounts.find(row=>row[0]==='admin@hs-pay');
  if(!account||account[4]!=='正常')return false;
- const actionId=action==='policy_view'?'sec_auto_blacklist_view':action==='policy_manage'?'sec_auto_blacklist_manage':action==='view'||action==='export'?'sec_view_logins':action==='transfer'?'sec_list_transfer':'sec_'+(kind==='black'?'blacklist':'whitelist')+'_'+action;
+ const actionId=action==='auto_release'?'sec_auto_blacklist_release':action==='policy_view'?'sec_auto_blacklist_view':action==='policy_manage'?'sec_auto_blacklist_manage':action==='view'||action==='export'?'sec_view_logins':action==='transfer'?'sec_list_transfer':'sec_'+(kind==='black'?'blacklist':'whitelist')+'_'+action;
  return accountRoleNames(account).some(name=>{const role=roles.find(row=>row[0]===name&&row[5]==='启用');const grant=role&&tenantRoleGrants[role[1]];return grant?.pages.includes('security')&&grant.actions.includes(actionId)});
 }
 function requireSecurityListAction(kind,action){if(!securityListActionAllowed(kind,action))throw new Error('当前账号没有该名单操作权限，请重新确认授权')}
@@ -594,23 +594,36 @@ function securityMetadata(row){
 }
 function securityBlacklistState(row,at=Date.now()){
  const m=securityMetadata(row);
+ if(m.restoreFailed)return '恢复异常';
  if(m.origin==='auto'&&m.releasedAt)return '已解除';
  if(m.origin==='auto'&&m.expiresAt<=at)return '已到期';
  return row[2]==='启用'?'拦截登录':'未生效';
 }
-function securityBlacklistEffective(row){return securityBlacklistState(row)==='拦截登录'}
-function makeManualBlacklist(row){
- const m=securityMetadata(row);if(m.origin!=='auto')return '';
- const history=`原自动记录：${m.reason||'—'}；到期：${m.expiresAt?securitySampleTime(m.expiresAt):'—'}；解除：${m.releasedAt?securitySampleTime(m.releasedAt):'未解除'}`;
- m.origin='manual';m.reason='人工确认转为长期黑名单';m.expiresAt=null;m.releasedAt=null;
- return history+'；已转为长期有效的手动黑名单';
+function securityBlacklistEffective(row){return securityMetadata(row).restoreFailed===true||securityBlacklistState(row)==='拦截登录'}
+function restoreTemporaryWhitelist(row,mode){
+ const m=securityMetadata(row),saved=m.returnWhitelist;
+ const validStamp=value=>typeof value==='string'&&/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}(:\d{2})?$/.test(value)&&Number.isFinite(Date.parse(value.replace(' ','T')+'+08:00'));
+ if(m.origin!=='auto'||!Array.isArray(saved?.row)||saved.row.length!==4||typeof saved.row[0]!=='string'||!saved.row[0].trim()||securityIpKey(saved.row[1])!==securityIpKey(row[1])||!['启用','停用'].includes(saved.row[2])||!validStamp(saved.row[3])||!saved.meta||typeof saved.meta!=='object'||Array.isArray(saved.meta)||!Number.isSafeInteger(saved.meta.id)||saved.meta.id<=0||!validStamp(saved.meta.created)||typeof saved.meta.remark!=='string'||saved.meta.remark.length>200)throw new Error('原白名单资料不可用，请核对后处理');
+ let white=security.find(item=>securityIpKey(item[1])===securityIpKey(row[1]));
+ if(!white&&[...security,...securityBlacklist].some(item=>item!==row&&(item[0]===saved.row[0]||securityWhitelistUi.meta.get(item[0])?.id===saved.meta.id)))throw new Error('原白名单标识已变化，请核对后处理');
+ if(!white){white=[...saved.row];security.push(white);securityWhitelistUi.meta.set(white[0],{...saved.meta})}
+ securityBlacklist=securityBlacklist.filter(item=>item[0]!==row[0]);securityWhitelistUi.meta.delete(row[0]);securityWhitelistUi.selected.delete(row[0]);
+ const detail=(mode==='expiry'?'到期':'提前解除')+'后恢复原白名单，保留原状态、备注和创建时间；其他登录验证仍须通过';
+ if(['expiry','released'].includes(mode)&&typeof audit==='function')audit('登录安全',row[1],mode==='expiry'?'临时黑名单到期恢复':'临时黑名单解除后恢复','系统处理；'+detail,'成功');
+ return {kind:'white',action:'提前解除临时黑名单',ips:[row[1]],detail};
 }
 
+function settleTemporaryBlacklists(at=Date.now()){
+ let changed=0;
+ for(const row of [...securityBlacklist]){const m=securityMetadata(row);if(m.origin==='auto'&&(m.releasedAt||(Number.isFinite(m.expiresAt)&&m.expiresAt<=at))){try{restoreTemporaryWhitelist(row,m.releasedAt?'released':'expiry');changed++}catch{m.restoreFailed=true}}}
+ return changed;
+}
 function filteredSecurityWhitelist(){
  const f=securityWhitelistUi.filters;
  return securityListRows().filter(row=>{const m=securityMetadata(row);const date=m.created.slice(0,10);return (!f.ip||row[1].toLowerCase().includes(f.ip.toLowerCase()))&&(!f.enabled||row[2]===f.enabled)&&(!f.remark||m.remark.toLowerCase().includes(f.remark.toLowerCase()))&&(!f.start||date>=f.start)&&(!f.end||date<=f.end)});
 }
 function renderSecurityWhitelist(){
+ settleTemporaryBlacklists();
  const label=securityListLabel(),black=securityWhitelistUi.kind==='black';
  document.querySelectorAll('[data-security-list]').forEach(button=>{button.setAttribute('aria-selected',String(button.dataset.securityList===securityWhitelistUi.kind))});
  document.getElementById('securityAddButton').textContent='新增'+label;
@@ -619,15 +632,15 @@ function renderSecurityWhitelist(){
  const policyStatus=document.getElementById('securityAutoPolicyStatus');policyStatus.hidden=!canViewPolicy;
  if(canViewPolicy){const policy=readSecurityAutoPolicy();policyStatus.textContent=policy.enabled?`自动拉黑已开启：${policy.windowMinutes}分钟内${policy.failureCount}次，拉黑${policy.banMinutes}分钟`:'自动拉黑未开启'}
 
- document.getElementById('securityProtectionHead').textContent=black?'拦截状态':'登录保护';
+ document.getElementById('securityProtectionHead').textContent='拦截状态';document.getElementById('securityProtectionHead').hidden=!black;
  document.querySelectorAll('[data-security-black-only]').forEach(el=>el.hidden=!black);
  document.querySelector('#view-security table').setAttribute('aria-label','登录IP'+label);
  const filtered=filteredSecurityWhitelist();const pages=Math.max(1,Math.ceil(filtered.length/securityWhitelistUi.size));
  securityWhitelistUi.page=Math.min(securityWhitelistUi.page,pages);
  const rows=filtered.slice((securityWhitelistUi.page-1)*securityWhitelistUi.size,securityWhitelistUi.page*securityWhitelistUi.size);
  const presentNames=new Set(securityListRows().map(row=>row[0]));for(const key of securityWhitelistUi.selected)if(!presentNames.has(key))securityWhitelistUi.selected.delete(key);
- document.getElementById('securityRows').innerHTML=rows.map(row=>{const m=securityMetadata(row);return `<tr><td><input type="checkbox" aria-label="选择${label} ${esc(row[1])}" data-security-select="${esc(row[0])}" ${securityWhitelistUi.selected.has(row[0])?'checked':''}></td><td>${m.id}</td><td>${esc(row[1])}</td><td><button type="button" class="security-switch ${row[2]==='启用'?'on':''}" role="switch" aria-checked="${row[2]==='启用'}" aria-label="${esc(row[1])} 启用状态" data-security-toggle="${esc(row[0])}">${row[2]}</button></td><td>${black?`<span class="tag ${securityBlacklistEffective(row)?'red':'gray'}">${securityBlacklistState(row)}</span>`:(m.locked?'<span class="tag red">封锁中</span>':'<span class="tag green">正常</span>')}</td>${black?`<td>${m.origin==='auto'?'自动触发':'手动维护'}</td><td class="security-trigger-reason">${esc(m.reason||'—')}</td><td>${m.expiresAt?securitySampleTime(m.expiresAt):'长期有效'}</td>`:''}<td>${esc(m.remark||'-')}</td><td>${esc(m.created)}</td><td><button class="link-btn" data-security-edit="${esc(row[0])}">编辑</button><button class="link-btn danger-text" data-security-delete="${esc(row[0])}">删除</button><button class="link-btn ${black?'':'danger-text'}" data-security-transfer="${esc(row[0])}">${black?'转入白名单':'转入黑名单'}</button>${!black&&m.locked?`<button class="link-btn" data-security-unlock="${esc(row[0])}">解除封锁</button>`:''}</td></tr>`}).join('')||`<tr><td colspan="${black?11:8}" class="muted">暂无数据</td></tr>`;
- const selectAll=document.getElementById('securitySelectAll');selectAll.checked=rows.length>0&&rows.every(row=>securityWhitelistUi.selected.has(row[0]));selectAll.indeterminate=!selectAll.checked&&rows.some(row=>securityWhitelistUi.selected.has(row[0]));
+ document.getElementById('securityRows').innerHTML=rows.map(row=>{const m=securityMetadata(row);return `<tr><td><input type="checkbox" aria-label="选择${label} ${esc(row[1])}" data-security-select="${esc(row[0])}" ${securityWhitelistUi.selected.has(row[0])?'checked':''} ${black&&m.origin==='auto'?'disabled':''}></td><td>${m.id}</td><td>${esc(row[1])}</td><td>${black&&m.origin==='auto'?'<span class="tag orange">临时拉黑</span>':`<button type="button" class="security-switch ${row[2]==='启用'?'on':''}" role="switch" aria-checked="${row[2]==='启用'}" aria-label="${esc(row[1])} 启用状态" data-security-toggle="${esc(row[0])}">${row[2]}</button>`}</td>${black?`<td><span class="tag ${securityBlacklistEffective(row)?'red':'gray'}">${securityBlacklistState(row)}</span></td>`:''}${black?`<td>${m.origin==='auto'?'自动触发':'手动维护'}</td><td class="security-trigger-reason">${esc(m.reason||'—')}</td><td>${m.expiresAt?securitySampleTime(m.expiresAt):'长期有效'}</td>`:''}<td>${esc(m.remark||'-')}</td><td>${esc(m.created)}</td><td>${black&&m.origin==='auto'?`<button class="link-btn" data-security-return="${esc(row[0])}">提前解除</button>`:`<button class="link-btn" data-security-edit="${esc(row[0])}">编辑</button><button class="link-btn danger-text" data-security-delete="${esc(row[0])}">删除</button><button class="link-btn ${black?'':'danger-text'}" data-security-transfer="${esc(row[0])}">${black?'转入白名单':'转入黑名单'}</button>`}</td></tr>`}).join('')||`<tr><td colspan="${black?11:7}" class="muted">暂无数据</td></tr>`;
+ const selectable=rows.filter(row=>!black||securityMetadata(row).origin!=='auto');const selectAll=document.getElementById('securitySelectAll');selectAll.checked=selectable.length>0&&selectable.every(row=>securityWhitelistUi.selected.has(row[0]));selectAll.indeterminate=!selectAll.checked&&selectable.some(row=>securityWhitelistUi.selected.has(row[0]));
  document.getElementById('securityBatchDelete').disabled=securityWhitelistUi.selected.size===0;
  document.getElementById('securityTotal').textContent='共 '+filtered.length+' 条';document.getElementById('securityPage').textContent=securityWhitelistUi.page+' / '+pages;document.getElementById('securityGoPage').value=securityWhitelistUi.page;
  document.querySelector('[data-security-action="prev"]').disabled=securityWhitelistUi.page<=1;document.querySelector('[data-security-action="next"]').disabled=securityWhitelistUi.page>=pages;
@@ -647,6 +660,7 @@ function saveSecurityWhitelist(data){
  if(!key)throw new Error('请输入有效的 IPv4 或 IPv6 地址');
  if(remark.length>200)throw new Error('备注不能超过200字');
  const row=edit.name?list.find(item=>item[0]===edit.name):null;
+ if(row&&kind==='black'&&securityMetadata(row).origin==='auto')throw new Error('临时黑名单请通过提前解除恢复原白名单');
  if(edit.name&&(!row||JSON.stringify(row)!==edit.snapshot))throw new Error(label+'记录已变化，请重新打开表单');
  if(list.some(item=>item[0]!==edit.name&&securityIpKey(item[1])===key))throw new Error('该IP地址已存在，请勿重复添加');
  if(row){row[1]=ip;row[3]=now();securityMetadata(row).remark=remark;return {row,kind,action:'编辑'+label}}
@@ -658,26 +672,39 @@ function openSecurityWhitelistAction(kind,names){
  const listKind=securityWhitelistUi.kind,label=securityListLabel(listKind);
  const rows=names.map(name=>securityListRows(listKind).find(row=>row[0]===name)).filter(Boolean);if(!rows.length){toast('请选择'+label);return}
  securityWhitelistUi.pending={kind,listKind,rows:rows.map(row=>({name:row[0],snapshot:JSON.stringify(row)}))};
+ if(kind==='return'){
+  const row=rows[0];if(rows.length!==1||securityMetadata(row).origin!=='auto')throw new Error('请选择临时黑名单');
+  securityWhitelistUi.pending.sourceMetaSnapshot=JSON.stringify(securityMetadata(row));
+  const target=security.find(item=>securityIpKey(item[1])===securityIpKey(row[1]));securityWhitelistUi.pending.target=target?{name:target[0],snapshot:JSON.stringify(target),metaSnapshot:JSON.stringify(securityMetadata(target))}:null;
+  modalShell('提前解除临时黑名单',`<form data-form="securityWhitelistAction"><div class="modal-section"><p>确认提前解除 <strong>${esc(row[1])}</strong> 的临时拉黑，并恢复原白名单？原白名单状态和备注保留，仍需通过密码及Google验证码验证。</p><div class="form-error" data-error></div><div class="modal-field"><label for="securityReturnReason"><span class="required-mark">*</span>解除原因</label><textarea id="securityReturnReason" name="reason" required placeholder="请输入解除原因"></textarea></div></div><div class="modal-footer"><button class="btn" type="button" data-close-modal>取消</button><button class="btn primary" type="submit">确认解除</button></div></form>`);return;
+ }
  if(kind==='transfer'){
   if(rows.length!==1){toast('请选择一条名单记录');return}
   const destination=listKind==='white'?'black':'white',destinationLabel=securityListLabel(destination);
   const target=securityListRows(destination).find(row=>securityIpKey(row[1])===securityIpKey(rows[0][1]));
   securityWhitelistUi.pending.sourceMetaSnapshot=JSON.stringify(securityMetadata(rows[0]));
   securityWhitelistUi.pending.target=target?{name:target[0],snapshot:JSON.stringify(target),metaSnapshot:JSON.stringify(securityMetadata(target))}:null;
-  const body=`<form data-form="securityWhitelistAction"><div class="modal-section"><p>确认将 <strong>${esc(rows[0][1])}</strong> 转入${destinationLabel}？</p><p>确认后移除该条${label}，并启用对应${destinationLabel}。${destination==='black'?'该IP的后台新登录将被拦截。':'取消该条黑名单拦截，恢复白名单准入；仍须通过其他登录校验。'}API和已登录会话不受影响。</p>${target?`<p>${destinationLabel}已有同一IP，将复用原记录并保留其备注。${destination==='black'&&securityMetadata(target).origin==='auto'?'确认后将原自动记录转为长期有效的手动黑名单，不再按原自动到期时间解除。':''}</p>`:''}<div class="form-error" data-error></div></div><div class="modal-footer"><button type="button" class="btn" data-close-modal>取消</button><button type="submit" class="btn danger">确认转入</button></div></form>`;
+  const body=`<form data-form="securityWhitelistAction"><div class="modal-section"><p>确认将 <strong>${esc(rows[0][1])}</strong> 转入${destinationLabel}？</p><p>确认后移除该条${label}，并启用对应${destinationLabel}。${destination==='black'?'该IP的后台新登录将被拦截。':'取消该条黑名单拦截，恢复白名单准入；仍须通过其他登录校验。'}API和已登录会话不受影响。</p>${target?`<p>${destinationLabel}已有同一IP，将复用原记录并保留其备注。</p>`:''}<div class="form-error" data-error></div></div><div class="modal-footer"><button type="button" class="btn" data-close-modal>取消</button><button type="submit" class="btn danger">确认转入</button></div></form>`;
   modalShell('转入'+destinationLabel,body);return;
  }
- const promoting=kind==='toggle'&&listKind==='black'&&rows[0][2]!=='启用'&&securityMetadata(rows[0]).origin==='auto';
  const title=kind==='unlock'?'解除封锁':kind==='toggle'?(rows[0][2]==='启用'?'停用':'启用')+label:rows.length>1?'批量删除'+label:'删除'+label;
- const body=`<form data-form="securityWhitelistAction"><div class="modal-section"><p>${kind==='unlock'?'确认解除该IP的登录封锁？启用状态保持不变。':kind==='toggle'?(rows[0][2]==='启用'?'停用后该IP不再按黑名单拦截，其他登录校验仍然有效。':promoting?'确认启用后，将原自动记录转为长期有效的手动黑名单，不再按原自动到期时间解除；后台新登录将被拦截。':'启用后拒绝该IP的后台新登录，优先于白名单；已登录会话不受影响。'):`确认删除所选 ${rows.length} 条${label}？`}</p><p>${rows.map(row=>esc(row[1])).join('、')}</p><div class="form-error" data-error></div></div><div class="modal-footer"><button type="button" class="btn" data-close-modal>取消</button><button type="submit" class="btn ${kind==='unlock'?'primary':'danger'}">确定</button></div></form>`;
+ const body=`<form data-form="securityWhitelistAction"><div class="modal-section"><p>${kind==='unlock'?'确认解除该IP的登录封锁？启用状态保持不变。':kind==='toggle'?(rows[0][2]==='启用'?'停用后该IP不再按黑名单拦截，其他登录校验仍然有效。':'启用后拒绝该IP的后台新登录，优先于白名单；已登录会话不受影响。'):`确认删除所选 ${rows.length} 条${label}？`}</p><p>${rows.map(row=>esc(row[1])).join('、')}</p><div class="form-error" data-error></div></div><div class="modal-footer"><button type="button" class="btn" data-close-modal>取消</button><button type="submit" class="btn ${kind==='unlock'?'primary':'danger'}">确定</button></div></form>`;
  modalShell(title,body);
 }
-function applySecurityWhitelistAction(){
+function applySecurityWhitelistAction(reason=''){
  const pending=securityWhitelistUi.pending;if(!pending)throw new Error('操作已失效，请重新选择');
  const listKind=pending.listKind||'white',label=securityListLabel(listKind);
- requireSecurityListAction(listKind,pending.kind);
+ requireSecurityListAction(listKind,pending.kind==='return'?'auto_release':pending.kind);
+ if(!['transfer','toggle','delete','return'].includes(pending.kind))throw new Error('不支持的名单操作');
  const rows=pending.rows.map(item=>securityListRows(listKind).find(row=>row[0]===item.name));
  if(rows.some((row,index)=>!row||JSON.stringify(row)!==pending.rows[index].snapshot))throw new Error('记录已变化，请重新选择');
+ if(pending.kind==='return'){
+  if(rows.length!==1||!String(reason||'').trim())throw new Error('请填写解除原因');
+  const row=rows[0],target=security.find(item=>securityIpKey(item[1])===securityIpKey(row[1])),expected=pending.target;
+  if(JSON.stringify(securityMetadata(row))!==pending.sourceMetaSnapshot||(expected?(!target||JSON.stringify(target)!==expected.snapshot||JSON.stringify(securityMetadata(target))!==expected.metaSnapshot):Boolean(target)))throw new Error('名单记录已变化，请重新确认');
+  const result=restoreTemporaryWhitelist(row,'manual');result.detail+='；解除原因：'+String(reason).trim();return result;
+ }
+ if(rows.some(row=>securityMetadata(row).origin==='auto'))throw new Error('临时黑名单请通过提前解除恢复原白名单');
  if(pending.kind==='transfer'){
   if(rows.length!==1)throw new Error('请选择一条名单记录');
   const destination=listKind==='white'?'black':'white',destinationLabel=securityListLabel(destination);
@@ -685,7 +712,8 @@ function applySecurityWhitelistAction(){
   const target=securityListRows(destination).find(item=>securityIpKey(item[1])===securityIpKey(row[1]));
   const expected=pending.target;
   if(JSON.stringify(sourceMeta)!==pending.sourceMetaSnapshot||(expected?(!target||target[0]!==expected.name||JSON.stringify(target)!==expected.snapshot||JSON.stringify(securityMetadata(target))!==expected.metaSnapshot):Boolean(target)))throw new Error('名单记录已变化，请重新确认转入');
-  const updated=now(),conversion=target&&destination==='black'?makeManualBlacklist(target):'';
+  if(target&&destination==='black'&&securityMetadata(target).origin==='auto')throw new Error('该IP处于临时黑名单，请等待到期或提前解除');
+  const updated=now();
   if(target){target[2]='启用';target[3]=updated}
   else{
    const id=securityWhitelistUi.sequence++,name=(destination==='black'?'BL-':'WL-')+id;
@@ -695,18 +723,16 @@ function applySecurityWhitelistAction(){
   const remaining=securityListRows(listKind).filter(item=>item[0]!==row[0]);
   if(listKind==='white')security=remaining;else securityBlacklist=remaining;
   securityWhitelistUi.meta.delete(row[0]);securityWhitelistUi.selected.delete(row[0]);
-  return {kind:destination,action:'转入'+destinationLabel,ips:[row[1]],detail:'已移除'+label+'并启用对应'+destinationLabel+'；其他登录校验、API和已登录会话保持不变'+(conversion?'；'+conversion:'')};
+  return {kind:destination,action:'转入'+destinationLabel,ips:[row[1]],detail:'已移除'+label+'并启用对应'+destinationLabel+'；其他登录校验、API和已登录会话保持不变'};
  }
- let conversionDetail='';
- if(pending.kind==='toggle')rows.forEach(row=>{if(listKind==='black'){if(row[2]!=='启用')conversionDetail=makeManualBlacklist(row);else if(securityMetadata(row).origin==='auto')securityMetadata(row).releasedAt=Date.now()}row[2]=row[2]==='启用'?'停用':'启用';row[3]=now()});
- else if(pending.kind==='unlock')rows.forEach(row=>{securityMetadata(row).locked=false});
+ if(pending.kind==='toggle')rows.forEach(row=>{row[2]=row[2]==='启用'?'停用':'启用';row[3]=now()});
  else {const names=new Set(rows.map(row=>row[0]));const remaining=securityListRows(listKind).filter(row=>!names.has(row[0]));if(listKind==='black')securityBlacklist=remaining;else security=remaining;for(const name of names){securityWhitelistUi.meta.delete(name);securityWhitelistUi.selected.delete(name)}}
- return {kind:listKind,action:pending.kind==='unlock'?'解除登录封锁':pending.kind==='toggle'?(rows[0][2]==='启用'?'启用':'停用')+label:'删除'+label,ips:rows.map(row=>row[1]),detail:conversionDetail||undefined};
+ return {kind:listKind,action:pending.kind==='unlock'?'解除登录封锁':pending.kind==='toggle'?(rows[0][2]==='启用'?'启用':'停用')+label:'删除'+label,ips:rows.map(row=>row[1])};
 }
 function exportSecurityWhitelist(){
  requireSecurityListAction(securityWhitelistUi.kind,'export');
  const black=securityWhitelistUi.kind==='black';
- const rows=[['ID','IP地址','启用状态',black?'拦截状态':'登录保护',...(black?['来源','触发原因','到期时间']:[]),'备注','创建时间'],...filteredSecurityWhitelist().map(row=>{const m=securityMetadata(row);return [m.id,row[1],row[2],black?securityBlacklistState(row):(m.locked?'封锁中':'正常'),...(black?[m.origin==='auto'?'自动触发':'手动维护',m.reason||'—',m.expiresAt?securitySampleTime(m.expiresAt):'长期有效']:[]),m.remark,m.created]})];
+ const rows=[['ID','IP地址','启用状态',...(black?['拦截状态','来源','触发原因','到期时间']:[]),'备注','创建时间'],...filteredSecurityWhitelist().map(row=>{const m=securityMetadata(row);return [m.id,row[1],row[2],...(black?[securityBlacklistState(row),m.origin==='auto'?'自动触发':'手动维护',m.reason||'—',m.expiresAt?securitySampleTime(m.expiresAt):'长期有效']:[]),m.remark,m.created]})];
  const csv='\uFEFF'+rows.map(row=>row.map(value=>'"'+String(value).replace(/^[=+@-]/,"'$&").replaceAll('"','""')+'"').join(',')).join('\r\n');
  const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));const link=document.createElement('a');link.href=url;link.download='登录IP'+securityListLabel()+'.csv';link.click();URL.revokeObjectURL(url);toast('已导出当前筛选结果');
 }
@@ -731,7 +757,7 @@ document.addEventListener('submit',event=>{
  event.preventDefault();event.stopImmediatePropagation();
  try{
   if(form.dataset.form==='securityWhitelist'){const result=saveSecurityWhitelist(fd(form));if(securityWhitelistUi.kind!==result.kind)switchSecurityList(result.kind);securityWhitelistUi.selected.clear();audit('登录安全',result.row[1],result.action,securityMetadata(result.row).remark||result.action,'成功')}
-  else{const result=applySecurityWhitelistAction();if(result.kind!==securityWhitelistUi.kind)switchSecurityList(result.kind);audit('登录安全',result.ips.join('、'),result.action,result.detail||result.ips.length+' 条'+securityListLabel(result.kind),'成功')}
+  else{const result=applySecurityWhitelistAction(fd(form).reason);if(result.kind!==securityWhitelistUi.kind)switchSecurityList(result.kind);audit('登录安全',result.ips.join('、'),result.action,result.detail||result.ips.length+' 条'+securityListLabel(result.kind),'成功')}
   render();closeModal();toast('操作成功');
  }catch(error){showFormError(form,error.message,form.dataset.form==='securityWhitelist'?['ip']:[])}
 },true);
@@ -740,20 +766,20 @@ document.addEventListener('change',event=>{
  const el=event.target;
  if(el.id==='autoBlacklistEnabled')syncSecurityAutoPolicyRequired(el.form);
  if(el.matches('[data-security-select]')){el.checked?securityWhitelistUi.selected.add(el.dataset.securitySelect):securityWhitelistUi.selected.delete(el.dataset.securitySelect);renderSecurityWhitelist()}
- if(el.id==='securitySelectAll'){const rows=filteredSecurityWhitelist().slice((securityWhitelistUi.page-1)*securityWhitelistUi.size,securityWhitelistUi.page*securityWhitelistUi.size);rows.forEach(row=>el.checked?securityWhitelistUi.selected.add(row[0]):securityWhitelistUi.selected.delete(row[0]));renderSecurityWhitelist()}
+ if(el.id==='securitySelectAll'){const rows=filteredSecurityWhitelist().slice((securityWhitelistUi.page-1)*securityWhitelistUi.size,securityWhitelistUi.page*securityWhitelistUi.size).filter(row=>securityWhitelistUi.kind!=='black'||securityMetadata(row).origin!=='auto');rows.forEach(row=>el.checked?securityWhitelistUi.selected.add(row[0]):securityWhitelistUi.selected.delete(row[0]));renderSecurityWhitelist()}
  if(el.id==='securityPageSize'){securityWhitelistUi.size=Number(el.value);securityWhitelistUi.page=1;renderSecurityWhitelist()}
  if(el.id==='securityGoPage'){const pages=Math.max(1,Math.ceil(filteredSecurityWhitelist().length/securityWhitelistUi.size));securityWhitelistUi.page=Math.max(1,Math.min(pages,Number(el.value)||1));renderSecurityWhitelist()}
 });
 document.addEventListener('click',event=>{
- const el=event.target.closest('[data-security-list],[data-security-action],[data-security-edit],[data-security-toggle],[data-security-delete],[data-security-unlock],[data-security-transfer]');if(!el)return;
- const permissionAction=el.hasAttribute('data-security-edit')?'edit':el.hasAttribute('data-security-toggle')?'toggle':el.hasAttribute('data-security-delete')?'delete':el.hasAttribute('data-security-unlock')?'unlock':el.hasAttribute('data-security-transfer')?'transfer':el.dataset.securityAction==='batch-delete'?'delete':el.dataset.securityAction;
- if(['add','edit','toggle','delete','unlock','transfer','export'].includes(permissionAction)&&!securityListActionAllowed(securityWhitelistUi.kind,permissionAction)){toast('当前账号没有该名单操作权限');return}
+ const el=event.target.closest('[data-security-list],[data-security-action],[data-security-edit],[data-security-toggle],[data-security-delete],[data-security-return],[data-security-transfer]');if(!el)return;
+ const permissionAction=el.hasAttribute('data-security-edit')?'edit':el.hasAttribute('data-security-toggle')?'toggle':el.hasAttribute('data-security-delete')?'delete':el.hasAttribute('data-security-return')?'auto_release':el.hasAttribute('data-security-transfer')?'transfer':el.dataset.securityAction==='batch-delete'?'delete':el.dataset.securityAction;
+ if(['add','edit','toggle','delete','auto_release','transfer','export'].includes(permissionAction)&&!securityListActionAllowed(securityWhitelistUi.kind,permissionAction)){toast('当前账号没有该名单操作权限');return}
  if(el.hasAttribute('data-security-list'))return switchSecurityList(el.dataset.securityList);
  if(el.hasAttribute('data-security-edit'))return openSecurityWhitelistEditor(el.dataset.securityEdit);
  if(el.hasAttribute('data-security-toggle')){const row=securityListRows().find(row=>row[0]===el.dataset.securityToggle);if(row&&securityWhitelistUi.kind==='black')return openSecurityWhitelistAction('toggle',[row[0]]);if(row)openWhitelistStatusConfirm((row[2]==='启用'?'停用':'启用')+'白名单 '+row[0]);return}
  if(el.hasAttribute('data-security-delete'))return openSecurityWhitelistAction('delete',[el.dataset.securityDelete]);
  if(el.hasAttribute('data-security-transfer'))return openSecurityWhitelistAction('transfer',[el.dataset.securityTransfer]);
- if(el.hasAttribute('data-security-unlock'))return openSecurityWhitelistAction('unlock',[el.dataset.securityUnlock]);
+ if(el.hasAttribute('data-security-return'))return openSecurityWhitelistAction('return',[el.dataset.securityReturn]);
  const action=el.dataset.securityAction;
  if(action==='policy'){try{openSecurityAutoPolicy()}catch(error){toast(error.message)}return}
  if(action==='add')return openSecurityWhitelistEditor('');
@@ -793,7 +819,7 @@ const tenantPermissionCatalog=[
   {id:'settings',page:'租户配置',path:'/tenant/system/settings',perm:'tenant.settings.view',group:'系统管理',actions:[{id:'brand_submit',label:'维护品牌配置',code:'tenant.brand.manage',risk:false},{id:'grant_rate_view',label:'查看业务授权、费率与可用域名',code:'tenant.settings.view',risk:false}],object:'当前租户配置对象',risk:'高'},
   {id:'accounts',page:'账户管理',path:'/tenant/system/accounts',perm:'tenant.user.manage',group:'系统管理',actions:[{id:'account_add',label:'新增',code:'tenant.user.manage',risk:false},{id:'account_edit',label:'编辑',code:'tenant.user.manage',risk:false},{id:'account_reset_pwd',label:'重置密码',code:'tenant.user.manage',risk:true},{id:'account_reset_2fa',label:'重置 2FA',code:'tenant.user.manage',risk:true},{id:'account_enable',label:'启用',code:'tenant.user.manage',risk:true},{id:'account_disable',label:'停用',code:'tenant.user.manage',risk:true},{id:'account_lock',label:'锁定',code:'tenant.user.manage',risk:true},{id:'account_unlock',label:'解锁',code:'tenant.user.manage',risk:true},{id:'account_offline',label:'强制下线',code:'tenant.user.manage',risk:true},{id:'account_export',label:'导出账号视图',code:'tenant.user.export',risk:true}],object:'当前租户账号对象',risk:'高'},
   {id:'roles',page:'角色权限',path:'/tenant/system/roles',perm:'tenant.role.manage',group:'系统管理',actions:[{id:'role_add',label:'新增',code:'tenant.role.manage',risk:false},{id:'role_edit',label:'编辑',code:'tenant.role.manage',risk:false},{id:'role_auth',label:'授权',code:'tenant.role.manage',risk:true},{id:'role_disable',label:'启用 / 停用 / 删除',code:'tenant.role.manage',risk:true}],object:'当前租户角色对象',risk:'高'},
-  {id:'security',page:'登录安全',path:'/tenant/system/security',perm:'tenant.security.whitelist.view',group:'系统管理',actions:[{id:'sec_view_logins',label:'查看白名单',code:'tenant.security.whitelist.view',risk:false},{id:'sec_whitelist_add',label:'新增白名单',code:'tenant.security.whitelist.manage',risk:true},{id:'sec_whitelist_edit',label:'编辑白名单',code:'tenant.security.whitelist.manage',risk:true},{id:'sec_whitelist_toggle',label:'启停白名单',code:'tenant.security.whitelist.manage',risk:true},{id:'sec_whitelist_delete',label:'删除白名单',code:'tenant.security.whitelist.manage',risk:true},{id:'sec_whitelist_unlock',label:'解除封锁',code:'tenant.security.whitelist.manage',risk:true},{id:'sec_blacklist_add',label:'新增黑名单',code:'tenant.security.whitelist.manage',risk:true},{id:'sec_blacklist_edit',label:'编辑黑名单',code:'tenant.security.whitelist.manage',risk:true},{id:'sec_blacklist_toggle',label:'启停黑名单',code:'tenant.security.whitelist.manage',risk:true},{id:'sec_blacklist_delete',label:'删除黑名单',code:'tenant.security.whitelist.manage',risk:true},{id:'sec_list_transfer',label:'转入黑白名单',code:'tenant.security.whitelist.manage',risk:true},{id:'sec_auto_blacklist_view',label:'查看自动拉黑设置',code:'tenant.security.auto_blacklist.view',risk:false},{id:'sec_auto_blacklist_manage',label:'修改自动拉黑设置',code:'tenant.security.auto_blacklist.manage',risk:true}],object:'当前租户后台登录IP黑白名单',risk:'低'},
+  {id:'security',page:'登录安全',path:'/tenant/system/security',perm:'tenant.security.whitelist.view',group:'系统管理',actions:[{id:'sec_view_logins',label:'查看白名单',code:'tenant.security.whitelist.view',risk:false},{id:'sec_whitelist_add',label:'新增白名单',code:'tenant.security.whitelist.manage',risk:true},{id:'sec_whitelist_edit',label:'编辑白名单',code:'tenant.security.whitelist.manage',risk:true},{id:'sec_whitelist_toggle',label:'启停白名单',code:'tenant.security.whitelist.manage',risk:true},{id:'sec_whitelist_delete',label:'删除白名单',code:'tenant.security.whitelist.manage',risk:true},{id:'sec_blacklist_add',label:'新增黑名单',code:'tenant.security.whitelist.manage',risk:true},{id:'sec_blacklist_edit',label:'编辑黑名单',code:'tenant.security.whitelist.manage',risk:true},{id:'sec_blacklist_toggle',label:'启停黑名单',code:'tenant.security.whitelist.manage',risk:true},{id:'sec_blacklist_delete',label:'删除黑名单',code:'tenant.security.whitelist.manage',risk:true},{id:'sec_list_transfer',label:'转入黑白名单',code:'tenant.security.whitelist.manage',risk:true},{id:'sec_auto_blacklist_view',label:'查看自动拉黑设置',code:'tenant.security.auto_blacklist.view',risk:false},{id:'sec_auto_blacklist_manage',label:'修改自动拉黑设置',code:'tenant.security.auto_blacklist.manage',risk:true},{id:'sec_auto_blacklist_release',label:'提前解除临时黑名单',code:'tenant.security.auto_blacklist.release',risk:true}],object:'当前租户后台登录IP黑白名单',risk:'低'},
   {id:'audit',page:'操作审计',path:'/tenant/system/audit',perm:'tenant.audit.view',group:'系统管理',actions:[{id:'audit_detail',label:'查看详情',code:'tenant.audit.view',risk:false},{id:'audit_export',label:'导出',code:'tenant.audit.export',risk:true}],object:'当前租户永久审计',risk:'高'}
 ];
 const tenantRoleGrants={
@@ -1136,7 +1162,8 @@ window.__HSTenantSecurityPrototype={
   setWhitelistEntryStatus:(name,status)=>{const row=security.find(item=>item[0]===String(name));if(!row||!['启用','停用'].includes(String(status)))return false;row[2]=String(status);row[3]=now();render();return true}
 };
 window.__tenantRoleAssignmentTest={getUserRoles:login=>{const row=accounts.find(item=>item[0]===login);return row?accountRoleNames(row):[]},getPermissionVersion:login=>Number(accounts.find(item=>item[0]===login)?.[11]||0),getRoleMembers:name=>accounts.filter(row=>accountHasRole(row,name)).map(row=>row[0]),getUserScope:login=>{const row=accounts.find(item=>item[0]===login);if(!row)return null;const accountScope={code:row[12]||'tenant.current',merchantIds:[...(row[13]||[])]};return {accountScope,roleMergedScope:tenantRoleMergedScope(accountRoleNames(row)),effectiveScope:tenantEffectiveScope(accountRoleNames(row),accountScope)}},getRoleScope:name=>{const role=roles.find(item=>item[0]===name);return role?{code:role[7]||'tenant.current',merchantIds:[...(role[8]||[])]}:null},getUserDataAccess:login=>{const row=accounts.find(item=>item[0]===login);return row?tenantUserDataAccess(accountRoleNames(row)):null},getRoleDataAccess:code=>tenantRoleGrants[code]?{sensitive:tenantRoleHasSensitive(code),exportActionCount:tenantRoleExportActionIds(code).length}:null};
-document.getElementById('closeModal').addEventListener('click',closeModal);document.getElementById('modalBackdrop').addEventListener('click',closeModal);document.addEventListener('keydown',e=>{const open=document.getElementById('modal').classList.contains('open');if(!open)return;if(e.key==='Escape')closeModal();else if(e.key==='Tab')trapTenantSystemModalFocus(e)});render();const initialRoute=window.location.hash.replace('#','');const initialView=initialRoute==='settings-brand'?'settings':initialRoute;if(views[initialView])switchView(initialView);if(initialRoute==='settings-brand')document.querySelector('[data-tenant-tab="brand"]')?.click();if(window.lucide){lucide.createIcons()}</script>
+document.getElementById('closeModal').addEventListener('click',closeModal);document.getElementById('modalBackdrop').addEventListener('click',closeModal);document.addEventListener('keydown',e=>{const open=document.getElementById('modal').classList.contains('open');if(!open)return;if(e.key==='Escape')closeModal();else if(e.key==='Tab')trapTenantSystemModalFocus(e)});render();const initialRoute=window.location.hash.replace('#','');const initialView=initialRoute==='settings-brand'?'settings':initialRoute;if(views[initialView])switchView(initialView);if(initialRoute==='settings-brand')document.querySelector('[data-tenant-tab="brand"]')?.click();if(window.lucide){lucide.createIcons()}
+setInterval(()=>{if(settleTemporaryBlacklists()>0)renderSecurityWhitelist()},1000);</script>
 <script>
 document.addEventListener('submit',event=>{
   const form=event.target.closest('form[data-form="confirm"]');
