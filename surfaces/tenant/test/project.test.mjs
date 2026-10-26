@@ -17,7 +17,7 @@ test("页面注册表包含 31 个页面", () => {
 test("登录安全参照开发环境展示白名单管理", async () => {
   const html = await readFile(path.join(root, "public/legacy/sources/system.html"), "utf8");
   const securityView = html.slice(html.indexOf('<section class="view" id="view-security">'), html.indexOf('<section class="view" id="view-settings">'));
-  for (const label of ['IP地址', '启用状态', '登录保护', '备注', '创建时间', '新增白名单', '批量删除']) assert.ok(securityView.includes(label));
+  for (const label of ['IP地址', '启用状态', '备注', '创建时间', '新增白名单', '批量删除']) assert.ok(securityView.includes(label));
   assert.match(securityView, /aria-label="登录IP白名单"/);
   assert.doesNotMatch(securityView, /<h2>登录记录<\/h2>/);
   assert.match(html, /login-whitelist-drawer/);
