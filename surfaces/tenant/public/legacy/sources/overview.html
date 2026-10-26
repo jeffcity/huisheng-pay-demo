@@ -21432,7 +21432,20 @@
         min-height: var(--topbar-height);
       }
     }
-  </style>
+
+    /* Compact operator tables retain full content and the original copy / action controls. */
+    body .blue-order-page .compact-order-table{table-layout:fixed;width:100%}
+    body .blue-order-page .compact-order-table th,body .blue-order-page .compact-order-table td{min-width:0!important;width:auto;padding:8px 6px;font-size:12px;line-height:17px;white-space:normal;overflow-wrap:anywhere}
+    body .blue-order-page .compact-order-table th:first-child,body .blue-order-page .compact-order-table td:first-child{min-width:0!important}
+    body .blue-order-page .compact-order-table td:first-child>.mono,body .blue-order-page .compact-order-table td:nth-child(2)>.mono{word-break:normal;overflow-wrap:anywhere}
+    body .blue-order-page .compact-order-table .mono{font-size:11px;line-height:16px;word-break:break-all}
+    body .blue-order-page .compact-order-table .stack{gap:4px}
+    body .blue-order-page .compact-order-table .stack>span{min-width:0;overflow-wrap:anywhere}
+    body .blue-order-page .compact-order-table .btn-link{min-height:24px!important;padding:0 2px;font-size:12px;line-height:20px}
+    body .blue-order-page .compact-order-table .tag{font-size:11px;padding:1px 5px;white-space:normal}
+    body .blue-order-page .compact-order-table .cell-actions{display:flex;flex-wrap:wrap;gap:2px}
+    body .blue-order-page .compact-order-table .order-more>summary{min-height:28px!important;height:28px;padding:0 6px;font-size:12px}
+</style>
 
   <style id="hs-unified-content-bridge">
     html, body { min-width: 0 !important; }
@@ -26251,11 +26264,13 @@
     }
 
     function moduleTableHtml(columns, rows, options = {}) {
-      const minWidth = options.minWidth || Math.max(1240, columns.length * 132);
+      const columnWidths = options.columnWidths;
+      const minWidth = columnWidths ? columnWidths.reduce((total, width) => total + width, 0) : options.minWidth || Math.max(1240, columns.length * 132);
       return `
         <div class="module-list-state" data-module-list-state role="status" aria-live="polite"></div>
         <div class="table-wrap" data-astryx="DataTableViewport">
-          <table class="rich-table" style="min-width:${minWidth}px" data-astryx="DataTable">
+          <table class="rich-table${columnWidths ? " compact-order-table" : ""}" style="min-width:${minWidth}px" data-astryx="DataTable">
+            ${columnWidths ? `<colgroup>${columnWidths.map(width => `<col style="width:${width}px">`).join("")}</colgroup>` : ""}
             <thead><tr>${columns.map((column) => `<th>${column}</th>`).join("")}</tr></thead>
             <tbody>
               ${rows.map((row) => `<tr>${row.map((cell) => `<td>${cell}</td>`).join("")}</tr>`).join("")}
@@ -26772,7 +26787,7 @@
     }
 
     function blueOrderNumberCell(channelOrderNo, merchantOrderNo) {
-      return `<div class="stack"><span><span class="mono">${escapeHtml(channelOrderNo)}</span> ${blueCopyButton(channelOrderNo)}</span><span><span class="mono muted">${escapeHtml(merchantOrderNo)}</span> ${blueCopyButton(merchantOrderNo)}</span></div>`;
+      return `<div class="stack"><span><span class="mono" title="${escapeHtml(channelOrderNo)}">${escapeHtml(channelOrderNo)}</span> ${blueCopyButton(channelOrderNo)}</span><span><span class="mono muted" title="${escapeHtml(merchantOrderNo)}">${escapeHtml(merchantOrderNo)}</span> ${blueCopyButton(merchantOrderNo)}</span></div>`;
     }
 
     function blueMerchantCell(name, merchantNo) {
@@ -26839,7 +26854,8 @@
             ["处理中金额", "CNY 20,800.00", ""]
           ],
           columns: ["系统订单号", "通道订单号/商家订单号", "商户名/号", "通道", "平台产品", "交易金额", "状态", "通知状态", "提交时间/回调时间", "IP", "操作"],
-          tableMinWidth: 1820,
+          tableMinWidth: 1070,
+          columnWidths: [126,150,84,96,100,86,64,72,128,100,64],
           rows: [
             [
               `<span class="mono">HS-C-260717-000031</span>`,
@@ -26961,7 +26977,8 @@
         ],
         secondaryToolbar: true,
         columns: ["", "系统订单号", "通道订单号/商家订单号", "商户名/号", "类型", "交易金额", "支付状态", "通知状态", "驳回描述", "通道商", "通道", "提交时间/回调时间", "操作"],
-        tableMinWidth: 2140,
+        tableMinWidth: 1134,
+        columnWidths: [30,126,150,84,48,86,72,72,88,90,96,128,64],
         rows: [
           [
             `<input class="checkbox-cell" type="checkbox" aria-label="选择订单 HS-P-260717-000336">`,
@@ -27084,7 +27101,7 @@
           ${blueOrderActionsHtml(page.actions)}
           ${blueOrderSummaryHtml(page)}
           ${page.secondaryToolbar ? `<div class="blue-order-secondary"><button class="btn btn-primary" type="button" data-action="bulk-recreate-payout">重新下单</button><label>异常订单提醒：<input type="checkbox" role="switch" aria-label="异常订单提醒"></label></div>` : ""}
-          ${moduleTableHtml(page.columns, page.rows, { minWidth: page.tableMinWidth })}
+          ${moduleTableHtml(page.columns, page.rows, { minWidth: page.tableMinWidth, columnWidths: page.columnWidths })}
         </section>
       </div>`;
     }
@@ -27656,7 +27673,7 @@
           <div class="panel-header"><h2 class="panel-title">全生命周期记录列表</h2></div>
           ${moduleFiltersHtml(page.filters)}
           ${moduleActionsHtml(page.actions, page.tableHint)}
-          ${moduleTableHtml(page.columns, page.rows, { minWidth: page.tableMinWidth })}
+          ${moduleTableHtml(page.columns, page.rows, { minWidth: page.tableMinWidth, columnWidths: page.columnWidths })}
         </section>
       `;
     }

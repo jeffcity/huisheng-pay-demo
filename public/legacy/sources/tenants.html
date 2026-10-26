@@ -1519,6 +1519,64 @@
     }
   .tenant-billing-settings{border:1px solid #e4e7ed;border-radius:8px;padding:16px;background:#f8faff}.tenant-billing-settings h3{font-size:15px;margin:0 0 8px}.tenant-billing-settings small{line-height:1.6;display:block;color:#606266}.tenant-billing-settings .form-grid{margin-top:12px}.tenant-billing-settings .field{justify-content:flex-start}.tenant-billing-settings select{min-height:32px!important;height:32px!important;padding:4px 10px}.tenant-billing-settings .field label{min-height:20px}
   #tenantModal.billing-only .modal-body > .form-grid > .field:not(.tenant-billing-settings){display:none}
+
+    /* Tenant content follows the developed Arco density; shell and monthly billing are unchanged. */
+    body .content{padding:12px 16px!important;gap:16px}
+    body .page-head{display:none!important;background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;margin:0 0 12px!important;min-height:32px;justify-content:flex-end}
+    .page-head .page-title,.tenant-list-panel>.panel-header{display:none}
+    body .panel{border-radius:6px;box-shadow:none}
+    body .tenant-list-panel>.panel-body{padding:0;overflow:visible}
+    body .tenant-list-panel .filter-bar{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:16px;background:#fff;border:1px solid var(--border);border-radius:6px;margin:0 0 16px}
+    body #createTenantTop{margin-left:auto}
+    body .tenant-list-panel .filter-bar .field{display:flex;flex-direction:row;align-items:center;gap:12px}
+    body .tenant-list-panel .filter-bar label{white-space:nowrap;font-size:14px;font-weight:400;margin:0}
+    body .tenant-list-panel .filter-bar input{width:220px}
+    body .tenant-list-panel .filter-bar select{width:130px}
+    body .btn{min-height:32px;height:32px;padding:0 14px;border-radius:3px;font-size:14px;font-weight:400;gap:6px}
+    body .btn svg{width:14px;height:14px}
+    body input,body select{min-height:32px!important;height:32px!important;font-size:14px!important;padding:4px 12px!important;border-radius:3px!important}
+    body textarea{font-size:14px!important;min-height:70px!important;border-radius:3px!important}
+    body .tenant-list-panel #tableWrap{margin:16px 16px 0;border:0}
+    body .tenant-list-panel table{min-width:640px}
+    body th,body td{font-size:14px;padding:14px 16px}
+    body th{font-weight:400;background:#f2f3f5;color:var(--text-secondary)}
+    body .tenant-cell{gap:6px}.tenant-cell strong{font-size:14px;font-weight:500}.tenant-cell .mono{font-family:var(--font-ui);font-size:12px;color:var(--text-tertiary)}
+    body #tenantDetailModal .kv strong .tag{display:inline-flex;width:fit-content;margin:0;padding:0 6px;border:0;background:var(--success-soft)}
+    body .tag{font-size:12px;line-height:20px;padding:0 6px;border-radius:3px;font-weight:400}
+    body .action-link{font-size:14px;font-weight:400;padding:0}.tenant-pagination{display:flex;justify-content:flex-end;align-items:center;gap:12px;padding:16px}.tenant-pagination select{width:auto}
+    body #tenantDetailModal{top:0;bottom:0;left:auto;right:0;width:min(920px,100vw);height:100dvh;max-height:100dvh;transform:translateX(32px);border-radius:0!important;border:0;grid-template-rows:auto auto minmax(0,1fr) auto}
+    body #tenantDetailModal.open{transform:translateX(0)}
+    body .detail-modal-head{padding:16px 20px 8px;border-bottom:0;gap:0}.detail-modal-head #detailTags{display:none}
+    body .detail-title h2{font-size:16px;font-weight:500}.detail-title p{font-size:12px;padding-top:12px}
+    body .icon-close{width:28px;min-width:28px;padding:0;border:0;background:transparent;font-size:20px}
+    body .detail-tabs{padding:0 16px;gap:8px;margin:0 16px}.detail-tabs .detail-tab{height:44px;font-size:14px;font-weight:400;padding:0 12px;border-radius:0}
+    body .detail-modal-body{padding:16px;overflow:auto}.detail-section.active{gap:16px}
+    body .detail-section .panel-header{padding:0!important;min-height:20px;border:0!important;border-radius:0!important;background:transparent;box-shadow:none}
+    body .detail-section h3{font-size:14px;font-weight:500;margin:0}.detail-section-heading{display:flex;align-items:center;gap:12px}
+    body .detail-section-heading .btn{height:28px;min-height:28px;background:#fff!important;color:var(--primary)!important;border-color:var(--primary)!important}
+    body #tenantDetailModal .kv-grid{display:block;border:1px solid var(--border);border-radius:3px;overflow:hidden}
+    body #tenantDetailModal .kv{display:grid;grid-template-columns:140px minmax(0,1fr);gap:0;border:0;border-bottom:1px solid var(--border);padding:0;border-radius:0;min-height:29px}
+    body #tenantDetailModal .kv:last-child{border-bottom:0}
+    body #tenantDetailModal .kv>span{background:#f2f3f5;border-right:1px solid var(--border);padding:5px 16px;margin:0;font-size:14px}
+    body #tenantDetailModal .kv>strong{padding:5px 16px;font-weight:400;font-size:14px;white-space:normal;overflow-wrap:anywhere}
+    body #tenantDetailModal table{min-width:620px}.detail-section .table-wrap{border:0}.detail-section td{padding:12px;font-size:13px}.detail-section th{padding:12px;font-size:13px}
+    body #tenantDetailModal .table-actions{justify-content:flex-start;gap:8px;flex-wrap:wrap}
+    body #tenantDetailModal .table-actions .btn{padding:0;height:24px;min-height:24px;border:0;background:transparent;color:var(--primary)}
+    body #tenantDetailModal .table-actions .btn.danger{color:var(--danger)}
+    body #tenantModal{width:min(650px,calc(100vw - 32px));max-height:calc(100dvh - 32px);border-radius:4px}
+    body #tenantModal.create-mode{border-radius:0!important;left:auto;right:0;top:0;bottom:0;width:min(560px,100vw);max-height:100dvh;border-radius:0;transform:translateX(32px)}
+    body #tenantModal.create-mode.open{transform:translateX(0)}
+    body #tenantModal>.modal-body>.form-grid{grid-template-columns:1fr;gap:22px}
+    body #tenantModal .field[hidden]{display:none!important}
+    body #tenantModal input,body #tenantModal select,body #tenantModal textarea{background:#f2f3f5!important;border-color:transparent!important}
+    body #tenantModal .field label{font-size:14px;font-weight:400;margin-bottom:8px}
+    body #tenantModal .required:before{content:'*';color:#f53f3f;margin-right:4px}
+    body #tenantModal .tenant-billing-settings{padding:16px;background:#f7f8ff}
+    body #tenantModal .tenant-billing-settings .form-grid{grid-template-columns:1fr 1fr;gap:16px}
+    body #tenantModal .tenant-billing-settings h3{font-size:14px}.tenant-billing-settings p,.tenant-billing-settings small{font-size:12px}
+    body #tenantModal .field.wide{grid-column:1/-1}
+    @media(max-width:760px){body .tenant-list-panel .filter-bar .field{width:100%;justify-content:space-between}body .tenant-list-panel .filter-bar input,body .tenant-list-panel .filter-bar select{flex:1;width:0}body #tenantDetailModal{width:100vw}body #tenantDetailModal .kv{grid-template-columns:112px minmax(0,1fr)}body #tenantModal .tenant-billing-settings .form-grid{grid-template-columns:1fr}}
+    @media(prefers-reduced-motion:reduce){body #tenantDetailModal,body #tenantModal{transition:none}}
 </style>
 </head>
 <body>
@@ -1606,11 +1664,11 @@
       <section class="content">
         <div class="page-head">
           <div class="page-title">
-            <h1>平台端租户管理</h1>
+            <h1>租户管理</h1>
             <p>管理租户生命周期、基础资料、账号安全、状态管理和租户收费设置。</p>
           </div>
           <div class="head-actions">
-            <button class="btn primary" id="createTenantTop"><i data-lucide="plus"></i>新增租户</button>
+
           </div>
         </div>
 
@@ -1645,7 +1703,7 @@
                   </select>
                 </div>
                 <button class="btn primary" id="applyFilter"><i data-lucide="sliders-horizontal"></i>筛选</button>
-                <button class="btn" id="clearFilter"><i data-lucide="rotate-ccw"></i>清空</button>
+                <button class="btn" id="clearFilter">清空</button><button class="btn" id="exportTenants">导出</button><button class="btn primary" id="createTenantTop"><i data-lucide="plus"></i>新增租户</button>
               </div>
 
               <div class="table-wrap" id="tableWrap">
@@ -1654,12 +1712,14 @@
                     <tr>
                       <th>租户</th>
                       <th>状态</th>
+                      <th>已开通业务</th>
                       <th class="action-col">操作</th>
                     </tr>
                   </thead>
                   <tbody id="tenantRows"></tbody>
                 </table>
               </div>
+              <div class="tenant-pagination" aria-label="租户列表分页"><span id="tenantTotal"></span><button class="btn" id="tenantPrev" aria-label="上一页">‹</button><span id="tenantPage"></span><button class="btn" id="tenantNext" aria-label="下一页">›</button><select id="tenantPageSize" aria-label="每页条数"><option value="10">10 条/页</option><option value="20">20 条/页</option><option value="50">50 条/页</option></select></div>
             </div>
           </section>
         </div>
@@ -1676,7 +1736,7 @@
           <h2 id="detailTenantName">租户详情</h2>
           <p id="detailTenantMeta">选择租户后查看详情。</p>
         </div>
-        <button class="btn" id="detailClose" aria-label="关闭详情">关闭</button>
+        <button class="btn icon-close" id="detailClose" aria-label="关闭详情">×</button>
       </div>
       <div class="tag-row" id="detailTags"></div>
     </div>
@@ -1694,6 +1754,7 @@
       <section class="detail-section" id="tab-domains"></section>
       <section class="detail-section" id="tab-audit"></section>
     </div>
+    <div class="modal-foot"><button class="btn" data-close-detail>取消</button><button class="btn primary" data-close-detail>确定</button></div>
   </section>
 
   <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true"></div>
@@ -1706,52 +1767,41 @@
       <div class="form-error" id="tenantFormError" role="alert"></div>
       <div class="form-grid">
         <div class="field">
-          <label for="tenantNameInput">租户名称</label>
-          <input id="tenantNameInput" value="汇盛东南亚">
+          <label class="required" for="tenantNameInput">租户名称</label>
+          <input id="tenantNameInput" value="汇盛东南亚" placeholder="请输入租户名称">
         </div>
         <div class="field">
           <label for="tenantCodeInput">租户编号</label>
           <input id="tenantCodeInput" value="系统自动生成" class="mono" readonly>
         </div>
         <div class="field">
-          <label for="contactInput">联系人</label>
-          <input id="contactInput" value="Lin Chen">
+          <label class="required" for="contactInput">联系人</label>
+          <input id="contactInput" value="Lin Chen" placeholder="请输入联系人">
         </div>
         <div class="field">
-          <label for="mobileInput">联系手机</label>
-          <input id="mobileInput" value="+63 917 208 8891">
+          <label class="required" for="mobileInput">联系手机</label>
+          <input id="mobileInput" value="+63 917 208 8891" placeholder="请输入联系手机">
         </div>
         <div class="field">
-          <label for="expireInput">过期时间</label>
+          <label class="required" for="expireInput">过期时间</label>
           <input id="expireInput" type="date" value="2027-01-31">
         </div>
-        <div class="field">
-          <label for="domainPrefixInput">初始域名前缀</label>
-          <input id="domainPrefixInput" value="tenant-062" autocomplete="off">
+        <div class="field" id="tenantDomainField">
+          <label for="domainInput">租户后台域名</label>
+          <input id="domainInput" class="mono" placeholder="tenant.example.com 或 https://tenant.example.com" autocomplete="off">
         </div>
-        <div class="field">
-          <label for="domainInput">完整系统域名</label>
-          <input id="domainInput" value="tenant-062.hs-pay.com" class="mono" readonly>
+        <div class="field" id="merchantDomainField">
+          <label for="merchantDomainInput">商户端域名</label>
+          <input id="merchantDomainInput" class="mono" placeholder="不填则自动生成 merchant.{绑定域名}" autocomplete="off">
         </div>
-        <div class="field">
-          <label>域名类型</label>
-          <input value="系统域名" readonly>
-        </div>
-        <div class="field">
-          <label>初始状态</label>
-          <input value="未启用 · 平台配置完成后可用" readonly>
-        </div>
-        <div class="field">
-          <label for="adminInput">管理账号</label>
-          <input id="adminInput" value="创建后在详情维护" readonly>
-        </div>
+        <div class="field" id="adminAccountField"><label for="adminInput">管理账号</label><input id="adminInput" readonly></div>
         <div class="field" id="initialLoginIpField">
           <label for="initialLoginIpInput">初始管理员登录 IP</label>
-          <input id="initialLoginIpInput" class="mono" value="103.18.50.80" placeholder="必填，完整 IPv4" autocomplete="off">
-          <small>与租户及管理员原子创建并立即启用，确保管理员可首次登录。</small>
+          <input id="initialLoginIpInput" class="mono" placeholder="可选，192.168.1.100 或 192.168.1.0/24" autocomplete="off">
+          <small>不填则创建后在详情安全页配置；填写则与租户原子创建并立即启用。</small>
         </div>
         <div class="field wide tenant-billing-settings">
-          <h3>租户服务费</h3><p class="cell-sub">平台向本租户收取的费用，代收、代付分别设置；按成功交易计算。</p>
+          <h3>租户服务费</h3><p class="cell-sub">平台向本租户收取的费用，代收、代付分别设置；按自然月汇总 CNY 成功订单结算。</p>
           <div class="form-grid"><div class="field"><label for="tenantCollectionBillingMode">代收计费方式</label><select id="tenantCollectionBillingMode"><option value="percentage">交易百分比</option><option value="perTransaction">按单笔</option></select></div><div class="field"><label id="tenantCollectionBillingLabel" for="tenantCollectionBillingValue">代收费率（%）</label><input id="tenantCollectionBillingValue" type="number" min="0" step="0.0001" placeholder="未设置"><small id="tenantCollectionBillingFormula"></small></div><div class="field"><label for="tenantPayoutBillingMode">代付计费方式</label><select id="tenantPayoutBillingMode"><option value="percentage">交易百分比</option><option value="perTransaction">按单笔</option></select></div><div class="field"><label id="tenantPayoutBillingLabel" for="tenantPayoutBillingValue">代付费率（%）</label><input id="tenantPayoutBillingValue" type="number" min="0" step="0.0001" placeholder="未设置"><small id="tenantPayoutBillingFormula"></small></div></div><p class="cell-sub">单笔费用按当前 CNY 业务设置；未填写表示尚未设置，填写 0 表示免费。</p>
         </div>
         <div class="field wide">
@@ -2146,6 +2196,8 @@
 
     const appState = {
       selectedTenant: tenants[0],
+      page: 1,
+      pageSize: 10,
       filtered: tenants.slice(),
       currentConfirm: '高风险操作',
       currentRole: platformTenantAuthorization ? '登录账号' : '平台超管',
@@ -2366,20 +2418,26 @@
 
     function renderRows() {
       const rows = document.getElementById('tenantRows');
-      const result = appState.filtered;
+      const total = appState.filtered.length;
+      const pages = Math.max(1, Math.ceil(total / appState.pageSize));
+      appState.page = Math.min(appState.page, pages);
+      const result = appState.filtered.slice((appState.page - 1) * appState.pageSize, appState.page * appState.pageSize);
+      document.getElementById('tenantTotal').textContent = '共 ' + total + ' 条';
+      document.getElementById('tenantPage').textContent = appState.page + ' / ' + pages;
+      document.getElementById('tenantPrev').disabled = appState.page <= 1;
+      document.getElementById('tenantNext').disabled = appState.page >= pages;
       const permissions = getPermissions();
       const createAllowed = canCreateTenant();
       document.getElementById('createTenantTop').disabled = !createAllowed;
       document.getElementById('createTenantTop').title = createAllowed ? '' : (permissions.canCreate ? '新增顶层租户要求“全部租户”数据范围' : appState.currentRole + ' 无新增租户权限');
 
       if (result.length === 0) {
-        rows.innerHTML = '<tr><td colspan="3" class="table-empty"><strong>没有符合条件的租户</strong><span>请调整筛选条件后再查看列表。</span><br><button class="btn" data-clear-filters><i data-lucide="rotate-ccw"></i>清空筛选</button></td></tr>';
+        rows.innerHTML = '<tr><td colspan="4" class="table-empty"><strong>没有符合条件的租户</strong><span>请调整筛选条件后再查看列表。</span><br><button class="btn" data-clear-filters><i data-lucide="rotate-ccw"></i>清空筛选</button></td></tr>';
         refreshIcons();
         return;
       }
 
       rows.innerHTML = result.map((tenant, index) => {
-        const accessPending = allTenantDomains(tenant).filter(domain => domain.status === '未启用').length;
         const statusAction = !permissions.canSecurity
           ? ''
           : tenant.status === '正常'
@@ -2388,8 +2446,9 @@
               ? '<button class="action-link" data-confirm="启用租户" data-confirm-tenant="' + tenant.id + '" data-confirm-detail="启用 ' + tenant.name + ' 只恢复租户层级的后续登录与新业务资格；下级对象状态保持不变。">启用</button>'
               : '';
         return '<tr data-index="' + index + '">' +
-          '<td><div class="tenant-cell"><strong>' + tenant.name + '</strong><span class="mono">' + tenant.id + ' / ' + tenant.contact + '</span>' + (accessPending ? '<span>' + tag('域名待处理 ' + accessPending, 'orange') + '</span>' : '') + '</div></td>' +
+          '<td><div class="tenant-cell"><strong>' + tenant.name + '</strong><span class="mono">' + tenant.id + ' / ' + tenant.contact + '</span>' + '</div></td>' +
           '<td>' + tag(tenant.status, tenant.statusTone) + '</td>' +
+          '<td>' + tenantBusinessDirections(tenant).map(d => tag('CNY ' + d, 'blue')).join(' ') + '</td>' +
           '<td class="action-col"><div class="table-actions">' +
             '<button class="action-link" data-open="' + tenant.id + '">详情</button>' +
             statusAction +
@@ -2420,6 +2479,20 @@
 
     function escapeHtml(value) {
       return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    function tenantBusinessDirections(tenant) {
+      const model = window.HSProviderDemo;
+      return ['代收', '代付'].filter(direction => model.grants.some(g => g.tenantId === tenant.id && g.status === '已授权' && model.grantDirections(tenant.id, g.providerId).includes(direction)));
+    }
+
+    function renderTenantBusiness(tenant) {
+      return sectionTitle('已授权通道商') + '<div class="table-wrap"><table aria-label="已授权通道商列表"><thead><tr><th>通道商</th><th>通道商编号</th><th>授权业务</th><th>授权状态</th><th>最近变更</th></tr></thead><tbody>' + renderAuthorizedChannelRows(tenant) + '</tbody></table></div>';
+    }
+
+    function isAdminLoginBanned(tenant) {
+      if (tenant.loginBanUntil) return new Date(tenant.loginBanUntil).getTime() > Date.now();
+      return Boolean(tenant.adminLocked);
     }
 
     function renderAuthorizedChannelRows(tenant) {
@@ -2579,10 +2652,7 @@
           : '仅平台人员录入租户后台自定义域名；保存后进入未启用状态，不会直接开放登录。';
         form.innerHTML =
           '<div class="field wide"><label for="newCustomDomain">完整域名</label><input id="newCustomDomain" class="mono" placeholder="pay.example.com" autocomplete="off"></div>' +
-          '<div class="field"><label>绑定租户</label><input value="' + tenant.id + ' / ' + tenant.name + '" readonly></div>' +
-          '<div class="field"><label>入口类型</label><input value="' + (merchantPortal ? '商户端登录' : '租户后台登录') + '" readonly></div>' +
-          '<div class="field"><label>初始状态</label><input value="未启用" readonly></div>' +
-          '<div class="field wide"><label for="domainAddReason">线下沟通说明</label><textarea id="domainAddReason" placeholder="记录线下沟通对象和配置目的"></textarea></div>';
+          '<div class="field wide"><label for="domainAddReason">新增原因</label><textarea id="domainAddReason" placeholder="记录线下沟通对象和配置目的"></textarea></div>';
         actionBtn.className = 'btn primary';
         actionBtn.innerHTML = '<i data-lucide="save"></i>保存域名';
         return true;
@@ -2633,6 +2703,19 @@
 
       if (renderDomainConfirmForm(title, form, actionBtn)) return;
       if (renderIpConfirmForm(title, form, actionBtn)) return;
+
+      if (title === '解禁') {
+        const tenant = currentTenantForAction();
+        document.getElementById('confirmDetail').textContent = '解除该管理员因登录尝试次数过多触发的临时封禁，清空本次登录失败计数，允许重新尝试登录。租户状态及原有登录验证保持不变。';
+        form.innerHTML =
+          '<div class="field"><label>管理账号</label><input value="' + escapeHtml(tenant.admin) + '" readonly></div>' +
+          '<div class="field"><label>登录状态</label><input value="' + (isAdminLoginBanned(tenant) ? '临时封禁' : '正常') + '" readonly></div>' +
+          '<div class="field wide"><label for="confirmReason">解禁原因</label><textarea id="confirmReason" placeholder="请输入解禁原因"></textarea></div>' +
+          '<div class="field wide"><label for="confirmOperator2fa">当前操作人 Google 验证码</label><input id="confirmOperator2fa" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="请输入6位验证码"></div>';
+        actionBtn.className = 'btn primary';
+        actionBtn.textContent = '确认解禁';
+        return;
+      }
 
       if (title === '重置账号') {
         const tenant = currentTenantForAction();
@@ -2823,6 +2906,7 @@
       const business = document.getElementById('businessFilter').value;
       const search = keyword || globalKeyword;
 
+      appState.page = 1;
       appState.filtered = tenants.filter(tenant => {
         const text = [tenant.id, tenant.name, tenant.contact, tenant.phone, tenant.domain].join(' ').toLowerCase();
         const okSearch = !search || text.includes(search);
@@ -2835,6 +2919,14 @@
       if (announce) showToast('筛选已更新', '结果已按租户、业务和状态刷新。');
     }
 
+    function exportTenantList() {
+      const rows = [['租户名称', '租户编号', '联系人', '状态', '已开通业务'], ...appState.filtered.filter(tenantInCurrentScope).map(tenant => [tenant.name, tenant.id, tenant.contact, tenant.status, tenantBusinessDirections(tenant).map(d => 'CNY ' + d).join(' / ')])];
+      const csv = '\uFEFF' + rows.map(row => row.map(value => '"' + String(value).replace(/^[=+@-]/, "'$&").replaceAll('"', '""') + '"').join(',')).join('\r\n');
+      const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+      const link = document.createElement('a'); link.href = url; link.download = '租户列表.csv'; link.click(); URL.revokeObjectURL(url);
+      showToast('已导出', '已导出当前筛选范围的租户列表。');
+    }
+
     function openDetailModal(tenantId) {
       const tenant = tenants.find(item => item.id === tenantId);
       if (!tenantInCurrentScope(tenant)) {
@@ -2843,7 +2935,7 @@
       }
       appState.selectedTenant = tenant;
       document.getElementById('detailTenantName').textContent = tenant.name;
-      document.getElementById('detailTenantMeta').textContent = tenant.id + ' / ' + tenant.contact + ' / ' + tenant.domain;
+      document.getElementById('detailTenantMeta').textContent = tenant.id + ' / ' + tenant.name + ' / ' + tenant.contact;
       document.getElementById('detailTags').innerHTML = [
         tag(tenant.status, tenant.statusTone)
       ].join('');
@@ -2873,37 +2965,34 @@
         ? '<button class="btn primary" data-edit="' + tenant.id + '"><i data-lucide="file-pen-line"></i>编辑资料</button>'
         : disabledButton('编辑资料', 'file-pen-line', appState.currentRole + ' 无编辑租户资料权限');
 
-      const editBillingAction = permissions.canEdit && !closed
-        ? '<button class="btn" data-billing="' + tenant.id + '"><i data-lucide="percent"></i>设置费率</button>'
-        : disabledButton('设置费率', 'percent', closed ? '关闭租户只允许历史查看' : appState.currentRole + ' 无编辑租户资料权限');
-
-      document.getElementById('tab-overview').innerHTML = sectionTitle('基础资料') +
+      document.getElementById('tab-overview').innerHTML = '<div class="detail-section-heading"><h3>基础资料</h3>' + editProfileAction + '</div>' +
         '<div class="kv-grid">' +
-          kv('租户编号', tenant.id) +
-          kv('联系人', tenant.contact + ' / ' + tenant.phone) +
-          kv('过期时间', tenant.expire) +
-          kv('当前状态', tenant.status) +
-          kv('租户服务费', tenantBillingSummary(tenant)) +
-        '</div>' +
-        '<div class="tag-row">' +
-          editProfileAction + editBillingAction +
+          kv('租户编号', escapeHtml(tenant.id)) +
+          kv('租户名称', escapeHtml(tenant.name)) +
+          kv('联系人', escapeHtml(tenant.contact + ' / ' + tenant.phone)) +
+          kv('到期时间', escapeHtml(tenant.expire)) +
+          kv('租户后台域名', escapeHtml(tenant.domain)) +
+          kv('当前状态', tag(tenant.status, tenant.statusTone)) +
+          kv('账号配额', String(tenant.accountQuota || 30)) +
+          kv('业务授权数', String(tenantBusinessDirections(tenant).length)) +
+          kv('创建时间', tenant.createdAt || '2026-07-01 09:00:00') +
+          kv('更新时间', tenant.updatedAt || '2026-10-24 10:20:00') +
+          kv('租户服务费', escapeHtml(tenantBillingSummary(tenant))) +
+          kv('计费周期', '月结算 · UTC+8 自然月 · CNY 成功订单') +
+          kv('备注', escapeHtml(tenant.remark || '—')) +
         '</div>';
 
-      document.getElementById('tab-business').innerHTML = sectionTitle('已授权通道商列表') +
-        '<div class="table-wrap detail-table"><table aria-label="已授权通道商列表"><thead><tr><th>通道商</th><th>通道商编号</th><th>授权业务</th><th>授权状态</th><th>最近变更</th></tr></thead><tbody>' +
-          renderAuthorizedChannelRows(tenant) +
-        '</tbody></table></div>';
+      document.getElementById('tab-business').innerHTML = renderTenantBusiness(tenant);
 
       document.getElementById('tab-security').innerHTML = sectionTitle('账号安全') +
-        '<div class="form-grid">' +
-          '<div class="field"><label>管理账号</label><input value="' + tenant.admin + '" readonly></div>' +
-          '<div class="field"><label>2FA 状态</label><input value="' + (tenant.status === '审核中' ? '待启用' : '已绑定') + '" readonly></div>' +
-        '</div>' +
+        '<div class="kv-grid">' + kv('管理账号', escapeHtml(tenant.admin)) + kv('管理员昵称', escapeHtml(tenant.adminNickname || tenant.contact)) + kv('账号状态', tag(isAdminLoginBanned(tenant) ? '临时封禁' : '正常', isAdminLoginBanned(tenant) ? 'red' : 'green')) + kv('2FA 状态', tenant.twoFaStatus || (tenant.status === '审核中' ? '待启用' : '已绑定')) + kv('最近登录 IP', '192.0.2.10') + kv('最近登录时间', tenant.lastLoginAt || '2026-10-23 14:20:00') + '</div>' +
+        sectionTitle('安全操作') +
         '<div class="tag-row">' +
           (permissions.canSecurity && !closed ? '<button class="btn" data-confirm="重置账号" data-confirm-tenant="' + tenant.id + '" data-confirm-detail="请输入新的管理账号，并通过当前操作人 2FA 验证。保存后通知租户重新登录。"><i data-lucide="user-round-cog"></i>重置账号</button>' : disabledButton('重置账号', 'user-round-cog', closed ? '关闭租户只允许历史查看' : appState.currentRole + ' 无安全操作权限')) +
           (permissions.canSecurity && !closed ? '<button class="btn" data-confirm="重置密码" data-confirm-tenant="' + tenant.id + '" data-confirm-detail="将为管理账号发起密码重置，并通过当前操作人 2FA 验证。保存后通知租户重新设置。"><i data-lucide="key-round"></i>重置密码</button>' : disabledButton('重置密码', 'key-round', closed ? '关闭租户只允许历史查看' : appState.currentRole + ' 无安全操作权限')) +
           (permissions.canSecurity && !closed ? '<button class="btn" data-confirm="重置 2FA" data-confirm-tenant="' + tenant.id + '" data-confirm-detail="解除当前管理账号的 2FA 绑定，并通过当前操作人 2FA 验证。管理员下次登录需重新绑定。"><i data-lucide="shield"></i>重置 2FA</button>' : disabledButton('重置 2FA', 'shield', closed ? '关闭租户只允许历史查看' : appState.currentRole + ' 无安全操作权限')) +
         '</div>' +
+        '<div class="tag-row">' + (permissions.canSecurity && !closed ? '<button class="btn" data-confirm="强制登出" data-confirm-tenant="' + tenant.id + '" data-confirm-detail="确认后使该管理员现有会话失效。">强制登出</button><button class="btn danger" data-confirm="解禁" data-confirm-tenant="' + tenant.id + '" data-confirm-detail="解除登录尝试次数过多触发的临时封禁。">解禁</button>' : '') + '</div>' +
         sectionTitle('租户后台登录 IP 白名单') +
         '<div class="tag-row" style="margin:12px 0">' +
           (permissions.canSecurity && !readonlyTenant ? '<button class="btn primary" data-ip-action="add" data-ip-type="login"><i data-lucide="plus"></i>新增登录 IP</button>' : disabledButton('新增登录 IP', 'plus', readonlyTenant ? '当前租户状态不允许新增规则' : appState.currentRole + ' 无安全配置权限')) +
@@ -2919,24 +3008,11 @@
         '</div>' +
         '<div class="table-wrap detail-table"><table aria-label="业务 API 来源 IP 白名单"><thead><tr><th>规则编号</th><th>IP / CIDR</th><th>用途说明</th><th>状态</th><th>最近更新</th><th style="text-align:right">操作</th></tr></thead><tbody>' +
           renderIpRuleRows('api', tenant.apiIpRules || [], permissions, readonlyTenant) +
-        '</tbody></table></div>' +
-        sectionTitle('状态操作') +
-        '<div class="tag-row">' +
-          (permissions.canSecurity && !closed ? '<button class="btn danger" data-confirm="关闭租户" data-confirm-tenant="' + tenant.id + '" data-confirm-detail="关闭后只允许历史查看，不允许创建新业务或新资金申请。"><i data-lucide="ban"></i>关闭</button>' : disabledButton('关闭', 'ban', closed ? '已关闭租户不可重复关闭' : appState.currentRole + ' 无状态操作权限')) +
-        '</div>';
+        '</tbody></table></div>' ;
 
       const tenantDomains = tenant.domains || [];
       const merchantDomains = tenant.merchantDomains || [];
-      const usableDomains = allTenantDomains(tenant).filter(item => item.status === '可用');
-      const pendingDomains = allTenantDomains(tenant).filter(item => item.status === '未启用');
       document.getElementById('tab-domains').innerHTML =
-        sectionTitle('域名管理') +
-        '<div class="kv-grid">' +
-          kv('可用域名', String(usableDomains.length)) +
-          kv('租户域名', String(tenantDomains.length)) +
-          kv('待处理域名', String(pendingDomains.length)) +
-          kv('管理边界', '平台录入并启停，租户与商户只读') +
-        '</div>' +
         '<div class="filter-bar" style="margin-top:16px;grid-template-columns:minmax(220px,1.5fr) minmax(150px,1fr) auto">' +
           '<div class="field"><label for="domainKeyword">域名关键词</label><input id="domainKeyword" placeholder="输入域名或编号"></div>' +
           '<div class="field"><label for="domainStatusFilter">状态</label><select id="domainStatusFilter"><option value="">全部状态</option><option>未启用</option><option>可用</option><option>已停用</option></select></div>' +
@@ -2959,16 +3035,8 @@
           renderDomainRows(merchantDomains, permissions) +
         '</tbody></table></div>';
 
-      document.getElementById('tab-audit').innerHTML = sectionTitle('审计日志') +
-        '<div class="table-wrap"><table aria-label="租户详情审计日志表格"><thead><tr>' +
-          '<th>日志编号</th>' +
-          '<th>时间</th>' +
-          '<th>操作人 / 角色</th>' +
-          '<th>动作类型</th>' +
-          '<th>结果</th>' +
-          '<th>IP / 设备</th>' +
-          '<th style="text-align:right;">操作</th>' +
-        '</tr></thead><tbody>' + renderAuditTableRows(tenantAuditRows) + '</tbody></table></div>';
+      document.getElementById('tab-audit').innerHTML = '<div class="table-wrap"><table aria-label="租户详情审计日志表格"><thead><tr><th>操作人</th><th>类型</th><th>子类型</th><th>动作</th><th>IP</th><th>时间</th></tr></thead><tbody>' +
+        (tenantAuditRows.map(event => '<tr><td>' + escapeHtml(event.operator) + '</td><td>' + escapeHtml(event.role) + '</td><td>' + tag(event.result, event.tone) + '</td><td><strong>' + escapeHtml(event.action) + '</strong><div class="cell-sub">' + escapeHtml(event.object) + '</div><div class="cell-sub">原因：' + escapeHtml(event.reason || '—') + '</div></td><td>' + escapeHtml(event.ip) + '</td><td>' + escapeHtml(event.time) + '</td></tr>').join('') || '<tr><td colspan="6" class="table-empty">暂无审计记录</td></tr>') + '</tbody></table></div>';
     }
 
     function sectionTitle(text) {
@@ -3025,22 +3093,24 @@
       appState.editingTenantId = mode === 'edit' ? tenant.id : '';
       clearFormError('tenantFormError');
       document.getElementById('tenantModalTitle').textContent = appState.editingBillingOnly ? '设置费率 · ' + tenant.name : mode === 'edit' ? '编辑租户' : '新增租户';
-      document.getElementById('tenantNameInput').value = mode === 'edit' ? tenant.name : '汇盛新租户';
+      document.getElementById('tenantNameInput').value = mode === 'edit' ? tenant.name : '';
       document.getElementById('tenantCodeInput').value = mode === 'edit' ? tenant.id : '系统自动生成';
-      document.getElementById('contactInput').value = mode === 'edit' ? tenant.contact : '新联系人';
-      document.getElementById('mobileInput').value = mode === 'edit' ? tenant.phone : '+63 900 000 0000';
-      document.getElementById('expireInput').value = mode === 'edit' ? tenant.expire : '2027-07-18';
-      const domainPrefixInput = document.getElementById('domainPrefixInput');
-      const nextPrefix = 'tenant-' + String(appState.tenantSequence).padStart(3, '0');
-      const currentPrefix = String(tenant.domain || '').replace(/\.hs-pay\.com$/, '');
-      domainPrefixInput.value = mode === 'edit' ? currentPrefix : nextPrefix;
-      domainPrefixInput.readOnly = mode === 'edit';
-      document.getElementById('domainInput').value = (mode === 'edit' ? currentPrefix : nextPrefix) + '.hs-pay.com';
-      document.getElementById('adminInput').value = mode === 'edit' ? tenant.admin : '创建成功后生成唯一超级管理员账号';
-      const initialLoginIpInput = document.getElementById('initialLoginIpInput');
-      initialLoginIpInput.value = mode === 'edit' ? ((tenant.loginIpRules || []).find(rule => rule.status === '启用')?.value || '请在安全页维护') : '103.18.50.80';
-      initialLoginIpInput.readOnly = mode === 'edit';
-      document.getElementById('initialLoginIpField').hidden = false;
+      document.getElementById('contactInput').value = mode === 'edit' ? tenant.contact : '';
+      document.getElementById('mobileInput').value = mode === 'edit' ? tenant.phone : '';
+      document.getElementById('expireInput').value = mode === 'edit' ? tenant.expire : '';
+      const creating = mode !== 'edit';
+      document.getElementById('tenantModal').classList.toggle('create-mode', creating);
+      document.getElementById('domainInput').value = creating ? '' : tenant.domain;
+      document.getElementById('domainInput').readOnly = !creating;
+      document.querySelector('label[for="domainInput"]').textContent = creating ? '租户后台域名' : '绑定域名';
+      document.querySelector('label[for="domainInput"]').classList.toggle('required', creating);
+      document.getElementById('merchantDomainInput').value = '';
+      document.getElementById('merchantDomainField').hidden = !creating;
+      document.getElementById('adminInput').value = creating ? '系统自动生成' : tenant.admin;
+      document.getElementById('adminAccountField').hidden = true;
+      document.getElementById('tenantCodeInput').closest('.field').hidden = !creating;
+      document.getElementById('initialLoginIpField').hidden = !creating;
+      document.getElementById('initialLoginIpInput').value = '';
       document.getElementById('tenantRemarkInput').value = mode === 'edit' ? tenant.remark : '';
       const billing=mode==='edit'?window.HSProviderDemo.tenantBilling(tenant.id):{collection:{mode:'percentage',value:''},payout:{mode:'percentage',value:''}};
       for(const [key,id] of [['collection','Collection'],['payout','Payout']]){document.getElementById('tenant'+id+'BillingMode').value=billing[key].mode;document.getElementById('tenant'+id+'BillingValue').value=billing[key].value;}
@@ -3154,16 +3224,16 @@
       appState.confirmTenantId = tenant.id;
       document.getElementById('confirmTitle').textContent = '租户创建完成';
       document.getElementById('confirmHeadline').textContent = tenant.id + ' 已创建';
-      document.getElementById('confirmDetail').textContent = '租户、唯一超级管理员、初始登录 IP、未启用系统域名已原子创建；管理员登录准入已就绪。';
+      document.getElementById('confirmDetail').textContent = '租户及唯一超级管理员已创建。域名待平台启用；未填写初始登录 IP 时，请到安全页配置。';
       document.getElementById('confirmForm').innerHTML =
         '<div class="field"><label>租户编号</label><input value="' + tenant.id + '" readonly></div>' +
         '<div class="field"><label>当前状态</label><input value="审核中" readonly></div>' +
-        '<div class="field wide"><label>系统域名</label><input value="https://' + tenant.domain + '" readonly></div>' +
+        '<div class="field wide"><label>租户后台域名</label><input value="https://' + tenant.domain + '" readonly></div>' +
         '<div class="field"><label>域名状态</label><input value="未启用" readonly></div>' +
         '<div class="field"><label>超级管理员账号</label><input value="' + tenant.admin + '" readonly></div>' +
         '<div class="field"><label>一次性密码</label><input value="' + oneTimePassword + '" readonly></div>' +
-        '<div class="field"><label>初始登录 IP</label><input class="mono" value="' + (tenant.loginIpRules?.[0]?.value || '-') + ' / 已启用" readonly></div>' +
-        '<div class="field"><label>登录准备度</label><input value="IP 准入就绪 · 域名待启用" readonly></div>' +
+        '<div class="field"><label>初始登录 IP</label><input class="mono" value="' + (tenant.loginIpRules?.[0] ? tenant.loginIpRules[0].value + ' / 已启用' : '待配置') + '" readonly></div>' +
+        '<div class="field"><label>登录准备度</label><input value="' + (tenant.loginIpRules?.length ? 'IP 准入就绪 · 域名待启用' : '登录 IP 待配置 · 域名待启用') + '" readonly></div>' +
         '<div class="field wide"><label>交付要求</label><input value="域名启用后安全交付；首次登录须改密并绑定 Google 2FA；API 来源 IP 后续独立配置" readonly></div>';
       const actionBtn = document.getElementById('confirmActionBtn');
       actionBtn.className = 'btn primary';
@@ -3201,7 +3271,8 @@
         phone: document.getElementById('mobileInput').value.trim(),
         expire: document.getElementById('expireInput').value,
         remark: document.getElementById('tenantRemarkInput').value.trim(),
-        domainPrefix: document.getElementById('domainPrefixInput').value.trim().toLowerCase(),
+        domain: document.getElementById('domainInput').value.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, ''),
+        merchantDomain: document.getElementById('merchantDomainInput').value.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, ''),
         initialLoginIp: document.getElementById('initialLoginIpInput').value.trim()
       };
       const missing = [
@@ -3216,20 +3287,22 @@
         showFormError('tenantFormError', '联系手机格式不正确，请至少填写 8 位数字并保留国家或地区区号。', ['mobileInput']);
         return;
       }
-      if (!editing && !/^(?!-)[a-z0-9-]{3,48}(?<!-)$/.test(values.domainPrefix)) {
-        showFormError('tenantFormError', '初始域名前缀只能使用小写字母、数字和连字符，长度为 3–48 位，且不能以连字符开头或结尾。', ['domainPrefixInput']);
+      const requestedDomain = editing ? tenants.find(item => item.id === appState.editingTenantId).domain : values.domain;
+      const requestedMerchantDomain = values.merchantDomain || 'merchant.' + requestedDomain;
+      if (!editing && (!isValidTenantDomain(requestedDomain) || !isValidTenantDomain(requestedMerchantDomain))) {
+        showFormError('tenantFormError', '请填写有效的完整域名，不支持端口、路径或参数。', ['domainInput', 'merchantDomainInput']);
         return;
       }
-      if (!editing && !validCompleteIpv4(values.initialLoginIp)) {
-        showFormError('tenantFormError', '初始管理员登录 IP 必填，且仅支持完整 IPv4；不支持 CIDR、范围、通配符或 IPv6。', ['initialLoginIpInput']);
+      if (!editing && values.initialLoginIp && !validApiIpRule(values.initialLoginIp)) {
+        showFormError('tenantFormError', '初始管理员登录 IP 仅支持有效 IPv4 或 CIDR。', ['initialLoginIpInput']);
         return;
       }
-      const requestedDomain = values.domainPrefix + '.hs-pay.com';
-      if (!editing && tenants.flatMap(allTenantDomains).some(item => item.value.toLowerCase() === requestedDomain)) {
-        showFormError('tenantFormError', '完整系统域名已存在，请调整域名前缀。', ['domainPrefixInput']);
+      if (!editing && (requestedDomain === requestedMerchantDomain || tenants.flatMap(allTenantDomains).some(item => [requestedDomain, requestedMerchantDomain].includes(item.value.toLowerCase())))) {
+        showFormError('tenantFormError', '域名已存在或两类入口域名相同，请调整后重试。', ['domainInput', 'merchantDomainInput']);
         return;
       }
-      delete values.domainPrefix;
+      delete values.domain;
+      delete values.merchantDomain;
       const initialLoginIp = values.initialLoginIp;
       delete values.initialLoginIp;
       const duplicateName = tenants.find(item => item.id !== appState.editingTenantId && item.name.toLowerCase() === values.name.toLowerCase());
@@ -3265,7 +3338,10 @@
           ],
           businessTypes: ['法币业务'],
           admin: `admin_${suffix}`,
-          loginIpRules: [{ id: `LIP-${suffix}-001`, value: initialLoginIp, name: '初始管理员登录 IP', status: '启用', updatedAt: platformNow() }],
+          loginIpRules: initialLoginIp ? [{ id: `LIP-${suffix}-001`, value: initialLoginIp, name: '初始管理员登录 IP', status: '启用', updatedAt: platformNow() }] : [],
+          domains: [{ id: `DOM-${suffix}-001`, value: requestedDomain, kind: '租户自定义域名', subjectType: 'tenant', subjectId: id, subjectName: values.name, status: '未启用', updatedAt: platformNow() }],
+          merchantDomains: [{ id: `MDOM-${suffix}-001`, value: requestedMerchantDomain, kind: '商户端自定义域名', subjectType: 'merchant_portal', subjectId: id, subjectName: values.name, status: '未启用', updatedAt: platformNow() }],
+          createdAt: platformNow(),
           apiIpRules: [],
           channels: [],
           tx: '-',
@@ -3284,12 +3360,13 @@
       providerModel.setTenantBilling(tenant.id,billing);
       appState.selectedTenant = tenant;
       ensureTenantAccessState(tenant);
-      const audit = addTenantAudit(tenant, action, '成功', editing ? '更新租户资料及服务费：代收 '+providerModel.billingFormula(billing.collection)+'；代付 '+providerModel.billingFormula(billing.payout) : '原子创建租户、唯一超级管理员、已启用初始登录 IP、未启用系统域名');
+      tenant.updatedAt = platformNow();
+      const audit = addTenantAudit(tenant, action, '成功', editing ? '更新租户资料及服务费：代收 '+providerModel.billingFormula(billing.collection)+'；代付 '+providerModel.billingFormula(billing.payout) : '创建租户、唯一超级管理员及未启用域名；' + (initialLoginIp ? '初始登录 IP 已启用' : '登录 IP 待配置'));
       setOperationReceipt({
         title: editing ? '租户资料已保存并生效' : '租户已创建',
         tenant,
         status: editing ? tenant.status : '审核中',
-        detail: editing ? '列表与详情已更新' : '超级管理员及初始登录 IP 已可用于首次登录；API 来源 IP 待后续独立配置',
+        detail: editing ? '列表与详情已更新' : (initialLoginIp ? '初始登录 IP 已启用；域名待平台启用' : '请在安全页配置登录 IP，并启用登录域名'),
         audit
       });
       closeTenantModal();
@@ -3305,7 +3382,7 @@
       setOperationReceipt({ title: action + '已完成', tenant, status: result, detail, audit });
       applyFilters(false);
       if (document.getElementById('tenantDetailModal').classList.contains('open')) {
-        document.getElementById('detailTenantMeta').textContent = tenant.id + ' / ' + tenant.contact + ' / ' + tenant.domain;
+        document.getElementById('detailTenantMeta').textContent = tenant.id + ' / ' + tenant.name + ' / ' + tenant.contact;
         document.getElementById('detailTags').innerHTML = tag(tenant.status, tenant.statusTone);
         renderDetailSections(tenant);
       }
@@ -3338,7 +3415,7 @@
           return;
         }
         if (!reason) {
-          showFormError('confirmFormError', '请填写线下沟通说明。', ['domainAddReason']);
+          showFormError('confirmFormError', '请填写新增原因。', ['domainAddReason']);
           return;
         }
         const duplicate = tenants.flatMap(allTenantDomains).find(item => item.value.toLowerCase().replace(/\.$/, '') === hostname);
@@ -3548,6 +3625,30 @@
         return;
       }
 
+      if (appState.currentConfirm === '解禁') {
+        if (!getPermissions().canSecurity || !tenantInCurrentScope(tenant)) {
+          otpField.value = '';
+          showFormError('confirmFormError', '当前账号无权对该租户执行解禁，本次未修改状态。');
+          return;
+        }
+        if (!isAdminLoginBanned(tenant)) {
+          closeConfirm();
+          showToast('无需解禁', '当前管理员账号未处于临时封禁状态。');
+          return;
+        }
+        tenant.adminLocked = false;
+        tenant.loginFailedAttempts = 0;
+        tenant.loginBanUntil = '';
+        finishTenantAction(tenant, { action: '解禁', detail: '管理员临时封禁已解除，可重新尝试登录；租户状态及原有登录验证保持不变', reason });
+        return;
+      }
+
+      if (appState.currentConfirm === '强制登出') {
+        tenant.lastSessionRevokedAt = platformNow();
+        finishTenantAction(tenant, { action: '强制登出', detail: '该管理员当前会话已失效（演示）', reason });
+        return;
+      }
+
       if (appState.currentConfirm === '停用租户' || appState.currentConfirm === '启用租户' || appState.currentConfirm === '关闭租户') {
         const expected = appState.currentConfirm === '停用租户' ? '正常' : appState.currentConfirm === '启用租户' ? '停用' : null;
         if (expected && tenant.status !== expected) {
@@ -3726,10 +3827,11 @@
         showToast('数据已刷新', '已保留当前筛选并重新加载租户列表。');
       });
       document.getElementById('createTenantTop').addEventListener('click', () => openTenantModal('create'));
-      document.getElementById('domainPrefixInput').addEventListener('input', event => {
-        const normalized = event.target.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
-        document.getElementById('domainInput').value = normalized ? normalized + '.hs-pay.com' : '请输入域名前缀';
-      });
+      document.getElementById('exportTenants').addEventListener('click', exportTenantList);
+      document.getElementById('tenantPrev').addEventListener('click', () => { if (appState.page > 1) { appState.page--; renderRows(); } });
+      document.getElementById('tenantNext').addEventListener('click', () => { if (appState.page < Math.ceil(appState.filtered.length / appState.pageSize)) { appState.page++; renderRows(); } });
+      document.getElementById('tenantPageSize').addEventListener('change', event => { appState.pageSize = Number(event.target.value); appState.page = 1; renderRows(); });
+      document.querySelectorAll('[data-close-detail]').forEach(button => button.addEventListener('click', closeDetailModal));
       document.getElementById('saveTenantBtn').addEventListener('click', saveTenantProfile);
       for(const key of ['Collection','Payout']) {document.getElementById('tenant'+key+'BillingMode').addEventListener('change',()=>{document.getElementById('tenant'+key+'BillingValue').value='';updateTenantBillingPreview();});document.getElementById('tenant'+key+'BillingValue').addEventListener('input',updateTenantBillingPreview);}
       document.querySelectorAll('[data-close-modal]').forEach(button => button.addEventListener('click', closeTenantModal));

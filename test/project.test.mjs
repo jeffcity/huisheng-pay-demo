@@ -99,10 +99,11 @@ test("角色编辑使用状态切换器且不展示编码、数据范围和提�
   assert.doesNotMatch(authorizeForm, /角色数据范围|<th>数据范围<\/th>|<span>数据范围<\/span>/);
 });
 
-test("租户创建要求初始登录 IP，并分离登录与 API 两套名单", async () => {
+test("租户创建可选初始登录 IP，并分离登录与 API 两套名单", async () => {
   const tenants = await readFile(path.join(root, "public/legacy/sources/tenants.html"), "utf8");
   assert.match(tenants, /初始管理员登录 IP/);
-  assert.match(tenants, /初始管理员登录 IP 必填/);
+  assert.match(tenants, /初始管理员登录 IP 仅支持有效 IPv4 或 CIDR/);
+  assert.match(tenants, /不填则创建后在详情安全页配置/);
   assert.match(tenants, /租户后台登录 IP 白名单/);
   assert.match(tenants, /业务 API 来源 IP 白名单/);
   assert.match(tenants, /两套名单相互独立/);
