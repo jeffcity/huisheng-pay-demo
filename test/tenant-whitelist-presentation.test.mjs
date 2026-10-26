@@ -3,12 +3,14 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 const source=fs.readFileSync(new URL('../surfaces/tenant/public/legacy/sources/system.html',import.meta.url),'utf8');
-function fixture(){
+function fixture({seeded=false}={}){
  const security=[['办公网络','192.0.2.1','启用','2026-10-01 10:00:00'],['财务专线','192.0.2.2','停用','2026-10-02 10:00:00']];
- const accounts=[['admin@hs-pay','','',['超级管理员'],'正常']],roles=[['超级管理员','SUPER','','','','启用']],tenantRoleGrants={SUPER:{pages:['security'],actions:['sec_view_logins','sec_list_transfer',...['whitelist','blacklist'].flatMap(kind=>['add','edit','delete','toggle','unlock'].map(action=>'sec_'+kind+'_'+action))]}};
- const ctx=vm.createContext({security,accounts,roles,tenantRoleGrants,accountRoleNames:row=>row[3],URL,Set,Map,Date,JSON,Error,esc:value=>String(value),modalShell(){},toast(){},now:()=> '2026-10-26 11:00:00'});
+ const accounts=[['admin@hs-pay','','',['超级管理员'],'正常']],roles=[['超级管理员','SUPER','','','','启用']],tenantRoleGrants={SUPER:{pages:['security'],actions:['sec_view_logins','sec_list_transfer','sec_auto_blacklist_view','sec_auto_blacklist_manage',...['whitelist','blacklist'].flatMap(kind=>['add','edit','delete','toggle','unlock'].map(action=>'sec_'+kind+'_'+action))]}};
+ const policyStorage=new Map();const sessionStorage={getItem:key=>policyStorage.get(key)||null,setItem:(key,value)=>policyStorage.set(key,value)};
+ const ctx=vm.createContext({security,accounts,roles,tenantRoleGrants,sessionStorage,accountRoleNames:row=>row[3],URL,Set,Map,Date,JSON,Error,esc:value=>String(value),modalShell(){},toast(){},now:()=> '2026-10-26 11:00:00'});
  const ipStart=source.indexOf('function ipv4ToNumber('),ipEnd=source.indexOf('\n',ipStart);vm.runInContext(source.slice(ipStart,ipEnd),ctx);
  const start=source.indexOf('// Security whitelist management:'),end=source.indexOf("document.addEventListener('submit',event=>{",start);vm.runInContext(source.slice(start,end),ctx);
+ if(!seeded)vm.runInContext('securityBlacklist.forEach(row=>securityWhitelistUi.meta.delete(row[0]));securityBlacklist=[]',ctx);
  return {run:code=>vm.runInContext(code,ctx),state:()=>JSON.stringify(vm.runInContext('security',ctx))};
 }
 test('白名单新增支持IPv4/IPv6并保持原默认停用，等价IPv6重复被阻止',()=>{
@@ -104,4 +106,70 @@ test('名单提交复验操作权限，失效时两份名单不部分修改',()=
   assert.throws(()=>f.run('applySecurityWhitelistAction()'),/权限/);assert.equal(f.run('JSON.stringify({white:security,black:securityBlacklist})'),before);
  }
  const f=fixture();f.run("securityWhitelistUi.edit={kind:'black',name:'',snapshot:''};accounts[0][4]='停用'");assert.throws(()=>f.run("saveSecurityWhitelist({ip:'192.0.2.3',remark:''})"),/权限/);assert.equal(f.run('securityBlacklist.length'),0);
+});
+
+test('自动拉黑配置默认关闭且不擅自填入建议阈值',()=>{
+ const f=fixture();assert.equal(f.run('readSecurityAutoPolicy().enabled'),false);
+ for(const key of ['windowMinutes','failureCount','banMinutes'])assert.equal(f.run('readSecurityAutoPolicy().'+key),'');
+ assert.match(source,/data-security-action="policy" id="securityAutoPolicyButton" hidden/);
+ assert.match(source,/canViewPolicy=black&&securityListActionAllowed\('black','policy_view'\)/);
+ assert.match(source,/密码错误<\/span><span>Google 验证码错误/);
+});
+test('自动拉黑开启前要求三项正整数，非法配置不写入',()=>{
+ const f=fixture();f.run("securityAutoPolicyEdit={snapshot:JSON.stringify(readSecurityAutoPolicy())}");
+ const before=f.run('JSON.stringify(readSecurityAutoPolicy())');
+ for(const data of [{enabled:'on'},{enabled:'on',windowMinutes:'0',failureCount:'5',banMinutes:'30'},{enabled:'on',windowMinutes:'10',failureCount:'1.5',banMinutes:'30'},{enabled:'on',windowMinutes:'10',failureCount:'5',banMinutes:'-1'},{enabled:'on',windowMinutes:'1e3',failureCount:'5',banMinutes:'30'}]){
+  assert.throws(()=>f.run('saveSecurityAutoPolicy('+JSON.stringify(data)+')'),/大于0的整数/);assert.equal(f.run('JSON.stringify(readSecurityAutoPolicy())'),before);
+ }
+});
+test('配置保存可回显，关闭保留已填参数，不改变手动名单',()=>{
+ const f=fixture(),before=f.state();f.run("securityAutoPolicyEdit={snapshot:JSON.stringify(readSecurityAutoPolicy())};saveSecurityAutoPolicy({enabled:'on',windowMinutes:'7',failureCount:'6',banMinutes:'20'})");
+ assert.equal(f.run('readSecurityAutoPolicy().enabled'),true);assert.equal(f.run('readSecurityAutoPolicy().windowMinutes'),7);
+ f.run("securityAutoPolicyEdit={snapshot:JSON.stringify(readSecurityAutoPolicy())};saveSecurityAutoPolicy({windowMinutes:'7',failureCount:'6',banMinutes:'20'})");assert.equal(f.run('readSecurityAutoPolicy().enabled'),false);assert.equal(f.run('readSecurityAutoPolicy().banMinutes'),20);assert.equal(f.state(),before);
+});
+test('配置取消、授权失效、陈旧表单或存储失败不修改原配置',()=>{
+ for(const failure of ['cancel','permission','stale','storage']){
+  const f=fixture();f.run("securityAutoPolicyEdit={snapshot:JSON.stringify(readSecurityAutoPolicy())}");const before=f.run('JSON.stringify(readSecurityAutoPolicy())');
+  if(failure==='cancel'){assert.equal(f.run('JSON.stringify(readSecurityAutoPolicy())'),before);continue}
+  if(failure==='permission')f.run("tenantRoleGrants.SUPER.actions=[]");
+  if(failure==='stale')f.run("securityAutoPolicyEdit.snapshot='expired'");
+  if(failure==='storage')f.run("sessionStorage.setItem=()=>{throw new Error('storage denied')}");
+  assert.throws(()=>f.run("saveSecurityAutoPolicy({enabled:'on',windowMinutes:'10',failureCount:'5',banMinutes:'30'})"),/权限|配置已变化|保存失败/);assert.equal(f.run('JSON.stringify(readSecurityAutoPolicy())'),before,failure);
+ }
+});
+test('配置损坏时保持默认关闭，权限目录包含查看及修改两项',()=>{
+ const f=fixture();f.run("sessionStorage.setItem(securityAutoPolicyKey,JSON.stringify({enabled:true,revision:1,windowMinutes:0,failureCount:5,banMinutes:30}))");assert.equal(f.run('readSecurityAutoPolicy().enabled'),false);
+ assert.match(source,/id:'sec_auto_blacklist_view'.*code:'tenant.security.auto_blacklist.view'/);
+ assert.match(source,/id:'sec_auto_blacklist_manage'.*code:'tenant.security.auto_blacklist.manage'/);
+});
+
+test('登录安全初始样例覆盖手动启停、IPv6、自动拦截、到期和解除',()=>{
+ const f=fixture({seeded:true});assert.equal(f.run('securityBlacklist.length'),6);
+ assert.equal(f.run("securityBlacklistState(securityBlacklist.find(r=>r[1]==='203.0.113.46'))"),'拦截登录');
+ assert.equal(f.run("securityBlacklistState(securityBlacklist.find(r=>r[1]==='198.51.100.73'))"),'未生效');
+ assert.equal(f.run("securityBlacklistState(securityBlacklist.find(r=>r[1]==='192.0.2.61'))"),'拦截登录');
+ assert.equal(f.run("securityBlacklistState(securityBlacklist.find(r=>r[1]==='192.0.2.62'))"),'已到期');
+ assert.equal(f.run("securityBlacklistState(securityBlacklist.find(r=>r[1]==='192.0.2.63'))"),'已解除');
+ assert.equal(f.run('readSecurityAutoPolicy().enabled'),false);
+ const expiry=f.run("securityMetadata(securityBlacklist.find(r=>r[1]==='192.0.2.61')).expiresAt");
+ assert.equal(f.run("securityBlacklistState(securityBlacklist.find(r=>r[1]==='192.0.2.61'),"+expiry+")"),'已到期');
+});
+test('到期和已解除样例不拦截登录，手动黑名单优先级保持',()=>{
+ const f=fixture({seeded:true});const start=source.indexOf('function evaluateTenantWhitelistLogin('),end=source.indexOf('function renderTenantWhitelistDecision(',start);f.run(source.slice(start,end));
+ f.run("security.push(['重叠名单示例','203.0.113.46','启用','2026-10-25 09:20'])");assert.equal(f.run("evaluateTenantWhitelistLogin('203.0.113.46').code"),'BLACKLIST_MATCH');
+ f.run("security.forEach(r=>r[2]='停用')");
+ for(const ip of ['192.0.2.62','192.0.2.63','198.51.100.73'])assert.equal(f.run("evaluateTenantWhitelistLogin('"+ip+"').allowed"),true,ip);
+ assert.equal(f.run("evaluateTenantWhitelistLogin('192.0.2.61').code"),'BLACKLIST_MATCH');
+ assert.equal(f.run("evaluateTenantWhitelistLogin('2001:db8::45').code"),'BLACKLIST_MATCH');
+});
+
+test('历史自动记录人工启用或作为转入目标后成为有效手动规则，保留原标识及备注',()=>{
+ for(const ip of ['192.0.2.62','192.0.2.63'])for(const action of ['toggle','transfer']){
+  const f=fixture({seeded:true});f.run("const target=securityBlacklist.find(r=>r[1]==='"+ip+"');const id=securityMetadata(target).id,remark=securityMetadata(target).remark,created=securityMetadata(target).created");
+  if(action==='toggle')f.run("securityWhitelistUi.kind='black';openSecurityWhitelistAction('toggle',[target[0]]);applySecurityWhitelistAction()");
+  else f.run("security.push(['新增白名单','"+ip+"','启用','2026-10-26 14:00']);openSecurityWhitelistAction('transfer',['新增白名单']);applySecurityWhitelistAction()");
+  assert.equal(f.run('securityBlacklistEffective(target)'),true,ip+action);assert.equal(f.run('securityMetadata(target).origin'),'manual');assert.equal(f.run('securityMetadata(target).expiresAt'),null);assert.equal(f.run('securityMetadata(target).releasedAt'),null);
+  assert.equal(f.run('securityMetadata(target).id===id&&securityMetadata(target).remark===remark&&securityMetadata(target).created===created'),true);
+  const start=source.indexOf('function evaluateTenantWhitelistLogin('),end=source.indexOf('function renderTenantWhitelistDecision(',start);f.run(source.slice(start,end));assert.equal(f.run("evaluateTenantWhitelistLogin('"+ip+"').code"),'BLACKLIST_MATCH');
+ }
 });
