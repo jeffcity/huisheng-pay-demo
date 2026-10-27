@@ -21152,6 +21152,73 @@
         min-height: var(--topbar-height);
       }
     }
+
+
+
+    /* Scope compact density to the merchant management list; business lists keep their own styles. */
+    .merchant-list-table { min-width:956px; table-layout:fixed; }
+    .merchant-list-table th,.merchant-list-table td { padding:7px 6px !important; white-space:normal; overflow-wrap:anywhere; line-height:1.4; }
+    .merchant-list-table th { font-size:12px; }
+    .merchant-list-table td { font-size:12px; }
+    .merchant-list-table th:first-child,.merchant-list-table td:first-child { padding-left:5px !important; padding-right:5px !important; }
+    .merchant-list-table .table-check { width:18px; min-width:18px; }
+    .merchant-list-table .stack { gap:2px; }
+    .merchant-list-table .tag { width:max-content; max-width:100%; padding:1px 5px; min-height:20px; }
+    .merchant-list-table .volume-cell,.merchant-list-table .wallet-cell { min-width:0; }
+    .merchant-list-table .volume-summary { min-width:0; gap:4px; }
+    .merchant-list-table .volume-line { grid-template-columns:24px minmax(0,1fr) 38px; gap:4px; }
+    .merchant-list-table .volume-amount { white-space:normal; overflow-wrap:normal; }
+    .merchant-list-table .volume-rate { font-size:11px; }
+    .merchant-list-table .merchant-fund-summary { min-width:0; gap:3px; }
+    .merchant-list-table .merchant-fund-summary-row { gap:4px; }
+    .merchant-list-table .merchant-fund-summary-row > span:last-child { white-space:nowrap; }
+    .merchant-list-table .merchant-fund-help { width:20px; min-width:20px !important; flex-basis:20px; height:24px; min-height:24px !important; margin-left:1px; }
+    .merchant-list-table .wallet-more { margin-top:0; min-height:24px !important; padding:0; }
+    .merchant-list-table .ops { gap:4px; flex-wrap:wrap; }
+    .merchant-list-table .ops .link-btn { min-width:28px !important; min-height:28px !important; padding:0; font-size:12px; }
+
+    .merchant-fund-summary { display:grid; gap:8px; min-width:230px; }
+    .merchant-fund-summary-row { display:flex; justify-content:space-between; align-items:center; gap:14px; font-size:12px; }
+    .merchant-fund-summary-row > span:first-child { display:inline-flex; align-items:center; color:var(--text-secondary); }
+    .merchant-fund-help { display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; padding:0; margin-left:3px; flex:0 0 24px; border:0; background:transparent; color:var(--text-tertiary); cursor:help; border-radius:4px; vertical-align:middle; }
+    .merchant-fund-help:hover,.merchant-fund-help:focus-visible { color:var(--primary); background:var(--primary-light); outline:2px solid var(--primary); outline-offset:1px; }
+    .merchant-business-funds { display:grid; gap:16px; }
+    .merchant-fund-panel { border:1px solid var(--border); border-radius:8px; background:var(--surface); }
+    .merchant-fund-panel-head { display:flex; justify-content:space-between; gap:12px; align-items:center; padding:16px 18px; border-bottom:1px solid var(--border); }
+    .merchant-fund-panel-head h3 { margin:0 0 4px; font-size:15px; }
+    .merchant-fund-panel-head .muted { font-size:12px; }
+    .merchant-fund-metrics { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); }
+    .merchant-fund-metric { padding:18px; min-width:0; }
+    .merchant-fund-metric + .merchant-fund-metric { border-left:1px solid var(--border); }
+    .merchant-fund-metric-label { display:flex; align-items:center; color:var(--text-secondary); font-size:13px; }
+    .merchant-fund-value { margin-top:10px; font-size:17px; font-weight:600; overflow-wrap:anywhere; }
+    .merchant-fund-tooltip { position:fixed; z-index:9999; width:max-content; max-width:min(320px,calc(100vw - 24px)); padding:12px 14px; border:1px solid var(--border-strong); border-radius:6px; color:var(--text); background:var(--surface); box-shadow:0 4px 18px #1d21291f; font-size:13px; line-height:1.65; white-space:pre-line; overflow-wrap:anywhere; }
+    .merchant-fund-tooltip[hidden] { display:none; }
+    @media(max-width:700px) {
+      .merchant-fund-metrics { grid-template-columns:1fr; }
+      .merchant-fund-metric { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:12px 16px; }
+      .merchant-fund-metric + .merchant-fund-metric { border-left:0; border-top:1px solid var(--border); }
+      .merchant-fund-value { margin-top:0; text-align:right; font-size:15px; }
+    }
+
+
+    .merchant-list-table .volume-cell,.merchant-list-table .wallet-cell { vertical-align:top; }
+    .merchant-list-table .merchant-fund-help { height:20px; min-height:20px !important; }
+    .merchant-list-table .merchant-money-group { display:grid; justify-items:start; gap:1px; }
+    .merchant-list-table .merchant-money-heading { display:flex; align-items:center; gap:6px; font-size:12px; font-weight:600; line-height:18px; }
+    .merchant-list-table .merchant-money-heading .muted { font-size:11px; font-weight:400; }
+    .merchant-list-table .merchant-currency-line { display:grid; grid-template-columns:28px 96px; justify-content:start; width:max-content; max-width:100%; align-items:center; gap:6px; min-height:20px; }
+    .merchant-list-table .merchant-currency-line > span:last-child { text-align:right; white-space:nowrap; }
+    .merchant-list-table .merchant-currency-name { display:inline-flex; align-items:center; color:var(--text-secondary); font-size:11px; }
+    .merchant-list-table .merchant-volume-currency-line { display:grid; grid-template-columns:28px 92px 32px; justify-content:start; width:max-content; max-width:100%; gap:6px; align-items:center; min-height:20px; }
+    .merchant-list-table .merchant-volume-currency-line .volume-amount { white-space:nowrap; font-size:11px; }
+    .merchant-list-table .volume-summary,.merchant-list-table .merchant-fund-summary { gap:5px; }
+    .merchant-fund-table-wrap { overflow-x:auto; }
+    .modal-body .merchant-fund-table { min-width:460px; width:100%; table-layout:fixed; }
+    .merchant-fund-table th,.merchant-fund-table td { padding:10px 12px; font-size:12px; }
+    .merchant-fund-table th:not(:first-child) { text-align:right; }
+    .merchant-fund-number { display:flex; justify-content:flex-end; align-items:center; gap:3px; white-space:nowrap; }
+    .merchant-fund-number .merchant-fund-help { min-width:20px !important; width:20px; min-height:24px !important; height:24px; flex-basis:20px; margin-left:0; }
   </style>
 
   <style id="hs-unified-content-bridge">
@@ -21296,7 +21363,8 @@
           </div>
 
           <div class="table-wrap" data-astryx="DataTable">
-            <table data-astryx="Table">
+            <table id="merchantListTable" class="merchant-list-table" data-astryx="Table">
+              <colgroup><col style="width:28px"><col style="width:150px"><col style="width:100px"><col style="width:180px"><col style="width:58px"><col style="width:234px"><col style="width:106px"><col style="width:100px"></colgroup>
               <thead>
                 <tr>
                   <th><label class="table-check"><input type="checkbox" id="selectAllMerchants" aria-label="选择当前结果全部商户"></label></th>
@@ -21304,7 +21372,7 @@
                   <th>类型 / 关系</th>
                   <th>今日跑量</th>
                   <th>状态</th>
-                  <th>钱包摘要</th>
+                  <th>业务资金</th>
                   <th>创建时间</th>
                   <th>操作</th>
                 </tr>
@@ -21319,6 +21387,7 @@
 
   <div class="modal-mask" id="modalMask" aria-hidden="true" data-astryx="DialogOverlay"></div>
   <section class="modal" id="modal" role="dialog" aria-modal="true" aria-live="polite" aria-hidden="true" tabindex="-1" data-astryx="Dialog"></section>
+  <div class="merchant-fund-tooltip" id="merchantFundTooltip" role="tooltip" hidden></div>
   <div class="toast" id="toast"></div>
 
   <script>
@@ -22331,39 +22400,101 @@
       return `${asset} ${row[4]}`;
     }
 
-    function renderWalletSummary(item) {
-      const lines = walletSummaryTypes.map(([label, walletType]) => `
-        <div class="wallet-line">
-          <span class="wallet-label">${label}</span>
-          <span class="wallet-mini">${walletAvailable(item, walletType, "CNY")}</span>
-        </div>
-      `).join("");
-      return `
-        <div class="wallet-summary">
-          ${lines}
-          <button class="link-btn wallet-more" type="button" data-wallet-detail="${item.id}">CNY 钱包</button>
-        </div>
-      `;
+    let merchantFundHelpTarget = null;
+
+    function hideMerchantFundHelp() {
+      const tooltip = document.getElementById("merchantFundTooltip");
+      if (tooltip) tooltip.hidden = true;
+      merchantFundHelpTarget?.removeAttribute("aria-describedby");
+      merchantFundHelpTarget = null;
     }
 
-    function renderVolumeSummary(item) {
-      const collect = item.volume.collect;
-      const payout = item.volume.payout;
-      return `
-        <div class="volume-summary">
-          <div class="volume-line">
-            <span class="volume-name">代收</span>
-            <span class="volume-amount">${collect.amount}</span>
-            <span class="volume-rate">${collect.rate}</span>
-          </div>
-          <div class="volume-line">
-            <span class="volume-name">代付</span>
-            <span class="volume-amount">${payout.amount}</span>
-            <span class="volume-rate">${payout.rate}</span>
-          </div>
-        </div>
-      `;
+    function showMerchantFundHelp(target) {
+      hideMerchantFundHelp();
+      const tooltip = document.getElementById("merchantFundTooltip");
+      merchantFundHelpTarget = target;
+      tooltip.textContent = target.dataset.fundHelp;
+      tooltip.hidden = false;
+      target.setAttribute("aria-describedby", "merchantFundTooltip");
+      const box = target.getBoundingClientRect();
+      const width = tooltip.offsetWidth, height = tooltip.offsetHeight;
+      tooltip.style.left = `${Math.max(12, Math.min(box.left, window.innerWidth - width - 12))}px`;
+      tooltip.style.top = `${Math.max(12, box.bottom + height + 10 > window.innerHeight ? box.top - height - 8 : box.bottom + 8)}px`;
     }
+
+    document.addEventListener("pointerover", event => {
+      const target = event.target.closest("[data-fund-help]");
+      if (target && !target.contains(event.relatedTarget)) showMerchantFundHelp(target);
+    });
+    document.addEventListener("pointerout", event => {
+      const target = event.target.closest("[data-fund-help]");
+      if (target && !target.contains(event.relatedTarget) && document.activeElement !== target) hideMerchantFundHelp();
+    });
+    document.addEventListener("focusin", event => {
+      if (event.target.matches("[data-fund-help]")) showMerchantFundHelp(event.target);
+      else hideMerchantFundHelp();
+    });
+    document.addEventListener("focusout", event => {
+      if (event.target.matches("[data-fund-help]")) hideMerchantFundHelp();
+    });
+    document.addEventListener("click", event => {
+      const target = event.target.closest("[data-fund-help]");
+      if (target) showMerchantFundHelp(target);
+      else hideMerchantFundHelp();
+    });
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && merchantFundHelpTarget) {
+        event.preventDefault(); event.stopImmediatePropagation(); hideMerchantFundHelp();
+      }
+    }, true);
+    document.addEventListener("scroll", hideMerchantFundHelp, true);
+    window.addEventListener("resize", hideMerchantFundHelp);
+
+    function merchantCurrencySnapshot(item, mode) {
+      const label = mode === "collect" ? "代收" : "代付";
+      return { row: walletRow(item, `${label}钱包`, "CNY"), today: item.volume?.[mode] || { amount: "CNY 0.00", rate: "-" } };
+    }
+
+
+    function merchantBusinessFunds(item, mode) {
+      const collect = mode === "collect";
+      const label = collect ? "代收" : "代付";
+      const snapshot = merchantCurrencySnapshot(item, mode), row = snapshot.row;
+      const page = `${label}商户管理`;
+      // Complete this simple, fee-free demo snapshot only; do not write back to wallets or business config.
+      const amountCents = Math.round(num(row[2]) * 100), remainingCents = Math.round(num(row[4]) * 100);
+      const example = { collectPrepaid: fmt.format((amountCents + remainingCents) / 100), payoutVolume: fmt.format((amountCents - remainingCents) / 100) };
+      return {
+        mode, label, page, asset: "CNY",
+        fields: [
+          { key: "balance", label: "余额（跑量）", value: collect ? row[2] : example.payoutVolume, source: collect ? "CNY 总额" : "余额（跑量，演示样例）", meaning: collect ? "已经帮商户收了多少钱，看这里。这是跑量，不是可以提现的钱。" : "已经帮商户付出去多少钱，看这里。商户还能付多少，要看“剩余预付”。" },
+          { key: "prepaid", label: "预付总额", value: collect ? example.collectPrepaid : row[2], source: collect ? "预付总额（演示样例）" : "代付总预付", meaning: collect ? "我们先付给商户的钱，一共付了多少。之后帮商户收到的钱，会从这笔预付里扣掉。" : "商户先付给我们的钱，一共付了多少，用来支付后续的代付订单。" },
+          { key: "remaining", label: "剩余预付", value: row[4], source: collect ? "可用余额" : "代付剩余预付", meaning: collect ? "我们先付给商户的钱，扣掉已经帮商户收到的部分，现在还剩多少。" : "商户现在还可以用来代付的钱。" }
+        ]
+      };
+    }
+
+    function merchantFundHelp(business, field) {
+      const source = `${field.meaning}\n${field.source.includes("演示样例") ? `相关业务可以到「${business.page}」查看。` : `这项金额对应「${business.page}」里的“${field.source}”。`}`;
+      return `<button type="button" class="merchant-fund-help" data-fund-help="${escapeHtml(source)}" aria-label="${business.label}${field.label}说明"><svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true"><circle cx="10" cy="10" r="7.3" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M7.8 7.3a2.2 2.2 0 1 1 3.3 1.9c-.9.5-1.1 1-1.1 1.8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="10" cy="13.4" r=".8" fill="currentColor"/></svg></button>`;
+    }
+
+    function renderWalletSummary(item) {
+      return `<div class="merchant-fund-summary">${["collect", "payout"].map(mode => {
+        const business = merchantBusinessFunds(item, mode), field = business.fields[2];
+        return `<div class="merchant-money-group" data-summary-business="${mode}"><div class="merchant-money-heading">${business.label}<span class="muted">剩余预付</span>${merchantFundHelp(business, field)}</div><div class="merchant-currency-line" data-summary-currency="CNY"><span class="merchant-currency-name">CNY</span><span class="mono">${escapeHtml(field.value)}</span></div></div>`;
+      }).join("")}</div>`;
+    }
+
+
+    function renderVolumeSummary(item) {
+      return `<div class="volume-summary">${["collect", "payout"].map(mode => `<div class="merchant-money-group" data-volume-business="${mode}"><div class="merchant-money-heading">${mode === "collect" ? "代收" : "代付"}</div>${["CNY"].map(asset => {
+        const today = merchantCurrencySnapshot(item, mode).today;
+        const amount = String(today.amount).replace(/^CNY\s*/, "");
+        return `<div class="merchant-volume-currency-line" data-volume-currency="${asset}"><span class="merchant-currency-name">${asset}</span><span class="volume-amount">${escapeHtml(amount)}</span><span class="volume-rate">${escapeHtml(today.rate)}</span></div>`;
+      }).join("")}</div>`).join("")}</div>`;
+    }
+
 
     function riskLevel(rate) {
       if (rate === 0) return ["0%", "warn"];
@@ -22605,7 +22736,6 @@
               <div class="stack">
                 <strong>${escapeHtml(item.name)}</strong>
                 <span class="mono muted">${item.id}</span>
-                <span class="muted">${escapeHtml(item.owner)} · ${escapeHtml(item.phone)}</span>
               </div>
             </td>
             <td>
@@ -23931,35 +24061,18 @@
     }
 
     function renderWallets(item) {
-      return section("钱包账户", `
-        <table class="mini-table">
-          <thead><tr><th>资产</th><th>钱包类型</th><th>当前总额</th><th>冻结金额</th><th>可用余额</th><th>操作</th></tr></thead>
-          <tbody>${walletRows(item).map((row) => `
-            <tr>
-              <td class="mono">${row[0]}</td>
-              <td>${row[1]}</td>
-              <td class="mono">${row[2]}</td>
-              <td class="mono">${row[3]}</td>
-              <td class="mono">${row[4]}</td>
-              <td>
-                <button class="link-btn" type="button" data-wallet-adjust="${escapeHtml(item.id)}" data-adjust-wallet="${escapeHtml(row[1])}">资金调整</button>
-              </td>
-            </tr>
-          `).join("")}</tbody>
-        </table>
-      `) + (item.walletAdjustments?.length ? section("资金调整记录", `
-        <table class="mini-table">
-          <thead><tr><th>流水号 / 时间</th><th>钱包 / 类型</th><th>金额</th><th>调整前 → 调整后可用余额</th><th>原因 / 操作人</th></tr></thead>
-          <tbody>${item.walletAdjustments.map((record) => `<tr>
-            <td class="mono">${escapeHtml(record.id)}<br>${escapeHtml(record.time)}</td>
-            <td>${escapeHtml(record.wallet)}<br>${record.direction === "add" ? "手动充值" : "手动扣款"}</td>
-            <td class="mono">CNY ${fmt.format(record.amount / 100)}</td>
-            <td class="mono">${fmt.format(record.before / 100)} → ${fmt.format(record.after / 100)}</td>
-            <td>${escapeHtml(record.reason)}<br>${escapeHtml(record.operator)}</td>
-          </tr>`).join("")}</tbody>
-        </table>
-      `) : "");
+      return `<div class="merchant-business-funds" data-merchant-business-funds="${escapeHtml(item.id)}">${["collect", "payout"].map(mode => {
+        const business = merchantBusinessFunds(item, mode);
+        return `<section class="merchant-fund-panel" data-fund-business="${mode}">
+          <div class="merchant-fund-panel-head"><div><h3>${business.label}业务资金</h3><span class="muted">对应${business.page}</span></div></div>
+          <div class="merchant-fund-table-wrap"><table class="merchant-fund-table"><colgroup><col style="width:12%"><col style="width:29%"><col style="width:30%"><col style="width:29%"></colgroup><thead><tr><th>币种</th>${business.fields.map(field => `<th>${field.label}${merchantFundHelp(business, field)}</th>`).join("")}</tr></thead><tbody>${["CNY"].map(asset => {
+            const current = merchantBusinessFunds(item, mode);
+            return `<tr data-fund-currency="${mode}-${asset}"><td class="mono">${asset}</td>${current.fields.map(field => `<td data-fund-field="${mode}-${field.key}${asset === "CNY" ? "" : `-${asset}`}"><div class="merchant-fund-number"><span class="mono">${escapeHtml(field.value)}</span></div></td>`).join("")}</tr>`;
+          }).join("")}</tbody></table></div>
+        </section>`;
+      }).join("")}</div>`;
     }
+
 
     let walletAdjustmentSequence = 0;
 
@@ -24053,33 +24166,14 @@
     }
 
     function openWalletModal(id) {
-      const item = merchants.find((merchant) => merchant.id === id);
-      const cards = walletSummaryTypes.map(([label, walletType]) => `
-        <div class="info-item">
-          <div class="k">${label}钱包</div>
-          <div class="v mono">${walletAvailable(item, walletType, "CNY")}</div>
-        </div>
-      `).join("");
-
+      const item = merchants.find(merchant => merchant.id === id);
       document.getElementById("modal").innerHTML = `
-        <div class="modal-head" data-astryx="DialogHeader">
-          <div>
-            <h2>钱包明细</h2>
-            <p><span class="mono">${item.id}</span> · ${item.name}</p>
-          </div>
-          <button class="modal-close" type="button" id="modalClose" aria-label="关闭"><i data-lucide="x"></i></button>
-        </div>
-        <div class="modal-tabs" data-astryx="Tabs">
-          <span class="modal-tab active" aria-current="page">钱包明细</span>
-        </div>
-        <div class="modal-body" data-astryx="DialogBody">
-          <div class="info-grid" data-astryx="DescriptionList">${cards}</div>
-          ${renderWallets(item)}
-        </div>
-      `;
+        <div class="modal-head" data-astryx="DialogHeader"><div><h2>商户业务资金</h2><p><span class="mono">${escapeHtml(item.id)}</span> · ${escapeHtml(item.name)}</p></div><button class="modal-close" type="button" id="modalClose" aria-label="关闭"><i data-lucide="x"></i></button></div>
+        <div class="modal-body" data-astryx="DialogBody">${renderWallets(item)}</div>`;
       showModal("small");
       bindModalEvents();
     }
+
 
     function merchantCallback(item) {
       return item.callback && !["待配置", "未配置"].includes(item.callback) ? item.callback : "";
@@ -24861,7 +24955,7 @@
         "跑量统计": renderVolumeTab,
         "代收配置": renderCollectConfig,
         "代付配置": renderPayoutConfig,
-        "钱包账户": renderWallets,
+        "业务资金": renderWallets,
         "安全配置": renderCommonConfig,
         "管理员安全": renderAdminSecurity,
         "操作日志": renderLogs
@@ -24882,7 +24976,7 @@
     function renderDetailModal(item, rateDraft) {
       if (activeBusinessDialogMode) return renderBusinessMerchantModal(item, activeBusinessDialogMode, rateDraft);
       document.getElementById("modal").dataset.merchantId = item.id;
-      const tabs = ["概览", "跑量统计", "钱包账户", "安全配置", "管理员安全", "操作日志"];
+      const tabs = ["概览", "跑量统计", "业务资金", "安全配置", "管理员安全", "操作日志"];
       document.getElementById("modal").innerHTML = `
         <div class="modal-head" data-astryx="DialogHeader">
           <div>
@@ -25128,6 +25222,7 @@
 
     function showModal(size) {
       const modal = document.getElementById("modal");
+      hideMerchantFundHelp();
       if (modal.__payoutAccessGuard) {modal.removeEventListener("click",modal.__payoutAccessGuard,true);modal.__payoutAccessGuard=null;}
       const opening = !modal.classList.contains("open");
       if (opening) merchantModalReturnFocus = document.activeElement;
@@ -25139,7 +25234,7 @@
       document.getElementById("modalMask").setAttribute("aria-hidden", "false");
       if (opening) {
         requestAnimationFrame(() => {
-          const firstControl = modal.querySelector('input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not(.modal-close):not([disabled])');
+          const firstControl = modal.querySelector('input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not(.modal-close):not(.merchant-fund-help):not([disabled])');
           (firstControl || modal.querySelector("button:not([disabled])") || modal).focus();
         });
       }
@@ -25147,6 +25242,7 @@
     }
 
     function closeModal() {
+      hideMerchantFundHelp();
       const modal = document.getElementById("modal");
       if (!modal.classList.contains("open")) return;
       modal.querySelectorAll('input[type="password"], input[inputmode="numeric"], input[autocomplete="one-time-code"]').forEach(input => { input.value = ""; });
