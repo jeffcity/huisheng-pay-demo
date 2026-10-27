@@ -1,0 +1,285 @@
+{
+  "payout-channel-daily": {
+    "title": "代付通道日终统计",
+    "reference": "https://j3-web.newopsname.com/report/collection-channel-daily-summary",
+    "columns": [
+      "序号",
+      "日期",
+      "商户号",
+      "商户名称",
+      "通道名称",
+      "成交金额",
+      "总单量",
+      "成交率",
+      "服务费",
+      "利润",
+      "备注"
+    ],
+    "types": []
+  },
+  "collect-channel-daily": {
+    "title": "代收通道日终统计",
+    "reference": "https://j3-web.newopsname.com/report/payout-channel-daily-summary",
+    "columns": [
+      "序号",
+      "日期",
+      "商户号",
+      "商户名称",
+      "通道名称",
+      "成交金额",
+      "总单量",
+      "成交率",
+      "服务费",
+      "利润",
+      "备注"
+    ],
+    "types": []
+  },
+  "merchant-collect-daily": {
+    "title": "商户代收日终统计",
+    "reference": "https://j3-web.newopsname.com/report/daily-settlement-channel",
+    "columns": [
+      "序号",
+      "日期",
+      "商户名称",
+      "成交金额",
+      "总单量",
+      "成功数",
+      "成交率",
+      "商户服务费",
+      "通道服务费",
+      "初期余额",
+      "末期余额",
+      "余额明细",
+      "初期预付",
+      "末期预付",
+      "预付明细"
+    ],
+    "types": []
+  },
+  "merchant-payout-daily": {
+    "title": "商户代付日终统计",
+    "reference": "https://j3-web.newopsname.com/report/daily-settlement-merchant",
+    "columns": [
+      "序号",
+      "日期",
+      "商户名称",
+      "订单总金额",
+      "成交金额",
+      "未成交金额",
+      "总单量",
+      "成功数",
+      "未支付",
+      "成交率",
+      "商户服务费",
+      "初期余额",
+      "末期余额",
+      "余额明细",
+      "初期预付",
+      "末期预付",
+      "预付明细"
+    ],
+    "types": []
+  },
+  "agent-collect-daily": {
+    "title": "代理代收日终统计",
+    "reference": "https://j3-web.newopsname.com/report/daily-settlement-agent",
+    "columns": [
+      "序号",
+      "日期",
+      "代理编号",
+      "代理名称",
+      "初期余额(CNY)",
+      "末期余额(CNY)",
+      "余额变动明细(CNY)"
+    ],
+    "types": []
+  },
+  "platform-collect-daily": {
+    "title": "平台代收日终统计",
+    "reference": "https://j3-web.newopsname.com/report/daily-settlement-platform",
+    "columns": [
+      "日期",
+      "成交额",
+      "总单数",
+      "成功数",
+      "商户服务费",
+      "通道服务费",
+      "平台利润",
+      "平台服务费",
+      "商户总余额",
+      "商户总预付",
+      "通道总余额",
+      "通道总预付",
+      "代理总余额"
+    ],
+    "types": []
+  },
+  "platform-payout-daily": {
+    "title": "平台代付日终统计",
+    "reference": "https://j3-web.newopsname.com/report/daily-pay-platform",
+    "columns": [
+      "日期",
+      "成交额",
+      "总单数",
+      "成功数",
+      "商户服务费",
+      "通道服务费",
+      "平台利润",
+      "平台服务费",
+      "商户总余额",
+      "商户总预付",
+      "通道总余额",
+      "代理总余额"
+    ],
+    "types": []
+  },
+  "channel-pay-change": {
+    "title": "通道代收流水记录",
+    "reference": "https://j3-web.newopsname.com/record/channel-pay-change",
+    "columns": [
+      "序号",
+      "通道名称",
+      "平台订单号",
+      "商户订单号",
+      "类型",
+      "币种",
+      "原金额",
+      "变动金额",
+      "变动后金额",
+      "变动时间",
+      "备注"
+    ],
+    "types": [
+      "后台调整",
+      "代收",
+      "结算",
+      "下发",
+      "活动赠送",
+      "其他"
+    ]
+  },
+  "channel-payout-change": {
+    "title": "通道代付流水记录",
+    "reference": "https://j3-web.newopsname.com/record/channel-payout-change",
+    "columns": [
+      "序号",
+      "通道名称",
+      "通道商名称",
+      "平台订单号",
+      "商户号",
+      "类型",
+      "币种",
+      "原金额",
+      "变动金额",
+      "变动后金额",
+      "变动时间",
+      "备注"
+    ],
+    "types": [
+      "代付退回",
+      "后台调整",
+      "代付",
+      "结算",
+      "订单冲销"
+    ]
+  },
+  "merchant-collect-change": {
+    "title": "商户代收流水记录",
+    "reference": "https://j3-web.newopsname.com/record/merchant-daifu-total-change",
+    "columns": [
+      "序号",
+      "商户名称",
+      "平台订单号",
+      "商户订单号",
+      "类型",
+      "对方商户",
+      "对方账户",
+      "币种",
+      "原金额",
+      "变动金额",
+      "变动后金额",
+      "变动时间",
+      "备注",
+      "操作"
+    ],
+    "types": [
+      "后台调整",
+      "代收",
+      "结算",
+      "活动赠送",
+      "其他",
+      "订单冲正",
+      "下发"
+    ]
+  },
+  "merchant-payout-change": {
+    "title": "商户代付流水记录",
+    "reference": "https://j3-web.newopsname.com/record/merchant-daifu-change",
+    "columns": [
+      "序号",
+      "商户名称",
+      "平台订单号",
+      "商户订单号",
+      "类型",
+      "对方商户",
+      "对方账户",
+      "币种",
+      "原金额",
+      "变动金额",
+      "变动后金额",
+      "变动时间",
+      "备注",
+      "操作"
+    ],
+    "types": [
+      "后台调整",
+      "代付",
+      "结算",
+      "订单冲销"
+    ]
+  },
+  "merchant-payout-prepay-change": {
+    "title": "商户代付预付记录",
+    "reference": "https://j3-web.newopsname.com/record/merchant-payout-total-prepayment-change",
+    "columns": [
+      "序号",
+      "商户名称",
+      "平台订单号",
+      "商户订单号",
+      "类型",
+      "币种",
+      "原金额",
+      "变动金额",
+      "变动后金额",
+      "变动时间",
+      "备注"
+    ],
+    "types": [
+      "后台调整",
+      "结算",
+      "订单冲销"
+    ]
+  },
+  "merchant-collect-prepay-change": {
+    "title": "商户代收预付记录",
+    "reference": "https://j3-web.newopsname.com/record/merchant-pay-total-prepayment-change",
+    "columns": [
+      "序号",
+      "商户名称",
+      "平台订单号",
+      "商户订单号",
+      "类型",
+      "币种",
+      "原金额",
+      "变动金额",
+      "变动后金额",
+      "变动时间",
+      "备注"
+    ],
+    "types": [
+      "后台调整",
+      "结算"
+    ]
+  }
+}

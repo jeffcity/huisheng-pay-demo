@@ -30,7 +30,7 @@
       <div class="meta"><span id="resultCount" aria-live="polite"></span><small id="snapshotTime">示例数据 · 截至 2026-10-05 16:30（UTC+8）</small></div>
       <div id="currencyPanel" role="tabpanel"><div class="table-wrap"><table id="reportTable"><thead id="reportHead"></thead><tbody id="reportRows"></tbody><tfoot id="reportTotal"></tfoot></table></div>
       </div>
-      <nav class="pagination" aria-label="报表分页"><span id="pageInfo"></span><button class="btn" type="button" id="previousPage" aria-label="上一页">‹</button><span id="pageNumbers"></span><button class="btn" type="button" id="nextPage" aria-label="下一页">›</button><select class="control" id="pageSize" aria-label="每页条数"><option value="10">10条/页</option><option value="20">20条/页</option><option value="50">50条/页</option></select><span>前往</span><input class="control jump" id="jumpPage" type="number" min="1" value="1" aria-label="前往页码"><button class="btn" type="button" id="goPage">确定</button></nav>
+      <nav class="pagination" aria-label="报表分页"><span id="pageInfo"></span><button class="btn" type="button" id="previousPage" aria-label="上一页">‹</button><span id="pageNumbers"></span><button class="btn" type="button" id="nextPage" aria-label="下一页">›</button><select class="control" id="pageSize" aria-label="每页条数"><option value="10">10条/页</option><option value="20">20条/页</option><option value="50">50条/页</option><option value="100">100条/页</option></select><span>前往</span><input class="control jump" id="jumpPage" type="number" min="1" value="1" aria-label="前往页码"><button class="btn" type="button" id="goPage">确定</button></nav>
     </section>
     <p class="footnote" id="reportNote"></p>
   </main>
@@ -43,164 +43,84 @@
   </dialog>
   <div class="toast" id="toast" role="status" hidden></div>
   <script>
-    (() => {
-      const reportConfigs = {
-        'payout-channel-daily': { title: '代付通道日终统计', direction: 'payout', kind: 'channel' },
-        'collect-channel-daily': { title: '代收通道日终统计', direction: 'collect', kind: 'channel' },
-        'merchant-collect-daily': { title: '商户代收日终统计', direction: 'collect', kind: 'merchant' },
-        'merchant-payout-daily': { title: '商户代付日终统计', direction: 'payout', kind: 'merchant' }
-      };
-      const requested = window.__UNIFIED_DEMO_HASH || location.hash.slice(1);
-      const config = reportConfigs[requested] || reportConfigs['payout-channel-daily'];
-      const merchantPage = config.kind === 'merchant';
-      const payout = config.direction === 'payout';
-      const walletName = payout ? '代付钱包' : '代收钱包';
-      const demoToday = '2026-10-05';
-      const merchants = [{id:'MCH-2031',name:'星河游戏'},{id:'MCH-1188',name:'东盛电商'},{id:'MCH-3096',name:'远山商贸'}];
-      const channels = payout ? ['银联代付通道','快捷代付通道'] : ['快捷代收通道','网银代收通道'];
-      // Static review fixtures, not an implementation of LanSheng's production metric formulas.
-      // 成交率、未支付／未成交计算由开发移植时核对蓝盛代码；这里仅展示示例结果。
-      const channelRows = [], merchantRows = [];
-      for (let day = 0; day < 6; day++) {
-        const date = new Date(demoToday + 'T00:00:00Z'); date.setUTCDate(date.getUTCDate()-day);
-        const reportDate = date.toISOString().slice(0,10);
-        merchants.forEach((merchant,m) => {
-          const slices = channels.map((channel,c) => {
-            const total = 64 + day*11 + m*17 + c*23;
-            const success = total - (3 + m + c + day);
-            const amount = (success * (payout ? 42850 : 28600)) + m*12400 + day*1500;
-            const row = {date:reportDate,merchantId:merchant.id,merchant:merchant.name,channel,currency:'CNY',amount,total,success,rate:(success/total*100).toFixed(2)+'%',remark:''};
-            channelRows.push(row); return row;
-          });
-          const total = slices.reduce((sum,row)=>sum+row.total,0);
-          const success = slices.reduce((sum,row)=>sum+row.success,0);
-          const amount = slices.reduce((sum,row)=>sum+row.amount,0);
-          const notPaid = total-success;
-          const notAmount = notPaid * (payout ? 38500 : 22400);
-          // Wallet snapshots include all booked changes, independently of transaction totals.
-          const walletStart = (payout ? 62842000 : 93688000) + m*24786000 + day*940000;
-          const walletEnd = walletStart + (payout ? -2753600-m*356200 : 3385400+m*194200) + day*87200;
-          const frozen = 1230000 + m*348000 + day*42600;
-          merchantRows.push({date:reportDate,merchantId:merchant.id,merchant:merchant.name,currency:'CNY',amount,orderAmount:amount+notAmount,notAmount,total,success,notPaid,rate:(success/total*100).toFixed(2)+'%',walletStart,walletEnd,frozen,available:walletEnd-frozen});
-        });
-      }
-      // Only CNY is available in this review scope; no hidden-currency fixtures are created.
-      const currencies = ['CNY'];
-      // Independent display fixtures. Production fees, profit and prepayment values
-      // must be migrated from LanSheng, not calculated from these sample amounts.
-      channelRows.forEach((row,index)=>{
-        row.serviceFee=[16840,22560,0,19320,25480,14560][index%6]+Math.floor(index/6)*320;
-        row.profit=[9450,-1280,0,11360,15620,7840][index%6]+Math.floor(index/6)*160;
-      });
-      merchantRows.forEach((row,index)=>{
-        row.merchantServiceFee=[32460,41820,0,35680,46720,28940][index%6];
-        row.channelServiceFee=[18240,25760,0,21680,27480,15320][index%6];
-        row.prepayStart=1584200+(index%3)*623400+Math.floor(index/3)*18400;
-        row.prepayEnd=row.prepayStart+[16340,-24860,0,18720,-15640,23680][index%6];
-        row.prepayDetail=0;
-      });
-      const remarkStorageKey='huisheng-demo:HS-TEN-001:daily-report-remarks:v1';
-      const remarkId=row=>JSON.stringify([config.direction,row.currency,row.date,row.merchantId,row.channel]);
-      function readRemarks(){const parsed=JSON.parse(window.top.localStorage.getItem(remarkStorageKey)||'{}');return parsed&&typeof parsed==='object'&&!Array.isArray(parsed)?parsed:{}}
-      let savedRemarks={};try{savedRemarks=readRemarks()}catch{}
-      channelRows.forEach(row=>{const value=savedRemarks[remarkId(row)];if(typeof value==='string')row.remark=value});
-      const sourceRows = merchantPage ? merchantRows : channelRows;
-      sourceRows.sort((a,b)=>b.date.localeCompare(a.date)||a.merchantId.localeCompare(b.merchantId));
-      sourceRows.forEach((row,i)=>{row.key=String(i)});
-      const columns = merchantPage ? [
-        ['date','日期'],['merchant','商户名称'],
-        ...(payout ? [['orderAmount','订单总金额']] : []),['amount','成交金额'],
-        ...(payout ? [['notAmount','未成交金额']] : []),['total','总单量'],['success','成功数'],
-        ...(payout ? [['notPaid','未支付']] : []),['rate','成交率'],
-        ['merchantServiceFee','商户服务费'],...(!payout ? [['channelServiceFee','通道服务费']] : []),
-        ['walletStart',walletName+'期初余额'],['walletEnd',walletName+'期末余额'],
-        ['prepayStart','初期预付'],['prepayEnd','末期预付'],['prepayDetail','预付明细']
-      ] : [['date','日期'],['merchantId','商户号'],['merchant','商户名称'],['channel','通道名称'],['amount','成交金额'],['total','总单量'],['rate','成交率'],['serviceFee','服务费'],['profit','利润'],['remark','备注']];
-      const moneyFields = new Set(['amount','orderAmount','notAmount','walletStart','walletEnd','serviceFee','profit','merchantServiceFee','channelServiceFee','prepayStart','prepayEnd','prepayDetail']);
-      const countFields = new Set(['total','success','notPaid']);
-      const sumFields = new Set(['amount','orderAmount','notAmount','total','success','notPaid','serviceFee','profit','merchantServiceFee','channelServiceFee']);
-      const $ = id => document.getElementById(id);
-      const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-      const money = value => (value/100).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});
-      const fieldClass = key => moneyFields.has(key)?'money':countFields.has(key)||key==='rate'?'number':'';
-      let applied = {entity:'',start:'',end:'',currency:'CNY'}, page=1, pageSize=10, toastTimer, activeRemarkRow;
-      document.title = '汇盛支付租户端 · '+config.title;
-      document.body.dataset.report = requested in reportConfigs ? requested : 'payout-channel-daily';
-      $('reportTitle').textContent = config.title;
-      $('reportDescription').textContent = merchantPage ? '按商户查看每日交易结果与'+walletName+'日终余额。' : '按日期、商户和通道查看每日交易结果。';
-      $('reportNote').textContent = merchantPage ? '钱包余额包含已记账的订单、费用、划转及资金调整。' : '合计按当前筛选范围汇总，不受分页影响。';
-      $('currencyTabs').innerHTML=currencies.map((currency,i)=>'<button class="currency-tab" id="currency-'+currency+'" type="button" role="tab" aria-controls="currencyPanel" aria-selected="'+(i===0)+'" tabindex="'+(i===0?'0':'-1')+'" data-currency="'+currency+'">'+currency+'</button>').join('');
-      $('entityLabel').textContent = merchantPage ? '商户' : '通道';
-      const options = merchantPage ? merchants.map(m=>[m.id,m.name+' · '+m.id]) : channels.map(c=>[c,c]);
-      $('entityFilter').innerHTML = '<option value="">'+(merchantPage?'全部商户':'全部渠道')+'</option>'+options.map(([value,label])=>'<option value="'+escapeHtml(value)+'">'+escapeHtml(label)+'</option>').join('');
-      $('reportHead').innerHTML = '<tr>'+columns.map(([key,label])=>'<th scope="col" class="'+fieldClass(key)+'">'+escapeHtml(label)+'</th>').join('')+'</tr>';
-      $('reportTable').style.minWidth = merchantPage ? (payout?'2060px':'1660px') : '1280px';
-      const filtered = () => sourceRows.filter(row=>(!applied.entity||(merchantPage?row.merchantId:row.channel)===applied.entity)&&(!applied.start||row.date>=applied.start)&&(!applied.end||row.date<=applied.end)&&row.currency===applied.currency);
-      function render() {
-        document.querySelectorAll('[data-currency]').forEach(button=>{const selected=button.dataset.currency===applied.currency;button.setAttribute('aria-selected',String(selected));button.tabIndex=selected?0:-1});
-        $('currencyPanel').setAttribute('aria-labelledby','currency-'+applied.currency);
-        const rows=filtered(), pages=Math.max(1,Math.ceil(rows.length/pageSize)); page=Math.min(page,pages);
-        const visible=rows.slice((page-1)*pageSize,page*pageSize);
-        $('resultCount').textContent='共 '+rows.length+' 条 · '+applied.currency;
-        $('reportRows').innerHTML=visible.length?visible.map(row=>'<tr data-row-key="'+row.key+'">'+columns.map(([key])=>{
-          if(key==='remark') return '<td class="remark-cell"><span class="remark-text">'+escapeHtml(row.remark||'—')+'</span><button class="link-btn" type="button" data-remark-key="'+row.key+'" aria-label="编辑 '+escapeHtml(row.merchant)+' '+row.date+' '+escapeHtml(row.channel)+' '+row.currency+' 备注">编辑</button></td>';
-          return '<td class="'+fieldClass(key)+'">'+(moneyFields.has(key)?money(row[key]):escapeHtml(row[key]|| (typeof row[key]==='number'?0:'—')))+'</td>';
-        }).join('')+'</tr>').join(''):'<tr><td colspan="'+columns.length+'" class="empty">当前筛选条件下暂无数据</td></tr>';
-        $('reportTotal').innerHTML=rows.length?'<tr>'+columns.map(([key],i)=>'<td class="'+fieldClass(key)+'">'+(i===0?'合计':sumFields.has(key)?(moneyFields.has(key)?money(rows.reduce((sum,r)=>sum+r[key],0)):rows.reduce((sum,r)=>sum+r[key],0)):'—')+'</td>').join('')+'</tr>':'';
-        $('pageInfo').textContent='第 '+page+' / '+pages+' 页';$('previousPage').disabled=page===1;$('nextPage').disabled=page===pages;
-        const start=Math.max(1,Math.min(page-2,pages-4)),end=Math.min(pages,start+4);
-        $('pageNumbers').innerHTML=Array.from({length:end-start+1},(_,i)=>start+i).map(n=>'<button class="page-number" type="button" data-page="'+n+'" aria-label="第 '+n+' 页"'+(n===page?' aria-current="page"':'')+'>'+n+'</button>').join('');
-        $('jumpPage').value=page;$('jumpPage').max=pages;$('exportReport').disabled=!rows.length;
-      }
-      function toast(message){clearTimeout(toastTimer);$('toast').textContent=message;$('toast').hidden=false;toastTimer=setTimeout(()=>{$('toast').hidden=true},2400)}
-      function applyFilters(){
-        const start=$('startDate').value,end=$('endDate').value;
-        if(start&&end&&start>end){$('filterError').textContent='开始日期不能晚于结束日期';$('filterError').hidden=false;$('startDate').focus();return false}
-        $('filterError').hidden=true;applied={entity:$('entityFilter').value,start,end,currency:applied.currency};page=1;render();return true;
-      }
-      $('reportFilters').addEventListener('submit',event=>{event.preventDefault();applyFilters()});
-      $('resetFilters').addEventListener('click',()=>{$('reportFilters').reset();$('startDate').value='';$('endDate').value='';applyFilters()});
-      function switchCurrency(currency){if(!currencies.includes(currency))return;applied={...applied,currency};page=1;render()}
-      $('currencyTabs').addEventListener('click',event=>{const button=event.target.closest('[data-currency]');if(button)switchCurrency(button.dataset.currency)});
-      $('currencyTabs').addEventListener('keydown',event=>{const current=currencies.indexOf(event.target.dataset.currency);if(current<0)return;let next=current;if(event.key==='ArrowRight')next=(current+1)%currencies.length;else if(event.key==='ArrowLeft')next=(current+currencies.length-1)%currencies.length;else if(event.key==='Home')next=0;else if(event.key==='End')next=currencies.length-1;else return;event.preventDefault();switchCurrency(currencies[next]);$('currency-'+currencies[next]).focus()});
-      $('timePreset').addEventListener('change',()=>{
-        const preset=$('timePreset').value,date=new Date(demoToday+'T00:00:00Z');let start='',end='';
-        if(preset!=='all'){end=demoToday;if(preset==='yesterday'){date.setUTCDate(date.getUTCDate()-1);end=date.toISOString().slice(0,10)}else if(preset==='week'){date.setUTCDate(date.getUTCDate()-((date.getUTCDay()+6)%7))}else if(preset==='month'){date.setUTCDate(1)}start=date.toISOString().slice(0,10)}
-        $('startDate').value=start;$('endDate').value=end;
-      });
-      ['startDate','endDate'].forEach(id=>$(id).addEventListener('input',()=>{$('timePreset').value='all';$('filterError').hidden=true}));
-      $('previousPage').addEventListener('click',()=>{page=Math.max(1,page-1);render()});$('nextPage').addEventListener('click',()=>{page++;render()});
-      $('pageNumbers').addEventListener('click',event=>{const target=event.target.closest('[data-page]');if(target){page=Number(target.dataset.page);render()}});
-      $('pageSize').addEventListener('change',()=>{pageSize=Number($('pageSize').value);page=1;render()});
-      function jump(){const value=Number($('jumpPage').value),max=Number($('jumpPage').max);if(!Number.isInteger(value)||value<1||value>max){toast('请输入 1 至 '+max+' 的页码');$('jumpPage').focus();return}page=value;render()}
-      $('goPage').addEventListener('click',jump);$('jumpPage').addEventListener('keydown',event=>{if(event.key==='Enter')jump()});
-      $('reportRows').addEventListener('click',event=>{
-        const remarkButton=event.target.closest('[data-remark-key]');
-        if(remarkButton){
-          const row=filtered().find(r=>r.key===remarkButton.dataset.remarkKey);if(!row)return;
-          activeRemarkRow=row;$('remarkInput').value=row.remark;
-          $('remarkContext').textContent=row.date+' · '+row.merchant+'（'+row.merchantId+'） · '+row.channel+' · '+row.currency;
-          $('remarkDialog').showModal();$('remarkInput').focus();return;
-        }
-      });
-      $('remarkForm').addEventListener('submit',event=>{
-        event.preventDefault();if(!activeRemarkRow)return;const value=$('remarkInput').value.trim();
-        try{const remarks=readRemarks();if(value)remarks[remarkId(activeRemarkRow)]=value;else delete remarks[remarkId(activeRemarkRow)];window.top.localStorage.setItem(remarkStorageKey,JSON.stringify(remarks))}
-        catch{toast('备注未保存，请检查浏览器本地存储后重试');return}
-        activeRemarkRow.remark=value;render();$('remarkDialog').close();toast(value?'备注已保存':'备注已清空');
-      });
-      ['cancelRemark','closeRemarkIcon'].forEach(id=>$(id).addEventListener('click',()=>{$('remarkDialog').close()}));
-      $('remarkDialog').addEventListener('close',()=>{if(activeRemarkRow)document.querySelector('[data-remark-key="'+activeRemarkRow.key+'"]')?.focus();activeRemarkRow=null});
-      $('exportReport').addEventListener('click',()=>{
-        const rows=filtered();if(!rows.length)return;
-        const exportColumns=columns;
-        const csvCell=value=>'"'+String(value??'').replace(/"/g,'""')+'"';
-        const records=[exportColumns.map(([,label])=>label),...rows.map(row=>exportColumns.map(([key])=>moneyFields.has(key)?(row[key]/100).toFixed(2):key==='remark'&&/^[\s]*[=+@-]/.test(row[key])?"'"+row[key]:row[key])),exportColumns.map(([key],i)=>i===0?'合计':sumFields.has(key)?(moneyFields.has(key)?(rows.reduce((sum,r)=>sum+r[key],0)/100).toFixed(2):rows.reduce((sum,r)=>sum+r[key],0)):'')];
-        const blob=new Blob(['\ufeff'+records.map(record=>record.map(csvCell).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob);
-        const link=document.createElement('a');link.href=url;link.download=config.title+'_'+applied.currency+'.csv';document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('已导出当前筛选的 '+rows.length+' 条记录');
-      });
-      render();
-    })();
+(() => {
+  const model=window.HSDailyReports,provider=window.HSProviderDemo,$=id=>document.getElementById(id),esc=model.escapeHtml;
+  const requested=window.__UNIFIED_DEMO_HASH||location.hash.slice(1),route=model.configs[requested]?requested:'payout-channel-daily',config=model.configs[route];
+  const tenantId=provider?.tenantId||'',columns=config.columns,moneyFields=model.moneyFields,countFields=model.countFields,sumFields=model.sumFields;
+  const sourceRows=model.fixtures(route,tenantId).map(row=>({...row}));
+  const remarkStorageKey='huisheng-demo:'+tenantId+':daily-report-remarks:v1';
+  const remarkId=row=>JSON.stringify([config.direction,'CNY',row.date,row.merchantId,row.channel]);
+  function readRemarks(){const saved=JSON.parse(window.top.localStorage.getItem(remarkStorageKey)||'{}');return saved&&typeof saved==='object'&&!Array.isArray(saved)?saved:{}}
+  try{const saved=readRemarks();sourceRows.forEach(row=>{if(typeof saved[remarkId(row)]==='string')row.remark=saved[remarkId(row)]})}catch{}
+  const fieldClass=key=>moneyFields.has(key)?'money':countFields.has(key)||key==='rate'||key==='id'?'number':'';
+  const money=cents=>(cents/100).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});
+  let applied={entity:'',start:'',end:'',currency:'CNY'},page=1,pageSize=10,activeRemarkRow,toastTimer;
+  document.title='汇盛支付租户端 · '+config.title;document.body.dataset.report=route;
+  $('reportTitle').textContent=config.title;
+  $('reportDescription').textContent=config.kind==='platform'?'查看当前租户内业务的每日成交、费用与余额汇总。':config.kind==='agent'?'按代理查看每日余额记录。':config.kind==='merchant'?'按商户查看每日交易结果、余额和预付记录。':'按日期、商户和通道查看每日交易结果。';
+  document.querySelector('.scope').textContent='当前租户 · CNY';
+  $('snapshotTime').textContent='示例数据 · 截至 '+model.demoToday+' 16:30（UTC+8）';
+  $('reportNote').textContent='仅展示 CNY；合计覆盖当前筛选的全部记录，余额和预付快照不跨日期累加。';
+  $('currencyTabs').innerHTML='<button class="currency-tab" id="currency-CNY" type="button" role="tab" aria-controls="currencyPanel" aria-selected="true">CNY</button>';
+  $('currencyPanel').setAttribute('aria-labelledby','currency-CNY');
+  const entityName={channel:'通道',merchant:'商户',agent:'代理',platform:''}[config.kind];
+  $('entityLabel').textContent=entityName;$('entityFilter').closest('.field').hidden=config.kind==='platform';
+  $('entityFilter').innerHTML='<option value="">全部'+esc(entityName)+'</option>'+model.entities(route).map(([id,name])=>'<option value="'+esc(id)+'">'+esc(name)+' · '+esc(id)+'</option>').join('');
+  $('reportHead').innerHTML='<tr>'+columns.map(([key,label])=>'<th scope="col" class="'+fieldClass(key)+'">'+esc(label)+'</th>').join('')+'</tr>';
+  $('reportTable').style.minWidth=(config.kind==='platform'?Math.max(1480,columns.length*110):config.kind==='agent'?920:config.kind==='merchant'?Math.max(1560,columns.length*110):1420)+'px';
+  function scopeValid(){return !!tenantId&&provider?.tenantId===tenantId}
+  function error(message){$('filterError').textContent=message;$('filterError').hidden=!message}
+  function filtered(){if(!scopeValid()){error('租户已切换，请重新打开页面');return []}return model.query(sourceRows,route,tenantId,applied)}
+  function render(){
+    const rows=filtered(),pages=Math.max(1,Math.ceil(rows.length/pageSize));page=Math.max(1,Math.min(page,pages));
+    $('resultCount').textContent='共 '+rows.length+' 条 · CNY';
+    $('reportRows').innerHTML=rows.length?rows.slice((page-1)*pageSize,page*pageSize).map(row=>'<tr data-row-key="'+esc(row.key)+'">'+columns.map(([key])=>{
+      if(key==='remark')return '<td class="remark-cell"><span class="remark-text">'+esc(row.remark||'—')+'</span><button class="link-btn" type="button" data-remark-key="'+esc(row.key)+'" aria-label="编辑 '+esc(row.merchant)+' '+row.date+' '+esc(row.channel)+' CNY 备注">编辑</button></td>';
+      return '<td class="'+fieldClass(key)+'">'+(moneyFields.has(key)?money(row[key]):esc(row[key]??'—'))+'</td>';
+    }).join('')+'</tr>').join(''):'<tr><td colspan="'+columns.length+'" class="empty">当前筛选条件下暂无数据</td></tr>';
+    const total=model.totals(rows,route,tenantId);
+    $('reportTotal').innerHTML=rows.length?'<tr>'+columns.map(([key],i)=>'<td class="'+fieldClass(key)+'">'+(i===0?'合计':sumFields.has(key)?(moneyFields.has(key)?money(total[key]):total[key]):key==='rate'?total.rate:'—')+'</td>').join('')+'</tr>':'';
+    $('pageInfo').textContent='第 '+page+' / '+pages+' 页';$('previousPage').disabled=page===1;$('nextPage').disabled=page===pages;
+    const start=Math.max(1,Math.min(page-2,pages-4)),end=Math.min(pages,start+4);
+    $('pageNumbers').innerHTML=Array.from({length:end-start+1},(_,i)=>start+i).map(n=>'<button class="page-number" type="button" data-page="'+n+'" aria-label="第 '+n+' 页"'+(n===page?' aria-current="page"':'')+'>'+n+'</button>').join('');
+    $('jumpPage').value=page;$('jumpPage').max=pages;$('exportReport').disabled=!rows.length;
+  }
+  function toast(message){clearTimeout(toastTimer);$('toast').textContent=message;$('toast').hidden=false;toastTimer=setTimeout(()=>{$('toast').hidden=true},2400)}
+  function applyFilters(){
+    if(!scopeValid()){render();return false}
+    const next={entity:$('entityFilter').value,start:$('startDate').value,end:$('endDate').value,currency:'CNY'};
+    try{model.query(sourceRows,route,tenantId,next);applied=next;page=1;error('');render();return true}catch(e){error(e.message);return false}
+  }
+  $('reportFilters').addEventListener('submit',event=>{event.preventDefault();applyFilters()});
+  $('resetFilters').onclick=()=>{$('reportFilters').reset();$('startDate').value='';$('endDate').value='';applyFilters()};
+  $('timePreset').onchange=()=>{const range=model.presetRange($('timePreset').value);$('startDate').value=range.start;$('endDate').value=range.end};
+  ['startDate','endDate'].forEach(id=>$(id).oninput=()=>{$('timePreset').value='all';error('')});
+  $('previousPage').onclick=()=>{page--;render()};$('nextPage').onclick=()=>{page++;render()};
+  $('pageNumbers').onclick=event=>{const target=event.target.closest('[data-page]');if(target){page=Number(target.dataset.page);render()}};
+  $('pageSize').onchange=()=>{pageSize=[10,20,50,100].includes(Number($('pageSize').value))?Number($('pageSize').value):10;page=1;render()};
+  function jump(){const value=Number($('jumpPage').value),max=Number($('jumpPage').max);if(!Number.isInteger(value)||value<1||value>max){toast('请输入 1 至 '+max+' 的页码');$('jumpPage').focus();return}page=value;render()}
+  $('goPage').onclick=jump;$('jumpPage').onkeydown=event=>{if(event.key==='Enter'){event.preventDefault();jump()}};
+  $('reportRows').onclick=event=>{
+    const button=event.target.closest('[data-remark-key]');if(!button||!scopeValid())return;
+    const row=filtered().find(item=>item.key===button.dataset.remarkKey);if(!row)return;
+    activeRemarkRow=row;$('remarkInput').value=row.remark;$('remarkContext').textContent=row.date+' · '+row.merchant+'（'+row.merchantId+'） · '+row.channel+' · CNY';
+    $('remarkDialog').showModal();$('remarkInput').focus();
+  };
+  $('remarkForm').onsubmit=event=>{
+    event.preventDefault();if(!activeRemarkRow)return;if(!scopeValid()){toast('租户已切换，备注未保存');return}
+    const value=$('remarkInput').value.trim();
+    try{const saved=readRemarks();if(value)saved[remarkId(activeRemarkRow)]=value;else delete saved[remarkId(activeRemarkRow)];window.top.localStorage.setItem(remarkStorageKey,JSON.stringify(saved))}catch{toast('备注未保存，请检查浏览器本地存储后重试');return}
+    activeRemarkRow.remark=value;render();$('remarkDialog').close();toast(value?'备注已保存':'备注已清空');
+  };
+  ['cancelRemark','closeRemarkIcon'].forEach(id=>$(id).onclick=()=>{$('remarkDialog').close()});
+  $('remarkDialog').addEventListener('close',()=>{if(activeRemarkRow)document.querySelector('[data-remark-key="'+activeRemarkRow.key+'"]')?.focus();activeRemarkRow=null});
+  $('exportReport').onclick=()=>{
+    if(!scopeValid()){render();return}const rows=filtered();if(!rows.length)return;
+    const blob=new Blob([model.csv(rows,route,tenantId)],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),link=document.createElement('a');
+    link.href=url;link.download=config.title+'_CNY.csv';document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('已导出当前筛选的 '+rows.length+' 条记录');
+  };
+  render();
+})();
   </script>
 </body>
 </html>

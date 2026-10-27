@@ -101,7 +101,8 @@
     "module": "reports",
     "sourceKey": "reports",
     "sourceName": "运营中心 / 日终统计",
-    "initialHash": "payout-channel-daily"
+    "initialHash": "payout-channel-daily",
+    "subgroup": "日终"
   },
   "collect-channel-daily": {
     "label": "代收通道日终统计",
@@ -109,7 +110,8 @@
     "module": "reports",
     "sourceKey": "reports",
     "sourceName": "运营中心 / 日终统计",
-    "initialHash": "collect-channel-daily"
+    "initialHash": "collect-channel-daily",
+    "subgroup": "日终"
   },
   "merchant-collect-daily": {
     "label": "商户代收日终统计",
@@ -117,7 +119,8 @@
     "module": "reports",
     "sourceKey": "reports",
     "sourceName": "运营中心 / 日终统计",
-    "initialHash": "merchant-collect-daily"
+    "initialHash": "merchant-collect-daily",
+    "subgroup": "日终"
   },
   "merchant-payout-daily": {
     "label": "商户代付日终统计",
@@ -125,23 +128,89 @@
     "module": "reports",
     "sourceKey": "reports",
     "sourceName": "运营中心 / 日终统计",
-    "initialHash": "merchant-payout-daily"
+    "initialHash": "merchant-payout-daily",
+    "subgroup": "日终"
+  },
+  "agent-collect-daily": {
+    "label": "代理代收日终统计",
+    "group": "运营中心",
+    "subgroup": "日终",
+    "module": "reports",
+    "sourceKey": "reports",
+    "sourceName": "运营中心 / 日终统计",
+    "initialHash": "agent-collect-daily"
+  },
+  "platform-collect-daily": {
+    "label": "平台代收日终统计",
+    "group": "运营中心",
+    "subgroup": "日终",
+    "module": "reports",
+    "sourceKey": "reports",
+    "sourceName": "运营中心 / 日终统计",
+    "initialHash": "platform-collect-daily"
+  },
+  "platform-payout-daily": {
+    "label": "平台代付日终统计",
+    "group": "运营中心",
+    "subgroup": "日终",
+    "module": "reports",
+    "sourceKey": "reports",
+    "sourceName": "运营中心 / 日终统计",
+    "initialHash": "platform-payout-daily"
   },
   "channel-pay-change": {
-    "label": "代收通道流水记录",
+    "label": "通道代收流水记录",
     "group": "运营中心",
     "module": "channel-records",
     "sourceKey": "channel-records",
     "sourceName": "运营中心 / 通道流水记录",
-    "initialHash": "channel-pay-change"
+    "initialHash": "channel-pay-change",
+    "subgroup": "账户记录"
   },
   "channel-payout-change": {
-    "label": "代付通道流水记录",
+    "label": "通道代付流水记录",
     "group": "运营中心",
     "module": "channel-records",
     "sourceKey": "channel-records",
     "sourceName": "运营中心 / 通道流水记录",
-    "initialHash": "channel-payout-change"
+    "initialHash": "channel-payout-change",
+    "subgroup": "账户记录"
+  },
+  "merchant-collect-change": {
+    "label": "商户代收流水记录",
+    "group": "运营中心",
+    "subgroup": "账户记录",
+    "module": "channel-records",
+    "sourceKey": "channel-records",
+    "sourceName": "运营中心 / 账户记录",
+    "initialHash": "merchant-collect-change"
+  },
+  "merchant-payout-change": {
+    "label": "商户代付流水记录",
+    "group": "运营中心",
+    "subgroup": "账户记录",
+    "module": "channel-records",
+    "sourceKey": "channel-records",
+    "sourceName": "运营中心 / 账户记录",
+    "initialHash": "merchant-payout-change"
+  },
+  "merchant-payout-prepay-change": {
+    "label": "商户代付预付记录",
+    "group": "运营中心",
+    "subgroup": "账户记录",
+    "module": "channel-records",
+    "sourceKey": "channel-records",
+    "sourceName": "运营中心 / 账户记录",
+    "initialHash": "merchant-payout-prepay-change"
+  },
+  "merchant-collect-prepay-change": {
+    "label": "商户代收预付记录",
+    "group": "运营中心",
+    "subgroup": "账户记录",
+    "module": "channel-records",
+    "sourceKey": "channel-records",
+    "sourceName": "运营中心 / 账户记录",
+    "initialHash": "merchant-collect-prepay-change"
   },
   "order-tracking": {
     "label": "全局订单追踪",
