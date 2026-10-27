@@ -14,6 +14,7 @@ const Header = Layout.Header;
 const Content = Layout.Content;
 const MenuItem = Menu.Item;
 const ItemGroup = Menu.ItemGroup;
+const SubMenu = Menu.SubMenu;
 
 const NAV_PATHS = [
   'M3 10 12 3l9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z',
@@ -37,6 +38,7 @@ export default function App() {
     const fromHash = resolvePageId(window.location.hash.slice(1));
     return MODULES[fromHash] ? fromHash : 'home';
   });
+  const [openKeys, setOpenKeys] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const frameRef = useRef(null);
@@ -73,6 +75,13 @@ export default function App() {
     }
   }, []);
 
+  useEffect(() => {
+    const page = MODULES[activePage];
+    if (!page?.subgroup) return;
+    const key = `${page.group}/${page.subgroup}`;
+    setOpenKeys(keys => keys.includes(key) ? keys : [...keys, key]);
+  }, [activePage]);
+
   useEffect(() => () => { requestRef.current++; }, []);
 
   useEffect(() => { openPage(activePage, { updateHash: false }); }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -105,11 +114,20 @@ export default function App() {
         <Menu
           style={{ flex: 1, overflowY: 'auto' }}
           selectedKeys={[activePage]}
+          openKeys={openKeys}
+          onClickSubMenu={(_, keys) => setOpenKeys(keys)}
           onClickMenuItem={(key) => openPage(key)}
         >
           {NAV_GROUPS.map((group, groupIndex) => (
             <ItemGroup key={group.title} title={<span className="tenant-nav-group"><NavIcon index={groupIndex} />{group.title}</span>}>
-              {group.items.map((item, itemIndex) => (
+              {group.subgroups.map(title => (
+                <SubMenu key={`${group.title}/${title}`} title={title} className="tenant-nav-submenu">
+                  {group.items.filter(item => item.subgroup === title).map(item => (
+                    <MenuItem key={item.id} className="tenant-nav-leaf"><span>{item.label}</span></MenuItem>
+                  ))}
+                </SubMenu>
+              ))}
+              {group.items.filter(item => !item.subgroup).map((item, itemIndex) => (
                 <MenuItem key={item.id}><NavIcon index={groupIndex + itemIndex + 1} small /><span>{item.label}</span></MenuItem>
               ))}
             </ItemGroup>
@@ -139,6 +157,7 @@ export default function App() {
             <Breadcrumb>
               <Breadcrumb.Item>租户端</Breadcrumb.Item>
               <Breadcrumb.Item>{config.group}</Breadcrumb.Item>
+              {config.subgroup && <Breadcrumb.Item>{config.subgroup}</Breadcrumb.Item>}
               <Breadcrumb.Item>{config.label}</Breadcrumb.Item>
             </Breadcrumb>
           </div>

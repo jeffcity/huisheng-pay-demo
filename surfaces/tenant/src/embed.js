@@ -1,5 +1,6 @@
 import providerModel from '../../../src/provider-model.js?raw';
 import channelRecordsModel from './channel-records-model.js?raw';
+import dailyReportsModel from './daily-reports-model.js?raw';
 import notificationBotModel from './notification-bot-model.js?raw';
 // 旧壳 prepareEmbeddedModule 的忠实移植：fetch 真实源文件 → 注入统一壳补丁
 // （隐藏内页自带 sidebar/topbar + __UNIFIED_DEMO_HASH 引导）→ 注入路由应用脚本 → 交给 iframe.srcdoc。
@@ -69,7 +70,7 @@ function routeBridge(moduleName) {
 
 function prepareEmbeddedModule(html, moduleName) {
   if (moduleName === 'login') return html;
-  const models = providerModel + (moduleName === 'channel-records' ? '\n' + channelRecordsModel : '') + (moduleName === 'notifications' ? '\n' + notificationBotModel : '');
+  const models = providerModel + (moduleName === 'reports' ? '\n' + dailyReportsModel : '') + (moduleName === 'channel-records' ? '\n' + channelRecordsModel : '') + (moduleName === 'notifications' ? '\n' + notificationBotModel : '');
   const modelBridge = '<script>' + models.replace(/<\/script/gi, '<\\/script') + '</script>';
   const withHead = html.includes('</head>') ? html.replace('</head>', () => modelBridge + headBridge + '</head>') : modelBridge + headBridge + html;
   return withHead.includes('</body>') ? withHead.replace('</body>', routeBridge(moduleName) + '</body>') : withHead + routeBridge(moduleName);

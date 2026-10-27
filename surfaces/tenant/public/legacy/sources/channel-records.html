@@ -32,13 +32,15 @@
  const sourceRows=model.fixtures(route,tenantId),esc=model.escapeHtml;
  let applied={currency:'CNY'},page=1,size=10,matched=[],timer,calendarMonth=new Date(2026,9,1),pickStart=true,dateFocus;
  document.title='汇盛支付租户端 · '+config.title;document.body.dataset.record=route;
- const widths={id:60,channel:145,provider:145,platformOrder:200,merchantOrder:220,merchantNo:220,type:110,currency:90,before:130,change:140,after:150,at:200,remark:210};
- $('recordTable').style.minWidth=config.direction==='payout'?'1750px':'1640px';
+ const widths={id:54,channel:142,provider:110,merchant:128,agent:128,platformOrder:180,merchantOrder:180,merchantNo:120,type:100,currency:64,before:112,change:112,after:112,at:166,remark:210,counterMerchant:120,counterAccount:120,operation:70};
+ $('recordTable').style.minWidth=config.columns.reduce((sum,[key])=>sum+widths[key],0)+'px';
+ document.querySelector('section.card').setAttribute('aria-label',config.title);
  $('recordColumns').innerHTML=config.columns.map(([key])=>'<col style="width:'+widths[key]+'px">').join('');
  $('recordHead').innerHTML='<tr>'+config.columns.map(([,label])=>'<th scope="col">'+esc(label)+'</th>').join('')+'</tr>';
  $('typeFilter').innerHTML='<option value="">全部类型</option>'+config.types.map(v=>'<option>'+esc(v)+'</option>').join('');
- const channelChoices=model.channels[config.direction].filter(([id])=>!id.endsWith('USDT'));
- $('channelFilter').innerHTML='<option value="">全部通道</option>'+channelChoices.map(([id,name])=>'<option value="'+esc(id)+'">'+esc(name)+'</option>').join('');
+ const entityName={channel:'通道',merchant:'商户',agent:'代理'}[config.kind],channelChoices=model.entities(route);
+ $('channelFilter').setAttribute('aria-label',entityName);
+ $('channelFilter').innerHTML='<option value="">全部'+entityName+'</option>'+channelChoices.map(([id,name])=>'<option value="'+esc(id)+'">'+esc(name)+'</option>').join('');
  $('currencyTabs').innerHTML=config.currencies.map(currency=>'<button class="currency-tab" type="button" role="tab" id="tab-'+currency+'" aria-controls="currencyPanel" data-currency="'+currency+'">'+currency+'</button>').join('');
  function error(message){$('filterError').textContent=message;$('filterError').hidden=!message;}
  function scoped(){if(!tenantId||provider?.tenantId!==tenantId){error('租户已切换，请重新打开页面');return []}return model.query(sourceRows,route,tenantId,applied)}
@@ -50,7 +52,7 @@
   let previous=0; $('pageNumbers').innerHTML=[...nums].sort((a,b)=>a-b).map(n=>{const dots=n>previous+1?'<span class="page-dots">…</span>':'';previous=n;return dots+'<button class="page-btn" type="button" data-page="'+n+'" aria-label="第 '+n+' 页"'+(n===page?' aria-current="page"':'')+'>'+n+'</button>'}).join('');
   $('previousPage').disabled=page===1;$('nextPage').disabled=page===pages;$('jumpPage').value=page;$('jumpPage').max=pages;
  }
- function apply(currency=applied.currency){try{const next={currency,platformOrder:$('platformOrder').value,merchantOrder:$('merchantOrder').value,type:$('typeFilter').value,channel:$('channelFilter').value,start:$('startTime').value,end:$('endTime').value};model.query(sourceRows,route,tenantId,next);applied=next;page=1;error('');render();return true}catch(e){error(e.message);return false}}
+ function apply(currency=applied.currency){try{const next={currency,platformOrder:$('platformOrder').value,merchantOrder:$('merchantOrder').value,type:$('typeFilter').value,entity:$('channelFilter').value,start:$('startTime').value,end:$('endTime').value};model.query(sourceRows,route,tenantId,next);applied=next;page=1;error('');render();return true}catch(e){error(e.message);return false}}
  $('recordFilters').addEventListener('submit',e=>{e.preventDefault();hideDates();apply()});
  $('resetFilters').addEventListener('click',()=>{$('recordFilters').reset();$('startTime').value='';$('endTime').value='';hideDates();syncClear();apply()});
  $('currencyTabs').addEventListener('click',e=>{const b=e.target.closest('[data-currency]');if(b){hideDates();apply(b.dataset.currency)}});

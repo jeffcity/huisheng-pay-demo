@@ -41,6 +41,12 @@ body { font-family:"PingFang SC","Microsoft YaHei",-apple-system,BlinkMacSystemF
 .tenant-sider .arco-menu-item:hover { background:#f2f3f8; }
 .tenant-sider .arco-menu-item.arco-menu-selected { color:#3246d2; background:#dfe3ff; border-right-color:#3246d2; font-weight:500; }
 .tenant-sider .arco-menu-item.arco-menu-selected .tenant-nav-icon { background:#eef0ff; color:#3246d2; }
+.tenant-sider .tenant-nav-submenu > .arco-menu-inline-header { min-height:38px; height:38px; line-height:38px; margin:0; padding:0 28px 0 32px !important; border-radius:0; font-size:14px; color:#4e5969; }
+.tenant-sider .tenant-nav-submenu > .arco-menu-inline-header > span:has(.arco-menu-indent) { display:none; }
+.tenant-sider .tenant-nav-submenu > .arco-menu-inline-header:hover { background:#f2f3f8; }
+.tenant-sider .tenant-nav-submenu > .arco-menu-inline-header.arco-menu-selected { color:#3246d2; }
+.tenant-sider .arco-menu-item.tenant-nav-leaf { padding-left:44px !important; gap:0; font-size:13px; }
+.tenant-sider .tenant-nav-leaf .arco-menu-item-inner { gap:0; }
 .tenant-header { height:72px; padding:0 20px 0 16px; display:flex; align-items:center; justify-content:space-between; gap:16px; background:#fff; border-bottom:1px solid #e3e8ef; flex-shrink:0; }
 .tenant-header h1 { margin:0; font-size:20px; font-weight:600; line-height:28px; color:#222; }
 .tenant-header-brand { color:#86909c; font-size:12px; white-space:nowrap; }
@@ -57,7 +63,7 @@ body { font-family:"PingFang SC","Microsoft YaHei",-apple-system,BlinkMacSystemF
 .frame-overlay { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:var(--color-bg-2); z-index:1; }
 iframe { position:absolute; inset:0; width:100%; height:100%; border:0; background:#f0f2f5; }
 .embedded-frame-host { width:100%; height:100%; }
-.tenant-shell button:focus-visible,.tenant-shell [role="menuitem"]:focus-visible { outline:2px solid #3246d2; outline-offset:-2px; }
+.tenant-shell button:focus-visible,.tenant-shell [role="menuitem"]:focus-visible,.tenant-shell .arco-menu-inline-header:focus-visible { outline:2px solid #3246d2; outline-offset:-2px; }
 @media(max-width:1000px) { .tenant-source { max-width:30%; } }
 @media(max-width:680px) {
   .tenant-header { height:60px; padding:0 12px; }
