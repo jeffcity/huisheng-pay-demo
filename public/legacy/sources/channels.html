@@ -2160,12 +2160,21 @@
       }
     }
 
-    #dataTable.vendor-wide { min-width: 0; width: 100%; table-layout: fixed; }
+    #dataTable.vendor-wide { min-width: 860px; width: 100%; table-layout: fixed; }
     #dataTable.vendor-wide th, #dataTable.vendor-wide td { position: static; width: auto; white-space: normal; }
-    #dataTable.vendor-wide th:first-child, #dataTable.vendor-wide td:first-child { width: 35%; }
-    #dataTable.vendor-wide th:nth-child(2), #dataTable.vendor-wide td:nth-child(2) { width: 20%; }
-    #dataTable.vendor-wide th:nth-child(3), #dataTable.vendor-wide td:nth-child(3) { width: 20%; white-space: nowrap; }
-    #dataTable.vendor-wide th:last-child, #dataTable.vendor-wide td:last-child { width: 25%; }
+    #dataTable.vendor-wide th:first-child, #dataTable.vendor-wide td:first-child { width: 17%; }
+    #dataTable.vendor-wide th:nth-child(2), #dataTable.vendor-wide td:nth-child(2) { width: 10%; }
+    #dataTable.vendor-wide th:nth-child(3), #dataTable.vendor-wide td:nth-child(3) { width: 14%; white-space: nowrap; }
+    #dataTable.vendor-wide th:nth-child(4), #dataTable.vendor-wide td:nth-child(4) { width: 24%; }
+    #dataTable.vendor-wide th:nth-child(5), #dataTable.vendor-wide td:nth-child(5) { width: 15%; }
+    .vendor-source-note { white-space: pre-wrap; overflow-wrap: anywhere; }
+    .vendor-source-editable { display: block; min-height: 24px; padding: 4px 6px; margin: -4px -6px; border-radius: 4px; cursor: text; }
+    .vendor-source-editable:hover { background: var(--color-fill-2, #f2f3f5); }
+    .vendor-source-editable:focus-visible { outline: 2px solid var(--primary, #3538e8); outline-offset: 2px; }
+    .vendor-source-editor textarea { width: 100%; min-width: 0; resize: vertical; padding: 6px 8px; border: 1px solid var(--primary, #3538e8); border-radius: 4px; font: inherit; box-sizing: border-box; }
+    .vendor-source-editor-actions { display: flex; gap: 12px; margin-top: 6px; }
+    .vendor-source-error { color: #d03050; font-size: 12px; margin-top: 4px; }
+    #dataTable.vendor-wide th:last-child, #dataTable.vendor-wide td:last-child { width: 20%; }
     .filters { grid-template-columns: minmax(180px, .6fr) minmax(260px, 1fr) auto; }
     @media (max-width: 800px) { .filters { grid-template-columns: 1fr; } }
   </style>
@@ -2387,6 +2396,8 @@
     };
 
     rows.vendors = window.HSProviderDemo.providers;
+    const vendorSourceSamples = { 'V-001':'商务直连', 'V-002':'合作方推荐', 'V-003':'技术团队对接', 'V-004':'供应商转介绍' };
+    rows.vendors.forEach(row => { if (row.integrationSource === undefined) row.integrationSource = vendorSourceSamples[row.id] || ''; });
 
     const vendorFundAccounts = [
       { id: "FA-001", accountNo: "FA-CNY-IN-001", vendorId: "V-001", vendorName: "QuickPay", name: "QuickPay", direction: "代收", currency: "CNY", bookBalance: 680000, reservedAmount: 46200, availableAmount: 633800, providerBalance: 680000, reconciliation: "一致", reconciledAt: "2026-07-24 09:45:00", settlement: "可操作", fundStatus: "正常", unsettledOrders: 18, fundVersion: 1 },
@@ -2400,7 +2411,7 @@
     ];
     const columns = {
       vendors: [
-        ["name", "通道商"], ["vendorNo", "编号"], ["directions", "业务方向"]
+        ["name", "通道商"], ["vendorNo", "编号"], ["directions", "业务方向"], ["integrationSource", "对接来源"], ["authorizedTenants", "授权租户"]
       ],
       collectionChannels: [
         ["select", ""], ["name", "通道名称"], ["todaySuccess", "今日成功"], ["cnyBalance", "余额"], ["cnyPrepaid", "预付"], ["cnyRemainingPrepaid", "剩余预付"], ["usdtBalance", "USDT余额"], ["usdtPrepaid", "USDT预付"], ["usdtRemainingPrepaid", "USDT剩余预付"], ["status", "状态"], ["thirdCode", "对接编码"], ["todayAmount", "今日成交"], ["rate", "费率"], ["receiptRule", "收款规则"], ["typeStatus", "类型状态"], ["typeActions", "操作"]
@@ -2420,6 +2431,7 @@
     let selectedRow = rows.vendors[0];
     let toastTimer = null;
     let activeModalContext = null;
+    let vendorSourceEdit = null;
     let modalReturnFocus = null;
     let channelAuditSequence = 1008;
     let channelExportSequence = 1;
@@ -2777,6 +2789,8 @@
       if (activeKey === "vendors") {
         const summary = vendorFundSummary(row);
         const capabilities = vendorBusinessCapabilities(row);
+        if (key === "integrationSource") return renderVendorSource(row);
+        if (key === "authorizedTenants") return canUseChannelAction('vendorTenants') ? `<button class="cell-link" data-action="vendorTenants" data-id="${row.id}" aria-label="${escapeHtml(row.name)}授权租户">${vendorAuthorizedTenants(row).length} 个租户 · 查看</button>` : '—';
         if (key === "selfOperated") return `<span class="pill ${row.selfOperated ? "green" : "gray"}">${row.selfOperated ? "自营" : "第三方"}</span>`;
         if (key === "directions") return `<span class="capability-list">${(row.directions || []).map(direction => `<span class="pill ${direction === "代收" ? "cyan" : "blue"}">${escapeHtml(direction)}</span>`).join("")}</span>`;
         if (key === "capabilities") return renderVendorCapabilities(row);
@@ -2991,7 +3005,7 @@
 
     function channelActionPermission(action) {
       const byAction = {
-        export: 'platform.channel.export', editVendor: 'platform.channel.vendor.manage', editChannel: 'platform.channel.manage',
+        export: 'platform.channel.export', editVendor: 'platform.channel.vendor.manage', saveVendor: 'platform.channel.vendor.manage', saveVendorSourceInline: 'platform.channel.vendor.manage', vendorTenants: 'platform.business_grant.view', editChannel: 'platform.channel.manage',
         devDocs: 'platform.channel.sandbox.generate', payoutDevConfig: 'platform.channel.sandbox.generate', savePayoutDevConfig: 'platform.channel.sandbox.generate', channelTest: 'platform.channel.sandbox.generate', collectionCodeTest: 'platform.channel.sandbox.generate', runCollectionCodeTest: 'platform.channel.sandbox.generate', collectionIntegration: 'platform.channel.sandbox.generate', saveCollectionIntegration: 'platform.channel.sandbox.generate',
         editProduct: 'platform.channel.product.manage', bindProductChannels: 'platform.channel.product.manage', deleteProductPreview: 'platform.channel.product.manage',
         vendorFunds: 'platform.channel.funds.view', fundAccountDetail: 'platform.channel.funds.view',
@@ -3016,7 +3030,9 @@
     }
 
     function hasChannelPermission(code) {
-      return !platformChannelAuthorization || platformChannelActionPermissions.has(code);
+      if (!platformChannelAuthorization) return true;
+      if (code === 'platform.business_grant.view') return platformChannelAuthorization.pagePermissions.includes(code);
+      return platformChannelActionPermissions.has(code);
     }
 
     function canUseChannelAction(action) {
@@ -3032,7 +3048,7 @@
       });
       document.querySelectorAll('[data-action]').forEach(button => {
         const required = channelActionPermissions(button.dataset.action);
-        if (required.length) button.hidden = required.every(code => !platformChannelActionPermissions.has(code));
+        if (required.length) button.hidden = required.every(code => !hasChannelPermission(code));
       });
     }
 
@@ -3153,10 +3169,10 @@
       const row = findRow(id);
       selectedRow = row;
       const vendorFundKeys = new Set(["bookBalance", "reservedAmount", "availableAmount", "totalFunded", "providerBalance", "reconciliation", "reconciledAt", "settlement", "fundStatus", "unsettledOrders", "fundVersion", "direction"]);
-      const details = Object.entries(row).filter(([key]) => (activeKey !== "vendors" || ["name", "vendorNo", "directions"].includes(key)) && key !== "id" && key !== "productRequired" && !(activeKey === "vendors" && vendorFundKeys.has(key))).map(([key, value]) => `
+      const details = Object.entries(row).filter(([key]) => (activeKey !== "vendors" || ["name", "vendorNo", "directions", "integrationSource"].includes(key)) && key !== "id" && key !== "productRequired" && !(activeKey === "vendors" && vendorFundKeys.has(key))).map(([key, value]) => `
         <div class="desc-item">
           <label>${fieldName(key)}</label>
-          <span>${maybeTag(key, value)}</span>
+          <span${key === 'integrationSource' ? ' class="vendor-source-note"' : ''}>${key === 'integrationSource' ? escapeHtml(value || '—') : maybeTag(key, value)}</span>
         </div>
       `).join("");
       const audits = channelAuditLog.filter((item) => item.objectId === row.id).slice(0, 5);
@@ -3172,7 +3188,59 @@
       `, `<button class="btn" data-action="closeModal">关闭</button><button class="btn primary" data-action="openAuditLog" data-id="${row.id}">查看全部审计</button>`);
     }
 
+    function renderVendorSource(row) {
+      const editable = canUseChannelAction('editVendor') && channelRowInCurrentScope(row);
+      if (editable && vendorSourceEdit?.id === row.id) return `<div class="vendor-source-editor" data-vendor-source-editor="${row.id}"><textarea id="vendorSourceInline" aria-label="${escapeHtml(row.name)}对接来源" rows="3" maxlength="200">${escapeHtml(vendorSourceEdit.value)}</textarea><div class="vendor-source-editor-actions"><button class="cell-link" data-action="saveVendorSourceInline" data-id="${row.id}">保存</button><button class="cell-link" data-action="cancelVendorSourceInline" data-id="${row.id}">取消</button></div><div class="vendor-source-error" id="vendorSourceInlineError" role="alert"></div></div>`;
+      return `<span class="vendor-source-note ${editable ? 'vendor-source-editable' : ''}" ${editable ? `data-vendor-source-edit="${row.id}" role="button" tabindex="0" aria-label="${escapeHtml(row.name)}对接来源，双击编辑" title="双击编辑"` : ''}>${escapeHtml(row.integrationSource || '—')}</span>`;
+    }
+
+    function startVendorSourceInline(row) {
+      if (activeKey !== 'vendors' || !row || !canUseChannelAction('editVendor') || !channelRowInCurrentScope(row)) return;
+      vendorSourceEdit = { id:row.id, original:row.integrationSource || '', value:row.integrationSource || '' };
+      renderTable();
+      $('#vendorSourceInline')?.focus();
+    }
+
+    function cancelVendorSourceInline(id) {
+      if (vendorSourceEdit?.id !== id) return;
+      vendorSourceEdit = null;
+      renderTable();
+      document.querySelector(`[data-vendor-source-edit="${id}"]`)?.focus();
+    }
+
+    function saveVendorSourceInline(id) {
+      const row = rows.vendors.find(row => row.id === id);
+      if (activeKey !== 'vendors' || vendorSourceEdit?.id !== id || !row || !canUseChannelAction('saveVendorSourceInline') || !channelRowInCurrentScope(row)) return;
+      const value = $('#vendorSourceInline')?.value.trim() || '';
+      const error = $('#vendorSourceInlineError');
+      if (value.length > 200) { if (error) error.textContent = '对接来源最多200字。'; return; }
+      if ((row.integrationSource || '') !== vendorSourceEdit.original) { if (error) error.textContent = '资料已变化，请取消后重新编辑。'; return; }
+      if (value !== (row.integrationSource || '')) {
+        row.integrationSource = value;
+        addChannelAudit({ objectId:row.id, objectType:'通道商', action:'编辑对接来源', summary:`${row.name} · 对接来源：${value || '—'}`, reason:'维护通道商对接来源' });
+      }
+      cancelVendorSourceInline(id);
+    }
+
+    function vendorAuthorizedTenants(row, scope = channelCurrentAccount.dataScope) {
+      if (!row || !canUseChannelAction('vendorTenants')) return [];
+      const model = window.HSProviderDemo;
+      const allowed = new Set(scope?.tenantIds || []);
+      return model.tenants.filter(tenant => scope?.scopeCode === 'platform.all_tenants' || (scope?.scopeCode === 'platform.assigned_tenants' && allowed.has(tenant.id))).flatMap(tenant => {
+        const directions = model.grantDirections(tenant.id, row.id);
+        const grant = model.grantFor(tenant.id, row.id);
+        return directions.length ? [{ id:tenant.id, name:tenant.name, directions, updatedAt:grant.updatedAt }] : [];
+      }).sort((a,b) => a.id.localeCompare(b.id));
+    }
+
+    function openVendorTenants(row) {
+      if (!row || !canUseChannelAction('vendorTenants') || !channelRowInCurrentScope(row)) return;
+      const tenants = vendorAuthorizedTenants(row);
+      openModal(`${row.name} · 授权租户`, `<div class="table-wrap"><table aria-label="授权租户名单"><thead><tr><th>租户名称</th><th>租户编号</th><th>授权业务</th><th>授权时间（UTC+8）</th></tr></thead><tbody>${tenants.map(tenant => `<tr><td>${escapeHtml(tenant.name)}</td><td class="mono">${escapeHtml(tenant.id)}</td><td>${tenant.directions.map(direction => `<span class="pill ${direction === '代收' ? 'cyan' : 'blue'}">${escapeHtml(direction)}</span>`).join(' ')}</td><td class="mono">${escapeHtml(tenant.updatedAt || '—')}</td></tr>`).join('') || '<tr><td colspan="4" class="muted">暂无授权租户</td></tr>'}</tbody></table></div>`, '<button class="btn" data-action="closeModal">关闭</button>', 'lg');
+    }
+
     function openVendorCreate(row) {
+      if (!canUseChannelAction(row ? 'editVendor' : 'primary') || (row && !channelRowInCurrentScope(row))) return;
       const isEdit = Boolean(row);
       activeModalContext = { kind: "vendor", rowId: row?.id || null };
       openModal(isEdit ? "编辑通道商" : "新增通道商", `
@@ -3181,6 +3249,7 @@
           <div class="field"><label for="vendorNameCreate">通道商名称</label><input id="vendorNameCreate" value="${escapeHtml(row?.name || "")}" placeholder="请输入通道商名称"></div>
           ${isEdit ? `<div class="field"><label>通道商编号</label><input value="${escapeHtml(row.vendorNo)}" readonly></div>` : ""}
           <div class="field full"><label>业务方向</label><div class="check-grid"><label class="check-line"><input id="vendorDirectionCollect" type="checkbox" ${row?.directions?.includes("代收") ? "checked" : ""}> 代收</label><label class="check-line"><input id="vendorDirectionPayout" type="checkbox" ${row?.directions?.includes("代付") ? "checked" : ""}> 代付</label></div></div>
+          <div class="field full"><label for="vendorIntegrationSource">对接来源</label><textarea id="vendorIntegrationSource" rows="3" maxlength="200" placeholder="请输入对接来源">${escapeHtml(row?.integrationSource || '')}</textarea></div>
         </div>
       `, `<button class="btn" data-action="closeModal">取消</button><button class="btn primary" data-action="saveVendor">${isEdit ? "保存变更" : "保存通道商"}</button>`);
     }
@@ -3211,7 +3280,7 @@
 
     function fieldName(key) {
       const map = {
-        vendorNo: "通道商编号", name: "名称", directions: "业务方向", support: "支持能力", direction: "业务方向", status: "状态", risk: "风险等级",
+        vendorNo: "通道商编号", integrationSource: "对接来源", authorizedTenants: "授权租户", name: "名称", directions: "业务方向", support: "支持能力", direction: "业务方向", status: "状态", risk: "风险等级",
         contact: "联系人", selfOperated: "是否自营", callbackLimitMinutes: "回调限制（分钟）",
         uncallbackedCount: "未回调", deposit: "保证金",
         botId: "机器人 ID", receiveCallback: "接收回调", channels: "通道数", products: "产品数", typeNo: "通道编号", channelNo: "通道编号", vendor: "通道商",
@@ -4016,8 +4085,12 @@
     }
 
     function saveVendor() {
+      if (!canUseChannelAction('saveVendor') || activeModalContext?.kind !== 'vendor') return;
       const name = $("#vendorNameCreate")?.value.trim();
       const row = rows.vendors.find((item) => item.id === activeModalContext?.rowId);
+      if (activeModalContext.rowId && (!row || !channelRowInCurrentScope(row))) return;
+      const integrationSource = $('#vendorIntegrationSource')?.value.trim() || '';
+      if (integrationSource.length > 200) return setModalError('对接来源最多200字。', 'vendorIntegrationSource');
       const directions = [["代收", "vendorDirectionCollect"], ["代付", "vendorDirectionPayout"]].filter(([, id]) => $("#" + id)?.checked).map(([direction]) => direction);
       if (!name) return setModalError("请填写通道商名称。", "vendorNameCreate");
       if (!directions.length) return setModalError("请至少选择一个业务方向。", "vendorDirectionCollect");
@@ -4031,7 +4104,7 @@
         channels: "0",
         products: "0"
       };
-      Object.assign(target, { name, directions });
+      Object.assign(target, { name, directions, integrationSource });
       if (!row) {
         rows.vendors.unshift(target);
       }
@@ -4046,7 +4119,7 @@
         objectId: target.id,
         objectType: "通道商",
         action: row ? "编辑通道商" : "新增通道商",
-        summary: `${name} · ${directions.join(" / ")}`,
+        summary: `${name} · ${directions.join(" / ")} · 对接来源：${integrationSource || "—"}`,
         reason: row ? "编辑通道商资料" : "新增通道商资料"
       });
       finishChange({ title: row ? "通道商资料已更新" : "通道商已建立", detail: name, audit });
@@ -4474,7 +4547,8 @@
       return [];
     }
 
-    function vendorExportValue(row, key) {
+    function vendorExportValue(row, key, scope = channelCurrentAccount.dataScope) {
+      if (key === 'authorizedTenants') return canUseChannelAction('vendorTenants') ? vendorAuthorizedTenants(row, scope).length : '—';
       if (key === "directions") return (row.directions || []).join(" / ");
       if (!["capabilities", "collectionWallets", "payoutWallets"].includes(key)) return row[key];
       const capabilities = vendorBusinessCapabilities(row);
@@ -4514,7 +4588,7 @@
         key === "tenantRefs" && scope.scopeCode !== "platform.all_tenants"
           ? channelTenantIdsForRow(moduleKey, row).filter(id => allowed.has(String(id))).length
           : moduleKey === "vendors"
-            ? vendorExportValue(row, key)
+            ? vendorExportValue(row, key, scope)
             : row[key]
       ])));
     }
@@ -4703,6 +4777,7 @@
       if (action === "bulkPayoutCallback") openPayoutBulkConfig("callback");
       if (action === "detail") openDetail(target.dataset.id);
       if (action === "editVendor") openVendorCreate(findRow(target.dataset.id));
+      if (action === "vendorTenants") openVendorTenants(rows.vendors.find(row => row.id === target.dataset.id));
       if (action === "editProduct") openProductCreate(findRow(target.dataset.id));
       if (action === "bindProductChannels") {
         const row = findRow(target.dataset.id);
@@ -4844,6 +4919,8 @@
       }
       if (action === "saveChannelConfig") saveChannelConfig();
       if (action === "saveVendor") saveVendor();
+      if (action === "saveVendorSourceInline") saveVendorSourceInline(target.dataset.id);
+      if (action === "cancelVendorSourceInline") cancelVendorSourceInline(target.dataset.id);
       if (action === "saveVendorAmountAdjustment") saveVendorAmountAdjustment();
       if (action === "saveProduct") saveProduct();
       if (action === "saveFundAdjustment") saveFundAdjustment();
@@ -4878,6 +4955,11 @@
       }
     }, true);
 
+    document.addEventListener('dblclick', event => {
+      const target = event.target.closest('[data-vendor-source-edit]');
+      if (target) startVendorSourceInline(rows.vendors.find(row => row.id === target.dataset.vendorSourceEdit));
+    });
+
     function closeCollectionCodeMenus() {
       $$(".collection-type-action-line .action-more[open]").forEach(menu => { menu.open = false; });
     }
@@ -4886,6 +4968,19 @@
     window.addEventListener("resize", closeCollectionCodeMenus);
 
     document.addEventListener("keydown", (event) => {
+      const source = event.target.closest('[data-vendor-source-edit]');
+      if (source && ['Enter','F2'].includes(event.key)) {
+        event.preventDefault();
+        startVendorSourceInline(rows.vendors.find(row => row.id === source.dataset.vendorSourceEdit));
+        return;
+      }
+      const editor = event.target.closest('[data-vendor-source-editor]');
+      if (editor && (event.key === 'Escape' || (event.key === 'Enter' && (event.ctrlKey || event.metaKey)))) {
+        event.preventDefault();
+        if (event.key === 'Escape') cancelVendorSourceInline(editor.dataset.vendorSourceEditor);
+        else saveVendorSourceInline(editor.dataset.vendorSourceEditor);
+        return;
+      }
       const root = $("#modalRoot");
       if (!root.classList.contains("open")) return;
       if (event.key === "Escape") {
@@ -4908,6 +5003,7 @@
     });
 
     document.addEventListener("input", (event) => {
+      if (event.target.id === 'vendorSourceInline' && vendorSourceEdit) vendorSourceEdit.value = event.target.value;
       if (event.target.id === "collectionTestAmount") clearCollectionTestResult();
     });
 
