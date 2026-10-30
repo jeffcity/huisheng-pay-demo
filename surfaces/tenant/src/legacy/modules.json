@@ -131,15 +131,6 @@
     "initialHash": "merchant-payout-daily",
     "subgroup": "日终"
   },
-  "agent-collect-daily": {
-    "label": "代理代收日终统计",
-    "group": "运营中心",
-    "subgroup": "日终",
-    "module": "reports",
-    "sourceKey": "reports",
-    "sourceName": "运营中心 / 日终统计",
-    "initialHash": "agent-collect-daily"
-  },
   "platform-collect-daily": {
     "label": "平台代收日终统计",
     "group": "运营中心",

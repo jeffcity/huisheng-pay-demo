@@ -57,17 +57,17 @@
   let applied={entity:'',start:'',end:'',currency:'CNY'},page=1,pageSize=10,activeRemarkRow,toastTimer;
   document.title='汇盛支付租户端 · '+config.title;document.body.dataset.report=route;
   $('reportTitle').textContent=config.title;
-  $('reportDescription').textContent=config.kind==='platform'?'查看当前租户内业务的每日成交、费用与余额汇总。':config.kind==='agent'?'按代理查看每日余额记录。':config.kind==='merchant'?'按商户查看每日交易结果、余额和预付记录。':'按日期、商户和通道查看每日交易结果。';
+  $('reportDescription').textContent=config.kind==='platform'?'查看当前租户内业务的每日成交、费用与余额汇总。':config.kind==='merchant'?'按商户查看每日交易结果、余额和预付记录。':'按日期、商户和通道查看每日交易结果。';
   document.querySelector('.scope').textContent='当前租户 · CNY';
   $('snapshotTime').textContent='示例数据 · 截至 '+model.demoToday+' 16:30（UTC+8）';
   $('reportNote').textContent='仅展示 CNY；合计覆盖当前筛选的全部记录，余额和预付快照不跨日期累加。';
   $('currencyTabs').innerHTML='<button class="currency-tab" id="currency-CNY" type="button" role="tab" aria-controls="currencyPanel" aria-selected="true">CNY</button>';
   $('currencyPanel').setAttribute('aria-labelledby','currency-CNY');
-  const entityName={channel:'通道',merchant:'商户',agent:'代理',platform:''}[config.kind];
+  const entityName={channel:'通道',merchant:'商户',platform:''}[config.kind];
   $('entityLabel').textContent=entityName;$('entityFilter').closest('.field').hidden=config.kind==='platform';
   $('entityFilter').innerHTML='<option value="">全部'+esc(entityName)+'</option>'+model.entities(route).map(([id,name])=>'<option value="'+esc(id)+'">'+esc(name)+' · '+esc(id)+'</option>').join('');
   $('reportHead').innerHTML='<tr>'+columns.map(([key,label])=>'<th scope="col" class="'+fieldClass(key)+'">'+esc(label)+'</th>').join('')+'</tr>';
-  $('reportTable').style.minWidth=(config.kind==='platform'?Math.max(1480,columns.length*110):config.kind==='agent'?920:config.kind==='merchant'?Math.max(1560,columns.length*110):1420)+'px';
+  $('reportTable').style.minWidth=(config.kind==='platform'?Math.max(1480,columns.length*110):config.kind==='merchant'?Math.max(1560,columns.length*110):1420)+'px';
   function scopeValid(){return !!tenantId&&provider?.tenantId===tenantId}
   function error(message){$('filterError').textContent=message;$('filterError').hidden=!message}
   function filtered(){if(!scopeValid()){error('租户已切换，请重新打开页面');return []}return model.query(sourceRows,route,tenantId,applied)}
