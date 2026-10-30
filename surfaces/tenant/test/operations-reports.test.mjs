@@ -12,9 +12,9 @@ const modules=JSON.parse(read('../src/legacy/modules.json'));
 const tenant='HS-TEN-001',plain=value=>JSON.parse(JSON.stringify(value));
 const allModels=[[daily,'日终'],[records,'账户记录']];
 
-test('7个日终和6个账户记录按蓝盛CNY字段独立清单完整接入',()=>{
- assert.equal(Object.keys(daily.configs).length,7);assert.equal(Object.keys(records.configs).length,6);
- assert.equal(Object.keys(expected).length,13);
+test('6个日终和6个账户记录按蓝盛CNY字段独立清单完整接入',()=>{
+ assert.equal(Object.keys(daily.configs).length,6);assert.equal(Object.keys(records.configs).length,6);
+ assert.equal(Object.keys(expected).length,12);
  for(const [model,subgroup] of allModels)for(const [route,c] of Object.entries(model.configs)){
   assert.equal(c.title,expected[route].title,route);
   assert.deepEqual(plain(c.columns.map(([,name])=>name)),expected[route].columns,route);
@@ -23,7 +23,7 @@ test('7个日终和6个账户记录按蓝盛CNY字段独立清单完整接入',(
   assert(!c.columns.some(([,name])=>/USDT|TRX|RMB/.test(name)),route);
  }
  assert(!Object.values(modules).some(m=>/商户服务费流水|USDT代付手续费流水/.test(m.label)));
- for(const route of ['agent-payout-daily','agent-change']){assert.equal(modules[route],undefined);assert.equal(daily.configs[route],undefined);assert.equal(records.configs[route],undefined);}
+ for(const route of ['agent-collect-daily','agent-payout-daily','agent-change']){assert.equal(modules[route],undefined);assert.equal(daily.configs[route],undefined);assert.equal(records.configs[route],undefined);}
  for(const c of Object.values(daily.configs))assert(!c.columns.some(([,label])=>label.includes('代理费')));
 });
 test('每页默认有多页CNY样例，其他租户和无租户不种入数据',()=>{

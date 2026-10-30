@@ -81,20 +81,6 @@
     ],
     "types": []
   },
-  "agent-collect-daily": {
-    "title": "代理代收日终统计",
-    "reference": "https://j3-web.newopsname.com/report/daily-settlement-agent",
-    "columns": [
-      "序号",
-      "日期",
-      "代理编号",
-      "代理名称",
-      "初期余额(CNY)",
-      "末期余额(CNY)",
-      "余额变动明细(CNY)"
-    ],
-    "types": []
-  },
   "platform-collect-daily": {
     "title": "平台代收日终统计",
     "reference": "https://j3-web.newopsname.com/report/daily-settlement-platform",
