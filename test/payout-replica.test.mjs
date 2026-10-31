@@ -11,7 +11,7 @@ function fixture(){
  const window={document:{}};window.top=window;
  const ctx=vm.createContext({window,Map,Set,URL,setTimeout(){},document:{querySelector:el,querySelectorAll:selector=>selector==='[data-payout-apply]:checked'?applies:[],addEventListener(type,fn){if(!listeners.has(type))listeners.set(type,[]);listeners.get(type).push(fn);}}});vm.runInContext(providerSource,ctx);
  const script=source.slice(source.lastIndexOf('<script>')+8,source.lastIndexOf('</script>'));
- const modified=script.replace(/ function close\(\)\{[^\n]+\}/,' function close(){context=null;}').replace(/ function finish\(text,object\)\{[^\n]+\}/,' function finish(text,object){model.log(text,object,tenantId);}').replace(/ render\(\);\s*\}\)\(\);\s*$/,`window.payoutTest={productBindingRows,bindingsFor,availableBindings,setCodeBinding,saveBindingEdit,openBindCodes,openBindMerchants,saveMerchantRate,renderProductRow,saveCollectionCode,collectionRateAction,confirmDeleteProduct,configurationActionAllowed,productAction,savePayoutChannel,savePayoutDev,savePayoutBulk,savePayoutLimit,setPayoutType,confirmPayoutDelete,runPayoutMoney,runPayoutTest,saveReplicaProduct,setContext(value){context=value;}};})();`);
+ const modified=script.replace(/ function close\(\)\{[^\n]+\}/,' function close(){context=null;}').replace(/ function finish\(text,object\)\{[^\n]+\}/,' function finish(text,object){model.log(text,object,tenantId);}').replace(/ render\(\);\s*\}\)\(\);\s*$/,`window.payoutTest={collectionTestProducts,openTest,runTest,productBindingRows,bindingsFor,availableBindings,setCodeBinding,saveBindingEdit,openBindCodes,openBindMerchants,saveMerchantRate,renderProductRow,saveCollectionCode,collectionRateAction,confirmDeleteProduct,configurationActionAllowed,productAction,savePayoutChannel,savePayoutDev,savePayoutBulk,savePayoutLimit,setPayoutType,confirmPayoutDelete,runPayoutMoney,runPayoutTest,saveReplicaProduct,setContext(value){context=value;}};})();`);
  assert.notEqual(modified,script);vm.runInContext(modified,ctx);
  return {key(event){for(const fn of listeners.get('keydown')||[])fn(event);},change(target){target.hasAttribute||=()=>false;for(const fn of listeners.get('change')||[])fn({target});},noModalFeedback(){feedbackAbsent=true;},click(action,id,extra={}){const button={dataset:{action,id,...extra},closest(){return null;}};const event={target:{closest(selector){return selector==='button'?button:null;}}};for(const fn of listeners.get('click')||[])fn(event);},el,ctx,model:window.HSProviderDemo,api:window.payoutTest,applies,set:(id,value)=>el('#'+id).value=value};
 }
@@ -236,4 +236,31 @@ test('列表费率保存复验记录、授权及租户，失败不覆盖现值',
 test('代收产品删除确认期间仅部分关联通道商撤权也不执行，既有撤权关系仍可重新确认清理',()=>{
  const f=fixture(),d=f.model.tenantData(),p=d.products.find(p=>p.direction==='代收'),r=d.channels.find(c=>p.channelIds.includes(c.id)),grant=f.model.grantFor(f.model.tenantId,r.providerId);f.click('deleteProduct',p.id);const before=JSON.stringify(p),channels=JSON.stringify(d.channels);grant.directions=['代付'];assert(f.model.tenantBusinessDirections(f.model.tenantId).includes('代收'));f.click('confirmDeleteProduct');assert(d.products.includes(p));assert.equal(JSON.stringify(p),before);assert.equal(JSON.stringify(d.channels),channels);assert.match(f.el('#modalFeedback').textContent,/授权已变化/);
  f.click('close');f.click('deleteProduct',p.id);f.click('confirmDeleteProduct');assert(!d.products.includes(p));assert(d.channels.includes(r));
+});
+
+
+test('出码测试仅提供当前租户当前编码的绑定产品，选择过程不写绑定数据',()=>{
+ const f=fixture(),d=f.model.tenantData(),r=d.channels.find(c=>c.id==='CH-FIAT-IN-001'),code=r.collectionTypes[0],p=d.products.find(p=>p.id==='PROD-IN-001');
+ const before=JSON.stringify(d.products);assert(f.api.collectionTestProducts(r,code).some(x=>x.id===p.id));assert.equal(JSON.stringify(d.products),before);
+ p.codeBindings={[code.id]:{bound:false},[r.collectionTypes[1]?.id||'other-code']:{bound:true}};
+ assert(!f.api.collectionTestProducts(r,code).some(x=>x.id===p.id));
+ p.codeBindings[code.id].bound=true;assert(f.api.collectionTestProducts(r,code).some(x=>x.id===p.id));
+ const other=f.model.tenantData('HS-TEN-017').products.find(p=>p.id==='PROD-IN-001');d.products.push({...other,id:'FOREIGN-PRODUCT',tenantId:'HS-TEN-017',channelIds:[r.id]});
+ assert(!f.api.collectionTestProducts(r,code).some(x=>x.id==='FOREIGN-PRODUCT'));
+ assert.equal(f.api.collectionTestProducts(r,{id:'missing-code'}).length,0);
+});
+test('出码测试必须选有效产品，重新校验解绑与停用，成功地址带所选编码及产品',()=>{
+ const f=fixture(),d=f.model.tenantData(),r=d.channels.find(c=>c.id==='CH-FIAT-IN-001'),code=r.collectionTypes[0],p=d.products.find(p=>p.id==='PROD-IN-001');
+ f.api.setContext({kind:'test',id:r.id,codeId:code.id});f.set('testAmount','200');f.api.runTest();assert.match(f.el('#modalFeedback').textContent,/请选择已绑定/);assert.equal(f.el('#testResult').value,'');
+ f.set('testProduct',p.id);const before=JSON.stringify(d);f.api.runTest();const result=f.el('#testResult').value;assert(result.includes('product='+p.id));assert(result.includes('code='+code.id));assert.equal(JSON.stringify(d),before);
+ p.codeBindings={[code.id]:{bound:false}};f.api.runTest();assert.equal(f.el('#testResult').value,'');assert.match(f.el('#modalFeedback').textContent,/解除绑定/);
+ p.codeBindings[code.id].bound=true;p.status='关闭';f.api.runTest();assert.match(f.el('#modalFeedback').textContent,/产品已关闭/);
+ p.status='开启';f.set('testAmount','0');f.api.runTest();assert.match(f.el('#modalFeedback').textContent,/大于 0/);
+ f.set('testAmount','200');r.collectionTypes=[];f.api.runTest();assert.match(f.el('#modalFeedback').textContent,/编码已变化/);assert.equal(f.el('#testResult').value,'');
+});
+test('出码测试没有绑定产品时不能发起请求，切换产品清除旧支付地址',()=>{
+ const f=fixture(),d=f.model.tenantData(),r=d.channels.find(c=>c.id==='CH-FIAT-IN-001'),code=r.collectionTypes[0];
+ for(const p of d.products){p.channelIds=[];p.codeBindings={};}f.api.openTest(r.id,code.id);
+ assert(f.el('#modalBody').innerHTML.includes('当前编码暂无可用的绑定产品'));assert.equal(f.el('#testProduct').disabled,true);assert.equal(f.el('#modalFoot [data-action="runTest"]').disabled,true);
+ f.set('testResult','old-address');f.change({id:'testProduct',dataset:{}});assert.equal(f.el('#testResult').value,'');
 });
