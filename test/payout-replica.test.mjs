@@ -264,3 +264,11 @@ test('出码测试没有绑定产品时不能发起请求，切换产品清除�
  assert(f.el('#modalBody').innerHTML.includes('当前编码暂无可用的绑定产品'));assert.equal(f.el('#testProduct').disabled,true);assert.equal(f.el('#modalFoot [data-action="runTest"]').disabled,true);
  f.set('testResult','old-address');f.change({id:'testProduct',dataset:{}});assert.equal(f.el('#testResult').value,'');
 });
+
+
+test('出码测试点击请求时先清空旧地址，通道授权撤销的外层拦截不残留结果',()=>{
+ const f=fixture(),d=f.model.tenantData(),r=d.channels.find(c=>c.id==='CH-FIAT-IN-001'),code=r.collectionTypes[0],p=d.products.find(p=>p.id==='PROD-IN-001');
+ f.api.setContext({kind:'test',id:r.id,codeId:code.id});f.set('testAmount','200');f.set('testProduct',p.id);f.click('runTest');assert(f.el('#testResult').value.includes('product='+p.id));
+ for(const g of f.model.grants.filter(g=>g.tenantId===f.model.tenantId&&g.providerId===r.providerId))g.status='未授权';
+ const before=JSON.stringify(d);f.click('runTest');assert.equal(f.el('#testResult').value,'');assert.match(f.el('#modalFeedback').textContent,/未获/);assert.equal(JSON.stringify(d),before);
+});
