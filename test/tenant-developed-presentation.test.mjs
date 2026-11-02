@@ -24,10 +24,10 @@ function fixture() {
   for (const [id, value] of Object.entries({tenantNameInput: '新租户测试', contactInput: '测试联系人', mobileInput: '+86 13800000000', expireInput: '2027-12-31', domainInput: 'https://tenant-new.example.com/', merchantDomainInput: '', initialLoginIpInput: '', tenantRemarkInput: '', tenantCollectionBillingMode: 'percentage', tenantCollectionBillingValue: '0.45', tenantPayoutBillingMode: 'perTransaction', tenantPayoutBillingValue: '2'})) el(id).value = value;
   return {el, profiles, errors, receipts, model: window.HSProviderDemo, save: () => vm.runInContext('saveTenantProfile()', context)};
 }
-test('开发展示表单允许不填初始IP，生成商户域名，仍仅保存月结费率', () => {
-  const f = fixture(); const grants = JSON.stringify(f.model.grants); f.save();
+test('租户创建允许联系人和初始IP为空，不生成联系手机字段', () => {
+  const f = fixture(); f.el('contactInput').value=''; const grants = JSON.stringify(f.model.grants); f.save();
   assert.deepEqual(f.errors, []); assert.equal(f.profiles.length, 1);
-  const t = f.profiles[0]; assert.equal(t.domain, 'tenant-new.example.com'); assert.equal(t.merchantDomains[0].value, 'merchant.tenant-new.example.com');
+  const t = f.profiles[0]; assert.equal(t.contact,''); assert.equal(Object.hasOwn(t,'phone'),false); assert.equal(t.domain, 'tenant-new.example.com'); assert.equal(t.merchantDomains[0].value, 'merchant.tenant-new.example.com');
   assert.equal(t.domains[0].status, '未启用'); assert.equal(t.loginIpRules.length, 0); assert.match(f.receipts[0].detail, /配置登录 IP/);
   assert.equal(f.model.tenantBilling(t.id).collection.value, '0.45'); assert.equal(f.model.tenantBilling(t.id).payout.value, '2'); assert.equal(JSON.stringify(f.model.grants), grants);
 });

@@ -1,3 +1,8 @@
+import dailyReportsModel from '../surfaces/tenant/src/daily-reports-model.js?raw';
+import channelRecordsModel from '../surfaces/tenant/src/channel-records-model.js?raw';
+import platformReportsModel from './platform-reports-model.js?raw';
+import platformDashboardModel from './platform-dashboard-model.js?raw';
+import feeWalletModel from './tenant-fee-wallet-model.js?raw';
 import settlementModel from './settlement-model.js?raw';
 import providerModel from './provider-model.js?raw';
 // 旧壳 prepareEmbeddedDocument 的忠实移植：fetch 真实源文件 → 内联 authGuard →
@@ -396,6 +401,23 @@ export async function prepareEmbeddedDocument(sourceKey, initialHash = '') {
   let html = await fetchSource(sourceKey);
   const guardCode = sourceKey === 'authGuard' ? '' : await fetchSource('authGuard');
   const normalizedHash = String(initialHash || '').replace(/^#/, '');
+  const retiredReportBridge = `
+    <script>
+      window.__hsRedirectRetiredReport = id => {
+        const routes = {report:'platform-collect-daily',ledger:'channel-pay-change','tenant-daily-report':'platform-collect-daily','channel-daily-report':'collect-channel-daily'};
+        const target=routes[id];if(!target)return false;
+        const guard=window.HSPlatformAuthRouteGuard;
+        if(guard?.isAuthRouteMode()) {
+          const navigation=guard.createAuthorizedNavigation({href:window.location.pathname+'?platformPage='+encodeURIComponent(target)+'#'+target,pagePermission:'platform.report.'+target+'.view'});
+          if(!navigation.ok){window.alert('当前账号无目标报表权限或登录状态已变化');return true;}
+          window.top.location.assign(navigation.href);return true;
+        }
+        window.parent.postMessage({type:'hs-demo-open-module',module:target},'*');return true;
+      };
+    </script>`;
+  html = html.replace('function renderPage(id) {', 'function renderPage(id) { if(window.__hsRedirectRetiredReport?.(id))return false;');
+  html = html.replace(/(function enterPlatformSource\(target,[^\n]*\{)\n/, '$1\n      if(window.__hsRedirectRetiredReport?.(target))return;\n');
+
   html = html.replace(
     /<script\s+src=(["'])\.\.\/platform-auth-route-guard\.js\1([^>]*)><\/script>/gi,
     (_match, _quote, attributes) => `<script${attributes}>${guardCode}</script>`
@@ -408,7 +430,9 @@ export async function prepareEmbeddedDocument(sourceKey, initialHash = '') {
     /<header\b[^>]*class=["'][^"']*\btopbar\b[^"']*["'][^>]*>[\s\S]*?<\/header>/i,
     match => match.replace(/<header\b/i, '<header hidden aria-hidden="true" style="display:none!important"')
   );
-  html = html.replace(/<\/head>/i, () => `<script>${providerModel.replace(/<\/script/gi, '<\\/script')}</script><script>${settlementModel.replace(/<\/script/gi, '<\\/script')}</script>${shellPatch(normalizedHash, sourceKey)}</head>`);
+  const reportModels = ['report','ledger','system','login'].includes(sourceKey) ? [dailyReportsModel,channelRecordsModel,platformReportsModel].map(code => '<script>'+code.replace(/<\/script/gi, '<\\/script')+'</script>').join('') : '';
+  const dashboardModel = sourceKey === 'home' ? '<script>'+platformDashboardModel.replace(/<\/script/gi, '<\\/script')+'</script>' : '';
+  html = html.replace(/<\/head>/i, () => `<script>${providerModel.replace(/<\/script/gi, '<\\/script')}</script><script>${settlementModel.replace(/<\/script/gi, '<\\/script')}</script><script>${feeWalletModel.replace(/<\/script/gi, '<\\/script')}</script>${reportModels}${dashboardModel}${shellPatch(normalizedHash, sourceKey)}${retiredReportBridge}</head>`);
   html = html.replace(/<\/body>/i, `${routeSync}</body>`);
   return html;
 }

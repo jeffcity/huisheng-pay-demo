@@ -15,11 +15,11 @@ function fixture(){
 }
 test('租户编辑资料不再修改通道商授权业务',()=>{
  const f=fixture();f.model.grantFor('HS-TEN-001','V-001').directions=['代收'];const before=JSON.stringify(f.model.grants);
- f.el('tenantNameInput').value='修改租户名称';f.save();assert.equal(f.errors.length,0);assert.equal(f.profile.name,'修改租户名称');assert.equal(JSON.stringify(f.model.grants),before);
+ f.el('tenantNameInput').value='修改租户名称';f.el('contactInput').value='';f.save();assert.equal(f.errors.length,0);assert.equal(f.profile.name,'修改租户名称');assert.equal(f.profile.contact,'');assert.equal(f.profile.phone,'+63 917 208 8891');assert.equal(JSON.stringify(f.model.grants),before);
  assert.equal(f.model.canConfigureChannel('HS-TEN-001','V-001','代付'),false);
 });
 test('租户资料校验失败不改变通道商授权',()=>{
- const f=fixture(),before=JSON.stringify(f.model.grants);f.el('mobileInput').value='1';f.save();assert.equal(f.errors.length,1);assert.equal(JSON.stringify(f.model.grants),before);
+ const f=fixture(),before=JSON.stringify(f.model.grants);f.el('tenantNameInput').value='';f.save();assert.equal(f.errors.length,1);assert.equal(JSON.stringify(f.model.grants),before);
 });
 
 test('租户编辑分别保存百分比及单笔服务费，不改变通道商授权或其他租户',()=>{
@@ -28,8 +28,8 @@ test('租户编辑分别保存百分比及单笔服务费，不改变通道商�
 });
 test('收费值或资料无效、无编辑权限时，资料及两种服务费均不部分保存',()=>{
  const f=fixture(),original=f.profile.name;f.el('tenantCollectionBillingValue').value='0.45';f.el('tenantPayoutBillingValue').value='101';f.el('tenantNameInput').value='不可部分修改';f.save();assert.equal(f.profile.name,original);assert.equal(f.model.tenantBilling('HS-TEN-001').collection.value,'');
- f.el('tenantPayoutBillingValue').value='0.15';f.el('mobileInput').value='1';f.save();assert.equal(f.model.tenantBilling('HS-TEN-001').collection.value,'');
- f.el('mobileInput').value=f.profile.phone;f.permissions.canEdit=false;f.save();assert.equal(f.profile.name,original);assert.equal(f.model.tenantBilling('HS-TEN-001').collection.value,'');
+ f.el('tenantPayoutBillingValue').value='0.15';f.el('tenantNameInput').value='';f.save();assert.equal(f.model.tenantBilling('HS-TEN-001').collection.value,'');
+ f.el('tenantNameInput').value=original;f.permissions.canEdit=false;f.save();assert.equal(f.profile.name,original);assert.equal(f.model.tenantBilling('HS-TEN-001').collection.value,'');
 });
 
 test('详情设置费率只保存收费，资料和授权不变，隐藏资料不参与校验',()=>{

@@ -42,7 +42,8 @@ async function bundleSurface(directory, title) {
 
 // Business source stays readable; only the delivery build embeds the document.
 const merchantSource = await readFile(path.join(root, 'surfaces/merchant/demo.html'), 'utf8');
-const merchantDocument = `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>汇盛支付商户端</title><style>html,body{height:100%;margin:0}iframe{display:block;width:100%;height:100%;border:0}</style></head><body><iframe id="demoFrame" title="汇盛支付商户端页面" referrerpolicy="no-referrer"></iframe><script id="merchant-source" type="application/json">${json(merchantSource)}</script><script>const embedded=document.getElementById('demoFrame').contentDocument;embedded.open();embedded.write(JSON.parse(document.getElementById('merchant-source').textContent));embedded.close();</script></body></html>`;
+const merchantModels = (await Promise.all(['provider-model','settlement-model','tenant-fee-wallet-model'].map(name=>readFile(path.join(root,'src',name+'.js'),'utf8')))).join('\n');
+const merchantDocument = `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>汇盛支付商户端</title><style>html,body{height:100%;margin:0}iframe{display:block;width:100%;height:100%;border:0}</style></head><body><iframe id="demoFrame" title="汇盛支付商户端页面" referrerpolicy="no-referrer"></iframe><script id="merchant-source" type="application/json">${json(merchantSource)}</script><script>${script(merchantModels)}</script><script>const embedded=document.getElementById('demoFrame').contentDocument;embedded.open();embedded.write(JSON.parse(document.getElementById('merchant-source').textContent));embedded.close();</script></body></html>`;
 const documents = {
   platform: await bundleSurface(root, '汇盛支付平台端'),
   tenant: await bundleSurface(path.join(root, 'surfaces/tenant'), '汇盛支付租户端'),

@@ -1378,6 +1378,16 @@
       align-items: end;
     }
 
+    @media(max-width:1200px) {
+      body[data-current-page="orders"] .filters { grid-template-columns:repeat(3,minmax(0,1fr)); }
+    }
+    @media(max-width:700px) {
+      body[data-current-page="orders"] .filters { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    }
+    @media(max-width:420px) {
+      body[data-current-page="orders"] .filters { grid-template-columns:minmax(0,1fr); }
+    }
+
     body[data-current-page="orders"] .table-wrap {
       overflow-x: auto;
     }
@@ -1385,6 +1395,28 @@
     body[data-current-page="orders"] table {
       min-width: 1360px;
     }
+
+    body[data-current-page="orders"] .table-wrap > table { table-layout:fixed; min-width:1080px; width:100%; }
+    body[data-current-page="orders"] #tableHead th { padding:7px 6px; height:36px; font-size:12px; line-height:17px; white-space:normal; }
+    body[data-current-page="orders"] #tableBody td { padding:9px 6px!important; height:auto; font-size:12px; line-height:17px; white-space:normal; overflow-wrap:anywhere; vertical-align:top; }
+    body[data-current-page="orders"] #tableHead th:nth-child(1) { width:122px; }
+    body[data-current-page="orders"] #tableHead th:nth-child(2) { width:148px; }
+    body[data-current-page="orders"] #tableHead th:nth-child(3) { width:100px; }
+    body[data-current-page="orders"] #tableHead th:nth-child(4) { width:86px; }
+    body[data-current-page="orders"] #tableHead th:nth-child(5) { width:82px; }
+    body[data-current-page="orders"] #tableHead th:nth-child(6) { width:90px; }
+    body[data-current-page="orders"] #tableHead th:nth-child(7) { width:168px; }
+    body[data-current-page="orders"] #tableHead th:nth-child(8) { width:72px; }
+    body[data-current-page="orders"] #tableHead th:nth-child(9) { width:164px; }
+    body[data-current-page="orders"] #tableHead th:nth-child(10) { width:48px; }
+    body[data-current-page="orders"] #tableBody .mono { font-size:11px; line-height:16px; white-space:normal; overflow-wrap:anywhere; }
+    body[data-current-page="orders"] #tableBody .order-row-stack { gap:3px; }
+    body[data-current-page="orders"] #tableBody .pill { padding:2px 5px; font-size:11px; white-space:normal; }
+    body[data-current-page="orders"] #tableBody .link-btn { min-width:0; min-height:26px; padding:0 2px; font-size:12px; }
+    .platform-order-times { display:grid; gap:4px; }
+    .platform-order-time { display:grid; grid-template-columns:32px minmax(0,1fr); gap:2px; align-items:baseline; font-size:11px; line-height:17px; }
+    .platform-order-time-label { color:var(--text-secondary); white-space:nowrap; }
+    .platform-order-time-value { font-variant-numeric:tabular-nums; white-space:nowrap; overflow-wrap:normal; word-break:normal; }
 
     body[data-current-page="orders"] tbody tr.order-exception {
       background: #fff7f7;
@@ -5234,7 +5266,7 @@
           ['通知失败率', '7.69%', '当前筛选范围', 'orange']
         ],
         filters: ['订单号 / 租户订单号', '租户', '订单类型', '当前状态', 'UTC+8 日期'],
-        columns: ['平台订单号', '通道订单号 / 租户订单号', '租户', '类型 / 金额', '当前状态', '异常节点', '结果摘要', '通知结果', '更新时间', '操作'],
+        columns: ['平台订单号', '通道订单号 / 租户订单号', '租户', '类型 / 金额', '当前状态', '异常节点', '结果摘要', '通知结果', '创建/支付/回调时间', '操作'],
         rows: [
           ['HS-C-260717-000941', '汇盛东南亚', 'MCH-2031', '代收', '成功', 'CNY 8,600.00', 'QuickPay / 成功', '已同步', '2026-07-17 14:33:20'],
           ['HS-C-260717-000982', '汇盛东南亚', 'MCH-2031', '代收', '异常待处理', 'CNY 12,800.00', 'QuickPay / 未知', '异常可见', '2026-07-17 15:42:18'],
@@ -6580,6 +6612,39 @@
       return platformOrderNotificationResult(row, meta) === '通知失败';
     }
 
+    const platformOrderTimeSamples = new Map([
+      ['HS-C-260717-000941', {createdAt:'2026-07-17 14:31:08',paidAt:'2026-07-17 14:32:50',callbackAt:'2026-07-17 14:33:20'}],
+      ['HS-C-260717-000982', {createdAt:'2026-07-17 15:36:04',paidAt:'',callbackAt:'2026-07-17 15:42:18'}],
+      ['HS-C-260717-000862', {createdAt:'2026-07-17 12:58:11',paidAt:'',callbackAt:''}],
+      ['HS-C-260717-000902', {createdAt:'2026-07-17 15:48:26',paidAt:'2026-07-17 15:51:32',callbackAt:'2026-07-17 15:51:40'}],
+      ['HS-P-260717-002134', {createdAt:'2026-07-17 15:38:12',paidAt:'',callbackAt:'2026-07-17 15:42:08'}],
+      ['HS-P-260717-000219', {createdAt:'2026-07-17 15:12:06',paidAt:'',callbackAt:'2026-07-17 15:16:32'}],
+      ['HS-P-260717-000220', {createdAt:'2026-07-17 15:02:20',paidAt:'',callbackAt:'2026-07-17 16:06:00'}],
+      ['HS-P-260717-000221', {createdAt:'2026-07-17 15:18:14',paidAt:'2026-07-17 15:18:35',callbackAt:'2026-07-17 16:12:00'}],
+      ['HS-P-260717-000336', {createdAt:'2026-07-17 10:29:40',paidAt:'',callbackAt:''}],
+      ['HS-P-260717-000298', {createdAt:'2026-07-17 12:41:05',paidAt:'2026-07-17 12:43:00',callbackAt:'2026-07-17 12:43:18'}],
+      ['HS-P-260717-000251', {createdAt:'2026-07-17 10:24:18',paidAt:'',callbackAt:'2026-07-17 10:26:48'}],
+      ['HS-P-260715-000172', {createdAt:'2026-07-15 10:24:18',paidAt:'2026-07-15 10:28:20',callbackAt:'2026-07-15 10:28:42'}]
+    ]);
+    function platformOrderTimesFor(row) {
+      const refund=platformRefundJourneyFacts.get(String(row?.[0]||''));
+      if(refund) {
+        // A status change is not a payment timestamp; keep missing paidAt empty.
+        const callback=refund.channelResults.filter(item=>item.obtainedVia==='callback').at(-1);
+        return {createdAt:refund.statusTimeline[0]?.at||'',paidAt:refund.paidAt||'',callbackAt:callback?.resultAt||''};
+      }
+      const sample=platformOrderTimeSamples.get(String(row?.[0]||''));
+      return sample?{...sample}:{createdAt:'',paidAt:'',callbackAt:''};
+    }
+    function platformOrderTimesText(row) {
+      const times=platformOrderTimesFor(row);
+      return `创建：${times.createdAt||'—'}；支付：${times.paidAt||'—'}；回调：${times.callbackAt||'—'}`;
+    }
+    function renderPlatformOrderTimes(row) {
+      const times=platformOrderTimesFor(row);
+      return `<div class="platform-order-times">${[['创建',times.createdAt],['支付',times.paidAt],['回调',times.callbackAt]].map(([label,value])=>`<div class="platform-order-time"><span class="platform-order-time-label">${label}：</span><span class="platform-order-time-value">${escapeHtml(value||'—')}</span></div>`).join('\n')}</div>`;
+    }
+
     function platformOrderStatsFor(rows) {
       const exceptionCount = rows.filter(row => String(row[4] || '') === '异常待处理').length;
       const notificationFailureCount = rows.filter(row => platformOrderNotificationFailed(row)).length;
@@ -6646,7 +6711,7 @@
               <td>${escapeHtml(platformOrderExceptionNode(row))}</td>
               <td><span title="${escapeHtml(platformOrderResultSummary(row, facts))}">${escapeHtml(platformOrderResultSummary(row, facts))}</span></td>
               <td><span class="pill ${platformOrderNotificationFailed(row, orderMeta) ? 'red' : /成功|已同步|已通知/.test(platformOrderNotificationResult(row, orderMeta)) ? 'green' : 'gray'}">${escapeHtml(platformOrderNotificationResult(row, orderMeta))}</span></td>
-              <td class="mono">${escapeHtml(row[8])}</td>
+              <td>${renderPlatformOrderTimes(row)}</td>
               <td><button class="link-btn" data-detail="${rowIndex}">详情</button></td>
             </tr>`;
         }
@@ -7368,7 +7433,7 @@
               platformOrderExceptionNode(row),
               platformOrderResultSummary(row, facts),
               platformOrderNotificationResult(row, meta),
-              row[8]
+              platformOrderTimesText(row)
             ].map(value => String(value ?? '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim());
           })
         : visibleRows.map(row => fieldSnapshot.map((_, index) => String(row[index] ?? '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()));
@@ -8250,6 +8315,7 @@
           <div class="order-summary-item"><span>租户订单 / 请求号</span><strong class="mono">${escapeHtml(identifiers['租户订单 / 请求号'] || '—')}</strong></div>
           <div class="order-summary-item"><span>订单金额</span><strong class="mono">${escapeHtml(row[5])}</strong></div>
           <div class="order-summary-item"><span>实际通道</span><strong>${escapeHtml(meta.actualChannelName || '未形成')}</strong></div>
+          <div class="order-summary-item"><span>创建 / 支付 / 回调时间（UTC+8）</span>${renderPlatformOrderTimes(row)}</div>
           <div class="order-summary-item"><span>更新时间</span><strong class="mono">${escapeHtml(row[8])} UTC+8</strong></div>
         </div>
       </div>`;
@@ -8387,6 +8453,7 @@
           ['异常节点', platformOrderExceptionNode(row)],
           ['结果摘要', platformOrderResultSummary(row, facts)],
           ['通知结果', platformOrderNotificationResult(row, meta)],
+          ['创建 / 支付 / 回调时间', platformOrderTimesText(row)],
           ['更新时间', row[8]]
         ].map(([label, value]) => `${label}：${value}`).join('\n');
       }

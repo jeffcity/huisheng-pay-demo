@@ -1,4 +1,4 @@
-// 模块注册表：32 个模块 → 14 个业务源文件 + 1 个内联鉴权守卫 + hash 路由。
+// 模块注册表：41 个模块 → 14 个业务源文件 + 1 个内联鉴权守卫 + hash 路由。
 import modules from './legacy/modules.json';
 
 export const MODULES = modules;
@@ -21,13 +21,23 @@ export const NAV_GROUPS = [
     { module: 'channel-vendors', label: '通道商管理' },
   ]},
   { title: '报表模块', subgroups: [
-    { title: '日终统计', items: [
-      { module: 'tenant-daily-report', label: '租户日终报表', level: 3 },
-      { module: 'channel-daily-report', label: '通道日终报表', level: 3 },
+    { title: '日终', items: [
+      { module: 'payout-channel-daily', label: '代付通道日终统计', level: 3 },
+      { module: 'collect-channel-daily', label: '代收通道日终统计', level: 3 },
+      { module: 'merchant-collect-daily', label: '商户代收日终统计', level: 3 },
+      { module: 'merchant-payout-daily', label: '商户代付日终统计', level: 3 },
+      { module: 'platform-collect-daily', label: '平台代收日终统计', level: 3 },
+      { module: 'platform-payout-daily', label: '平台代付日终统计', level: 3 },
     ]},
-  ], items: [
-    { module: 'ledger', label: '租户整体流水' },
-  ]},
+    { title: '账户记录', items: [
+      { module: 'channel-pay-change', label: '通道代收流水记录', level: 3 },
+      { module: 'channel-payout-change', label: '通道代付流水记录', level: 3 },
+      { module: 'merchant-collect-change', label: '商户代收流水记录', level: 3 },
+      { module: 'merchant-payout-change', label: '商户代付流水记录', level: 3 },
+      { module: 'merchant-payout-prepay-change', label: '商户代付预付记录', level: 3 },
+      { module: 'merchant-collect-prepay-change', label: '商户代收预付记录', level: 3 },
+    ]},
+  ], items: []},
   { title: '审计模块', items: [
     { module: 'orders', label: '全局订单查询' },
     { module: 'audit', label: '审计日志' },
