@@ -7,7 +7,7 @@
  {
   "key": "home",
   "file": "home.html",
-  "bytes": 534953
+  "bytes": 541397
  },
  {
   "key": "tenants",
@@ -37,17 +37,17 @@
  {
   "key": "report",
   "file": "report.html",
-  "bytes": 546156
+  "bytes": 17516
  },
  {
   "key": "ledger",
   "file": "ledger.html",
-  "bytes": 543829
+  "bytes": 21705
  },
  {
   "key": "orders",
   "file": "orders.html",
-  "bytes": 534955
+  "bytes": 556196
  },
  {
   "key": "audit",
@@ -57,12 +57,12 @@
  {
   "key": "system",
   "file": "system.html",
-  "bytes": 250305
+  "bytes": 292251
  },
  {
   "key": "login",
   "file": "login.html",
-  "bytes": 74830
+  "bytes": 79902
  },
  {
   "key": "tickets",

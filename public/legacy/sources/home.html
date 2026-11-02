@@ -1940,6 +1940,55 @@
       }
     }
   </style>
+
+  <style id="platform-dashboard-tidewell">
+    body[data-platform-dashboard="true"] { background:#f3f6f7; color:#172a32; }
+    body[data-platform-dashboard="true"] .content { padding:22px; gap:18px; }
+    body[data-platform-dashboard="true"] .risk-strip { display:none; }
+    body[data-platform-dashboard="true"] .page-head { padding:0; background:transparent; border:0; box-shadow:none; }
+    body[data-platform-dashboard="true"] .page-title { font-size:26px; line-height:1.35; letter-spacing:-.5px; }
+    body[data-platform-dashboard="true"] .page-subtitle { font-size:12px; line-height:1.8; color:#5e7480; margin-top:8px; }
+    body[data-platform-dashboard="true"] .page-actions .btn { border-color:#dfe8eb; border-radius:8px; min-height:36px; padding:8px 12px; font-size:12px; }
+    body[data-platform-dashboard="true"] .page-actions .btn.primary { background:#245665; border-color:#245665; }
+    body[data-platform-dashboard="true"] .page-actions .btn.primary:hover { background:#173b47; }
+    body[data-platform-dashboard="true"] .btn:focus-visible { outline:2px solid #245665; outline-offset:3px; }
+    #metrics.dashboard-metrics { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin:0; }
+    .dashboard-stat { padding:20px; border:1px solid #e2e9ec; border-radius:10px; background:#fff; min-width:0; }
+    .dashboard-stat.featured { background:#245665; border-color:#245665; color:#fff; }
+    .dashboard-stat-heading { display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:13px; font-weight:600; }
+    .dashboard-stat-heading svg { width:18px; height:18px; opacity:.65; }
+    .dashboard-stat-label { display:block; margin-top:20px; color:#5e7480; font-size:11px; }
+    .dashboard-stat.featured .dashboard-stat-label { color:#d4e6eb; }
+    .dashboard-stat-amount { display:block; font-variant-numeric:tabular-nums; letter-spacing:-.7px; font-size:clamp(22px,2.1vw,31px); line-height:1.4; font-weight:650; white-space:nowrap; }
+    .dashboard-stat-amount small { font-size:11px; letter-spacing:0; font-weight:500; margin-right:6px; opacity:.75; }
+    .dashboard-stat-bottom { display:flex; justify-content:space-between; gap:12px; margin-top:20px; padding-top:14px; border-top:1px solid #e5ecef; }
+    .featured .dashboard-stat-bottom { border-color:#ffffff26; }
+    .dashboard-stat-bottom span { display:grid; gap:5px; }
+    .dashboard-stat-bottom small { color:#5e7480; font-size:11px; }
+    .featured .dashboard-stat-bottom small { color:#d4e6eb; }
+    .dashboard-stat-bottom strong { font-size:17px; font-variant-numeric:tabular-nums; font-weight:600; }
+    #homeExtra.dashboard-extra { display:grid; grid-template-columns:1fr; gap:18px; margin:0; }
+    .dashboard-note { font-size:12px; color:#5e7480; line-height:1.8; margin:0; }
+    .dashboard-table-panel { min-width:0; background:#fff; border:1px solid #e2e9ec; border-radius:10px; overflow:hidden; }
+    .dashboard-table-heading { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; padding:17px 18px; }
+    .dashboard-table-heading h2 { font-size:15px; line-height:1.5; margin:0; color:#172a32; }
+    .dashboard-table-heading span { font-size:11px; color:#5e7480; }
+    .dashboard-table-scroll { overflow-x:auto; }
+    table.dashboard-table { width:100%; min-width:640px; table-layout:fixed; border-collapse:collapse; }
+    table.dashboard-table th:first-child { width:22%; }
+    table.dashboard-table th { background:#f7f9fa; color:#5e7480; font-size:11px; font-weight:500; padding:10px 14px; border-top:1px solid #edf1f3; border-bottom:1px solid #edf1f3; text-align:left; white-space:normal; }
+    table.dashboard-table td { padding:13px 14px; border-bottom:1px solid #edf1f3; white-space:normal; line-height:1.5; font-size:12px; }
+    table.dashboard-table tbody tr:last-child td { border-bottom:0; }
+    table.dashboard-table tbody tr:hover { background:#f8fafb; }
+    .dashboard-entity { display:block; font-size:12px; font-weight:600; overflow-wrap:anywhere; }
+    .dashboard-entity-id { display:block; margin-top:4px; color:#82939b; font-size:10px; }
+    .dashboard-cell-amount { display:block; color:#172a32; font-size:13px; font-weight:600; font-variant-numeric:tabular-nums; white-space:nowrap; }
+    .dashboard-cell-detail { display:block; margin-top:4px; font-size:10px; color:#5e7480; white-space:nowrap; font-variant-numeric:tabular-nums; }
+    .dashboard-cell-detail i { font-style:normal; color:#a6b3b9; padding:0 4px; }
+    .dashboard-empty { text-align:center; padding:28px!important; color:#5e7480; }
+    @media(max-width:1100px) { .dashboard-stat { padding:16px; } .dashboard-stat-amount { font-size:22px; } }
+    @media(max-width:740px) { #metrics.dashboard-metrics { grid-template-columns:1fr; } .dashboard-stat-label { margin-top:14px; } .dashboard-stat-amount { font-size:29px; } body[data-platform-dashboard="true"] .content { padding:16px; } }
+  </style>
 </head>
 <body>
   <div class="app">
@@ -6184,6 +6233,47 @@
       return dateIndices[pageId]?.includes(index) ? 'date' : 'text';
     }
 
+
+    // All three sections and exports share one frozen set of virtual facts per refresh.
+    let platformDashboardSnapshot = null;
+    function platformDashboardView(dataScope = currentPlatformAccount.dataScope) {
+      if (!platformDashboardSnapshot) {
+        const cutoffAt = utc8DateTime();
+        const date = cutoffAt.slice(0, 10);
+        platformDashboardSnapshot = { date, cutoffAt, facts: window.HSPlatformDashboard.createFacts(date),
+          tenants: clonePlatformExportValue(window.HSTenantSettlements?.tenants || []),
+          providers: clonePlatformExportValue(window.HSProviderDemo?.providers || []) };
+      }
+      return window.HSPlatformDashboard.summarize({ ...platformDashboardSnapshot, scope: dataScope });
+    }
+    function renderPlatformDashboardHome() {
+      const model = window.HSPlatformDashboard;
+      const view = platformDashboardView();
+      platformHomeCutoffAt = view.cutoffAt;
+      platformHomeRefreshedAt = view.cutoffAt;
+      document.getElementById('crumbGroup').textContent = '首页';
+      document.getElementById('crumbPage').textContent = '首页数据看板';
+      document.getElementById('pageTitle').textContent = '首页数据看板';
+      document.getElementById('pageSubtitle').textContent = `${view.date} · UTC+8 · CNY · ${view.allTenants ? '全部租户' : `授权范围 ${view.tenantCount} 个租户`} · 数据截至 ${view.cutoffAt} · 模拟数据`;
+      document.getElementById('pageActions').innerHTML = `<button class="btn primary" type="button" data-special="home-refresh">${iconButton('refresh')}刷新数据</button><button class="btn" type="button" data-export-page="home">${iconButton('export')}导出数据</button>`;
+      const icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 19h16M6 15V9m6 6V5m6 10v-4" stroke-linecap="round"/></svg>';
+      const cards = [[view.allTenants ? '全平台合计' : '授权范围合计', view.total], ['代收', view.collection], ['代付', view.payout]];
+      const metrics = document.getElementById('metrics');
+      metrics.className = 'metrics dashboard-metrics';
+      metrics.innerHTML = cards.map(([title, value], index) => `<article class="dashboard-stat ${index ? '' : 'featured'}"><div class="dashboard-stat-heading">${title}${icon}</div><span class="dashboard-stat-label">今日成交金额</span><strong class="dashboard-stat-amount"><small>CNY</small>${model.money(value)}</strong><div class="dashboard-stat-bottom"><span><small>订单数</small><strong>${value.orderCount.toLocaleString('en-US')}</strong></span><span><small>成功率</small><strong>${model.rate(value)}</strong></span></div></article>`).join('');
+      const cell = value => `<td><span class="dashboard-cell-amount">${model.money(value)}</span><span class="dashboard-cell-detail">${value.orderCount.toLocaleString('en-US')} 单<i>·</i>${model.rate(value)}</span></td>`;
+      const table = (title, object, items) => `<section class="dashboard-table-panel" aria-label="${title}"><div class="dashboard-table-heading"><h2>${title}</h2><span>${items.length} 家${object} · 今日 · CNY</span></div><div class="dashboard-table-scroll" tabindex="0" role="region" aria-label="${title}表格"><table class="dashboard-table"><thead><tr><th scope="col">${object}</th>${['代收','代付','合计'].map(name => `<th scope="col">${name}<br>成交金额 / 订单数 / 成功率</th>`).join('')}</tr></thead><tbody>${items.length ? items.map(item => `<tr><td><span class="dashboard-entity">${escapeHtml(item.name)}</span><span class="dashboard-entity-id">${escapeHtml(item.id)}</span></td>${cell(item.collection)}${cell(item.payout)}${cell(item.total)}</tr>`).join('') : '<tr><td colspan="4" class="dashboard-empty">当前授权范围暂无数据</td></tr>'}</tbody></table></div></section>`;
+      const extra = document.getElementById('homeExtra');
+      extra.className = 'home-extra dashboard-extra';
+      extra.innerHTML = `<p class="dashboard-note">统计今天创建的订单；成交金额只计成功订单。成功率 = 成功笔数 ÷ 已结束订单数，处理中和异常待处理不计入分母；没有已结束订单时显示“—”。</p>${table('通道商交易概览', '通道商', view.providers)}${table('租户交易概览', '租户', view.tenants)}`;
+      extra.style.display = 'grid';
+      document.getElementById('mainGrid').style.display = 'none';
+      document.getElementById('contextPanel').classList.remove('show');
+      document.querySelectorAll('.nav-button').forEach(button => button.classList.toggle('active', button.dataset.page === 'home'));
+      renderPlatformFactReceipt();
+      applyPlatformPermissions();
+    }
+
     function renderPage(id) {
       if (!canAccessPlatformPage(id)) {
         showToast('当前账号没有目标页面权限，未加载任何数据');
@@ -6193,6 +6283,10 @@
       if (!integratedRoutes[id] && window.location.hash !== `#${id}`) {
         window.history.replaceState(null, '', `#${id}`);
       }
+      document.body.dataset.platformDashboard = String(id === 'home');
+      if (id === 'home' && window.HSPlatformDashboard) return renderPlatformDashboardHome();
+      document.getElementById('metrics').classList.remove('dashboard-metrics');
+      document.getElementById('homeExtra').classList.remove('dashboard-extra');
       const page = pages[id];
       const visibleRows = filteredRowsForPage(id);
       document.getElementById('crumbGroup').textContent = page.group;
@@ -6920,6 +7014,10 @@
       const page = pages[pageId];
       const summary = page.filters.map((label, index) => [label, filterState[pageId]?.[index] || '全部']).filter(item => item[1] !== '');
       const filterSummary = summary.map(item => `${item[0]}：${item[1]}`).join('；') || '全部';
+      if (pageId === 'home' && window.HSPlatformDashboard) {
+        const view = platformDashboardView();
+        return `今日 ${view.date} UTC+8；CNY；${view.allTenants ? '全部租户' : '当前授权租户'}；数据截止：${view.cutoffAt} UTC+8；模拟数据`;
+      }
       if (pageId === 'home') return `${filterSummary}；数据截止：${platformHomeCutoffAt} UTC+8`;
       return pageId === 'report' ? `${filterSummary}；统计截止：${platformReportCutoffAt} UTC+8` : filterSummary;
     }
@@ -7012,6 +7110,7 @@
     }
 
     function platformExportRows(pageId, dataScope = currentPlatformAccount.dataScope) {
+      if (pageId === 'home' && window.HSPlatformDashboard) return window.HSPlatformDashboard.exportRows(platformDashboardView(dataScope));
       const page = pages[pageId];
       const fieldSnapshot = (page?.columns || []).filter(field => field !== '操作');
       const visibleRows = pageId === 'home' && dataScope?.scopeCode === 'platform.assigned_tenants'
@@ -7144,10 +7243,12 @@
       const permissionCode = platformExportPermissionByPage[pageId] || '';
       if (!page || !currentPlatformAccount.canExport || !hasPlatformActionPermission(permissionCode)) return null;
       const compact = createdAt.replace(/[- :]/g, '');
-      const includesRefundSnapshot = ['home', 'report', 'orders', 'ledger'].includes(pageId);
+      const includesRefundSnapshot = ['report', 'orders', 'ledger'].includes(pageId) || (pageId === 'home' && !window.HSPlatformDashboard);
       const normalizedFilterSnapshot = sourceTask
         ? clonePlatformExportValue(sourceTask.normalizedFilterSnapshot)
-        : {
+        : pageId === 'home' && window.HSPlatformDashboard
+          ? { pageId, filters: { date: platformDashboardView().date, currency: 'CNY', range: 'today', timezone: 'UTC+8' } }
+          : {
             pageId,
             filters: Object.fromEntries(page.filters.map((label, index) => [label, String(filterState[pageId]?.[index] || '').trim()]))
           };
@@ -7158,7 +7259,7 @@
       const sourceSensitiveAccessRequired = sourceTask
         ? Boolean(sourceTask.sourceSensitiveAccessRequired ?? sourceTask.securitySnapshot.sensitiveAccess)
         : securitySnapshot.sensitiveAccess === true;
-      const cutoffAt = includesRefundSnapshot ? platformRefundAggregate.cutoffAt : createdAt;
+      const cutoffAt = pageId === 'home' && window.HSPlatformDashboard ? (sourceTask?.cutoffAt || platformDashboardView().cutoffAt) : includesRefundSnapshot ? platformRefundAggregate.cutoffAt : createdAt;
       const originalRows = sourceTask
         ? { fieldSnapshot: clonePlatformExportValue(sourceTask.fileDefinitionSnapshot.fieldSnapshot), rowSnapshot: clonePlatformExportValue(sourceTask.fileDefinitionSnapshot.rowSnapshot) }
         : platformExportRows(pageId, sourceScopeSnapshot);
@@ -7203,7 +7304,7 @@
         sourceSensitiveAccessRequired,
         fileDefinitionSnapshot,
         fileSnapshotDigest: platformExportSnapshotDigest(fileDefinitionSnapshot),
-        factRevision: PLATFORM_REFUND_JOURNEY_FACTS_REVISION,
+        factRevision: pageId === 'home' && window.HSPlatformDashboard ? 'platform-dashboard-cny-v1' : PLATFORM_REFUND_JOURNEY_FACTS_REVISION,
         refundAggregateSnapshot: includesRefundSnapshot ? JSON.parse(JSON.stringify(platformRefundAggregate)) : null
       };
       if (sourceTask) task.retryOf = sourceTask.id;
@@ -8968,6 +9069,12 @@
         if (specialButton.dataset.special === 'system-fees') navigatePlatformTarget('../10-系统管理/平台端系统管理-demo.html#fees', 'fees');
         if (specialButton.dataset.special === 'business-auth') openBusinessAuthorization(specialButton.dataset.businessAuthRow);
         if (specialButton.dataset.special === 'home-refresh') {
+          if (window.HSPlatformDashboard) {
+            platformDashboardSnapshot = null;
+            renderPage('home');
+            showToast(`今日看板已刷新；数据截至 ${platformHomeCutoffAt} UTC+8`);
+            return;
+          }
           capturePageFilters();
           if (!validatePlatformDateFilters('home')) return;
           platformHomeCutoffAt = utc8DateTime();
@@ -9920,9 +10027,10 @@
       },
       getReportMetrics: () => platformReportMetricsFor(filteredRowsForPage('report')).map(item => [...item]),
       getReportSnapshot: () => ({ cutoffAt: platformReportCutoffAt, refreshedAt: platformReportRefreshedAt, filters: [...filterState.report] }),
+      getDashboardSnapshot: () => window.HSPlatformDashboard ? clonePlatformExportValue(platformDashboardView()) : null,
       getHomeReportRows: () => platformHomeReportRows().map(row => [...row]),
       getHomeMetrics: () => platformHomeMetricsFor(platformHomeReportRows()).map(item => [...item]),
-      getHomeSnapshot: () => ({ cutoffAt: platformHomeCutoffAt, refreshedAt: platformHomeRefreshedAt, filters: [...filterState.home], applied: { transaction: ['start_date_utc8', 'end_date_utc8', 'business_direction', 'tenant'], funds: ['start_date_utc8', 'end_date_utc8', 'tenant'], channel_health: ['business_direction', 'tenant'], audit: ['start_date_utc8', 'end_date_utc8'] } }),
+      getHomeSnapshot: () => window.HSPlatformDashboard ? { ...clonePlatformExportValue(platformDashboardView()), refreshedAt: platformHomeRefreshedAt, filters: [], applied: { date: 'today', currency: 'CNY', timezone: 'UTC+8' } } : ({ cutoffAt: platformHomeCutoffAt, refreshedAt: platformHomeRefreshedAt, filters: [...filterState.home], applied: { transaction: ['start_date_utc8', 'end_date_utc8', 'business_direction', 'tenant'], funds: ['start_date_utc8', 'end_date_utc8', 'tenant'], channel_health: ['business_direction', 'tenant'], audit: ['start_date_utc8', 'end_date_utc8'] } }),
       getOrderRows: () => pages.orders.rows.map(row => [...row]),
       getOrderFacts: orderId => platformOrderFacts[String(orderId)] ? { ...platformOrderFacts[String(orderId)], identifiers: { ...platformOrderFacts[String(orderId)].identifiers } } : null,
       getOrderQueryMeta: orderId => {

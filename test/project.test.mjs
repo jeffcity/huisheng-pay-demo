@@ -9,8 +9,8 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const modules = JSON.parse(await readFile(path.join(root, "src/legacy/modules.json"), "utf8"));
 
-test("模块注册表包含 32 个统一入口", () => {
-  assert.equal(Object.keys(modules).length, 32);
+test("模块注册表包含 41 个统一入口", () => {
+  assert.equal(Object.keys(modules).length, 41);
 });
 
 test("每个模块的源文件存在于 public/legacy/sources", async () => {
@@ -166,9 +166,10 @@ test("平台系统管理提供独立租户菜单目录与安全发布边界", as
   assert.doesNotMatch(tenantPage, /删除菜单|data-message="tenant-menu:delete/);
 });
 
-test("平台租户管理不再展示或创建租户钱包，保留费率设置", async () => {
+test("平台租户详情提供单一钱包及独立调整权限，结算单保留费用对账", async () => {
  const tenants=await readFile(path.join(root,"public/legacy/sources/tenants.html"),"utf8"),page=await readFile(path.join(root,"public/legacy/sources/wallets.html"),"utf8");
- assert.doesNotMatch(tenants,/<th>钱包余额<\/th>|data-open-wallet|id="tab-wallet"|walletSummaryCell|listWalletSnapshots/);
+ assert.doesNotMatch(tenants,/<th>钱包余额<\/th>|data-open-wallet|walletSummaryCell|listWalletSnapshots/);
+ assert.match(tenants,/id="tab-wallet"/);assert.match(tenants,/platform\.tenant\.wallet\.adjust/);
  assert.match(tenants,/设置费率/);assert.match(page,/<h1>租户结算单<\/h1>/);assert.match(page,/type="month"/);assert.doesNotMatch(page,/租户平台钱包|可用余额|冻结金额|人工加款/);
 });
 

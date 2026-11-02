@@ -7,7 +7,7 @@ for(const [name,path] of [['平台','src/embed.js'],['租户','surfaces/tenant/s
  const source=fs.readFileSync(new URL(path,root),'utf8').replace(/^import [^\n]+\n/gm,'').replace(/export async function/g,'async function');
  for(const providerModel of ['window.probe = "$& $` '+"$'"+'";',fs.readFileSync(new URL('src/provider-model.js',root),'utf8')]){
   const window={__HS_EMBEDDED_SOURCES__:{channels:'<html><head></head><body>BODY_MARKER</body></html>',authGuard:''}};
-  const ctx=vm.createContext({window,providerModel,settlementModel:"",channelRecordsModel:"",Map,Set});vm.runInContext(source,ctx);const html=await ctx.prepareEmbeddedDocument('channels');assert(html.includes('<script>'+providerModel+'</script>'));const first=html.match(/<script>([\s\S]*?)<\/script>/)[1];assert.doesNotThrow(()=>new vm.Script(first));assert.equal(html.split('BODY_MARKER').length,2);
+  const ctx=vm.createContext({window,providerModel,settlementModel:"",feeWalletModel:"",channelRecordsModel:"",Map,Set});vm.runInContext(source,ctx);const html=await ctx.prepareEmbeddedDocument('channels');assert(html.includes('<script>'+providerModel+'</script>'));const first=html.match(/<script>([\s\S]*?)<\/script>/)[1];assert.doesNotThrow(()=>new vm.Script(first));assert.equal(html.split('BODY_MARKER').length,2);
  }
 });
 

@@ -1,4 +1,6 @@
+import feeWalletModel from '../../../src/tenant-fee-wallet-model.js?raw';
 import providerModel from '../../../src/provider-model.js?raw';
+import settlementModel from '../../../src/settlement-model.js?raw';
 import channelRecordsModel from './channel-records-model.js?raw';
 import dailyReportsModel from './daily-reports-model.js?raw';
 import notificationBotModel from './notification-bot-model.js?raw';
@@ -70,7 +72,7 @@ function routeBridge(moduleName) {
 
 function prepareEmbeddedModule(html, moduleName) {
   if (moduleName === 'login') return html;
-  const models = providerModel + (moduleName === 'reports' ? '\n' + dailyReportsModel : '') + (moduleName === 'channel-records' ? '\n' + channelRecordsModel : '') + (moduleName === 'notifications' ? '\n' + notificationBotModel : '');
+  const models = providerModel + (moduleName === 'overview' ? '\n' + settlementModel + '\n' + feeWalletModel : '') + (moduleName === 'reports' ? '\n' + dailyReportsModel : '') + (moduleName === 'channel-records' ? '\n' + channelRecordsModel : '') + (moduleName === 'notifications' ? '\n' + notificationBotModel : '');
   const modelBridge = '<script>' + models.replace(/<\/script/gi, '<\\/script') + '</script>';
   const withHead = html.includes('</head>') ? html.replace('</head>', () => modelBridge + headBridge + '</head>') : modelBridge + headBridge + html;
   return withHead.includes('</body>') ? withHead.replace('</body>', routeBridge(moduleName) + '</body>') : withHead + routeBridge(moduleName);

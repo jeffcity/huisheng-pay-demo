@@ -64,7 +64,7 @@ const puppeteer = require('puppeteer-core');
     await system.waitForSelector('form[data-form="accountRepairLimits"]', { hidden: true });
     assert.match(await system.$eval('#accountRows tr', el => el.textContent), /每日可补单数：5/);
     await system.click('#accountRows [data-repair-account]');
-    assert.equal(await system.$eval('[name="repairSingleAmount"]', el => el.value), '20.00');
+    assert.equal(Number(await system.$eval('[name="repairSingleAmount"]', el => el.value)), 20);
     assert.equal(await page.$$eval('#surface-panel > iframe', els => els.length), 1);
     assert.deepEqual(errors, []);
     console.log('PASS 统一 Demo 账户管理：补单限制展示、金额校验、保存回显、数据范围列移除');

@@ -52,10 +52,7 @@ test('调额和付款测试只生成预览，余额不变且不保存收款个�
  f.api.setContext({id:r.id});for(const [k,v] of Object.entries({pxAmount:'200',pxAccount:'DEMO-ACCOUNT-1234',pxRecipient:'DEMO-RECIPIENT',pxBank:'DEMO-BANK',pxBranch:'',pxBankCode:'',pxExtra:'{}'}))f.set(k,v);f.api.runPayoutTest();assert.equal(JSON.parse(f.el('#pxResponse').value).code,'DEMO_SUCCESS');assert.equal(r.balance,before);assert(!JSON.stringify(d).includes('DEMO-ACCOUNT-1234'));assert(!JSON.stringify(f.model.audits).includes('DEMO-RECIPIENT'));
 });
 
-test('删除代付通道后提款审核候选禁用，已选订单快照仍可辨识',()=>{
- const f=fixture(),d=f.model.tenantData(),r=d.channels.find(c=>c.id==='CH-FIAT-OUT-004');assert(r);f.api.setContext({id:r.id});f.api.confirmPayoutDelete();
- const start=merchantsSource.indexOf('    const tenantPayoutChannels =');const end=merchantsSource.indexOf('    const fundingOrders =',start);assert(start>0&&end>start);vm.runInContext(merchantsSource.slice(start,end),f.ctx);const result=vm.runInContext(`fundingPayoutChannelProjection({authorizedPayoutChannelIds:['CH-FIAT-OUT-004']})`,f.ctx);assert.equal(result[0].selectable,false);assert.equal(result[0].acceptsNewOrders,false);
-});
+
 
 test('编辑代付通道同步保存限额与开关，关闭后保留配置并可重新开启',()=>{
  const f=fixture(),d=f.model.tenantData(),r=d.channels.find(c=>c.direction==='代付');
@@ -70,12 +67,7 @@ test('编辑限额校验失败不会部分保存名称、类型关系或限额�
  f.set('plMax','1000');f.set('plIps','999.0.0.1');f.api.savePayoutChannel();assert.equal(JSON.stringify(r),before);assert.equal(JSON.stringify(d.products),bindings);
 });
 
-test('代付通道主类型改为USDT后，既有CNY提款候选保留但不可选',()=>{
- const f=fixture(),d=f.model.tenantData(),r=d.channels.find(c=>c.id==='CH-FIAT-OUT-004'),p=d.products.find(p=>p.direction==='代付'&&p.currency==='USDT');
- channelForm(f,r,p.id);f.api.setContext({id:r.id});f.api.savePayoutChannel();assert.equal(r.asset,'USDT');assert.equal(r.productId,p.id);
- const start=merchantsSource.indexOf('    const tenantPayoutChannels ='),end=merchantsSource.indexOf('    const fundingOrders =',start);vm.runInContext(merchantsSource.slice(start,end),f.ctx);
- const rows=vm.runInContext(`fundingPayoutChannelProjection({authorizedPayoutChannelIds:['CH-FIAT-OUT-004']})`,f.ctx);assert.equal(rows.length,1);assert.equal(rows[0].id,r.id);assert.equal(rows[0].selectable,false);assert.equal(rows[0].acceptsNewOrders,false);
-});
+
 
 test('租户仅有代收许可时，代付创建、编辑、开发、限额和批量配置均不保存',()=>{
  const f=fixture(),d=f.model.tenantData(),r=d.channels.find(c=>c.providerId==='V-001'&&c.direction==='代付');

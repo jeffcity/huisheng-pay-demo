@@ -1744,6 +1744,7 @@
       <button class="detail-tab active" data-tab="overview">概览</button>
       <button class="detail-tab" data-tab="business">业务</button>
       <button class="detail-tab" data-tab="security">安全</button>
+      <button class="detail-tab" data-tab="wallet">钱包</button>
       <button class="detail-tab" data-tab="domains">域名管理</button>
       <button class="detail-tab" data-tab="audit">审计日志</button>
     </div>
@@ -1751,6 +1752,7 @@
       <section class="detail-section active" id="tab-overview"></section>
       <section class="detail-section" id="tab-business"></section>
       <section class="detail-section" id="tab-security"></section>
+      <section class="detail-section" id="tab-wallet"></section>
       <section class="detail-section" id="tab-domains"></section>
       <section class="detail-section" id="tab-audit"></section>
     </div>
@@ -1775,12 +1777,8 @@
           <input id="tenantCodeInput" value="系统自动生成" class="mono" readonly>
         </div>
         <div class="field">
-          <label class="required" for="contactInput">联系人</label>
-          <input id="contactInput" value="Lin Chen" placeholder="请输入联系人">
-        </div>
-        <div class="field">
-          <label class="required" for="mobileInput">联系手机</label>
-          <input id="mobileInput" value="+63 917 208 8891" placeholder="请输入联系手机">
+          <label for="contactInput">联系人</label>
+          <input id="contactInput" value="Lin Chen" placeholder="请输入联系人（选填）">
         </div>
         <div class="field">
           <label class="required" for="expireInput">过期时间</label>
@@ -1801,8 +1799,8 @@
           <small>不填则创建后在详情安全页配置；填写则与租户原子创建并立即启用。</small>
         </div>
         <div class="field wide tenant-billing-settings">
-          <h3>租户服务费</h3><p class="cell-sub">平台向本租户收取的费用，代收、代付分别设置；按自然月汇总 CNY 成功订单结算。</p>
-          <div class="form-grid"><div class="field"><label for="tenantCollectionBillingMode">代收计费方式</label><select id="tenantCollectionBillingMode"><option value="percentage">交易百分比</option><option value="perTransaction">按单笔</option></select></div><div class="field"><label id="tenantCollectionBillingLabel" for="tenantCollectionBillingValue">代收费率（%）</label><input id="tenantCollectionBillingValue" type="number" min="0" step="0.0001" placeholder="未设置"><small id="tenantCollectionBillingFormula"></small></div><div class="field"><label for="tenantPayoutBillingMode">代付计费方式</label><select id="tenantPayoutBillingMode"><option value="percentage">交易百分比</option><option value="perTransaction">按单笔</option></select></div><div class="field"><label id="tenantPayoutBillingLabel" for="tenantPayoutBillingValue">代付费率（%）</label><input id="tenantPayoutBillingValue" type="number" min="0" step="0.0001" placeholder="未设置"><small id="tenantPayoutBillingFormula"></small></div></div><p class="cell-sub">单笔费用按当前 CNY 业务设置；未填写表示尚未设置，填写 0 表示免费。</p>
+          <h3>租户服务费</h3><div class="field"><label><input id="tenantAllowNegative" type="checkbox"> 允许租户钱包为负数</label><small>开启后余额为负仍可接收新订单；租户关闭或停用仍停止新业务。关闭后余额不足拦截新单，在途订单成功仍照常扣费。</small><small id="tenantFeeWalletBalance"></small></div><p class="cell-sub">平台向本租户收取的费用，代收、代付分别设置；两种方式都只对 CNY 成功订单计费，成功时扣钱包，按自然月对账。</p>
+          <div class="form-grid"><div class="field"><label for="tenantCollectionBillingMode">代收计费方式</label><select id="tenantCollectionBillingMode"><option value="percentage">交易百分比</option><option value="perTransaction">按单笔</option></select></div><div class="field"><label id="tenantCollectionBillingLabel" for="tenantCollectionBillingValue">代收费率（%）</label><input id="tenantCollectionBillingValue" type="number" min="0" step="0.0001" placeholder="未设置"><small id="tenantCollectionBillingFormula"></small></div><div class="field"><label for="tenantPayoutBillingMode">代付计费方式</label><select id="tenantPayoutBillingMode"><option value="percentage">交易百分比</option><option value="perTransaction">按单笔</option></select></div><div class="field"><label id="tenantPayoutBillingLabel" for="tenantPayoutBillingValue">代付费率（%）</label><input id="tenantPayoutBillingValue" type="number" min="0" step="0.0001" placeholder="未设置"><small id="tenantPayoutBillingFormula"></small></div></div><p class="cell-sub">交易百分比按每笔成功订单金额计算并保留精度，成功时按原精度扣减同一租户钱包，月底汇总后四舍五入至分对账，不重复扣费；按单笔只按成功笔数计费。未填写表示尚未设置，填写 0 表示免费。</p>
         </div>
         <div class="field wide">
           <label for="tenantRemarkInput">备注</label>
@@ -1814,6 +1812,20 @@
       <button class="btn" data-close-modal>取消</button>
       <button class="btn primary" id="saveTenantBtn"><i data-lucide="save"></i>保存</button>
     </div>
+  </section>
+
+  <section class="modal" id="walletAdjustModal" role="dialog" aria-modal="true" aria-labelledby="walletAdjustTitle" aria-hidden="true" tabindex="-1">
+    <div class="modal-head"><h2 id="walletAdjustTitle">调整租户钱包</h2><button class="btn" data-close-wallet-adjust>关闭</button></div>
+    <div class="modal-body"><div class="form-error" id="walletAdjustError" role="alert"></div><div class="form-grid">
+      <div class="field wide"><label for="walletAdjustTenant">租户</label><input id="walletAdjustTenant" readonly></div>
+      <div class="field"><label for="walletAdjustBefore">当前余额（CNY）</label><input id="walletAdjustBefore" class="mono" readonly></div>
+      <div class="field"><label for="walletAdjustAfter">调整后余额（CNY）</label><input id="walletAdjustAfter" class="mono" readonly></div>
+      <div class="field"><label for="walletAdjustDirection">调整方式</label><select id="walletAdjustDirection"><option value="increase">调增</option><option value="decrease">调减</option></select></div>
+      <div class="field"><label class="required" for="walletAdjustAmount">调整金额（CNY）</label><input id="walletAdjustAmount" inputmode="decimal" placeholder="0.00" autocomplete="off"></div>
+      <div class="field wide"><label class="required" for="walletAdjustReason">调整原因</label><textarea id="walletAdjustReason" maxlength="200" placeholder="请输入调整原因"></textarea></div>
+      <div class="field wide"><label for="walletAdjustOperator">操作人</label><input id="walletAdjustOperator" readonly></div>
+    </div></div>
+    <div class="modal-foot"><button class="btn" data-close-wallet-adjust>取消</button><button class="btn primary" id="walletAdjustSubmit">确认调整</button></div>
   </section>
 
   <section class="modal" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-hidden="true" tabindex="-1">
@@ -2045,6 +2057,7 @@
 
     const roleProfiles = {
       '平台超管': {
+        canAdjustWallet: true,
         scopeCode: 'platform.all_tenants',
         tenantIds: [],
         canCreate: true,
@@ -2091,6 +2104,7 @@
         tenantIds: [...platformTenantAuthorization.dataScope.tenantIds],
         canCreate: platformTenantActionPermissions.has('platform.tenant.manage'),
         canEdit: platformTenantActionPermissions.has('platform.tenant.manage'),
+        canAdjustWallet: platformTenantActionPermissions.has('platform.tenant.wallet.adjust'),
         canBusinessAuth: platformTenantActionPermissions.has('platform.business_grant.manage'),
         canSecurity: platformTenantActionPermissions.has('platform.tenant.manage'),
         canAccessProcess: platformTenantActionPermissions.has('platform.tenant.manage'),
@@ -2158,6 +2172,14 @@
     }
 
     tenants.forEach(ensureTenantAccessState);
+    for (const tenant of tenants) {
+      window.HSTenantSettlements?.registerTenant(tenant);
+      if (!window.HSProviderDemo.tenants.some(t => t.id === tenant.id)) window.HSProviderDemo.tenants.push({ id: tenant.id, name: tenant.name });
+      const wallet = window.HSFeeWallets?.wallet(tenant.id);
+      if (wallet?.profileInitialized) { tenant.status = wallet.status; tenant.statusTone = statusTone[tenant.status]; }
+      else window.HSFeeWallets?.syncTenantProfile(tenant);
+    }
+
     tenants[0].domains.push(
       {
         id: 'DOM-001-002',
@@ -2212,6 +2234,7 @@
       confirmIpId: '',
       tenantSequence: 62,
       auditSequence: 12050,
+      walletAdjustment: null,
       latestReceipt: null
     };
 
@@ -2330,7 +2353,7 @@
       const audit = {
         id: `AL-20260718-${String(appState.auditSequence++).padStart(5, '0')}`,
         time: platformNow(),
-        operator: appState.currentRole === '平台超管' ? 'Jeff' : appState.currentRole,
+        operator: platformTenantAuthorization?.account || (appState.currentRole === '平台超管' ? 'Jeff' : appState.currentRole),
         role: appState.currentRole,
         tenant: tenant.name,
         object: `${tenant.id} / ${action}`,
@@ -2446,7 +2469,7 @@
               ? '<button class="action-link" data-confirm="启用租户" data-confirm-tenant="' + tenant.id + '" data-confirm-detail="启用 ' + tenant.name + ' 只恢复租户层级的后续登录与新业务资格；下级对象状态保持不变。">启用</button>'
               : '';
         return '<tr data-index="' + index + '">' +
-          '<td><div class="tenant-cell"><strong>' + tenant.name + '</strong><span class="mono">' + tenant.id + ' / ' + tenant.contact + '</span>' + '</div></td>' +
+          '<td><div class="tenant-cell"><strong>' + tenant.name + '</strong><span class="mono">' + tenant.id + (tenant.contact ? ' / ' + escapeHtml(tenant.contact) : '') + '</span>' + '</div></td>' +
           '<td>' + tag(tenant.status, tenant.statusTone) + '</td>' +
           '<td>' + tenantBusinessDirections(tenant).map(d => tag('CNY ' + d, 'blue')).join(' ') + '</td>' +
           '<td class="action-col"><div class="table-actions">' +
@@ -2910,7 +2933,7 @@
 
       appState.page = 1;
       appState.filtered = tenants.filter(tenant => {
-        const text = [tenant.id, tenant.name, tenant.contact, tenant.phone, tenant.domain].join(' ').toLowerCase();
+        const text = [tenant.id, tenant.name, tenant.contact, tenant.domain].join(' ').toLowerCase();
         const okSearch = !search || text.includes(search);
         const okStatus = status === 'all' || tenant.status === status;
         const okBusiness = business === 'all' || tenant.businessTypes.includes(business);
@@ -2937,7 +2960,7 @@
       }
       appState.selectedTenant = tenant;
       document.getElementById('detailTenantName').textContent = tenant.name;
-      document.getElementById('detailTenantMeta').textContent = tenant.id + ' / ' + tenant.name + ' / ' + tenant.contact;
+      document.getElementById('detailTenantMeta').textContent = [tenant.id, tenant.name, tenant.contact].filter(Boolean).join(' / ');
       document.getElementById('detailTags').innerHTML = [
         tag(tenant.status, tenant.statusTone)
       ].join('');
@@ -2971,7 +2994,7 @@
         '<div class="kv-grid">' +
           kv('租户编号', escapeHtml(tenant.id)) +
           kv('租户名称', escapeHtml(tenant.name)) +
-          kv('联系人', escapeHtml(tenant.contact + ' / ' + tenant.phone)) +
+          kv('联系人', escapeHtml(tenant.contact || '—')) +
           kv('到期时间', escapeHtml(tenant.expire)) +
           kv('租户后台域名', escapeHtml(tenant.domain)) +
           kv('当前状态', tag(tenant.status, tenant.statusTone)) +
@@ -2980,14 +3003,15 @@
           kv('创建时间', tenant.createdAt || '2026-07-01 09:00:00') +
           kv('更新时间', tenant.updatedAt || '2026-10-24 10:20:00') +
           kv('租户服务费', escapeHtml(tenantBillingSummary(tenant))) +
-          kv('计费周期', '月结算 · UTC+8 自然月 · CNY 成功订单') +
+          kv('计费周期', '成功时扣费 · UTC+8 自然月对账 · 不重复扣款') +
           kv('备注', escapeHtml(tenant.remark || '—')) +
         '</div>';
 
+      renderTenantWallet(tenant);
       document.getElementById('tab-business').innerHTML = renderTenantBusiness(tenant);
 
       document.getElementById('tab-security').innerHTML = sectionTitle('账号安全') +
-        '<div class="kv-grid">' + kv('管理账号', escapeHtml(tenant.admin)) + kv('管理员昵称', escapeHtml(tenant.adminNickname || tenant.contact)) + kv('账号状态', tag(isAdminLoginBanned(tenant) ? '临时封禁' : '正常', isAdminLoginBanned(tenant) ? 'red' : 'green')) + kv('2FA 状态', tenant.twoFaStatus || (tenant.status === '审核中' ? '待启用' : '已绑定')) + kv('最近登录 IP', '192.0.2.10') + kv('最近登录时间', tenant.lastLoginAt || '2026-10-23 14:20:00') + '</div>' +
+        '<div class="kv-grid">' + kv('管理账号', escapeHtml(tenant.admin)) + kv('管理员昵称', escapeHtml(tenant.adminNickname || tenant.contact || tenant.admin || '—')) + kv('账号状态', tag(isAdminLoginBanned(tenant) ? '临时封禁' : '正常', isAdminLoginBanned(tenant) ? 'red' : 'green')) + kv('2FA 状态', tenant.twoFaStatus || (tenant.status === '审核中' ? '待启用' : '已绑定')) + kv('最近登录 IP', '192.0.2.10') + kv('最近登录时间', tenant.lastLoginAt || '2026-10-23 14:20:00') + '</div>' +
         sectionTitle('安全操作') +
         '<div class="tag-row">' +
           (permissions.canSecurity && !closed ? '<button class="btn" data-confirm="重置账号" data-confirm-tenant="' + tenant.id + '" data-confirm-detail="请输入新的管理账号，并通过当前操作人 2FA 验证。保存后通知租户重新登录。"><i data-lucide="user-round-cog"></i>重置账号</button>' : disabledButton('重置账号', 'user-round-cog', closed ? '关闭租户只允许历史查看' : appState.currentRole + ' 无安全操作权限')) +
@@ -3041,6 +3065,81 @@
         (tenantAuditRows.map(event => '<tr><td>' + escapeHtml(event.operator) + '</td><td>' + escapeHtml(event.role) + '</td><td>' + tag(event.result, event.tone) + '</td><td><strong>' + escapeHtml(event.action) + '</strong><div class="cell-sub">' + escapeHtml(event.object) + '</div><div class="cell-sub">原因：' + escapeHtml(event.reason || '—') + '</div></td><td>' + escapeHtml(event.ip) + '</td><td>' + escapeHtml(event.time) + '</td></tr>').join('') || '<tr><td colspan="6" class="table-empty">暂无审计记录</td></tr>') + '</tbody></table></div>';
     }
 
+    function walletOperator() {
+      if (platformTenantAuthorization?.account) return platformTenantAuthorization.account;
+      return appState.currentRole === '平台超管' ? 'Jeff / 平台超管' : appState.currentRole;
+    }
+
+    function renderTenantWallet(tenant) {
+      const target = document.getElementById('tab-wallet');
+      if (!tenantInCurrentScope(tenant)) { target.innerHTML = ''; return; }
+      const model = window.HSFeeWallets, wallet = model?.wallet(tenant.id), entries = model?.ledger(tenant.id) || [];
+      const esc = value => escapeHtml(value ?? '—');
+      const settingsButton = getPermissions().canEdit && tenant.status !== '关闭'
+        ? ' <button class="action-link" data-wallet-settings="' + esc(tenant.id) + '" aria-label="设置允许负余额">设置</button>' : '';
+      const adjustButton = getPermissions().canAdjustWallet && tenant.status !== '关闭'
+        ? '<button class="btn primary" data-wallet-adjust="' + esc(tenant.id) + '">调整余额</button>' : '';
+      target.innerHTML = '<div class="detail-section-heading"><h3>租户钱包</h3><div class="tag-row"><button class="btn" data-wallet-refresh>刷新</button>' + adjustButton + '</div></div>' +
+        '<div class="kv-grid">' + kv('钱包余额（CNY）', '<span class="mono">' + esc(wallet?.balance) + '</span>') + kv('允许负余额', (wallet?.allowNegative ? '已开启' : '未开启') + settingsButton) + '</div>' +
+        '<h3>钱包流水</h3><div class="table-wrap"><table aria-label="租户钱包流水"><thead><tr><th>流水号 / 时间（UTC+8）</th><th>类型</th><th>变动金额（CNY）</th><th>变动前余额（CNY）</th><th>变动后余额（CNY）</th><th>关联订单</th><th>操作人 / 原因</th></tr></thead><tbody>' +
+        entries.map(e => '<tr><td class="mono">' + esc(e.id) + '<div class="cell-sub">' + esc(e.occurredAt) + '</div></td><td>' + esc(e.type) + '</td><td class="mono">' + esc(e.change) + '</td><td class="mono">' + esc(e.beforeBalance) + '</td><td class="mono">' + esc(e.afterBalance) + '</td><td>' + esc(e.orderId) + (e.orderId ? '<div class="cell-sub">' + esc(e.direction) + ' · CNY ' + esc(e.orderAmount) + '</div>' : '') + '</td><td>' + esc(e.operator) + '<div class="cell-sub">' + esc(e.reason || '—') + '</div></td></tr>').join('') +
+        (entries.length ? '' : '<tr><td colspan="7">暂无流水</td></tr>') + '</tbody></table></div>';
+    }
+
+    function openWalletAdjustment(tenantId) {
+      const tenant = tenants.find(t => t.id === tenantId);
+      if (!tenantInCurrentScope(tenant) || !getPermissions().canAdjustWallet || tenant.status === '关闭') { showToast('无权调整钱包', ''); return; }
+      const wallet = window.HSFeeWallets.wallet(tenantId);
+      appState.walletAdjustment = { tenantId, requestId: crypto.randomUUID(), expectedRevision: wallet.revision };
+      clearFormError('walletAdjustError');
+      document.getElementById('walletAdjustTenant').value = tenant.id + ' / ' + tenant.name;
+      document.getElementById('walletAdjustBefore').value = wallet.balance;
+      document.getElementById('walletAdjustAfter').value = '—';
+      document.getElementById('walletAdjustDirection').value = 'increase';
+      document.getElementById('walletAdjustAmount').value = '';
+      document.getElementById('walletAdjustReason').value = '';
+      document.getElementById('walletAdjustOperator').value = walletOperator();
+      document.getElementById('walletAdjustSubmit').disabled = false;
+      document.getElementById('modalBackdrop').classList.add('open');
+      showTenantDialog(document.getElementById('walletAdjustModal'));
+    }
+
+    function walletAdjustmentInput() {
+      return { ...appState.walletAdjustment, direction: document.getElementById('walletAdjustDirection').value, amount: document.getElementById('walletAdjustAmount').value.trim(), reason: document.getElementById('walletAdjustReason').value.trim(), operator: walletOperator() };
+    }
+
+    function previewWalletAdjustment() {
+      if (!appState.walletAdjustment) return;
+      try { document.getElementById('walletAdjustAfter').value = window.HSFeeWallets.previewAdjustment(appState.walletAdjustment.tenantId, walletAdjustmentInput()).afterBalance; }
+      catch (_) { document.getElementById('walletAdjustAfter').value = '—'; }
+    }
+
+    function closeWalletAdjustment() {
+      const dialog = document.getElementById('walletAdjustModal');
+      dialog.classList.remove('open'); dialog.setAttribute('aria-hidden','true');
+      document.getElementById('modalBackdrop').classList.remove('open');
+      appState.walletAdjustment = null;
+      restoreTenantDialogFocus(dialog);
+    }
+
+    function submitWalletAdjustment() {
+      const pending = appState.walletAdjustment;
+      if (!pending) return;
+      const tenant = tenants.find(t => t.id === pending.tenantId);
+      if (!tenantInCurrentScope(tenant) || !getPermissions().canAdjustWallet || tenant.status === '关闭') { showFormError('walletAdjustError','无权调整该租户钱包'); return; }
+      try {
+        const result = window.HSFeeWallets.adjust(tenant.id, walletAdjustmentInput());
+        document.getElementById('walletAdjustSubmit').disabled = true;
+        if (result.applied) {
+          const e = result.entry;
+          addTenantAudit(tenant, e.type, '成功', e.id + ' · CNY ' + e.change + ' · ' + e.beforeBalance + ' → ' + e.afterBalance + ' · ' + e.reason);
+        }
+        closeWalletAdjustment();
+        renderDetailSections(tenant); activateDetailTab('wallet');
+        showToast('钱包调整已完成', result.entry.id);
+      } catch (error) { showFormError('walletAdjustError', error.message, ['walletAdjustAmount']); }
+    }
+
     function sectionTitle(text) {
       return '<div class="panel-header" style="border:1px solid var(--border); border-radius: var(--radius-lg);"><h3>' + text + '</h3></div>';
     }
@@ -3070,10 +3169,10 @@
         const mode=document.getElementById('tenant'+key+'BillingMode').value,input=document.getElementById('tenant'+key+'BillingValue'),out=document.getElementById('tenant'+key+'BillingFormula');
         document.getElementById('tenant'+key+'BillingLabel').textContent=label+(mode==='percentage'?'费率（%）':'单笔费用（CNY / 笔）');
         input.step=mode==='percentage'?'0.0001':'0.01';if(mode==='percentage')input.max='100';else input.removeAttribute('max');
-        try{const p={mode,value:input.value.trim()},amount=model.billingPreview(p);out.textContent=amount===null?'未设置':model.billingFormula(p)+'；例：成功金额 CNY 10,000，成功 100 笔，服务费 CNY '+amount;}catch(e){out.textContent=e.message;}
+        try{const p={mode,value:input.value.trim()},amount=model.billingPreview(p);out.textContent=amount===null?'未设置':model.billingFormula(p)+(mode==='percentage'?'；保留每笔精度，月汇总后四舍五入至分。':'；只计成功订单。')+'例：成功金额 CNY 10,000，成功 100 笔，服务费 CNY '+amount;}catch(e){out.textContent=e.message;}
       }
     }
-    function tenantBillingSummary(tenant) {const model=window.HSProviderDemo,b=model.tenantBilling(tenant.id);return '代收：'+model.billingFormula(b.collection)+'；代付：'+model.billingFormula(b.payout);}
+    function tenantBillingSummary(tenant) {const model=window.HSProviderDemo,b=model.tenantBilling(tenant.id);return '代收：'+model.billingFormula(b.collection)+'；代付：'+model.billingFormula(b.payout)+'；允许负余额：'+(window.HSFeeWallets?.wallet(tenant.id).allowNegative?'是':'否');}
 
     function openTenantModal(mode, tenantId, billingOnly = false) {
       const permissions = getPermissions();
@@ -3094,11 +3193,10 @@
       document.getElementById('tenantModal').classList.toggle('billing-only', appState.editingBillingOnly);
       appState.editingTenantId = mode === 'edit' ? tenant.id : '';
       clearFormError('tenantFormError');
-      document.getElementById('tenantModalTitle').textContent = appState.editingBillingOnly ? '设置费率 · ' + tenant.name : mode === 'edit' ? '编辑租户' : '新增租户';
+      document.getElementById('tenantModalTitle').textContent = appState.editingBillingOnly ? '收费与钱包设置 · ' + tenant.name : mode === 'edit' ? '编辑租户' : '新增租户';
       document.getElementById('tenantNameInput').value = mode === 'edit' ? tenant.name : '';
       document.getElementById('tenantCodeInput').value = mode === 'edit' ? tenant.id : '系统自动生成';
-      document.getElementById('contactInput').value = mode === 'edit' ? tenant.contact : '';
-      document.getElementById('mobileInput').value = mode === 'edit' ? tenant.phone : '';
+      document.getElementById('contactInput').value = mode === 'edit' ? (tenant.contact || '') : '';
       document.getElementById('expireInput').value = mode === 'edit' ? tenant.expire : '';
       const creating = mode !== 'edit';
       document.getElementById('tenantModal').classList.toggle('create-mode', creating);
@@ -3116,6 +3214,9 @@
       document.getElementById('tenantRemarkInput').value = mode === 'edit' ? tenant.remark : '';
       const billing=mode==='edit'?window.HSProviderDemo.tenantBilling(tenant.id):{collection:{mode:'percentage',value:''},payout:{mode:'percentage',value:''}};
       for(const [key,id] of [['collection','Collection'],['payout','Payout']]){document.getElementById('tenant'+id+'BillingMode').value=billing[key].mode;document.getElementById('tenant'+id+'BillingValue').value=billing[key].value;}
+      const feeWallet = mode === 'edit' ? window.HSFeeWallets?.wallet(tenant.id) : null;
+      document.getElementById('tenantAllowNegative').checked = feeWallet?.allowNegative === true;
+      document.getElementById('tenantFeeWalletBalance').textContent = feeWallet ? '当前钱包余额：CNY ' + feeWallet.balance : '创建后使用一个租户钱包';
       updateTenantBillingPreview();
       document.getElementById('modalBackdrop').classList.add('open');
       showTenantDialog(document.getElementById('tenantModal'));
@@ -3263,6 +3364,7 @@
         const model = window.HSProviderDemo;
         if (!model.tenants.some(item => item.id === tenant.id)) model.tenants.push({ id: tenant.id, name: tenant.name });
         model.setTenantBilling(tenant.id, billing);
+        window.HSFeeWallets?.setAllowNegative(tenant.id, document.getElementById('tenantAllowNegative').checked);
         finishTenantAction(tenant, { action: '设置租户费率', detail: '代收、代付收费设置已更新', reason: tenantBillingSummary(tenant) });
         closeTenantModal();
         return;
@@ -3270,7 +3372,6 @@
       const values = {
         name: document.getElementById('tenantNameInput').value.trim(),
         contact: document.getElementById('contactInput').value.trim(),
-        phone: document.getElementById('mobileInput').value.trim(),
         expire: document.getElementById('expireInput').value,
         remark: document.getElementById('tenantRemarkInput').value.trim(),
         domain: document.getElementById('domainInput').value.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, ''),
@@ -3278,15 +3379,11 @@
         initialLoginIp: document.getElementById('initialLoginIpInput').value.trim()
       };
       const missing = [
-        ['name', 'tenantNameInput'], ['contact', 'contactInput'], ['phone', 'mobileInput'],
+        ['name', 'tenantNameInput'],
         ['expire', 'expireInput']
       ].filter(([key]) => !values[key]).map(([, id]) => id);
       if (missing.length) {
-        showFormError('tenantFormError', '请补全租户名称、联系人、联系手机和过期时间。', missing);
-        return;
-      }
-      if (values.phone.replace(/\D/g, '').length < 8) {
-        showFormError('tenantFormError', '联系手机格式不正确，请至少填写 8 位数字并保留国家或地区区号。', ['mobileInput']);
+        showFormError('tenantFormError', '请补全租户名称和过期时间。', missing);
         return;
       }
       const requestedDomain = editing ? tenants.find(item => item.id === appState.editingTenantId).domain : values.domain;
@@ -3360,6 +3457,7 @@
       sharedTenant.name = tenant.name;
       window.HSTenantSettlements?.registerTenant(tenant);
       providerModel.setTenantBilling(tenant.id,billing);
+      window.HSFeeWallets?.setAllowNegative(tenant.id, document.getElementById('tenantAllowNegative').checked);
       appState.selectedTenant = tenant;
       ensureTenantAccessState(tenant);
       tenant.updatedAt = platformNow();
@@ -3379,12 +3477,13 @@
     }
 
     function finishTenantAction(tenant, { action, result = '成功', detail, reason, tone = 'green' }) {
+      window.HSFeeWallets?.syncTenantProfile(tenant);
       const audit = addTenantAudit(tenant, action, result, reason, tone);
       appState.selectedTenant = tenant;
       setOperationReceipt({ title: action + '已完成', tenant, status: result, detail, audit });
       applyFilters(false);
       if (document.getElementById('tenantDetailModal').classList.contains('open')) {
-        document.getElementById('detailTenantMeta').textContent = tenant.id + ' / ' + tenant.name + ' / ' + tenant.contact;
+        document.getElementById('detailTenantMeta').textContent = [tenant.id, tenant.name, tenant.contact].filter(Boolean).join(' / ');
         document.getElementById('detailTags').innerHTML = tag(tenant.status, tenant.statusTone);
         renderDetailSections(tenant);
       }
@@ -3734,6 +3833,12 @@
           return;
         }
 
+        const walletSettingsBtn = event.target.closest('[data-wallet-settings]');
+        if (walletSettingsBtn) { openTenantModal('edit', walletSettingsBtn.dataset.walletSettings, true); return; }
+        const walletAdjustBtn = event.target.closest('[data-wallet-adjust]');
+        if (walletAdjustBtn) { openWalletAdjustment(walletAdjustBtn.dataset.walletAdjust); return; }
+        if (event.target.closest('[data-close-wallet-adjust]')) { closeWalletAdjustment(); return; }
+        if (event.target.closest('[data-wallet-refresh]')) { renderTenantWallet(appState.selectedTenant); return; }
         const detailTabBtn = event.target.closest('.detail-tab');
         if (detailTabBtn) {
           activateDetailTab(detailTabBtn.dataset.tab);
@@ -3811,6 +3916,8 @@
         }
       });
 
+      document.getElementById('walletAdjustSubmit').addEventListener('click', submitWalletAdjustment);
+      ['walletAdjustDirection','walletAdjustAmount','walletAdjustReason'].forEach(id => document.getElementById(id).addEventListener('input', previewWalletAdjustment));
       document.getElementById('applyFilter').addEventListener('click', applyFilters);
       document.getElementById('clearFilter').addEventListener('click', clearFilters);
       document.getElementById('globalSearch').addEventListener('input', applyFilters);
@@ -3858,13 +3965,14 @@
         });
       });
       document.addEventListener('keydown', event => {
-        const dialogs = ['confirmModal', 'tenantModal', 'tenantDetailModal']
+        const dialogs = ['walletAdjustModal', 'confirmModal', 'tenantModal', 'tenantDetailModal']
           .map(id => document.getElementById(id))
           .filter(dialog => dialog.classList.contains('open'));
         const topDialog = dialogs[0];
         if (!topDialog) return;
         if (event.key === 'Escape') {
-          if (topDialog.id === 'confirmModal') closeConfirm();
+          if (topDialog.id === 'walletAdjustModal') closeWalletAdjustment();
+          else if (topDialog.id === 'confirmModal') closeConfirm();
           else if (topDialog.id === 'tenantModal') closeTenantModal();
           else closeDetailModal();
         } else if (event.key === 'Tab') {

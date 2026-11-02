@@ -224,7 +224,7 @@
 
     <section class="panel" id="messagesPanel" role="tabpanel" aria-labelledby="messagesTab">
       <section class="card filter-card push-filter" aria-label="TG 推送记录筛选">
-        <div class="field"><label for="messageEvent">推送事件</label><select class="control" id="messageEvent"><option value="">全部事件</option><option>商户钱包地址变更</option><option>商户资金申请</option><option>商户资金划转</option><option>代付订单驳回</option><option>恶意拉单预警</option><option>同一IP登录失败过多</option><option>账号与角色权限变更</option><option>通知配置变更</option></select></div>
+        <div class="field"><label for="messageEvent">推送事件</label><select class="control" id="messageEvent"><option value="">全部事件</option><option>商户钱包地址变更</option><option>商户资金划转</option><option>代付订单驳回</option><option>恶意拉单预警</option><option>同一IP登录失败过多</option><option>账号与角色权限变更</option><option>通知配置变更</option></select></div>
         <div class="field"><label for="messageGroup">TG 群 ID</label><input class="control" id="messageGroup" placeholder="请输入 TG 群 ID"></div>
         <div class="field"><label for="messageDate">推送日期（UTC+8）</label><input class="control" id="messageDate" type="date"></div>
         <div class="filter-actions"><button class="btn" id="resetMessages" type="button">重置</button><button class="btn primary" id="searchMessages" type="button">搜索</button></div>
@@ -411,13 +411,11 @@
       { type: "恶意拉单预警", group: "-5211818661", time: "2026-09-01 17:24:27", date: "2026-09-01", template: "【恶意拉单预警】\n商户：${merchantName}\n请求次数：${requestCount}\n当前回传金额：${currentReturnedAmount}\n近期 IP 数：${recentIps}", values: { merchantName: "星河游戏", requestCount: "6", currentReturnedAmount: "CNY 1,001.00", recentIps: "2" } },
       { type: "同一IP登录失败过多", group: "-5151564225", time: "2026-09-01 16:42:18", date: "2026-09-01", template: "【同一 IP 登录失败告警】\n账号：${username}\n来源 IP：${userIp}\n失败次数：${failedCount}", values: { username: "tenant.ops", userIp: "203.0.113.18", failedCount: "5" } },
       { type: "账号与角色权限变更", group: "-5211818661", time: "2026-08-31 23:27:41", date: "2026-08-31", template: "【账号与角色权限变更】\n账号：${targetAccount}\n角色：${roleName}\n变更：${changeSummary}\n操作人：${operator}", values: { targetAccount: "tenant.finance", roleName: "财务管理员", changeSummary: "新增账户流水导出权限", operator: "tenant.admin" } },
-      { type: "商户资金申请", group: "-5211818661", time: "2026-08-31 11:27:30", date: "2026-08-31", template: "【商户资金申请】\n申请单号：${applicationNo}\n商户：${merchantName}\n金额：${amount} ${currency}\n状态：${status}", values: { applicationNo: "TFA202609020018", merchantName: "星河游戏", amount: "120,000.00", currency: "CNY", status: "待平台确认" } },
       { type: "通知配置变更", group: "-5211818661", time: "2026-08-29 09:36:22", date: "2026-08-29", template: "【通知配置变更】\n消息类型：${configType}\n操作人：${operator}\n发生时间：${occurredAt}", values: { configType: "商户资金划转", operator: "tenant.admin", occurredAt: "2026-08-29 09:36:22" } }
     ];
 
     const typeMeta = {
       "商户钱包地址变更": { risk: "高风险", vars: ["merchantName", "merchantNo", "oldWalletAddress", "newWalletAddress", "operator", "occurredAt"], template: "【商户钱包地址变更】\n商户：${merchantName}（${merchantNo}）\n原地址：${oldWalletAddress}\n新地址：${newWalletAddress}\n操作人：${operator}" },
-      "商户资金申请": { risk: "中风险", vars: ["applicationNo", "merchantName", "amount", "currency", "status", "occurredAt"], template: "【商户资金申请】\n申请单号：${applicationNo}\n商户：${merchantName}\n金额：${amount} ${currency}\n状态：${status}" },
       "商户资金划转": { risk: "高风险", vars: ["transferOrderNo", "sourceMerchantName", "targetMerchantName", "transferAmount", "feeAmount", "currency", "orderStatus", "operator"], template: "【商户资金划转】\n划转单号：${transferOrderNo}\n从：${sourceMerchantName}\n到：${targetMerchantName}\n划转金额：${transferAmount} ${currency}\n手续费：${feeAmount} ${currency}\n状态：${orderStatus}" },
       "代付订单驳回": { risk: "中风险", vars: ["merchantName", "platformOrderNo", "merchantOrderNo", "payoutAmount", "rejectReason", "rejectedAt"], template: "【代付订单驳回】\n商户：${merchantName}\n平台订单号：${platformOrderNo}\n商户订单号：${merchantOrderNo}\n金额：${payoutAmount}\n驳回原因：${rejectReason}" },
       "恶意拉单预警": { risk: "高风险", vars: ["merchantName", "requestCount", "currentReturnedAmount", "recentIps", "occurredAt"], template: "【恶意拉单预警】\n商户：${merchantName}\n请求次数：${requestCount}\n当前回传金额：${currentReturnedAmount}\n近期 IP 数：${recentIps}" },
@@ -445,7 +443,6 @@
       { type: "代付订单驳回", group: "-5211818661", robot: "汇盛通知 A", on: true, time: "2026-09-01 18:03:09" },
       { type: "恶意拉单预警", group: "-5211818661", robot: "汇盛风控", on: true, time: "2026-09-01 17:24:27", special: true },
       { type: "账号与角色权限变更", group: "-5211818661", robot: "汇盛风控", on: false, time: "2026-08-31 23:27:41" },
-      { type: "商户资金申请", group: "-5211818661", robot: "汇盛资金审核", on: true, time: "2026-08-31 11:27:30" },
       { type: "租户账号登录失败过多", group: "-5300000037", robot: "测试机器人", on: true, time: "2026-08-30 12:24:05" },
       { type: "通知配置变更", group: "-5211818661", robot: "汇盛通知 A", on: false, time: "2026-08-29 09:36:22" },
       { type: "商户钱包地址变更", group: "-5211818661", robot: "汇盛风控", on: true, time: "2026-08-28 16:35:50" }

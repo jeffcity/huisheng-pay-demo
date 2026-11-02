@@ -32,9 +32,11 @@ const MODULE_ICON = {
 };
 
 export default function App() {
-  const [activeModule, setActiveModule] = useState('home');
+  const initialModule = new URLSearchParams(window.location.search).get('platformPage');
+  const [activeModule, setActiveModule] = useState(MODULES[initialModule] ? initialModule : 'home');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [openGroups, setOpenGroups] = useState(['日终']);
   const frameRef = useRef(null);
   const frameHostRef = useRef(null);
   const requestRef = useRef(0);
@@ -42,7 +44,18 @@ export default function App() {
 
   const openModule = useCallback(async (moduleId, hash) => {
     const request = ++requestRef.current;
+    const aliases = { report: 'platform-collect-daily', 'tenant-daily-report': 'platform-collect-daily', 'channel-daily-report': 'collect-channel-daily', ledger: 'channel-pay-change' };
+    if (aliases[moduleId]) { moduleId = aliases[moduleId]; hash = MODULES[moduleId]?.initialHash; }
     const target = MODULES[moduleId] || MODULES.home;
+    const sourceGuard = frameRef.current?.contentWindow?.HSPlatformAuthRouteGuard;
+    if (target.subgroup && sourceGuard?.isAuthRouteMode()) {
+      const navigation = sourceGuard.createAuthorizedNavigation({ href: window.location.pathname + '?platformPage=' + encodeURIComponent(moduleId) + '#' + moduleId, pagePermission: 'platform.report.' + moduleId + '.view' });
+      if (!navigation.ok) { setError('当前账号无目标报表权限或登录状态已变化'); return; }
+      window.top.location.assign(navigation.href);
+      return;
+    }
+
+    if (target.subgroup) setOpenGroups(keys => keys.includes(target.subgroup) ? keys : [...keys, target.subgroup]);
     setActiveModule(MODULES[moduleId] ? moduleId : 'home');
     setLoading(true);
     setError('');
@@ -122,15 +135,16 @@ export default function App() {
         <Menu
           style={{ flex: 1, overflowY: 'auto' }}
           selectedKeys={[activeTarget.navId || activeModule]}
-          defaultOpenKeys={['report']}
+          openKeys={openGroups}
+          onClickSubMenu={(_, keys) => setOpenGroups(keys)}
           onClickMenuItem={(key) => openModule(key)}
         >
           {NAV_GROUPS.map((group, groupIndex) => (
-            <ItemGroup key={group.title} title={<span className="platform-nav-group"><span className={'platform-nav-icon tone-' + groupIndex % 7} aria-hidden="true">{MODULE_ICON[group.items?.[0]?.module] || <IconApps />}</span>{group.title}</span>}>
+            <ItemGroup key={group.title} title={<span className="platform-nav-group">{group.title}</span>}>
               {group.subgroups?.map(sub => (
-                <SubMenu key={sub.title === '日终统计' ? 'report' : sub.title} title={sub.title} icon={<span className={'platform-nav-icon is-small tone-' + (groupIndex + 1) % 7} aria-hidden="true"><IconCalendar /></span>}>
+                <SubMenu key={sub.title} title={<span className="platform-submenu-title"><span className="platform-nav-icon is-small" aria-hidden="true">{sub.title === '账户记录' ? <IconBook /> : <IconCalendar />}</span><span>{sub.title}</span></span>}>
                   {sub.items.map(item => (
-                    <MenuItem key={item.module}><span className={'platform-nav-icon is-small tone-' + (groupIndex + 2) % 7} aria-hidden="true">{MODULE_ICON[item.module] || <IconCalendar />}</span><span>{item.label}</span></MenuItem>
+                    <MenuItem key={item.module}><span className={'platform-nav-icon is-small tone-' + (groupIndex + 2) % 7} aria-hidden="true">{MODULE_ICON[item.module] || (sub.title === '账户记录' ? <IconBook /> : <IconCalendar />)}</span><span>{item.label}</span></MenuItem>
                   ))}
                 </SubMenu>
               ))}
@@ -160,6 +174,8 @@ export default function App() {
         <div className="platform-pagebar">
           <Breadcrumb>
             <Breadcrumb.Item>平台端</Breadcrumb.Item>
+            {activeTarget.subgroup && <Breadcrumb.Item>报表模块</Breadcrumb.Item>}
+            {activeTarget.subgroup && <Breadcrumb.Item>{activeTarget.subgroup}</Breadcrumb.Item>}
             <Breadcrumb.Item>{navLabel(activeTarget.navId || activeModule)}</Breadcrumb.Item>
           </Breadcrumb>
         </div>

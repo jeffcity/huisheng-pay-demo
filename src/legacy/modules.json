@@ -179,35 +179,137 @@
     "initialHash": "funds",
     "navId": "funds"
   },
-  "tenant-daily-report": {
-    "label": "租户日终报表",
+  "payout-channel-daily": {
+    "label": "代付通道日终统计",
     "code": "06-01",
-    "group": "06 日终统计",
-    "description": "按租户汇总经营指标、成本与利润",
-    "sourceName": "平台端租户整体报表-demo.html",
+    "group": "06 报表模块",
+    "description": "跨租户代付通道日终统计",
+    "sourceName": "平台端 · 日终",
     "sourceKey": "report",
-    "initialHash": "tenant-daily-report",
-    "navId": "tenant-daily-report"
+    "initialHash": "payout-channel-daily",
+    "navId": "payout-channel-daily",
+    "subgroup": "日终"
   },
-  "channel-daily-report": {
-    "label": "通道日终报表",
+  "collect-channel-daily": {
+    "label": "代收通道日终统计",
     "code": "06-02",
-    "group": "06 日终统计",
-    "description": "按全平台通道汇总成功率、成本与利润",
-    "sourceName": "平台端租户整体报表-demo.html",
+    "group": "06 报表模块",
+    "description": "跨租户代收通道日终统计",
+    "sourceName": "平台端 · 日终",
     "sourceKey": "report",
-    "initialHash": "channel-daily-report",
-    "navId": "channel-daily-report"
+    "initialHash": "collect-channel-daily",
+    "navId": "collect-channel-daily",
+    "subgroup": "日终"
   },
-  "ledger": {
-    "label": "租户整体流水",
-    "code": "07-01",
-    "group": "07 租户整体流水",
-    "description": "余额变动、冻结与来源追溯",
-    "sourceName": "平台端租户整体流水-demo.html",
+  "merchant-collect-daily": {
+    "label": "商户代收日终统计",
+    "code": "06-03",
+    "group": "06 报表模块",
+    "description": "跨租户商户代收日终统计",
+    "sourceName": "平台端 · 日终",
+    "sourceKey": "report",
+    "initialHash": "merchant-collect-daily",
+    "navId": "merchant-collect-daily",
+    "subgroup": "日终"
+  },
+  "merchant-payout-daily": {
+    "label": "商户代付日终统计",
+    "code": "06-04",
+    "group": "06 报表模块",
+    "description": "跨租户商户代付日终统计",
+    "sourceName": "平台端 · 日终",
+    "sourceKey": "report",
+    "initialHash": "merchant-payout-daily",
+    "navId": "merchant-payout-daily",
+    "subgroup": "日终"
+  },
+  "platform-collect-daily": {
+    "label": "平台代收日终统计",
+    "code": "06-05",
+    "group": "06 报表模块",
+    "description": "跨租户平台代收日终统计",
+    "sourceName": "平台端 · 日终",
+    "sourceKey": "report",
+    "initialHash": "platform-collect-daily",
+    "navId": "platform-collect-daily",
+    "subgroup": "日终"
+  },
+  "platform-payout-daily": {
+    "label": "平台代付日终统计",
+    "code": "06-06",
+    "group": "06 报表模块",
+    "description": "跨租户平台代付日终统计",
+    "sourceName": "平台端 · 日终",
+    "sourceKey": "report",
+    "initialHash": "platform-payout-daily",
+    "navId": "platform-payout-daily",
+    "subgroup": "日终"
+  },
+  "channel-pay-change": {
+    "label": "通道代收流水记录",
+    "code": "06-07",
+    "group": "06 报表模块",
+    "description": "跨租户通道代收流水记录",
+    "sourceName": "平台端 · 账户记录",
     "sourceKey": "ledger",
-    "initialHash": "ledger",
-    "navId": "ledger"
+    "initialHash": "channel-pay-change",
+    "navId": "channel-pay-change",
+    "subgroup": "账户记录"
+  },
+  "channel-payout-change": {
+    "label": "通道代付流水记录",
+    "code": "06-08",
+    "group": "06 报表模块",
+    "description": "跨租户通道代付流水记录",
+    "sourceName": "平台端 · 账户记录",
+    "sourceKey": "ledger",
+    "initialHash": "channel-payout-change",
+    "navId": "channel-payout-change",
+    "subgroup": "账户记录"
+  },
+  "merchant-collect-change": {
+    "label": "商户代收流水记录",
+    "code": "06-09",
+    "group": "06 报表模块",
+    "description": "跨租户商户代收流水记录",
+    "sourceName": "平台端 · 账户记录",
+    "sourceKey": "ledger",
+    "initialHash": "merchant-collect-change",
+    "navId": "merchant-collect-change",
+    "subgroup": "账户记录"
+  },
+  "merchant-payout-change": {
+    "label": "商户代付流水记录",
+    "code": "06-10",
+    "group": "06 报表模块",
+    "description": "跨租户商户代付流水记录",
+    "sourceName": "平台端 · 账户记录",
+    "sourceKey": "ledger",
+    "initialHash": "merchant-payout-change",
+    "navId": "merchant-payout-change",
+    "subgroup": "账户记录"
+  },
+  "merchant-payout-prepay-change": {
+    "label": "商户代付预付记录",
+    "code": "06-11",
+    "group": "06 报表模块",
+    "description": "跨租户商户代付预付记录",
+    "sourceName": "平台端 · 账户记录",
+    "sourceKey": "ledger",
+    "initialHash": "merchant-payout-prepay-change",
+    "navId": "merchant-payout-prepay-change",
+    "subgroup": "账户记录"
+  },
+  "merchant-collect-prepay-change": {
+    "label": "商户代收预付记录",
+    "code": "06-12",
+    "group": "06 报表模块",
+    "description": "跨租户商户代收预付记录",
+    "sourceName": "平台端 · 账户记录",
+    "sourceKey": "ledger",
+    "initialHash": "merchant-collect-prepay-change",
+    "navId": "merchant-collect-prepay-change",
+    "subgroup": "账户记录"
   },
   "orders": {
     "label": "全局订单查询",

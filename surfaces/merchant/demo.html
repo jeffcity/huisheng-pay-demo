@@ -1919,6 +1919,7 @@
       payout: merchantBusinessGrantScenario === 'payout-stopped' ? 'stopped' : 'active'
     };
     const pageNames = { home: '首页', collect: '代收与退款', payout: '代付订单', wallet: '余额流水与资金申请', recon: '每日对账', integration: '对接信息', children: '子商户数据', access: '账号与权限', notificationBots: '通知机器人配置', notificationConfigs: '消息通知配置' };
+    try { window.HSFeeWallets = window.parent.HSFeeWallets; } catch (_) {}
     let currentMerchantAccount = { account: '', name: '未登录', authenticated: false, tenantId: '', tenantName: '', merchantId: '', merchantName: '', accountStatus: 'unknown', tenantStatus: 'unknown', merchantStatus: 'unknown', roleNames: [], permissions: new Set(), permissionCodes: new Set(), dataScope: null, dataAccess: { sensitive: false, export: false, exportActionCount: 0 }, permissionVersion: 0, sessionVersion: 0 };
     const toast = document.getElementById('toast');
     let toastTimer;
@@ -2587,7 +2588,7 @@
     let pendingRoleData = null;
     let pendingMerchantRoleAction = null;
     const merchantPermissionCatalog = [
-      { id: 'home', label: '首页', description: '当前商户概览', itemType: 'page', visible: true, enabled: true, href: '#home', pagePermission: 'merchant.dashboard.view', actions: [] },
+      { id: 'home', label: '首页', description: '当前商户概览', itemType: 'page', visible: true, enabled: true, href: '#home', pagePermission: 'merchant.dashboard.view', actions: [{ code: 'merchant.dashboard.query', label: '查询首页数据' }] },
       { id: 'collect', label: '代收与退款', description: '当前商户代收订单与退款申请', itemType: 'page', visible: true, enabled: true, href: '#collect', pagePermission: 'merchant.collect.view', actions: [
         { code: 'merchant.collect.create', label: '创建代收' },
         { code: 'merchant.refund.apply', label: '提交退款申请' },
@@ -5078,6 +5079,13 @@
           showMerchantFormError(form, '商户订单号已存在，请更换后重新提交', 'newPayoutNo');
           return;
         }
+        let tenantAdmission;
+        try { tenantAdmission = window.HSFeeWallets?.canAccept(currentMerchantAccount.tenantId, { direction: '代付', amount: amount.toFixed(2) }); }
+        catch (_) { tenantAdmission = { allowed: false, reason: '暂时无法核对所属租户的钱包状态，请稍后重试' }; }
+        if (!tenantAdmission || !tenantAdmission.allowed) {
+          showMerchantFormError(form, tenantAdmission?.reason || '暂时无法核对所属租户的钱包状态', 'newPayoutAmount');
+          return;
+        }
         const fee = amount * 0.002;
         const maskedName = `${escapeHtml(payeeName.slice(0, 1))}*`;
         const maskedAccount = `**** ${escapeHtml(account.slice(-4))}`;
@@ -6408,7 +6416,146 @@
   @media(max-width:1100px) { .base-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); } .base-stats { grid-template-columns:repeat(3,minmax(0,1fr)); } }
   @media(max-width:760px) { .app-shell { display:grid; grid-template-columns:170px minmax(0,1fr); } .sidebar { display:block; width:auto; height:100vh; overflow-y:auto; } .sidebar .nav-list { display:grid; width:auto; } .sidebar .nav-item { width:100%; min-width:0; } .brand { padding-left:14px; } .base-group summary,.nav-item { padding-left:14px; } .base-group .nav-item { padding-left:24px; } .workspace { padding:12px; } .base-columns,.base-metrics.three { grid-template-columns:1fr; } .base-quick { grid-template-columns:1fr 1fr; } .topbar { padding:10px; top:0; } .top-user-label,.top-actions:before { display:none; } .base-info th { width:100px; } }
   @media(max-width:500px) { .app-shell { display:block; } .sidebar { position:relative; height:auto; max-height:210px; border-bottom:1px solid #e6e8ee; } .sidebar .brand,.side-foot,.nav-label { display:none; } .base-metrics { grid-template-columns:1fr; } .base-stats { grid-template-columns:1fr 1fr; } .base-filter input,.base-filter select { width:100%; } }
+  .home-overview-heading { display:flex; align-items:center; justify-content:space-between; gap:16px; }
+  .home-overview-heading h1 { margin:0 0 5px; font-size:23px; font-weight:600; color:#172a32; }
+  .home-overview-heading p { margin:0; font-size:13px; color:#60717d; }
+  .home-demo-label { color:#60717d; font-size:11px; padding:5px 9px; background:#eaf0f2; border-radius:5px; white-space:nowrap; }
+  .home-query { padding:15px 18px 10px; }
+  .home-query form { display:flex; align-items:center; flex-wrap:wrap; gap:10px; }
+  .home-query label { font-size:12px; color:#445b66; }
+  .home-query input { width:168px; min-height:34px; font-size:13px; padding:5px 10px; }
+  .home-query .btn { min-height:34px; padding:5px 18px; }
+  .home-query-note,.home-query-feedback { color:#60717d; font-size:11px; line-height:1.6; }
+  .home-query-note { margin-left:auto; }
+  .home-query-feedback { margin:7px 0 0; min-height:18px; }
+  .home-business-heading { display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin:0 0 11px; }
+  .home-business-heading h2 { margin:0; font-size:16px; font-weight:600; color:#172a32; }
+  .home-business-heading > span { color:#60717d; font-size:11px; }
+  .home-business-heading i { margin:0 5px; font-style:normal; color:#98a7ae; }
+  .home-stat-grid { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:10px; }
+  .home-stat { min-width:0; min-height:90px; box-sizing:border-box; padding:15px 14px 13px; border:1px solid #e4e9ed; border-radius:8px; background:#fff; }
+  .home-stat > span { display:block; color:#586c78; font-size:11px; line-height:18px; }
+  .home-stat strong { display:block; color:#263c47; font-size:21px; line-height:28px; margin-top:6px; font-weight:600; font-variant-numeric:tabular-nums; letter-spacing:-.015em; overflow-wrap:anywhere; }
+  .home-stat.balance { background:#edf4f5; border-color:#d7e6e9; }
+  .home-stat.balance strong { color:#245665; }
+  .home-stat.success strong { color:#217455; }
+  .home-quick-links { padding:16px 18px; }
+  .home-quick-links .base-title { font-size:14px; }
+  .home-quick-links .base-quick { display:flex; flex-wrap:wrap; gap:8px; padding-top:12px; }
+  .home-quick-links .base-quick .btn { padding:7px 11px; font-size:12px; }
+  @media(max-width:1280px) { .home-stat-grid { grid-template-columns:repeat(4,minmax(0,1fr)); } }
+  @media(max-width:1040px) { .home-query-note { margin-left:0; flex-basis:100%; } }
+  @media(max-width:900px) { .home-stat-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+  @media(max-width:620px) { .home-stat-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; } .home-stat { padding:12px 10px; } .home-stat strong { font-size:19px; } .home-query { padding:12px; } }
 </style>
+
+<style id="merchant-tidewell-theme">
+  :root {
+    --color-primary:#245665; --color-primary-hover:#193f4b; --color-primary-light:#e8f1f3;
+    --color-bg-page:#f3f6f7; --color-bg-surface:#fff; --color-bg-subtle:#f6f8f9;
+    --color-text-primary:#172a32; --color-text-secondary:#536b77; --color-text-tertiary:#647a85;
+    --color-border:#e3eaed; --color-border-strong:#cfdae0;
+    --sidebar-width:220px; --topbar-height:64px;
+    --merchant-ink:#172a32; --merchant-muted:#5e7480; --merchant-accent:#245665;
+    --merchant-active:#173b47; --merchant-hover:#edf3f5; --merchant-line:#e5ecef;
+  }
+  .sidebar { padding:0 10px 16px; background:#fff; border-right:1px solid var(--merchant-line); }
+  .sidebar .brand { position:sticky; top:0; z-index:2; display:flex; justify-content:flex-start; gap:10px; min-height:72px; padding:12px 8px; background:#fff; }
+  .sidebar .brand > div { display:block; }
+  .sidebar .brand .logo { display:grid; width:32px; height:32px; border-radius:9px; background:var(--merchant-accent); font-size:11px; font-weight:600; }
+  .sidebar .brand strong { color:var(--merchant-ink); font-size:14px; line-height:21px; font-weight:600; }
+  .sidebar .brand span { color:var(--merchant-muted); font-size:11px; line-height:17px; }
+  .sidebar .nav-label { display:block; padding:8px 12px; color:var(--merchant-muted); font-size:11px; }
+  .sidebar .nav-list { display:grid; gap:2px; width:auto; margin:0 0 12px; }
+  .sidebar .nav-item { display:flex; align-items:center; justify-content:flex-start; width:100%; min-width:0; min-height:38px; height:auto; gap:10px; padding:8px 12px; border:0; border-radius:7px!important; color:#445b66; font-size:13px; line-height:20px; }
+  .sidebar .nav-item span { display:block; }
+  .sidebar .nav-icon { display:block; flex:0 0 18px; width:18px; height:18px; margin:0; stroke:currentColor; fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+  .sidebar .nav-item:hover { color:var(--merchant-ink); background:var(--merchant-hover); }
+  .sidebar .nav-item.active { color:#fff; background:var(--merchant-active); font-weight:500; }
+  .sidebar .base-group { margin:7px 0; }
+  .sidebar .base-group summary { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 12px; color:var(--merchant-muted); font-size:12px; line-height:20px; border-radius:7px; transition:background-color .16s ease-out; }
+  .sidebar .base-group summary:hover { color:var(--merchant-ink); background:var(--merchant-hover); }
+  .sidebar .base-group summary::after { content:''; width:6px; height:6px; flex:0 0 6px; margin:0 3px 3px 0; border-right:1px solid currentColor; border-bottom:1px solid currentColor; transform:rotate(45deg); transition:transform .16s ease-out; }
+  .sidebar .base-group[open] summary::after { transform:rotate(225deg); margin-top:4px; }
+  .sidebar .base-group .nav-item { padding-left:20px; font-size:12px; margin:2px 0; }
+  .sidebar .side-foot { display:block; margin:16px 2px 0; padding:14px 10px 0; color:var(--merchant-muted); background:none; border:0; border-top:1px solid var(--merchant-line); border-radius:0; font-size:11px; line-height:1.8; }
+  .sidebar .side-foot strong { color:var(--merchant-ink); font-weight:600; }
+  .topbar { height:64px; min-height:64px; padding:0 24px; background:#fff; border-color:var(--merchant-line); backdrop-filter:none; }
+  .breadcrumb { font-size:12px; color:var(--merchant-muted); }
+  .breadcrumb #crumb { color:var(--merchant-ink); font-weight:500; }
+  .top-actions { width:auto; gap:10px; }
+  .top-actions:before { color:var(--merchant-muted); font-size:11px; }
+  .top-user-label { color:#445b66; font-size:12px; font-weight:500; }
+  .top-actions .btn { font-size:12px; min-height:30px; padding:4px 10px; }
+  .avatar { color:var(--merchant-accent); background:#eaf2f4; border:1px solid #d7e4e8; border-radius:9px; font-size:12px; font-weight:600; }
+  .base-visited { min-height:34px; box-sizing:border-box; align-items:center; padding:4px 24px; gap:10px; border-color:var(--merchant-line); }
+  .base-visited button { min-height:26px!important; padding:3px 8px; border:0; border-radius:5px!important; background:transparent; color:var(--merchant-muted); font-size:11px; }
+  .base-visited button:hover { color:var(--merchant-accent); background:var(--merchant-hover); }
+  .base-visited button[aria-current] { color:var(--merchant-accent); background:#e8f1f3; font-weight:500; }
+  .base-visited-item button+button { margin:0; padding:3px 5px; color:var(--merchant-muted); }
+  .workspace { padding:24px; background:var(--color-bg-page); }
+  .baseline-root { gap:22px; }
+  .base-card { border-color:var(--merchant-line); border-radius:10px; box-shadow:none; }
+  .base-title { color:var(--merchant-ink); }
+  .base-muted { color:var(--merchant-muted); }
+  .base-summary b { color:var(--merchant-accent); }
+  .base-tabs button { color:var(--merchant-muted); }
+  .base-tabs button[aria-selected=true] { color:var(--merchant-accent); border-bottom-color:var(--merchant-accent); }
+  .base-scroll tr:hover td { background:#f4f8f9; }
+  .base-scroll th,.base-scroll td { color:#445b66; }
+  .base-empty { color:var(--merchant-muted)!important; }
+  .base-pagination { color:var(--merchant-muted); }
+  .btn { border-color:var(--color-border-strong); box-shadow:none; }
+  .btn:hover { background:var(--merchant-hover); border-color:#9bb8c2; }
+  .btn.link { color:var(--merchant-accent); }
+  .btn.primary { color:#fff; background:var(--merchant-accent); border-color:var(--merchant-accent); }
+  .btn.primary:hover { background:#193f4b; border-color:#193f4b; }
+  :focus-visible,[role="dialog"] :focus { outline:2px solid var(--merchant-accent)!important; box-shadow:0 0 0 3px #fff!important; outline-offset:2px!important; }
+  .sidebar .nav-item.active:focus-visible { outline-color:#badde7!important; outline-offset:-4px!important; box-shadow:none!important; }
+  .home-overview-heading h1 { font-size:24px; letter-spacing:-.02em; }
+  .home-overview-heading p { color:var(--merchant-muted); }
+  .home-demo-label { background:#e9f0f2; color:var(--merchant-muted); }
+  .home-query { border:0; background:#fff; padding:15px 18px 11px; }
+  .home-query input { border-color:var(--color-border-strong); background:#f9fbfb; }
+  .home-query .btn { border-radius:7px!important; }
+  .home-business-heading { margin-bottom:12px; }
+  .home-business-heading h2 { font-size:16px; letter-spacing:-.01em; }
+  .home-stat-grid { gap:12px; }
+  .home-stat { padding:16px; min-height:94px; border:1px solid var(--merchant-line); border-radius:10px; box-shadow:none; background:#fff; }
+  .home-stat > span { color:var(--merchant-muted); }
+  .home-stat strong { margin-top:8px; color:var(--merchant-ink); font-size:22px; line-height:28px; letter-spacing:-.02em; }
+  .home-stat.balance { background:var(--merchant-accent); border-color:var(--merchant-accent); }
+  .home-stat.balance > span { color:#e0eef2; }
+  .home-stat.balance strong { color:#fff; }
+  .home-stat.success strong { color:#236f55; }
+  .home-quick-links .base-quick .btn { background:#f6f9fa; border-color:var(--merchant-line); color:var(--merchant-accent); }
+  .home-quick-links .base-quick .btn:hover { background:#e8f1f3; border-color:#aac5ce; }
+  @media(max-width:1180px) { .sidebar .brand { justify-content:flex-start; } }
+  @media(max-width:760px) {
+    .sidebar { display:block; width:auto; height:100vh; padding:0 8px 14px; }
+    .sidebar .brand { padding:10px 6px; min-height:64px; }
+    .sidebar .nav-item { gap:8px; padding-left:9px; padding-right:9px; font-size:12px; }
+    .sidebar .base-group summary { padding-left:9px; padding-right:9px; }
+    .sidebar .base-group .nav-item { padding-left:13px; font-size:11px; }
+    .sidebar .base-group .nav-icon { width:15px; height:15px; flex-basis:15px; }
+    .sidebar .side-foot { display:none; }
+    .topbar { padding:10px 14px; top:0; gap:10px; }
+    .top-actions { width:auto; gap:6px; }
+    .workspace { padding:18px 14px; }
+    .base-visited { padding:4px 14px; }
+    .home-stat { padding:13px 11px; }
+    .home-stat strong { font-size:20px; }
+  }
+  @media(max-width:500px) {
+    .sidebar { position:relative; height:auto; max-height:210px; border-bottom:1px solid var(--merchant-line); }
+    .sidebar .brand,.sidebar .nav-label,.sidebar .side-foot { display:none; }
+    .home-stat-grid { gap:8px; }
+    .home-stat strong { font-size:19px; }
+    .home-overview-heading h1 { font-size:21px; }
+    .baseline-root { gap:18px; }
+  }
+</style>
+
 <script>
 (() => {
   const routes = {
@@ -6421,11 +6568,22 @@
   const defaults = {home:'home',collect:'collect',payout:'payout',wallet:'accountCollect',recon:'dailyCollect',integration:'integration'};
   const views = {}, state = {}; let activeRoute = ''; let requestedRoute = ''; let visited = []; let baselineAccount = ''; let refreshTimer;
   const esc = value => escapeHtml(String(value));
-  const nav = id => `<button type="button" class="nav-item" data-page="${routes[id][1]}" data-baseline-route="${id}">${routes[id][0]}</button>`;
+  const merchantNavPaths = {
+    home:'M3 10 12 3l9 7v10H15v-7H9v7H3Z',
+    order:'M5 4h14v16H5ZM8 8h8M8 12h8M8 16h5',
+    wallet:'M4 7h16v13H4ZM4 7V4h13v3M15 12h5v5h-5Z',
+    report:'M5 3v18h16M9 16v-5M14 16V7M19 16v-8',
+    integration:'M8 8 4 12l4 4M16 8l4 4-4 4M14 5l-4 14'
+  };
+  const merchantNavIcon = id => {
+    const key=id==='home'?'home':id==='integration'?'integration':id.startsWith('daily')?'report':/^(account|prepay|fee)|serviceFee|withdrawal/.test(id)?'wallet':'order';
+    return `<svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="${merchantNavPaths[key]}"/></svg>`;
+  };
+  const nav = id => `<button type="button" class="nav-item" data-page="${routes[id][1]}" data-baseline-route="${id}">${merchantNavIcon(id)}<span>${routes[id][0]}</span></button>`;
   const groups = [['订单管理',['collect','payout','cryptoCollect','cryptoPayout','manual']],['账户记录',['accountCollect','accountPayout']],['预付记录',['prepayCollect','prepayPayout','serviceFee','feeRecharge','feeFlow']],['日终统计',['dailyCollect','dailyPayout']]];
   const firstNav = document.querySelector('.sidebar .nav-list');
   firstNav.innerHTML = nav('home') + groups.map(([label,ids]) => `<details class="base-group" open><summary>${label}</summary>${ids.map(nav).join('')}</details>`).join('') + nav('withdrawal') + nav('integration');
-  document.querySelector('.brand strong').textContent = '汇盛'; document.querySelector('.brand span').textContent = '商户端';
+  document.querySelector('.brand strong').textContent = '汇盛支付'; document.querySelector('.brand span').textContent = '商户端';
   document.querySelector('.nav-label').textContent = '业务导航';
   document.querySelectorAll('.nav-label')[1].textContent = '账号与通知中心';
   const visitedBar = document.createElement('nav'); visitedBar.className='base-visited'; visitedBar.setAttribute('aria-label','已打开页面'); document.querySelector('.topbar').after(visitedBar);
@@ -6439,13 +6597,71 @@
   const routeButton = (id,label=routes[id][0]) => `<button type="button" class="btn" data-baseline-route="${id}" data-page="${routes[id][1]}">${label}</button>`;
   function tabs(values,selected,kind='currency') { return `<div class="base-tabs" role="tablist">${values.map(([value,label])=>`<button type="button" role="tab" aria-selected="${value===selected}" data-base-tab="${value}" data-base-kind="${kind}">${label}</button>`).join('')}</div>`; }
   function metric(label,value,note='') { return `<div class="base-card base-metric"><span>${label}</span><strong>${value}</strong><small class="base-muted">${note||'演示账户 · 非实时资金'}</small></div>`; }
+  const merchantHomeDemoDate = '2026-11-02';
+  // Amounts are integer cents. These fixtures belong only to the home preview.
+  const merchantHomeSamples = {
+    '2026-11-02': {
+      collect:{paid:28642000,paidCount:472,rejected:380000,rejectedCount:6,pending:150000,pendingCount:2,reversed:0,reversedCount:0,fee:142860,singleFee:23600},
+      payout:{paid:17380000,paidCount:426,rejected:420000,rejectedCount:10,pending:240000,pendingCount:4,reversed:0,reversedCount:0,fee:63840,singleFee:85200}
+    },
+    '2026-11-01': {
+      collect:{paid:26400000,paidCount:455,rejected:260000,rejectedCount:8,pending:120000,pendingCount:3,reversed:80000,reversedCount:2,fee:132000,singleFee:22750},
+      payout:{paid:16150000,paidCount:408,rejected:310000,rejectedCount:7,pending:180000,pendingCount:3,reversed:50000,reversedCount:1,fee:59200,singleFee:81600}
+    },
+    '2026-10-31': {
+      collect:{paid:25168000,paidCount:438,rejected:180000,rejectedCount:5,pending:90000,pendingCount:2,reversed:0,reversedCount:0,fee:125840,singleFee:21900},
+      payout:{paid:14920000,paidCount:392,rejected:220000,rejectedCount:6,pending:160000,pendingCount:4,reversed:0,reversedCount:0,fee:54720,singleFee:78400}
+    }
+  };
+  function merchantHomeDateValid(value) {
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(value||'')) return false;
+    const time=new Date(value+'T00:00:00Z');
+    return Number.isFinite(time.getTime()) && time.toISOString().slice(0,10)===value && value<=merchantHomeDemoDate;
+  }
+  function merchantHomeStats(date,business) {
+    if(!merchantHomeDateValid(date)||!['collect','payout'].includes(business)) return null;
+    const row=merchantHomeSamples[date]?.[business];
+    const data=row?{...row}:{paid:0,paidCount:0,rejected:0,rejectedCount:0,pending:0,pendingCount:0,reversed:0,reversedCount:0,fee:0,singleFee:0};
+    return {...data,total:data.paid+data.rejected+data.pending+data.reversed,totalCount:data.paidCount+data.rejectedCount+data.pendingCount+data.reversedCount,available:business==='collect'?92314050:57139000,hasSample:!!row};
+  }
+  function homeStatCard(label,value,{kind='',help=''}={}) {
+    return `<div class="home-stat ${kind}"><span${help?` title="${esc(help)}"`:''}>${esc(label)}</span><strong>${esc(value)}</strong></div>`;
+  }
+  function homeBusinessPreview(business,date) {
+    const data=merchantHomeStats(date,business), isCollect=business==='collect';
+    const money=value=>(value/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+    const count=value=>value.toLocaleString('en-US');
+    const name=isCollect?'代收':'代付', done=isCollect?'已收':'已付';
+    const cards=[
+      homeStatCard('手续费（元）',money(data.fee),{help:'所选日期的手续费合计，单费另列。'}),
+      homeStatCard('单费（元）',money(data.singleFee),{help:'所选日期按笔收取的固定费用合计。'}),
+      homeStatCard(isCollect?'当前代收余额（元）':'当前剩余预付（元）',money(data.available),{kind:'balance',help:'当前可用金额，不随统计日期变化。'}),
+      homeStatCard('总订单金额（元）',money(data.total)),
+      homeStatCard(done+'金额（元）',money(data.paid),{kind:'success'}),
+      homeStatCard('总订单数（笔）',count(data.totalCount)),
+      homeStatCard(done+'订单数（笔）',count(data.paidCount),{kind:'success'}),
+      homeStatCard('驳回订单数（笔）',count(data.rejectedCount)),
+      homeStatCard('驳回金额（元）',money(data.rejected)),
+      homeStatCard('冲正订单数（笔）',count(data.reversedCount)),
+      homeStatCard('冲正金额（元）',money(data.reversed))
+    ];
+    return `<section class="home-business-preview" aria-label="${name}数据预览" data-home-business="${business}"><div class="home-business-heading"><h2>${name}数据</h2><span>CNY <i>·</i> ${esc(date)}</span></div><div class="home-stat-grid">${cards.join('')}</div></section>`;
+  }
   function home() {
-    return `<section class="base-card base-welcome"><h1>欢迎回来，商户管理员</h1><p>汇盛商户端 · 账户概览与当日业务数据</p></section>
-      <div class="base-metrics">${metric('代收余额','¥ 923,140.50')}${metric('代付余额（预付款）','¥ 571,390.00')}${metric('USDT 余额','12,680.00')}${metric('USDT 代付剩余余额','8,420.00')}</div>
-      <div class="base-metrics three">${metric('USDT 代付手续费可用余额','360.00','手续费专用可用余额')}${metric('今日成功率','96.82%','演示统计，不用于实际结算')}<div class="base-card base-metric"><span>自有地址累计收款</span><strong>6,850.00 USDT</strong><small class="base-muted">此金额不可提现</small><div style="margin-top:12px">${routeButton('cryptoCollect','查看订单')}</div></div></div>
-      <div class="base-columns">${['代收账户','代付账户'].map((label,i)=>`<section class="base-card"><h2 class="base-title">${label}</h2><div class="base-account"><div>人民币（CNY）<small>${i?'商户预付':'商户余额'}</small></div><strong>¥ ${i?'571,390.00':'923,140.50'}</strong></div><div class="base-account"><div>USDT<small>${i?'商户 USDT 预付':'商户 USDT 余额'}</small></div><strong>${i?'8,420.00':'12,680.00'} USDT</strong></div></section>`).join('')}</div>
-      ${['当日业务数据 · CNY','USDT 代付','USDT 代收'].map((label,i)=>`<section class="base-card"><h2 class="base-title">${label}</h2><div class="base-stats">${['代付剩余余额','今日跑量','今日订单量','商户服务费','今日成功订单量','订单成功率'].map((key,j)=>`<div><span class="base-muted">${key}</span><strong>${[['571,390.00','173,800.00','440','638.40','426','96.82%'],['8,420.00','2,680.00','40','12.00','38','95.00%'],['12,680.00','4,210.00','52','18.00','50','96.15%']][i][j]}</strong></div>`).join('')}</div></section>`).join('')}
-      <section class="base-card"><h2 class="base-title">快捷入口</h2><div class="base-quick">${['collect','payout','prepayCollect','prepayPayout','dailyCollect','withdrawal','cryptoCollect','serviceFee'].map(id=>routeButton(id)).join('')}</div></section>`;
+    const date=state.home?.date||merchantHomeDemoDate;
+    const allowed=currentMerchantAccount.permissionCodes.has('merchant.dashboard.query');
+    const sample=!!merchantHomeSamples[date];
+    return `<section class="home-overview-heading"><div><h1>数据概览</h1><p>${esc(currentMerchantAccount.merchantName||'当前商户')} · CNY 代收与代付</p></div><span class="home-demo-label">模拟数据</span></section>
+      <section class="base-card home-query"><form data-home-query data-required-permission="merchant.dashboard.query"><label for="merchantHomeDate">统计日期</label><input class="control" id="merchantHomeDate" name="date" type="date" value="${esc(date)}" max="${merchantHomeDemoDate}" required><button class="btn primary" type="submit" data-required-permission="merchant.dashboard.query" ${allowed?'':'disabled'}>查询</button><span class="home-query-note">UTC+8 · 余额显示当前值，其余指标按日统计</span></form><p class="home-query-feedback" role="status" aria-live="polite">${sample?'示例日期：2026-10-31 至 2026-11-02':'所选日期暂无业务记录，交易指标显示为 0。'}</p></section>
+      ${homeBusinessPreview('collect',date)}${homeBusinessPreview('payout',date)}
+      <section class="base-card home-quick-links"><h2 class="base-title">快捷入口</h2><div class="base-quick">${['collect','payout','prepayCollect','prepayPayout','dailyCollect','dailyPayout'].map(id=>routeButton(id)).join('')}</div></section>`;
+  }
+  function queryMerchantHome(form) {
+    if(!merchantAuthorizeCurrentOperation('merchant.dashboard.query',{pageId:'home'}).ok) return blockMerchantPermission('merchant.dashboard.query');
+    const date=form.elements.date.value;
+    if(!merchantHomeDateValid(date)) {form.closest('.home-query').querySelector('.home-query-feedback').textContent='请选择有效的统计日期，不能晚于示例截止日。';return;}
+    state.home.date=date; requestedRoute='home'; render('home');
+    showToast('已查询 '+date+' 的代收与代付数据');
   }
   const orderCols = ['平台订单号','商户订单号','通道','产品','订单金额','交易金额','状态','提交时间','结束时间'];
   const accountCols = ['序号','平台订单号','商户订单号','币种','类型','账变前余额','变动金额','账变后余额','变动时间','备注'];
@@ -6462,7 +6678,7 @@
     dailyCollect:dailyCols, dailyPayout:dailyCols,
     withdrawal:['序号','单号','提现金额','手续费','审核图片','到账金额','币种','收款钱包地址','协议类型','状态','备注','操作备注','提交时间','操作时间','操作人']
   };
-  function initial(id) { return {currency:id==='accountCollect'?'USDT':'CNY',pool:'main',query:{},page:1,size:10}; }
+  function initial(id) { return {currency:id==='accountCollect'?'USDT':'CNY',pool:'main',query:{},page:1,size:10,date:merchantHomeDemoDate}; }
   function sampleRows(id,s) {
     if(id==='cryptoCollect' && s.pool==='self') return [];
     const daily=id.startsWith('daily'), crypto=id.startsWith('crypto'), account=id.startsWith('account'), prepay=id.startsWith('prepay');
@@ -6543,13 +6759,7 @@
         if(id==='withdrawal') form.insertAdjacentHTML('afterbegin',selectFilter('protocol',['协议类型','TRC20','ERC20']));
         for(const [key,value] of Object.entries(s.query)) if(form.elements[key]) form.elements[key].value=value;
       }
-      if(id==='home') {
-        const quick=view.root.querySelector('.base-quick');quick.insertAdjacentHTML('beforeend',routeButton('feeRecharge')+routeButton('feeFlow')+routeButton('integration'));
-        view.root.querySelectorAll('.base-stats')[2].firstElementChild.firstElementChild.textContent='商户 USDT 余额';
-        const self=view.root.querySelector('.base-metrics.three .base-metric:last-child');
-        self.insertAdjacentHTML('beforeend','<div class="base-actions" style="margin-top:12px"><button class="btn" data-base-period="today" type="button">今日</button><button class="btn" data-base-period="month" type="button">本月</button><button class="btn" data-base-period="all" type="button">全部</button></div>');
-        self.querySelector('[data-baseline-route]').dataset.baseSelf='';
-      }
+
     }
     document.getElementById('crumb').textContent=label; document.title=label+' - 汇盛商户端 Demo';
     if(!visited.includes(id)) visited.push(id);
@@ -6595,6 +6805,11 @@
   },true);
   document.addEventListener('submit',event=>{
     const form=event.target;
+    if(form.matches('[data-home-query]')) {
+      event.preventDefault();
+      queryMerchantHome(form);
+      return;
+    }
     if(form.matches('[data-base-recharge]')) {event.preventDefault();if(!merchantAuthorizeCurrentOperation('merchant.fund_application.create',{pageId:'wallet'}).ok)return blockMerchantPermission('merchant.fund_application.create');form.querySelector('.base-feedback').textContent='演示订单已生成：DEMO-FEE-PREVIEW · 不提供收款地址或支付二维码，不改变余额。';}
     if(form.matches('[data-base-filter]')) { event.preventDefault(); const s=state[activeRoute];s.query=Object.fromEntries(new FormData(form));s.page=1;refreshResults(form.closest('.baseline-root'),s); }
     if(form.matches('[data-base-manual]')) { event.preventDefault(); if(!merchantAuthorizeCurrentOperation('merchant.payout.apply',{pageId:'payout'}).ok)return blockMerchantPermission('merchant.payout.apply'); const output=form.querySelector('.base-feedback'); output.textContent=form.elements.otp.value==='382641'?'演示校验通过；未发送订单、未扣款。':'演示验证码不匹配，请输入 382641。'; }

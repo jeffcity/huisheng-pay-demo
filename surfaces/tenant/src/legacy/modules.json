@@ -31,22 +31,6 @@
     "sourceName": "01-商户运营 / 代付商户管理",
     "initialHash": "merchant-payout"
   },
-  "merchantFunding": {
-    "label": "商户资金申请",
-    "group": "商户运营",
-    "module": "merchants",
-    "sourceKey": "merchants",
-    "sourceName": "01-商户运营 / 01-商户管理",
-    "initialHash": "merchant-funding"
-  },
-  "merchantRate": {
-    "label": "商户费率",
-    "group": "商户运营",
-    "module": "merchants",
-    "sourceKey": "merchants",
-    "sourceName": "01-商户运营 / 01-商户管理",
-    "initialHash": "merchant-rate"
-  },
   "channels": {
     "label": "已授权通道商",
     "group": "通道管理",
@@ -72,28 +56,12 @@
     "initialHash": "payout"
   },
   "wallets": {
-    "label": "租户钱包",
+    "label": "系统费",
     "group": "资金中心",
     "module": "overview",
     "sourceKey": "overview",
     "sourceName": "00-总览 / 业务运营 / 资金中心 / 运营中心",
     "initialHash": "wallets"
-  },
-  "funds": {
-    "label": "资金划转",
-    "group": "资金中心",
-    "module": "overview",
-    "sourceKey": "overview",
-    "sourceName": "00-总览 / 业务运营 / 资金中心 / 运营中心",
-    "initialHash": "funds"
-  },
-  "ledger": {
-    "label": "账户流水",
-    "group": "资金中心",
-    "module": "overview",
-    "sourceKey": "overview",
-    "sourceName": "00-总览 / 业务运营 / 资金中心 / 运营中心",
-    "initialHash": "ledger"
   },
   "payout-channel-daily": {
     "label": "代付通道日终统计",

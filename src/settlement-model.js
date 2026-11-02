@@ -11,16 +11,20 @@ const hsSettlementSeeds={"tenants":[{"id":"HS-TEN-001","name":"汇盛东南亚"}
     const model={
       tenants:clone(tenants),
       registerTenant(t){const existing=tenants.find(item=>item.id===t.id);if(existing)existing.name=t.name;else tenants.push({id:t.id,name:t.name});this.tenants=clone(tenants);},
+      sourceOrders(){return clone(orders);},
       getOrderRows(){return liveOrderRows===null?null:clone(liveOrderRows);},
       syncOrders(rows){
         const converted=[];
         for(const row of rows){let tenantId=orderTenantIds.get(row[0]);if(!tenantId){const matches=tenants.filter(t=>t.name===row[1]);if(matches.length===1)tenantId=matches[0].id;}if(!tenantId||!String(row[5]).startsWith('CNY '))continue;orderTenantIds.set(row[0],tenantId);converted.push({id:row[0],tenantId,direction:row[3],status:row[4],amount:String(row[5]).slice(4).replaceAll(',',''),completedAt:row[8]});}
         liveOrderRows=clone(rows);orders.splice(0,orders.length,...converted);
+        for(const order of converted)if(order.status==='成功')owner.__HSFeeWallets?.recordSuccess(order);
       },
       preview(tenantId,month){
         monthKey(month);const tenant=tenants.find(t=>t.id===tenantId);if(!tenant)throw new Error('租户不存在');
         const policies=owner.__HSProviderDemo.tenantBilling(tenantId),seen=new Set(),selected=[];
         for(const o of orders){if(o.tenantId!==tenantId||o.status!=='成功'||!['代收','代付'].includes(o.direction)||o.completedAt.slice(0,7)!==month||seen.has(o.id))continue;seen.add(o.id);selected.push(o);}
+        const walletStatement=owner.__HSFeeWallets?.reconcile(tenantId,month);
+        if(walletStatement)return {tenantId,tenantName:tenant.name,month,currency:'CNY',...walletStatement,orders:clone(selected),reconciliationOnly:true};
         const lines=['collection','payout'].map((key,index)=>{
           const direction=['代收','代付'][index],items=selected.filter(o=>o.direction===direction),amount=items.reduce((n,o)=>n+cents(o.amount),0n),policy=policies[key];let fee=null;
           if(!items.length)fee=0n;

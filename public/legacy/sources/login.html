@@ -1431,6 +1431,8 @@
       }
     };
 
+    const platformReportNavigation = Object.entries(window.HSPlatformReports?.configs||{}).map(([id,c])=>({id,label:c.title,type:'page',pagePermission:c.permissions.view,href:window.location.pathname+'?platformPage='+encodeURIComponent(id)+'#'+id,visible:true,enabled:true}));
+    const platformReportQueryPermissions = Object.values(window.HSPlatformReports?.configs||{}).map(c=>c.permissions.query);
     const platformLoginNavigation = [
       { id: "home", label: "首页数据看板", type: "page", pagePermission: "platform.dashboard.view", href: "../00-平台端功能导航索引/平台端功能导航索引-demo.html#home", visible: true, enabled: true },
       { id: "tenants", label: "租户管理", type: "page", pagePermission: "platform.tenant.view", href: "../01-租户管理/平台端租户管理-demo.html", visible: true, enabled: true },
@@ -1438,8 +1440,7 @@
       { id: "wallets", label: "租户结算单", type: "page", pagePermission: "platform.wallet.view", href: "../00-平台端功能导航索引/平台端功能导航索引-demo.html#wallets", visible: true, enabled: true },
       { id: "funds", label: "资金待办", type: "page", pagePermission: "platform.fund_task.view", href: "../00-平台端功能导航索引/平台端功能导航索引-demo.html#funds", visible: true, enabled: true },
       { id: "channels", label: "通道管理", type: "page", pagePermission: "platform.channel.view", href: "../03-通道管理/平台端通道管理-demo.html", visible: true, enabled: true },
-      { id: "report", label: "租户整体报表", type: "page", pagePermission: "platform.report.view", href: "../00-平台端功能导航索引/平台端功能导航索引-demo.html#report", visible: true, enabled: true },
-      { id: "ledger", label: "租户整体流水", type: "page", pagePermission: "platform.ledger.view", href: "../00-平台端功能导航索引/平台端功能导航索引-demo.html#ledger", visible: true, enabled: true },
+      ...platformReportNavigation,
       { id: "orders", label: "全局订单查询", type: "page", pagePermission: "platform.order.view", href: "../00-平台端功能导航索引/平台端功能导航索引-demo.html#orders", visible: true, enabled: true },
       { id: "audit", label: "审计日志", type: "page", pagePermission: "platform.audit.view", href: "../00-平台端功能导航索引/平台端功能导航索引-demo.html#audit", visible: true, enabled: true },
       { id: "tickets", label: "租户协同工单", type: "page", pagePermission: "platform.ticket.view", href: "../00-平台端功能导航索引/平台端功能导航索引-demo.html#tickets", visible: true, enabled: true },
@@ -1452,14 +1453,15 @@
       { id: "empty-route-sentinel", label: "空地址哨兵", type: "page", pagePermission: "platform.invalid.empty", href: "", visible: true, enabled: true }
     ];
 
-    const platformPagePermissionOrder = platformLoginNavigation.slice(0, 14).map((item) => item.pagePermission);
+    const platformNavigablePages = platformLoginNavigation.filter(item=>item.type==='page'&&item.visible&&item.enabled&&item.href&&!item.pagePermission.startsWith('platform.invalid.'));
+    const platformPagePermissionOrder = platformNavigablePages.map((item) => item.pagePermission);
     const knownPlatformPagePermissions = new Set(platformPagePermissionOrder);
-    const allowedPlatformRouteHrefs = new Set(platformLoginNavigation.slice(0, 14).map((item) => item.href));
+    const allowedPlatformRouteHrefs = new Set(platformNavigablePages.map((item) => item.href));
     const platformReviewPermissionFactOverrides = new Map();
     const reviewPermissionFactFields = new Set(["status", "factStatus", "expiresAt", "permissionVersion", "menuVersion", "roles", "dataScope", "sensitiveAccess"]);
     const platformLoginAccounts = new Map([
-      ["platform.ops.demo", { account: "platform.ops.demo", permissionVersion: 12, menuVersion: 8, roles: [{ enabled: true, pagePermissions: platformPagePermissionOrder, actionPermissions: ["platform.audit.export"] }] }],
-      ["platform.ops", { account: "platform.ops", permissionVersion: 12, menuVersion: 8, roles: [{ enabled: true, pagePermissions: platformPagePermissionOrder, actionPermissions: [] }] }],
+      ["platform.ops.demo", { account: "platform.ops.demo", permissionVersion: 12, menuVersion: 8, roles: [{ enabled: true, pagePermissions: platformPagePermissionOrder, actionPermissions: [...platformReportQueryPermissions, "platform.audit.export"] }] }],
+      ["platform.ops", { account: "platform.ops", permissionVersion: 12, menuVersion: 8, roles: [{ enabled: true, pagePermissions: platformPagePermissionOrder, actionPermissions: [...platformReportQueryPermissions] }] }],
       ["first.login.demo", { account: "first.login.demo", permissionVersion: 3, menuVersion: 8, roles: [{ enabled: true, pagePermissions: ["platform.dashboard.view"], actionPermissions: [] }] }],
       ["risk.chen", { account: "risk.chen", permissionVersion: 9, menuVersion: 8, roles: [{ enabled: true, pagePermissions: ["platform.tenant.view", "platform.audit.view"], actionPermissions: ["platform.audit.export"] }] }],
       ["funds.only.demo", { account: "funds.only.demo", permissionVersion: 4, menuVersion: 8, roles: [{ enabled: true, pagePermissions: ["platform.fund_task.view"], actionPermissions: ["platform.fund_review.execute"] }] }],
@@ -2008,7 +2010,7 @@
         if (view === "bind") setPanelTag("warning", "需绑定");
         return true;
       },
-      getNavigationOrder: () => structuredClone(platformLoginNavigation.slice(0, 14)),
+      getNavigationOrder: () => structuredClone(platformNavigablePages),
       getNavigationCandidates: () => structuredClone(platformLoginNavigation),
       getPermissionFact: getPlatformLoginPermissionFact,
       setReviewPermissionFact: setReviewPlatformPermissionFact,

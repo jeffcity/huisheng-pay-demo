@@ -23,7 +23,7 @@ const hsProviderFixtures = {"typeRows": [{"id": "CH-FIAT-IN-001", "channelNo": "
       tenantBilling(id) {return clone(billing.get(id)||emptyBilling());},
       validateTenantBilling(settings) {return normalizeBilling(settings);},
       setTenantBilling(id,settings) {if(!tenants.some(t=>t.id===id))throw new Error('未知租户');const normalized=normalizeBilling(settings);billing.set(id,normalized);},
-      billingFormula(policy) {if(!policy?.value)return '未设置';return policy.mode==='percentage'?`成功交易金额 × ${policy.value}%`:`成功交易笔数 × CNY ${policy.value} / 笔`;},
+      billingFormula(policy) {if(!policy?.value)return '未设置';return policy.mode==='percentage'?`每笔成功订单金额 × ${policy.value}%`:`成功订单笔数 × CNY ${policy.value} / 笔`;},
       billingPreview(policy) {if(!policy?.value)return null;const settings=normalizeBilling({collection:policy,payout:policy}),p=settings.collection;const cents=p.mode==='percentage'?(1000000n*scaled(p.value,4)+500000n)/1000000n:100n*scaled(p.value,2);return `${cents/100n}.${String(cents%100n).padStart(2,'0')}`;},
       tenantData(id = 'HS-TEN-001') {
         if (!tenants.some(t => t.id === id)) throw new Error('未知租户');

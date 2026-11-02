@@ -6,23 +6,24 @@
   <title>汇盛支付统一 Demo</title>
   <link rel="icon" href="data:,">
   <style>
-    :root{--primary:#3246d2;--soft:#eef0ff;--ink:#1d2433;--muted:#5c6575;--line:#e5e6eb;--surface:#fff;--canvas:#f2f3f5;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;color:var(--ink);background:var(--canvas)}
+    :root{--primary:#245665;--soft:#eaf2f4;--ink:#172a32;--muted:#536b77;--line:#e5ecef;--surface:#fff;--canvas:#f3f6f7;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;color:var(--ink);background:var(--canvas)}
     *{box-sizing:border-box}html,body{height:100%;margin:0;overflow:hidden}
-    .unified-demo{height:100%;display:grid;grid-template-rows:64px minmax(0,1fr)}
-    .topbar{display:flex;align-items:center;gap:32px;padding:0 22px;background:var(--surface);border-bottom:1px solid var(--line)}
-    .brand{display:flex;align-items:center;gap:12px;white-space:nowrap;font-size:18px;font-weight:700}
-    .brand-mark{width:34px;height:34px;display:grid;place-items:center;border-radius:8px;background:var(--primary);color:white;font-size:13px;letter-spacing:.04em}
-    .brand small{margin-left:8px;font-size:12px;font-weight:500;color:var(--muted)}
-    .tabs{display:flex;align-self:stretch;gap:4px}
-    .tabs button{min-width:92px;padding:0 20px;border:0;border-bottom:3px solid transparent;background:transparent;color:var(--muted);font:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:background .16s,color .16s}
+    .unified-demo{height:100%;display:grid;grid-template-rows:56px minmax(0,1fr)}
+    .topbar{display:flex;align-items:center;gap:36px;padding:0 20px;background:var(--surface);border-bottom:1px solid var(--line)}
+    .brand{display:flex;align-items:center;gap:10px;white-space:nowrap;font-size:16px;font-weight:650}
+    .brand-mark{width:30px;height:30px;display:grid;place-items:center;border-radius:8px;background:var(--primary);color:white;font-size:11px;letter-spacing:.04em}
+    .brand small{margin-left:9px;font-size:11px;font-weight:400;color:var(--muted)}
+    .tabs{display:flex;align-items:center;gap:4px;padding:3px;background:var(--canvas);border:1px solid var(--line);border-radius:9px}
+    .tabs button{min-width:80px;height:32px;padding:0 17px;border:0;border-radius:6px;background:transparent;color:var(--muted);font:inherit;font-size:12px;font-weight:500;cursor:pointer;transition:background .16s ease-out,color .16s ease-out}
     .tabs button:hover{background:var(--soft);color:var(--primary)}
-    .tabs button[aria-selected="true"]{color:var(--primary);background:var(--soft);border-bottom-color:var(--primary)}
-    button:focus-visible{outline:3px solid var(--primary);outline-offset:-4px}
+    .tabs button[aria-selected="true"]{color:#fff;background:var(--primary)}
+    button:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+    .tabs button[aria-selected="true"]:focus-visible{outline-color:#b9dce5;outline-offset:-4px}
     .workspace{position:relative;min-height:0;overflow:hidden}
     .workspace iframe{display:block;border:0;width:100%;height:100%;background:var(--canvas)}
     .status{position:absolute;inset:0;display:grid;place-content:center;gap:14px;text-align:center;background:var(--canvas);color:var(--muted);font-size:14px;z-index:1}
     .status[hidden]{display:none}.status button{padding:10px 16px;background:var(--surface);border:1px solid var(--line);border-radius:6px;color:var(--primary);cursor:pointer;font:inherit}
-    @media(max-width:650px){.unified-demo{grid-template-rows:104px minmax(0,1fr)}.topbar{padding:0 12px;gap:0;flex-wrap:wrap}.brand{height:52px;width:100%;font-size:16px}.brand-mark{width:28px;height:28px}.tabs{height:52px;flex:1}.tabs button{flex:1;min-width:0;padding:0 16px}}
+    @media(max-width:650px){.unified-demo{grid-template-rows:96px minmax(0,1fr)}.topbar{padding:0 12px;gap:0;flex-wrap:wrap}.brand{height:48px;width:100%;font-size:15px}.brand-mark{width:27px;height:27px}.tabs{height:38px;margin-bottom:10px;flex:1}.tabs button{flex:1;min-width:0;height:30px;padding:0 12px}}
     @media(prefers-reduced-motion:reduce){*{transition:none!important}}
   </style>
 </head>

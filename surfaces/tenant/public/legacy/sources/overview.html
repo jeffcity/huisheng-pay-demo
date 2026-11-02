@@ -21020,6 +21020,48 @@
     .wallet-card-grid .wallet-pipe-node:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(29,33,41,.08); }
     .wallet-action-primary { border-color: var(--primary); background: var(--primary); color: #fff; font-weight: 700; }
     .wallet-action-primary:hover { border-color: var(--primary-hover); background: var(--primary-hover); color: #fff; }
+    .system-fee-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .system-fee-card { min-width: 0; padding: 22px 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow-soft); }
+    .system-fee-card-heading { display: flex; align-items: center; gap: 10px; }
+    .system-fee-card-heading h2 { margin: 0; font-size: 15px; font-weight: 600; color: var(--text-secondary); }
+    .system-fee-icon { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 8px; background: var(--primary-light); color: var(--primary); }
+    .system-fee-icon .lucide { width: 18px; height: 18px; }
+    .system-fee-amount { display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px; margin-top: 18px; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+    .system-fee-amount > span { color: var(--text-secondary); font-size: 14px; font-weight: 600; }
+    .system-fee-amount strong { font-size: 30px; line-height: 1.25; letter-spacing: -.4px; }
+    .tenant-fee-wallet { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; padding: 22px 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+    .tenant-fee-wallet h2 { margin: 0; font-size: 15px; font-weight: 600; }
+    .system-fee-ledger-count { margin: 0; padding: 12px 18px; color: var(--text-secondary); font-size: 12px; }
+    .system-fee-ledger th, .system-fee-ledger td { padding: 10px !important; font-size: 12px; }
+    .system-fee-ledger { min-width: 1600px !important; }
+    .system-fee-ledger .mono { white-space: nowrap; }
+    .system-fee-daily { min-width: 1050px !important; }
+    .system-fee-daily th, .system-fee-daily td { padding: 10px !important; font-size: 12px; white-space: nowrap; text-align: right; }
+    .system-fee-daily th:first-child { text-align: left; }
+    .system-fee-daily thead th { white-space: normal; }
+    .system-fee-daily thead tr:first-child th[colspan] { text-align: center; }
+    .system-fee-daily tfoot { background: var(--primary-light); font-weight: 600; }
+
+    .wallet-ledger-search { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; padding: 16px 18px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .wallet-ledger-search label { display: grid; gap: 6px; min-width: 140px; flex: 1; font-size: 12px; color: var(--text-secondary); }
+    .wallet-ledger-search label:first-child { flex: 1.5; min-width: 190px; }
+    .wallet-ledger-search .input { width: 100%; min-width: 0; }
+    .wallet-ledger-search-actions { display: flex; gap: 8px; }
+    .system-fee-daily-search label, .system-fee-daily-search label:first-child { flex: 0 1 190px; min-width: 140px; }
+
+    .system-fee-period { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 16px 18px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+    .system-fee-period label { font-size: 14px; font-weight: 600; }
+    .system-fee-period .input { width: 180px; min-width: 0; }
+    .system-fee-amount .system-fee-unset { font-size: 20px; font-weight: 600; line-height: 1.5; color: var(--text-secondary); }
+    .system-fee-details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 12px; margin: 20px 0 0; padding-top: 18px; border-top: 1px solid var(--border); }
+    .system-fee-details dt { margin: 0 0 5px; color: var(--text-secondary); font-size: 12px; }
+    .system-fee-details dd { margin: 0; overflow-wrap: anywhere; font-size: 14px; font-weight: 600; }
+
+    @media (max-width: 560px) {
+      .system-fee-summary { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+      .system-fee-card { padding: 18px 20px; }
+    }
+
     .wallet-recent-ledger { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-soft); overflow: hidden; }
     .wallet-recent-ledger .wallet-section-head { align-items: center; padding: 17px 20px; background: #f8fafc; }
     .wallet-recent-ledger .wallet-section-head h2 { font-size: 17px; }
@@ -21440,6 +21482,10 @@
     body .blue-order-page .compact-order-table td:first-child>.mono,body .blue-order-page .compact-order-table td:nth-child(2)>.mono{word-break:normal;overflow-wrap:anywhere}
     body .blue-order-page .compact-order-table .mono{font-size:11px;line-height:16px;word-break:break-all}
     body .blue-order-page .compact-order-table .stack{gap:4px}
+    body .blue-order-page .compact-order-table .order-time-stack{display:grid;gap:4px}
+    body .blue-order-page .compact-order-table .order-time-line{display:grid;grid-template-columns:32px minmax(0,1fr);gap:2px;align-items:baseline;font-size:11px;line-height:17px;white-space:nowrap}
+    body .blue-order-page .compact-order-table .order-time-label{color:var(--muted);font-size:11px}
+    body .blue-order-page .compact-order-table .order-time-value{font-variant-numeric:tabular-nums;white-space:nowrap;overflow-wrap:normal;word-break:normal}
     body .blue-order-page .compact-order-table .stack>span{min-width:0;overflow-wrap:anywhere}
     body .blue-order-page .compact-order-table .btn-link{min-height:24px!important;padding:0 2px;font-size:12px;line-height:20px}
     body .blue-order-page .compact-order-table .tag{font-size:11px;padding:1px 5px;white-space:normal}
@@ -21493,8 +21539,6 @@
         <div class="nav-group">
           <div class="nav-group-title">商户运营</div>
           <button class="nav-button" type="button" data-nav="商户管理"><i data-lucide="building-2"></i><span>商户管理</span></button>
-          <button class="nav-button" type="button" data-nav="商户资金申请"><i data-lucide="wallet-cards"></i><span>商户资金申请</span></button>
-          <button class="nav-button" type="button" data-nav="商户费率"><i data-lucide="percent"></i><span>商户费率</span></button>
         </div>
         <div class="nav-group">
           <div class="nav-group-title">业务运营</div>
@@ -21504,9 +21548,7 @@
         </div>
         <div class="nav-group">
           <div class="nav-group-title">资金中心</div>
-          <button class="nav-button" type="button" data-nav="平台钱包"><i data-lucide="landmark"></i><span>平台钱包</span></button>
-          <button class="nav-button" type="button" data-nav="资金划转"><i data-lucide="arrow-left-right"></i><span>资金划转</span></button>
-          <button class="nav-button" type="button" data-nav="账户流水"><i data-lucide="list-tree"></i><span>账户流水</span></button>
+          <button class="nav-button" type="button" data-nav="平台钱包"><i data-lucide="landmark"></i><span>系统费</span></button>
           <button class="nav-button" type="button" data-nav="导出任务"><i data-lucide="download"></i><span>导出任务</span></button>
         </div>
         <div class="nav-group">
@@ -21713,11 +21755,7 @@
                 </div>
               </div>
               <div class="panel-body">
-                <div class="kv-grid">
-                  <div>CNY 代收可用</div><div class="mono">959,520.00</div>
-                  <div>CNY 代付可用</div><div class="mono">735,680.08</div>
-                  <div>CNY 提款可用</div><div class="mono">300,000.00</div>
-                  <div>平台服务费</div><div class="mono">CNY 29,880.42</div>
+                <div class="kv-grid" id="tenantFeeHomeSummary">
                   <div>数据更新</div><div>UTC+8 · 1 分钟内，可手动刷新</div>
                 </div>
               </div>
@@ -24654,6 +24692,9 @@
       pendingSourceNavigation: "",
       notificationSegment: "merchant",
       walletLedgerWindow: "hour",
+      systemFeeMonth: "2026-07",
+      systemFeeDailyFilters: { from: "", to: "" },
+      walletLedgerFilters: { keyword: "", type: "all", from: "", to: "" },
       walletLedgerWallet: "",
       walletLedgerFromCard: false,
       businessGrants: {
@@ -26798,6 +26839,13 @@
       return `<div class="stack"><span>${escapeHtml(submittedAt)}</span><span class="muted">${escapeHtml(callbackAt)}</span></div>`;
     }
 
+    function blueCollectOrderTimeCell(submittedAt, paidAt, callbackAt) {
+      return `<div class="order-time-stack">${[["提交", submittedAt], ["支付", paidAt], ["回调", callbackAt]].map(([label, value]) => {
+        const text = !value || ["-", "未付"].includes(value) ? "—" : String(value);
+        return `<div class="order-time-line"><span class="order-time-label">${label}：</span><span class="order-time-value">${escapeHtml(text)}</span></div>`;
+      }).join("\n")}</div>`;
+    }
+
     function blueCollectActionCell({ repair = true, block = true } = {}) {
       return `<details class="order-more">
         <summary class="btn btn-primary">更多</summary>
@@ -26853,9 +26901,9 @@
             ["处理中订单数", "3", ""],
             ["处理中金额", "CNY 20,800.00", ""]
           ],
-          columns: ["系统订单号", "通道订单号/商家订单号", "商户名/号", "通道", "平台产品", "交易金额", "状态", "通知状态", "提交时间/回调时间", "IP", "操作"],
+          columns: ["系统订单号", "通道订单号/商家订单号", "商户名/号", "通道", "平台产品", "交易金额", "订单状态", "通知状态", "提交/支付/回调时间", "IP", "操作"],
           tableMinWidth: 1070,
-          columnWidths: [126,150,84,96,100,86,64,72,128,100,64],
+          columnWidths: [126,150,84,96,100,86,64,72,164,100,64],
           rows: [
             [
               `<span class="mono">HS-C-260717-000031</span>`,
@@ -26866,7 +26914,7 @@
               `<strong class="mono">12,840.00</strong>`,
               blueOrderTag("待支付", "orange"),
               blueOrderTag("未通知", "gray"),
-              blueOrderTimeCell("2026-07-17 10:42:00", "未付"),
+              blueCollectOrderTimeCell("2026-07-17 10:42:00", "", "未付"),
               `<span class="mono">198.51.100.31</span>`,
               blueCollectActionCell()
             ],
@@ -26879,7 +26927,7 @@
               `<strong class="mono">8,600.00</strong>`,
               blueOrderTag("成功", "green"),
               blueOrderTag("通知成功", "green"),
-              blueOrderTimeCell("2026-07-17 14:31:08", "2026-07-17 14:33:20"),
+              blueCollectOrderTimeCell("2026-07-17 14:31:08", "2026-07-17 14:32:50", "2026-07-17 14:33:20"),
               `<span class="mono">198.51.100.45</span>`,
               blueCollectActionCell({ repair: false })
             ],
@@ -26892,7 +26940,7 @@
               `<strong class="mono">4,520.00</strong>`,
               `<div class="stack">${blueOrderTag("异常", "red")}<span class="negative">通道返回格式异常</span></div>`,
               blueOrderTag("未通知", "gray"),
-              blueOrderTimeCell("2026-07-17 15:48:26", "-"),
+              blueCollectOrderTimeCell("2026-07-17 15:48:26", "", "-"),
               `<span class="mono">203.0.113.92</span>`,
               blueCollectActionCell()
             ],
@@ -26905,7 +26953,7 @@
               `<strong class="mono">12,800.00</strong>`,
               blueOrderTag("处理中", "blue"),
               blueOrderTag("未通知", "gray"),
-              blueOrderTimeCell("2026-07-17 15:36:04", "-"),
+              blueCollectOrderTimeCell("2026-07-17 15:36:04", "", "-"),
               `<span class="mono">198.51.100.82</span>`,
               blueCollectActionCell()
             ],
@@ -26918,7 +26966,7 @@
               `<strong class="mono">1,500.00</strong>`,
               blueOrderTag("失败", "red"),
               blueOrderTag("通知成功", "green"),
-              blueOrderTimeCell("2026-07-16 18:16:30", "2026-07-16 18:20:18"),
+              blueCollectOrderTimeCell("2026-07-16 18:16:30", "", "2026-07-16 18:20:18"),
               `<span class="mono">198.51.100.92</span>`,
               blueCollectActionCell()
             ],
@@ -26931,7 +26979,7 @@
               `<strong class="mono">980.00</strong>`,
               blueOrderTag("已过期", "gray"),
               blueOrderTag("未通知", "gray"),
-              blueOrderTimeCell("2026-07-16 18:38:25", "未付"),
+              blueCollectOrderTimeCell("2026-07-16 18:38:25", "", "未付"),
               `<span class="mono">198.51.100.99</span>`,
               blueCollectActionCell()
             ]
@@ -27540,92 +27588,85 @@
         </section>`;
     }
 
-    function renderWalletLedgerPage() {
-      const walletName = state.walletLedgerWallet;
-      return `
-        <section class="page-head" data-astryx="PageHeader">
-          <div>
-            <h1 class="page-title">账户流水</h1>
-            <p class="page-subtitle">${walletName ? `查看${escapeHtml(walletName.replace(/^CNY /, ""))}的资金变动。` : "查看当前租户三个钱包的资金变动。"}</p>
-          </div>
-          <div class="page-actions" data-astryx="ActionGroup">
-            ${walletName ? `<button class="btn" type="button" data-action="back-to-wallets"><i data-lucide="arrow-left"></i>返回租户钱包</button>` : ""}
-            <button class="btn" type="button" data-action="refresh-page"><i data-lucide="refresh-cw"></i>刷新</button>
-          </div>
-        </section>
-        ${renderWalletLedgerPanel(walletName)}`;
+    function renderSystemFeeLedger() {
+      const filters = state.walletLedgerFilters;
+      const entries = window.HSFeeWallets?.queryLedger(currentTenantAccount.tenantId, filters) || [];
+      const cell = value => escapeHtml(value ?? '—');
+      return `<section class="wallet-recent-ledger" aria-label="钱包流水"><div class="wallet-section-head"><h2>钱包流水</h2></div>
+        <form id="tenantWalletLedgerSearch" class="wallet-ledger-search">
+          <label>订单号／流水号<input class="input" name="keyword" placeholder="输入订单号或流水号" value="${cell(filters.keyword)}"></label>
+          <label>流水类型<select class="input" name="type">${[['all','全部类型'],['collect','代收系统费'],['payout','代付系统费'],['increase','人工调增'],['decrease','人工调减']].map(([value,label])=>`<option value="${value}" ${filters.type===value?'selected':''}>${label}</option>`).join('')}</select></label>
+          <label>开始日期<input class="input" name="from" type="date" value="${cell(filters.from)}"></label>
+          <label>结束日期<input class="input" name="to" type="date" value="${cell(filters.to)}"></label>
+          <div class="wallet-ledger-search-actions"><button class="btn btn-primary" type="submit">查询</button><button class="btn" type="button" data-action="wallet-ledger-reset">重置</button></div>
+        </form>
+        <div class="table-wrap"><table class="rich-table system-fee-ledger"><thead><tr>${['流水单号','类型','原订单号 / 成功时间','原始订单金额（CNY）','计费方式 / 费率快照','变动金额（CNY）','扣费/调整时间（UTC+8）','变动前余额（CNY）','变动后余额（CNY）','操作人 / 原因','状态'].map(t=>`<th>${t}</th>`).join('')}</tr></thead><tbody>${entries.map(e=>`<tr><td class="mono">${cell(e.id)}</td><td>${e.type === '系统费' ? cell(e.direction)+'系统费' : cell(e.type)}</td><td><strong class="mono">${cell(e.orderId)}</strong>${e.succeededAt ? `<div class="muted mono">${cell(e.succeededAt)}</div>` : ''}</td><td class="mono">${cell(e.orderAmount)}</td><td>${e.type !== '系统费' ? '—' : !e.policy ? '未设置' : e.policy.mode === 'percentage' ? `交易百分比<br>${cell(e.policy.value)}%` : `按单笔<br>CNY ${cell(e.policy.value)} / 笔`}</td><td class="mono"><strong>${e.change === null ? '待计费' : cell(e.change)}</strong></td><td class="mono">${cell(e.occurredAt || '—')}</td><td class="mono">${cell(e.beforeBalance)}</td><td class="mono">${cell(e.afterBalance)}</td><td>${cell(e.operator)}<div class="muted">${cell(e.reason || '—')}</div></td><td>${cell(e.status)}</td></tr>`).join('') || '<tr><td colspan="11"><div class="empty-state">暂无符合条件的流水</div></td></tr>'}</tbody></table></div><p class="system-fee-ledger-count" role="status">共 ${entries.length} 条</p></section>`;
     }
 
+    function renderSystemFeeDaily() {
+      const filters = state.systemFeeDailyFilters;
+      const stats = window.HSFeeWallets?.daily(currentTenantAccount.tenantId, state.systemFeeMonth, filters);
+      const firstDate = `${state.systemFeeMonth}-01`;
+      const lastDay = new Date(`${firstDate}T00:00:00Z`);
+      lastDay.setUTCMonth(lastDay.getUTCMonth() + 1, 0);
+      const lastDate = lastDay.toISOString().slice(0,10);
+      const cell = value => escapeHtml(value ?? '—');
+      const values = row => [row.collection.count,row.collection.amount,row.collection.exactFee,row.payout.count,row.payout.amount,row.payout.exactFee,row.exactTotal,row.pendingCount].map(value=>`<td class="mono">${cell(value)}</td>`).join('');
+      return `<section class="wallet-recent-ledger" aria-label="系统费日统计"><div class="wallet-section-head"><h2>系统费日统计</h2></div>
+        <form id="tenantSystemFeeDailySearch" class="wallet-ledger-search system-fee-daily-search" aria-label="日统计日期查询">
+          <label>开始日期<input class="input" name="from" type="date" min="${firstDate}" max="${lastDate}" value="${cell(filters.from)}"></label>
+          <label>结束日期<input class="input" name="to" type="date" min="${firstDate}" max="${lastDate}" value="${cell(filters.to)}"></label>
+          <div class="wallet-ledger-search-actions"><button class="btn btn-primary" type="submit">查询</button><button class="btn" type="button" data-action="system-fee-daily-reset">重置</button></div>
+        </form><div class="table-wrap"><table class="rich-table system-fee-daily" aria-label="系统费日统计表"><thead><tr><th rowspan="2">日期（UTC+8）</th><th colspan="3" scope="colgroup">代收</th><th colspan="3" scope="colgroup">代付</th><th rowspan="2">已扣系统费合计（CNY）</th><th rowspan="2">待计费笔数</th></tr><tr>${['成功笔数','成功金额（CNY）','已扣系统费（CNY）','成功笔数','成功金额（CNY）','已扣系统费（CNY）'].map(label=>`<th scope="col">${label}</th>`).join('')}</tr></thead><tbody>${stats?.rows.length ? stats.rows.map(row=>`<tr><th scope="row" class="mono">${cell(row.date)}</th>${values(row)}</tr>`).join('') : `<tr><td colspan="9"><div class="empty-state">${filters.from || filters.to ? '暂无符合条件的日统计' : '本月暂无系统费统计'}</div></td></tr>`}</tbody>${stats?.rows.length ? `<tfoot><tr><th scope="row">合计</th>${values(stats.totals)}</tr></tfoot>` : ''}</table></div></section>`;
+    }
+
+    function tenantSystemFeeView() {
+      const model = window.HSTenantSettlements;
+      if (!model) return null;
+      const tenantId = currentTenantAccount.tenantId;
+      const saved = model.find(tenantId, state.systemFeeMonth);
+      return { statement: saved || model.preview(tenantId, state.systemFeeMonth), settled: Boolean(saved) };
+    }
+
+    // Wallet admission and charging rules live in HSFeeWallets; this view only presents balances, statistics and ledger data.
     function renderWalletShowcasePage() {
-      const canTransfer = currentTenantAccount.canTransfer;
-      const walletAggregate = Object.values(walletShowcaseData).reduce((acc, w) => {
-        acc.total = roundCny(acc.total + w.total);
-        acc.frozen = roundCny(acc.frozen + w.frozen);
-        acc.available = roundCny(acc.available + w.total - w.frozen);
-        return acc;
-      }, { total: 0, frozen: 0, available: 0 });
-      const walletCard = (source, tone) => {
-        const wallet = walletShowcaseData[source];
-        const available = formatMoney(wallet.total - wallet.frozen);
-        const statusMeta = walletStatusMeta(wallet.status);
-        const isActive = wallet.status === "active";
+      let view = null;
+      try { view = tenantSystemFeeView(); } catch (_) {}
+      const statement = view?.statement;
+      const wallet = window.HSFeeWallets?.wallet(currentTenantAccount.tenantId);
+
+      const card = direction => {
+        const line = statement?.lines.find(item => item.direction === direction);
+        const policy = line?.policy;
+        const percentage = policy?.mode === "percentage";
+        const configured = Boolean(policy && policy.value !== "");
+        const rate = !configured ? "未设置" : percentage ? `${escapeHtml(policy.value)}%` : `CNY ${escapeHtml(policy.value)} / 笔`;
+        const icon = direction === "代收" ? "arrow-down-left" : "arrow-up-right";
         return `
-        <article class="wallet-pipe-node wallet-pipe-node--${tone}${statusMeta.cardCls ? ` ${statusMeta.cardCls}` : ""}">
-          <div class="wallet-pipe-head">
-            <span class="wallet-pipe-chip wallet-chip--${tone}"><i data-lucide="${wallet.icon}"></i></span>
-            <div>
-              <div class="wallet-pipe-name">${wallet.name}</div>
-              <div class="wallet-pipe-status${statusMeta.cls ? ` ${statusMeta.cls}` : ""}"><i></i>${statusMeta.label}</div>
-            </div>
-          </div>
-          <div>
-            <div class="wallet-pipe-avail-label">可用余额</div>
-            <div class="wallet-pipe-avail"><span class="ccy">CNY</span>${available}</div>
-          </div>
-          <dl class="wallet-pipe-meta">
-            <div><dt>当前总额</dt><dd>${formatMoney(wallet.total)}</dd></div>
-            <div><dt>冻结</dt><dd>${formatMoney(wallet.frozen)}</dd></div>
-          </dl>
-          ${!isActive && statusMeta.note ? `<p class="modal-note" style="margin:0;">${statusMeta.note}</p>` : ""}
-          <div class="wallet-pipe-actions">
-            ${canTransfer && isActive ? `<button class="btn wallet-action-primary" type="button" data-action="internal-transfer" data-source="${source}"><i data-lucide="arrow-left-right"></i>发起划转</button>` : ""}
-            <button class="btn" type="button" data-action="wallet-ledger" data-wallet="${source}">流水</button>
-          </div>
-        </article>`;
+          <article class="system-fee-card" data-system-fee="${direction === "代收" ? "collect" : "payout"}">
+            <div class="system-fee-card-heading"><span class="system-fee-icon" aria-hidden="true"><i data-lucide="${icon}"></i></span><h2>${direction}系统费</h2></div>
+            <div class="system-fee-amount">${line?.exactFee != null ? `<span>CNY</span><strong>${escapeHtml(line.exactFee)}</strong>` : `<strong class="system-fee-unset">${line ? "待平台设置费率" : "暂无法统计"}</strong>`}</div>
+            <dl class="system-fee-details">
+              <div><dt>当前计费方式</dt><dd>${!policy ? "—" : percentage ? "交易百分比" : "按单笔"}</dd></div>
+              <div><dt>${percentage ? "费率" : "单笔费用"}</dt><dd>${rate}</dd></div>
+              <div><dt>成功笔数</dt><dd>${line ? `${line.count} 笔` : "—"}</dd></div>
+              <div><dt>成功金额</dt><dd>${line ? `CNY ${escapeHtml(line.amount)}` : "—"}</dd></div>
+            </dl>
+          </article>`;
       };
-
       return `
-        <section class="wallet-showcase" aria-label="租户钱包概览">
+        <section class="wallet-showcase" aria-label="系统费概览">
           <section class="page-head" data-astryx="PageHeader">
-            <div>
-              <h1 class="page-title">租户钱包</h1>
-              <p class="page-subtitle">查看当前租户的 CNY 代收、代付和提款钱包。</p>
-            </div>
-            <div class="page-actions" data-astryx="ActionGroup">
-              <button class="btn" type="button" data-action="refresh-page"><i data-lucide="refresh-cw"></i>刷新</button>
-            </div>
+            <div><h1 class="page-title">系统费</h1></div>
+            <div class="page-actions"><button class="btn" type="button" data-action="refresh-page"><i data-lucide="refresh-cw"></i>刷新</button></div>
           </section>
-
-          <section class="wallet-overview" aria-label="租户钱包">
-            <div class="wallet-overview-head">
-              <div class="wallet-overview-title">
-                <span class="wallet-overview-title-icon"><i data-lucide="wallet-cards"></i></span>
-                <div><h2>租户钱包</h2><p>当前租户 · 3 个 CNY 钱包</p></div>
-              </div>
-              <div class="wallet-overview-total">
-                <span>合计可用余额</span>
-                <strong>CNY ${formatMoney(walletAggregate.available)}</strong>
-                <small>总额 ${formatMoney(walletAggregate.total)} · 冻结 ${formatMoney(walletAggregate.frozen)}</small>
-              </div>
-            </div>
-            <div class="wallet-card-grid">
-              ${walletCard("CNY 代收钱包", "collect")}
-              ${walletCard("CNY 代付钱包", "payout")}
-              ${walletCard("CNY 提款钱包", "withdraw")}
-            </div>
+          <section class="tenant-fee-wallet" aria-label="租户统一钱包"><div><h2>租户钱包余额</h2><div class="system-fee-amount"><span>CNY</span><strong>${escapeHtml(wallet?.balance || "0.00")}</strong></div></div></section>
+          <section class="system-fee-period" aria-label="系统费统计月份">
+            <label for="tenantSystemFeeMonth">统计月份（UTC+8）</label><input class="input" id="tenantSystemFeeMonth" type="month" value="${escapeHtml(state.systemFeeMonth)}">
           </section>
-
-          ${renderWalletLedgerPanel()}
+          <section class="system-fee-summary" aria-label="代收和代付系统费统计">${card("代收")}${card("代付")}</section>
+          ${renderSystemFeeDaily()}
+          ${renderSystemFeeLedger()}
         </section>
       `;
     }
@@ -27680,7 +27721,7 @@
 
     function renderModulePage(pageName) {
       if (pageName === "平台钱包") return renderWalletShowcasePage();
-      if (pageName === "账户流水") return renderWalletLedgerPage();
+      if (pageName === "账户流水") return renderWalletShowcasePage();
       if (pageName === "法币代收订单" || pageName === "法币代付订单") return renderBlueTenantOrderPage(pageName);
       if (pageName === "全局订单追踪") return renderTenantGlobalOrderTrackingPage();
       const page = pageName === "资金划转"
@@ -27750,9 +27791,7 @@
 
     function openMerchantModule(pageName) {
       const hashes = {
-        "商户管理": "merchant-list",
-        "商户资金申请": "merchant-funding",
-        "商户费率": "merchant-rate"
+        "商户管理": "merchant-list"
       };
       const hash = hashes[pageName];
       if (!hash) return false;
@@ -27798,7 +27837,7 @@
       channels: "授权通道",
       wallets: "平台钱包",
       funds: "资金划转",
-      ledger: "账户流水",
+      ledger: "平台钱包",
       reconciliation: "总览工作台",
       exports: "导出任务",
       reports: "商户代收日终统计",
@@ -27811,9 +27850,10 @@
       tickets: "工单协同",
       notifications: "通知中心"
     };
-    const tenantPageHashes = Object.fromEntries(Object.entries(tenantHashPages).map(([hash, page]) => [page, hash]));
+    const tenantPageHashes = { ...Object.fromEntries(Object.entries(tenantHashPages).map(([hash, page]) => [page, hash])), "平台钱包": "wallets" };
 
     function renderNavPage(pageName) {
+      if (pageName === "资金划转" || pageName === "账户流水") pageName = "平台钱包";
       if (pageName === "日终报表") { showToast("该日终报表已移除"); return false; }
       if (pageName === "经营报表" || tenantDailyReportRoutes[pageName]) { openTenantDailyReport(pageName); return; }
       if (!canAccessTenantPage(pageName)) {
@@ -27949,8 +27989,13 @@
     }
 
     function renderMetrics() {
+      const feeWallet = window.HSFeeWallets?.wallet(currentTenantAccount.tenantId);
+      const feeMonth = window.HSFeeWallets?.reconcile(currentTenantAccount.tenantId, state.systemFeeMonth);
+      const summary = document.getElementById('tenantFeeHomeSummary');
+      if (summary && feeWallet) summary.innerHTML = `<div>租户钱包余额</div><div class="mono">CNY ${escapeHtml(feeWallet.balance)}</div><div>允许负余额</div><div>${feeWallet.allowNegative ? '已开启' : '未开启'}</div><div>代收已扣系统费</div><div class="mono">CNY ${escapeHtml(feeMonth.lines[0].exactFee)}</div><div>代付已扣系统费</div><div class="mono">CNY ${escapeHtml(feeMonth.lines[1].exactFee)}</div>`;
+
       const values = (metrics[state.mode] || metrics.all)
-        .map((item, index) => ({ item, index }))
+        .map((item, index) => ({ item: item[0] === "平台钱包可用" ? ["租户钱包余额", `CNY ${feeWallet?.balance || '0.00'}`, "统一钱包 · 系统费扣款", "wallet", "查看系统费"] : item[0] === "冻结金额" ? ["本月已扣系统费", `CNY ${feeMonth?.total || '0.00'}`, "逐单扣费 · 月底对账", "receipt-text", "不重复扣款"] : item, index }))
         .filter(({ item }) => !["当前业务待办", "当前异常", "租户费用毛差"].includes(item[0]));
       const notice = tenantHomeModuleNotice("metrics", "核心指标");
       document.getElementById("metricGrid").innerHTML = notice + (state.homeHealth.metrics.status === "empty" ? "" : values.map(({ item, index }) => `
@@ -28318,7 +28363,24 @@
       return appliedFilterCount || state.activePage === "通知中心" ? applyModuleFilters({ announce: false, resetPage: false }) : moduleTableRows().length;
     }
 
+    function openMergedWalletLedger(keyword = "", dates = {}) {
+      if (!canAccessTenantPage("平台钱包")) { showToast("当前账号没有目标页面权限"); return 0; }
+      state.walletLedgerFilters = { keyword: String(keyword || "").trim(), type: "all", from: dates.from || "", to: dates.to || "" };
+      state.sourceContext = null;
+      state.pendingSourceNavigation = "";
+      closeDrawer();
+      document.querySelector('[data-nav="平台钱包"]')?.click();
+      return window.HSFeeWallets.queryLedger(currentTenantAccount.tenantId, state.walletLedgerFilters).length;
+    }
+
     function enterModuleWithSource(target, context, filterIndex = null, filterValue = "") {
+      if (target === "账户流水") {
+        const items = Array.isArray(filterIndex) ? filterIndex : filterIndex === null ? [] : [{ index: Number(filterIndex), value: filterValue }];
+        const keyword = items.find(item => [0,1].includes(Number(item.index)))?.value || "";
+        const date = String(items.find(item => Number(item.index) === 4)?.value || "");
+        return openMergedWalletLedger(keyword, /^\d{4}-\d{2}-\d{2}$/.test(date) ? { from: date, to: date } : {});
+      }
+
       if (target === "日终报表") { showToast("该日终报表已移除"); return 0; }
       if (target === "经营报表" || tenantDailyReportRoutes[target]) { openTenantDailyReport(target); return 0; }
       if (!canAccessTenantPage(target)) {
@@ -29074,7 +29136,7 @@
           ["通道手续费", "0.00"],
           ["通道代理费", "0.00"],
           ["平台利润", "0.00"],
-          ["提交时间 / 回调时间", value(8)],
+          ["提交 / 支付 / 回调时间", value(8)],
           ["IP", value(9)],
           ["通知状态", noticeStatus],
           ["支付地址", channelOrderNo === "-" ? "-" : `https://pay.example.test/${systemOrderNo}`],
@@ -31105,6 +31167,9 @@
       }
 
       if (kind === "recreate-payout") {
+        const nextAmount = parseMoney(row.cells[2]?.textContent);
+        const admission = window.HSFeeWallets?.canAccept(currentTenantAccount.tenantId, { direction: "代付", amount: Number.isFinite(nextAmount) ? nextAmount.toFixed(2) : undefined });
+        if (admission && !admission.allowed) { showToast(admission.reason); return; }
         const reason = document.getElementById("reorderReason")?.value.trim() || "";
         const requestKey = document.getElementById("reorderRequestKey")?.value || "";
         const channel = document.getElementById("reorderChannel")?.value || "";
@@ -31537,11 +31602,12 @@
           const wallet = actionButton.dataset.wallet || "";
           state.walletLedgerWallet = wallet;
           state.walletLedgerFromCard = true;
-          document.querySelector('[data-nav="账户流水"]')?.click();
+          openMergedWalletLedger();
           showToast(`已打开${wallet || "当前钱包"}流水`);
         } else if (action === "ledger-source") {
           const target = actionButton.dataset.target;
           const relation = actionButton.dataset.relation || "";
+          if (target === "账户流水") { openMergedWalletLedger(relation === "-" ? "" : relation); return; }
           closeDrawer();
           document.querySelector(`[data-nav="${target}"]`)?.click();
           const sourceFilter = document.getElementById("moduleFilter0");
@@ -31552,6 +31618,7 @@
           const target = actionButton.dataset.target;
           const filter = actionButton.dataset.filter || "";
           const filterIndex = Number(actionButton.dataset.filterIndex || 0);
+          if (target === "账户流水") { openMergedWalletLedger(filter === "-" ? "" : filter); return; }
           closeDrawer();
           document.querySelector(`[data-nav="${target}"]`)?.click();
           document.querySelectorAll('main [data-astryx="FilterForm"] input').forEach((input) => { input.value = ""; });
@@ -31562,6 +31629,7 @@
           showToast(`已进入${target}${filter ? `并带入 ${filter}` : ""}，共 ${visible} 条结果`);
         } else if (action === "ledger-counterpart") {
           const ledgerNo = actionButton.dataset.ledger || "";
+          if (state.activePage === "平台钱包") { openMergedWalletLedger(ledgerNo); return; }
           closeDrawer();
           document.querySelectorAll('main [data-astryx="FilterForm"] input').forEach((input) => { input.value = ""; });
           document.querySelectorAll('main [data-astryx="FilterForm"] select').forEach((select) => { select.selectedIndex = 0; });
@@ -31693,6 +31761,12 @@
         } else if (action === "copy-payment") {
           const copied = await copyText(tenantVisibleRowSummary(actionButton));
           showToast(copied ? "已复制本订单付款信息和有效期，不包含其他订单资料" : "复制失败，请手动复制当前可见付款信息");
+        } else if (action === "system-fee-daily-reset") {
+          state.systemFeeDailyFilters = { from: "", to: "" };
+          renderNavPage("平台钱包");
+        } else if (action === "wallet-ledger-reset") {
+          state.walletLedgerFilters = { keyword: "", type: "all", from: "", to: "" };
+          renderNavPage("平台钱包");
         } else if (action === "refresh-page") {
           const sourceContext = state.sourceContext;
           const currentView = captureModuleViewState(state.activePage);
@@ -31787,7 +31861,40 @@
       }
     });
 
+    document.addEventListener("submit", (event) => {
+      if (event.target.id === "tenantSystemFeeDailySearch") {
+        event.preventDefault();
+        const filters = Object.fromEntries(['from','to'].map(key => [key, event.target.elements.namedItem(key).value]));
+        try { window.HSFeeWallets.daily(currentTenantAccount.tenantId, state.systemFeeMonth, filters); }
+        catch (error) { showToast(error.message); return; }
+        state.systemFeeDailyFilters = filters;
+        renderNavPage("平台钱包");
+        return;
+      }
+      if (event.target.id !== "tenantWalletLedgerSearch") return;
+      event.preventDefault();
+      const form = event.target;
+      const filters = Object.fromEntries(['keyword','type','from','to'].map(key => [key, form.elements.namedItem(key).value.trim()]));
+      try { window.HSFeeWallets.queryLedger(currentTenantAccount.tenantId, filters); }
+      catch (error) { showToast(error.message); return; }
+      state.walletLedgerFilters = filters;
+      renderNavPage("平台钱包");
+    });
+
     document.addEventListener("change", (event) => {
+      if (event.target.id === "tenantSystemFeeMonth") {
+        const month = event.target.value;
+        if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) {
+          event.target.value = state.systemFeeMonth;
+          showToast("请选择有效的统计月份");
+          return;
+        }
+        state.systemFeeMonth = month;
+        state.systemFeeDailyFilters = { from: "", to: "" };
+        renderNavPage("平台钱包");
+        return;
+      }
+
       if (event.target.matches("[data-business-evidence]")) {
         const existingCount = Number(event.target.dataset.existingCount || 0);
         applyBusinessEvidenceFeedback(event.target, validateBusinessEvidenceInput(event.target, { existingCount }));

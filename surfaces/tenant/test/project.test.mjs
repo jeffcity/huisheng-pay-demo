@@ -8,8 +8,8 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const modules = JSON.parse(await readFile(path.join(root, "src/legacy/modules.json"), "utf8"));
 
-test("页面注册表包含 37 个页面", () => {
-  assert.equal(Object.keys(modules).length, 37);
+test("页面注册表包含 33 个页面", () => {
+  assert.equal(Object.keys(modules).length, 33);
   assert.equal(modules.todos, undefined);
   assert.equal(modules.tickets, undefined);
 });
@@ -39,41 +39,17 @@ test("账户管理提供补单限制且不再展示数据范围列", async () =>
   const accounts = html.slice(html.indexOf('id="view-accounts"'), html.indexOf('id="view-roles"'));
   assert.doesNotMatch(accounts, /<th>数据范围<\/th>/);
   for (const key of ['repairDailyCount', 'repairDailyAmount', 'repairSingleAmount']) assert.ok(html.includes(key));
-  assert.match(html, /保存补单限制/);
+  assert.match(html, /modalShell\('补单设置'/);
+  assert.match(html, /type="submit">确认提交/);
 });
 
-test("租户钱包与资金划转导航及业务对象口径一致", async () => {
-  const [loginHtml, systemHtml, overviewHtml] = await Promise.all([
-    readFile(path.join(root, "public/legacy/sources/login.html"), "utf8"),
-    readFile(path.join(root, "public/legacy/sources/system.html"), "utf8"),
-    readFile(path.join(root, "public/legacy/sources/overview.html"), "utf8")
-  ]);
-  assert.equal(modules.wallets.label, "租户钱包");
-  assert.equal(modules.funds.label, "资金划转");
-  assert.equal(modules.funds.navLabel, undefined);
-  assert.match(overviewHtml, /<h1 class="page-title">租户钱包<\/h1>/);
-  assert.match(overviewHtml, /<h2>最近钱包流水<\/h2>/);
-  assert.match(overviewHtml, /<th>流水单号<\/th><th>时间<\/th><th>钱包<\/th><th>类型<\/th><th>金额<\/th><th>变动后余额<\/th><th>关联单号<\/th>/);
-  assert.match(overviewHtml, /function walletLedgerDirectionTag\(value\)/);
-  assert.match(overviewHtml, /columns: \["划转单号", "来源钱包", "目标钱包"/);
-  assert.match(overviewHtml, /"划转金额 \/ 手续费", "订单状态", "用途说明"/);
-  assert.doesNotMatch(overviewHtml, /订单状态 \/ 执行方式|<span class="muted">实时执行，无平台审核<\/span>/);
-  assert.doesNotMatch(overviewHtml, /划转编号 \/ 关联号|请输入划转编号或关联号|WCOR202607|record\.correlationId|result\.correlationId/);
-  assert.match(overviewHtml, /if \(pageName === "账户流水"\) return renderWalletLedgerPage\(\)/);
-  assert.match(overviewHtml, /data-action="back-to-wallets"[\s\S]*?返回租户钱包/);
-  assert.match(overviewHtml, /action === "back-to-wallets"[\s\S]*?data-nav="平台钱包"/);
-  assert.match(overviewHtml, /function transferTargets\(source\) \{[\s\S]*?filter\(\(walletName\) => walletName !== source\)/);
-  assert.doesNotMatch(overviewHtml, />发起提现<\/button>/);
-  assert.doesNotMatch(overviewHtml, /<select[^>]+data-wallet-role/);
-  assert.doesNotMatch(overviewHtml, /演示角色：/);
-  assert.doesNotMatch(overviewHtml, /来源商户 \/ 钱包|目标商户 \/ 钱包|发起商户钱包划转/);
-  assert.doesNotMatch(overviewHtml, /sourceMerchant|targetMerchant|walletTransferMerchants/);
-  assert.match(overviewHtml, /function walletTransferFingerprint\(\{ sourceWallet, targetWallet, amount, purpose \}\)/);
-  assert.match(loginHtml, /id: "funding", label: "资金划转"[^\n]+tenant\.wallet_transfer\.view/);
-  assert.match(systemHtml, /id:'funding',page:'资金划转'[^\n]+tenant\.wallet_transfer\.view/);
-  assert.doesNotMatch(systemHtml, /id:'funding',page:'资金申请'/);
-  assert.doesNotMatch(overviewHtml, /data-action="todo-source"[^>]+data-target="资金申请"/);
-  assert.doesNotMatch(overviewHtml, /type: "资金申请处理"[^\n]+target: "资金申请"/);
+test("系统费使用单一租户钱包与逐单扣费流水", async () => {
+  const html = await readFile(path.join(root, "public/legacy/sources/overview.html"), "utf8");
+  assert.equal(modules.wallets.label, "系统费");
+  assert.equal(modules.funds, undefined);
+  assert.equal(modules.ledger, undefined);
+  for (const text of ["租户钱包余额", "原订单号 / 成功时间", "原始订单金额（CNY）", "计费方式 / 费率快照", "变动金额（CNY）", "扣费/调整时间（UTC+8）", "变动后余额（CNY）"]) assert(html.includes(text));
+  assert.match(html, /window\.HSFeeWallets\?\.canAccept/);
 });
 
 test("登录页提供 2FA 已绑定与未绑定两条可验证流程", async () => {
