@@ -21475,6 +21475,16 @@
       }
     }
 
+    /* Scoped to tenant global tracking; CNY business order tables keep their existing layout. */
+    .tenant-tracking-page .rich-table{table-layout:fixed;width:100%}
+    .tenant-tracking-page .rich-table th,.tenant-tracking-page .rich-table td{min-width:0!important;padding:8px 6px;font-size:12px;line-height:17px;white-space:normal;overflow-wrap:anywhere}
+    .tenant-tracking-page .rich-table .mono{font-size:11px;white-space:normal;overflow-wrap:anywhere}
+    .tenant-tracking-page .rich-table td:nth-child(4) .mono{word-break:normal;overflow-wrap:normal}
+    .tenant-tracking-page .tracking-order-times{display:grid;gap:4px}
+    .tenant-tracking-page .tracking-order-time{display:grid;grid-template-columns:56px minmax(0,1fr);gap:2px;font-size:11px;line-height:17px;white-space:nowrap}
+    .tenant-tracking-page .tracking-time-label{color:var(--muted)}
+    .tenant-tracking-page .tracking-time-value{font-variant-numeric:tabular-nums;white-space:nowrap;overflow-wrap:normal;word-break:normal}
+
     /* Compact operator tables retain full content and the original copy / action controls. */
     body .blue-order-page .compact-order-table{table-layout:fixed;width:100%}
     body .blue-order-page .compact-order-table th,body .blue-order-page .compact-order-table td{min-width:0!important;width:auto;padding:8px 6px;font-size:12px;line-height:17px;white-space:normal;overflow-wrap:anywhere}
@@ -24980,6 +24990,16 @@
       ["通道观察", "3 条通道成功率低于本租户阈值", "tag-orange", "授权通道"],
     ];
 
+    const tenantTrackingTimeSamples = new Map([
+      ['HS-C-260717-000941', {createdAt:'2026-07-17 14:31:08',paidAt:'2026-07-17 14:32:50',channelCallbackAt:'2026-07-17 14:33:20',merchantNotifyAt:'2026-07-17 14:33:26'}],
+      ['HS-C-260717-000982', {createdAt:'2026-07-17 15:36:04',paidAt:'',channelCallbackAt:'2026-07-17 15:42:18',merchantNotifyAt:'2026-07-17 15:42:24'}],
+      ['HS-C-260717-000862', {createdAt:'2026-07-17 12:58:11',paidAt:'',channelCallbackAt:'',merchantNotifyAt:'2026-07-17 13:14:24'}],
+      ['HS-P-260717-000298', {createdAt:'2026-07-17 12:41:05',paidAt:'2026-07-17 12:43:00',channelCallbackAt:'2026-07-17 12:43:18',merchantNotifyAt:'2026-07-17 12:43:24'}],
+      ['HS-P-260717-002134', {createdAt:'2026-07-17 15:38:12',paidAt:'',channelCallbackAt:'2026-07-17 15:42:08',merchantNotifyAt:'2026-07-17 15:44:08'}],
+      ['HS-P-260717-000251', {createdAt:'2026-07-17 10:24:18',paidAt:'',channelCallbackAt:'2026-07-17 10:26:48',merchantNotifyAt:''}],
+      ['HS-R-260717-000077', {createdAt:'2026-07-17 11:20:06',paidAt:'2026-07-17 11:26:00',channelCallbackAt:'2026-07-17 11:26:12',merchantNotifyAt:'2026-07-17 11:26:40'}]
+    ]);
+
     const modulePages = {
       "代收退款审核": refundPageConfig,
       "授权通道": {
@@ -25230,16 +25250,17 @@
         ],
         summary: [],
         tableHint: "共 7 笔 · 异常 3 笔（当前筛选）",
-        tableMinWidth: 2240,
-        columns: ["平台订单号", "通道订单号 / 商户订单号", "商户", "类型 / 金额", "当前状态", "异常节点", "结果摘要", "通知结果", "更新时间", "操作"],
+        tableMinWidth: 1080,
+        columnWidths: [122,148,100,86,82,90,144,72,188,48],
+        columns: ["平台订单号", "通道订单号 / 商户订单号", "商户", "类型 / 金额", "当前状态", "异常节点", "结果摘要", "通知结果", "订单时间（UTC+8）", "操作"],
         rows: [
-          [`<span class="mono">HS-C-260717-000941</span>`, `<div class="stack"><span class="mono">QP20260717000941</span><span class="mono muted">CO-M-20260717-0941</span></div>`, `<div class="stack"><strong>星河游戏</strong><span class="mono muted">MCH-2031</span></div>`, `<div class="stack"><span>代收</span><strong class="mono">CNY 8,600.00</strong></div>`, `<div class="stack"><span class="tag tag-green">成功</span><span class="muted">明确终态</span></div>`, `<span class="muted">-</span>`, `QuickPay / 成功`, `<span class="tag tag-green">已通知</span>`, `<span class="mono">2026-07-17 14:33:20</span>`, `<button class="btn-link" type="button" data-action="tracking-detail">详情</button>`],
-          [`<span class="mono">HS-C-260717-000982</span>`, `<div class="stack"><span class="mono">QP20260717000982</span><span class="mono muted">CO-M-20260717-0982</span></div>`, `<div class="stack"><strong>星河游戏</strong><span class="mono muted">MCH-2031</span></div>`, `<div class="stack"><span>代收</span><strong class="mono">CNY 12,800.00</strong></div>`, `<div class="stack"><span class="tag tag-orange">异常待处理</span><span class="muted">等待通道最终结果</span></div>`, `通道结果确认`, `QuickPay / 未知`, `<span class="tag tag-green">已通知</span>`, `<span class="mono">2026-07-17 15:42:18</span>`, `<button class="btn-link" type="button" data-action="tracking-detail">详情</button>`],
-          [`<span class="mono">HS-C-260717-000862</span>`, `<div class="stack"><span class="mono">TCI202607170862</span><span class="mono muted">CO-M-20260717-0862</span></div>`, `<div class="stack"><strong>东盛电商</strong><span class="mono muted">MCH-1188</span></div>`, `<div class="stack"><span>代收</span><strong class="mono">CNY 21,000.00</strong></div>`, `<div class="stack"><span class="tag tag-orange">异常待处理</span><span class="muted">终态冲突</span></div>`, `终态冲突处理`, `保留原过期；迟到成功待核实`, `<span class="tag tag-red">失败停止</span>`, `<span class="mono">2026-07-17 13:14:26</span>`, `<button class="btn-link" type="button" data-action="tracking-detail">详情</button>`],
-          [`<span class="mono">HS-P-260717-000298</span>`, `<div class="stack"><span class="mono">BP20260717000298</span><span class="mono muted">PO-M-20260717-0298</span></div>`, `<div class="stack"><strong>星河游戏</strong><span class="mono muted">MCH-2031</span></div>`, `<div class="stack"><span>代付</span><strong class="mono">CNY 9,800.00</strong></div>`, `<div class="stack"><span class="tag tag-green">成功</span><span class="muted">明确终态</span></div>`, `<span class="muted">-</span>`, `BridgePay / 成功`, `<span class="tag tag-green">已通知</span>`, `<span class="mono">2026-07-17 12:43:18</span>`, `<button class="btn-link" type="button" data-action="tracking-detail">详情</button>`],
-          [`<span class="mono">HS-P-260717-002134</span>`, `<div class="stack"><span class="mono">PX20260717002134</span><span class="mono muted">PO-M-20260717-2134</span></div>`, `<div class="stack"><strong>星河游戏</strong><span class="mono muted">MCH-2031</span></div>`, `<div class="stack"><span>代付</span><strong class="mono">CNY 8,000.00</strong></div>`, `<div class="stack"><span class="tag tag-red">失败</span><span class="muted">明确终态</span></div>`, `代付下单`, `PayoutX / 收款资料不匹配`, `<span class="tag tag-red">失败停止</span>`, `<span class="mono">2026-07-17 15:18:46</span>`, `<button class="btn-link" type="button" data-action="tracking-detail">详情</button>`],
-          [`<span class="mono">HS-P-260717-000251</span>`, `<div class="stack"><span class="mono">PX20260717000251</span><span class="mono muted">PO-M-20260717-0251</span></div>`, `<div class="stack"><strong>寰宇数娱</strong><span class="mono muted">MCH-2209</span></div>`, `<div class="stack"><span>代付</span><strong class="mono">CNY 42,000.00</strong></div>`, `<div class="stack"><span class="tag tag-orange">异常待处理</span><span class="muted">等待通道最终结果</span></div>`, `通道结果确认`, `PayoutX / 处理中`, `<span class="tag tag-orange">重试中</span>`, `<span class="mono">2026-07-17 14:58:02</span>`, `<button class="btn-link" type="button" data-action="tracking-detail">详情</button>`],
-          [`<span class="mono">HS-R-260717-000077</span>`, `<div class="stack"><span class="mono">QP-RF-20260717-0077</span><span class="mono muted">RF-M-20260717-0077</span></div>`, `<div class="stack"><strong>东盛电商</strong><span class="mono muted">MCH-1188</span></div>`, `<div class="stack"><span>代收退款</span><strong class="mono">CNY 1,280.00</strong></div>`, `<div class="stack"><span class="tag tag-green">成功</span><span class="muted">明确终态</span></div>`, `<span class="muted">-</span>`, `原通道退款 / 成功`, `<span class="tag tag-green">已通知</span>`, `<span class="mono">2026-07-17 11:26:44</span>`, `<button class="btn-link" type="button" data-action="tracking-detail">详情</button>`]
+          [`<span class="mono">HS-C-260717-000941</span>`, `<div class="stack"><span class="mono">QP20260717000941</span><span class="mono muted">CO-M-20260717-0941</span></div>`, `<div class="stack"><strong>星河游戏</strong><span class="mono muted">MCH-2031</span></div>`, `<div class="stack"><span>代收</span><strong class="mono">CNY 8,600.00</strong></div>`, `<div class="stack"><span class="tag tag-green">成功</span><span class="muted">明确终态</span></div>`, `<span class="muted">-</span>`, `QuickPay / 成功`, `<span class="tag tag-green">已通知</span>`, tenantTrackingTimeCell("HS-C-260717-000941", "2026-07-17 14:33:20"), `<button class="btn-link" type="button" data-action="tracking-detail">详情</button>`],
+          [`<span class="mono">HS-C-260717-000982</span>`, `<div class="stack"><span class="mono">QP20260717000982</span><span class="mono muted">CO-M-20260717-0982</span></div>`, `<div class="stack"><strong>星河游戏</strong><span class="mono muted">MCH-2031</span></div>`, `<div class="stack"><span>代收</span><strong class="mono">CNY 12,800.00</strong></div>`, `<div class="stack"><span class="tag tag-orange">异常待处理</span><span class="muted">等待通道最终结果</span></div>`, `通道结果确认`, `QuickPay / 未知`, `<span class="tag tag-green">已通知</span>`, tenantTrackingTimeCell("HS-C-260717-000982", "2026-07-17 15:42:18"), `<button class="btn-link" type="button" data-action="tracking-detail">详情</button>`],
+          [`<span class="mono">HS-C-260717-000862</span>`, `<div class="stack"><span class="mono">TCI202607170862</span><span class="mono muted">CO-M-20260717-0862</span></div>`, `<div class="stack"><strong>东盛电商</strong><span class="mono muted">MCH-1188</span></div>`, `<div class="stack"><span>代收</span><strong class="mono">CNY 21,000.00</strong></div>`, `<div class="stack"><span class="tag tag-orange">异常待处理</span><span class="muted">终态冲突</span></div>`, `终态冲突处理`, `保留原过期；迟到成功待核实`, `<span class="tag tag-red">失败停止</span>`, tenantTrackingTimeCell("HS-C-260717-000862", "2026-07-17 13:14:26"), `<button class="btn-link" type="button" data-action="tracking-detail">详情</button>`],
+          [`<span class="mono">HS-P-260717-000298</span>`, `<div class="stack"><span class="mono">BP20260717000298</span><span class="mono muted">PO-M-20260717-0298</span></div>`, `<div class="stack"><strong>星河游戏</strong><span class="mono muted">MCH-2031</span></div>`, `<div class="stack"><span>代付</span><strong class="mono">CNY 9,800.00</strong></div>`, `<div class="stack"><span class="tag tag-green">成功</span><span class="muted">明确终态</span></div>`, `<span class="muted">-</span>`, `BridgePay / 成功`, `<span class="tag tag-green">已通知</span>`, tenantTrackingTimeCell("HS-P-260717-000298", "2026-07-17 12:43:18"), `<button class="btn-link" type="button" data-action="tracking-detail">详情</button>`],
+          [`<span class="mono">HS-P-260717-002134</span>`, `<div class="stack"><span class="mono">PX20260717002134</span><span class="mono muted">PO-M-20260717-2134</span></div>`, `<div class="stack"><strong>星河游戏</strong><span class="mono muted">MCH-2031</span></div>`, `<div class="stack"><span>代付</span><strong class="mono">CNY 8,000.00</strong></div>`, `<div class="stack"><span class="tag tag-red">失败</span><span class="muted">明确终态</span></div>`, `代付下单`, `PayoutX / 收款资料不匹配`, `<span class="tag tag-red">失败停止</span>`, tenantTrackingTimeCell("HS-P-260717-002134", "2026-07-17 15:42:08"), `<button class="btn-link" type="button" data-action="tracking-detail">详情</button>`],
+          [`<span class="mono">HS-P-260717-000251</span>`, `<div class="stack"><span class="mono">PX20260717000251</span><span class="mono muted">PO-M-20260717-0251</span></div>`, `<div class="stack"><strong>寰宇数娱</strong><span class="mono muted">MCH-2209</span></div>`, `<div class="stack"><span>代付</span><strong class="mono">CNY 42,000.00</strong></div>`, `<div class="stack"><span class="tag tag-orange">异常待处理</span><span class="muted">等待通道最终结果</span></div>`, `通道结果确认`, `PayoutX / 处理中`, `<span class="tag tag-orange">重试中</span>`, tenantTrackingTimeCell("HS-P-260717-000251", "2026-07-17 14:58:02"), `<button class="btn-link" type="button" data-action="tracking-detail">详情</button>`],
+          [`<span class="mono">HS-R-260717-000077</span>`, `<div class="stack"><span class="mono">QP-RF-20260717-0077</span><span class="mono muted">RF-M-20260717-0077</span></div>`, `<div class="stack"><strong>东盛电商</strong><span class="mono muted">MCH-1188</span></div>`, `<div class="stack"><span>代收退款</span><strong class="mono">CNY 1,280.00</strong></div>`, `<div class="stack"><span class="tag tag-green">成功</span><span class="muted">明确终态</span></div>`, `<span class="muted">-</span>`, `原通道退款 / 成功`, `<span class="tag tag-green">已通知</span>`, tenantTrackingTimeCell("HS-R-260717-000077", "2026-07-17 11:26:44"), `<button class="btn-link" type="button" data-action="tracking-detail">详情</button>`]
         ]
       },
       "业务待办": {
@@ -27693,10 +27714,20 @@
       </div>`;
     }
 
+    function tenantTrackingTimesFor(orderId) {
+      const sample = tenantTrackingTimeSamples.get(orderId);
+      return sample ? {...sample} : {createdAt:"",paidAt:"",channelCallbackAt:"",merchantNotifyAt:""};
+    }
+
+    function tenantTrackingTimeCell(orderId, updatedAt) {
+      const times = tenantTrackingTimesFor(orderId);
+      return `<div class="tracking-order-times" data-updated-at="${escapeHtml(updatedAt)}">${[["创建",times.createdAt,"订单创建的时间"],["支付",times.paidAt,"实际支付完成的时间"],["通道回调",times.channelCallbackAt,"收到通道订单结果通知的时间；主动查单不算通道回调"],["通知商户",times.merchantNotifyAt,"最近一次向商户发送订单结果通知的时间；是否送达看通知结果"]].map(([label,value,help])=>`<div class="tracking-order-time"><span class="tracking-time-label" title="${escapeHtml(help)}">${label}：</span><span class="tracking-time-value">${escapeHtml(value||"—")}</span></div>`).join("\n")}</div>`;
+    }
+
     function renderTenantGlobalOrderTrackingPage() {
       const page = modulePages["全局订单追踪"];
       const metricIcons = ["list-tree", "triangle-alert", "bell-ring"];
-      return `
+      return `<div class="tenant-tracking-page">
         <section class="page-head" data-astryx="PageHeader">
           <div>
             <h1 class="page-title">${page.title}</h1>
@@ -27715,7 +27746,7 @@
           ${moduleFiltersHtml(page.filters)}
           ${moduleActionsHtml(page.actions, page.tableHint)}
           ${moduleTableHtml(page.columns, page.rows, { minWidth: page.tableMinWidth, columnWidths: page.columnWidths })}
-        </section>
+        </section></div>
       `;
     }
 
@@ -29083,6 +29114,8 @@
         const identifiers = [...(row.cells[1]?.querySelectorAll(".mono") || [])].map((node) => node.textContent.trim()).filter(Boolean);
         const merchantParts = [...(row.cells[2]?.querySelectorAll("strong, .mono") || [])].map((node) => node.textContent.trim()).filter(Boolean);
         const status = value(4);
+        const times = tenantTrackingTimesFor(value(0));
+        const updatedAt = row.cells[8]?.querySelector(".tracking-order-times")?.dataset.updatedAt || "—";
         const isException = status.includes("异常") || value(5) !== "-";
         title = value(0);
         intro = "";
@@ -29097,7 +29130,11 @@
           ["异常节点", value(5)],
           ["结果摘要", value(6)],
           ["通知结果", value(7)],
-          ["更新时间", `${value(8)} · UTC+8`]
+          ["创建时间", `${times.createdAt || "—"} · UTC+8`],
+          ["支付时间", `${times.paidAt || "—"} · UTC+8`],
+          ["通道回调时间", `${times.channelCallbackAt || "—"} · UTC+8`],
+          ["通知商户时间", `${times.merchantNotifyAt || "—"} · UTC+8`],
+          ["更新时间", `${updatedAt} · UTC+8`]
         ]);
         body += detailSection("生命周期节点", "", isException ? [
           ["请求受理", "已完成 · 14:31:02"],
@@ -29110,9 +29147,9 @@
           ["商户与业务校验", "已通过 · 14:31:02"],
           ["平台订单创建", "已完成 · 14:31:03"],
           ["提交通道", "已完成 · 14:31:04"],
-          ["订单终态", `${value(6)} · ${value(8).slice(-8)}`]
+          ["订单终态", `${value(6)} · ${updatedAt.slice(-8)}`]
         ]);
-        body += detailSection("通知记录", "", [["当前结果", value(7)], ["可见状态", "已与平台订单结果同步"], ["最近更新时间", `${value(8)} · UTC+8`]]);
+        body += detailSection("通知记录", "", [["当前结果", value(7)], ["可见状态", "已与平台订单结果同步"], ["最近更新时间", `${updatedAt} · UTC+8`]]);
         actions = "";
       } else if (action === "order-detail") {
         const systemOrderNo = value(0);

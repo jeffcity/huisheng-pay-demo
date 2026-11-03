@@ -1405,16 +1405,16 @@
     body[data-current-page="orders"] #tableHead th:nth-child(4) { width:86px; }
     body[data-current-page="orders"] #tableHead th:nth-child(5) { width:82px; }
     body[data-current-page="orders"] #tableHead th:nth-child(6) { width:90px; }
-    body[data-current-page="orders"] #tableHead th:nth-child(7) { width:168px; }
+    body[data-current-page="orders"] #tableHead th:nth-child(7) { width:144px; }
     body[data-current-page="orders"] #tableHead th:nth-child(8) { width:72px; }
-    body[data-current-page="orders"] #tableHead th:nth-child(9) { width:164px; }
+    body[data-current-page="orders"] #tableHead th:nth-child(9) { width:188px; }
     body[data-current-page="orders"] #tableHead th:nth-child(10) { width:48px; }
     body[data-current-page="orders"] #tableBody .mono { font-size:11px; line-height:16px; white-space:normal; overflow-wrap:anywhere; }
     body[data-current-page="orders"] #tableBody .order-row-stack { gap:3px; }
     body[data-current-page="orders"] #tableBody .pill { padding:2px 5px; font-size:11px; white-space:normal; }
     body[data-current-page="orders"] #tableBody .link-btn { min-width:0; min-height:26px; padding:0 2px; font-size:12px; }
     .platform-order-times { display:grid; gap:4px; }
-    .platform-order-time { display:grid; grid-template-columns:32px minmax(0,1fr); gap:2px; align-items:baseline; font-size:11px; line-height:17px; }
+    .platform-order-time { display:grid; grid-template-columns:56px minmax(0,1fr); gap:2px; align-items:baseline; font-size:11px; line-height:17px; }
     .platform-order-time-label { color:var(--text-secondary); white-space:nowrap; }
     .platform-order-time-value { font-variant-numeric:tabular-nums; white-space:nowrap; overflow-wrap:normal; word-break:normal; }
 
@@ -5266,7 +5266,7 @@
           ['通知失败率', '7.69%', '当前筛选范围', 'orange']
         ],
         filters: ['订单号 / 租户订单号', '租户', '订单类型', '当前状态', 'UTC+8 日期'],
-        columns: ['平台订单号', '通道订单号 / 租户订单号', '租户', '类型 / 金额', '当前状态', '异常节点', '结果摘要', '通知结果', '创建/支付/回调时间', '操作'],
+        columns: ['平台订单号', '通道订单号 / 租户订单号', '租户', '类型 / 金额', '当前状态', '异常节点', '结果摘要', '通知结果', '订单时间（UTC+8）', '操作'],
         rows: [
           ['HS-C-260717-000941', '汇盛东南亚', 'MCH-2031', '代收', '成功', 'CNY 8,600.00', 'QuickPay / 成功', '已同步', '2026-07-17 14:33:20'],
           ['HS-C-260717-000982', '汇盛东南亚', 'MCH-2031', '代收', '异常待处理', 'CNY 12,800.00', 'QuickPay / 未知', '异常可见', '2026-07-17 15:42:18'],
@@ -6613,36 +6613,36 @@
     }
 
     const platformOrderTimeSamples = new Map([
-      ['HS-C-260717-000941', {createdAt:'2026-07-17 14:31:08',paidAt:'2026-07-17 14:32:50',callbackAt:'2026-07-17 14:33:20'}],
-      ['HS-C-260717-000982', {createdAt:'2026-07-17 15:36:04',paidAt:'',callbackAt:'2026-07-17 15:42:18'}],
-      ['HS-C-260717-000862', {createdAt:'2026-07-17 12:58:11',paidAt:'',callbackAt:''}],
-      ['HS-C-260717-000902', {createdAt:'2026-07-17 15:48:26',paidAt:'2026-07-17 15:51:32',callbackAt:'2026-07-17 15:51:40'}],
-      ['HS-P-260717-002134', {createdAt:'2026-07-17 15:38:12',paidAt:'',callbackAt:'2026-07-17 15:42:08'}],
-      ['HS-P-260717-000219', {createdAt:'2026-07-17 15:12:06',paidAt:'',callbackAt:'2026-07-17 15:16:32'}],
-      ['HS-P-260717-000220', {createdAt:'2026-07-17 15:02:20',paidAt:'',callbackAt:'2026-07-17 16:06:00'}],
-      ['HS-P-260717-000221', {createdAt:'2026-07-17 15:18:14',paidAt:'2026-07-17 15:18:35',callbackAt:'2026-07-17 16:12:00'}],
-      ['HS-P-260717-000336', {createdAt:'2026-07-17 10:29:40',paidAt:'',callbackAt:''}],
-      ['HS-P-260717-000298', {createdAt:'2026-07-17 12:41:05',paidAt:'2026-07-17 12:43:00',callbackAt:'2026-07-17 12:43:18'}],
-      ['HS-P-260717-000251', {createdAt:'2026-07-17 10:24:18',paidAt:'',callbackAt:'2026-07-17 10:26:48'}],
-      ['HS-P-260715-000172', {createdAt:'2026-07-15 10:24:18',paidAt:'2026-07-15 10:28:20',callbackAt:'2026-07-15 10:28:42'}]
+      ['HS-C-260717-000941', {createdAt:'2026-07-17 14:31:08',paidAt:'2026-07-17 14:32:50',channelCallbackAt:'2026-07-17 14:33:20',merchantNotifyAt:'2026-07-17 14:33:26'}],
+      ['HS-C-260717-000982', {createdAt:'2026-07-17 15:36:04',paidAt:'',channelCallbackAt:'2026-07-17 15:42:18',merchantNotifyAt:'2026-07-17 15:42:24'}],
+      ['HS-C-260717-000862', {createdAt:'2026-07-17 12:58:11',paidAt:'',channelCallbackAt:'',merchantNotifyAt:'2026-07-17 13:14:24'}],
+      ['HS-C-260717-000902', {createdAt:'2026-07-17 15:48:26',paidAt:'2026-07-17 15:51:32',channelCallbackAt:'2026-07-17 15:51:40',merchantNotifyAt:'2026-07-17 15:53:10'}],
+      ['HS-P-260717-002134', {createdAt:'2026-07-17 15:38:12',paidAt:'',channelCallbackAt:'2026-07-17 15:42:08',merchantNotifyAt:'2026-07-17 15:44:08'}],
+      ['HS-P-260717-000219', {createdAt:'2026-07-17 15:12:06',paidAt:'',channelCallbackAt:'2026-07-17 15:16:32',merchantNotifyAt:''}],
+      ['HS-P-260717-000220', {createdAt:'2026-07-17 15:02:20',paidAt:'',channelCallbackAt:'2026-07-17 16:06:00',merchantNotifyAt:''}],
+      ['HS-P-260717-000221', {createdAt:'2026-07-17 15:18:14',paidAt:'2026-07-17 15:18:35',channelCallbackAt:'2026-07-17 16:12:00',merchantNotifyAt:''}],
+      ['HS-P-260717-000336', {createdAt:'2026-07-17 10:29:40',paidAt:'',channelCallbackAt:'',merchantNotifyAt:''}],
+      ['HS-P-260717-000298', {createdAt:'2026-07-17 12:41:05',paidAt:'2026-07-17 12:43:00',channelCallbackAt:'2026-07-17 12:43:18',merchantNotifyAt:'2026-07-17 12:43:24'}],
+      ['HS-P-260717-000251', {createdAt:'2026-07-17 10:24:18',paidAt:'',channelCallbackAt:'2026-07-17 10:26:48',merchantNotifyAt:''}],
+      ['HS-P-260715-000172', {createdAt:'2026-07-15 10:24:18',paidAt:'2026-07-15 10:28:20',channelCallbackAt:'2026-07-15 10:28:42',merchantNotifyAt:''}]
     ]);
     function platformOrderTimesFor(row) {
       const refund=platformRefundJourneyFacts.get(String(row?.[0]||''));
       if(refund) {
         // A status change is not a payment timestamp; keep missing paidAt empty.
         const callback=refund.channelResults.filter(item=>item.obtainedVia==='callback').at(-1);
-        return {createdAt:refund.statusTimeline[0]?.at||'',paidAt:refund.paidAt||'',callbackAt:callback?.resultAt||''};
+        return {createdAt:refund.statusTimeline[0]?.at||'',paidAt:refund.paidAt||'',channelCallbackAt:callback?.resultAt||'',merchantNotifyAt:refund.merchantNotifyAt||''};
       }
       const sample=platformOrderTimeSamples.get(String(row?.[0]||''));
-      return sample?{...sample}:{createdAt:'',paidAt:'',callbackAt:''};
+      return sample?{...sample}:{createdAt:'',paidAt:'',channelCallbackAt:'',merchantNotifyAt:''};
     }
     function platformOrderTimesText(row) {
       const times=platformOrderTimesFor(row);
-      return `创建：${times.createdAt||'—'}；支付：${times.paidAt||'—'}；回调：${times.callbackAt||'—'}`;
+      return `创建：${times.createdAt||'—'}；支付：${times.paidAt||'—'}；通道回调：${times.channelCallbackAt||'—'}；通知商户：${times.merchantNotifyAt||'—'}`;
     }
     function renderPlatformOrderTimes(row) {
       const times=platformOrderTimesFor(row);
-      return `<div class="platform-order-times">${[['创建',times.createdAt],['支付',times.paidAt],['回调',times.callbackAt]].map(([label,value])=>`<div class="platform-order-time"><span class="platform-order-time-label">${label}：</span><span class="platform-order-time-value">${escapeHtml(value||'—')}</span></div>`).join('\n')}</div>`;
+      return `<div class="platform-order-times">${[['创建',times.createdAt,'订单创建的时间'],['支付',times.paidAt,'实际支付完成的时间'],['通道回调',times.channelCallbackAt,'收到通道订单结果通知的时间；主动查单不算通道回调'],['通知商户',times.merchantNotifyAt,'最近一次向商户发送订单结果通知的时间；是否送达看通知结果']].map(([label,value,help])=>`<div class="platform-order-time"><span class="platform-order-time-label" title="${escapeHtml(help)}">${label}：</span><span class="platform-order-time-value">${escapeHtml(value||'—')}</span></div>`).join('\n')}</div>`;
     }
 
     function platformOrderStatsFor(rows) {
@@ -8315,7 +8315,7 @@
           <div class="order-summary-item"><span>租户订单 / 请求号</span><strong class="mono">${escapeHtml(identifiers['租户订单 / 请求号'] || '—')}</strong></div>
           <div class="order-summary-item"><span>订单金额</span><strong class="mono">${escapeHtml(row[5])}</strong></div>
           <div class="order-summary-item"><span>实际通道</span><strong>${escapeHtml(meta.actualChannelName || '未形成')}</strong></div>
-          <div class="order-summary-item"><span>创建 / 支付 / 回调时间（UTC+8）</span>${renderPlatformOrderTimes(row)}</div>
+          <div class="order-summary-item"><span>订单时间（UTC+8）</span>${renderPlatformOrderTimes(row)}</div>
           <div class="order-summary-item"><span>更新时间</span><strong class="mono">${escapeHtml(row[8])} UTC+8</strong></div>
         </div>
       </div>`;
@@ -8453,7 +8453,7 @@
           ['异常节点', platformOrderExceptionNode(row)],
           ['结果摘要', platformOrderResultSummary(row, facts)],
           ['通知结果', platformOrderNotificationResult(row, meta)],
-          ['创建 / 支付 / 回调时间', platformOrderTimesText(row)],
+          ['订单时间（UTC+8）', platformOrderTimesText(row)],
           ['更新时间', row[8]]
         ].map(([label, value]) => `${label}：${value}`).join('\n');
       }

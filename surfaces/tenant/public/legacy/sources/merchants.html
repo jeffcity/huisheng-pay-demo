@@ -23705,7 +23705,6 @@
     }
 
     function openCreateModal() {
-      const parentOptions = merchants.filter((merchant) => merchant.type !== "子商户").map((merchant) => `<option value="${merchant.id}">${escapeHtml(merchant.name)} · ${merchant.id}</option>`).join("");
       document.getElementById("modal").innerHTML = `
         <div class="modal-head" data-astryx="DialogHeader">
           <div>
@@ -23723,10 +23722,6 @@
                 <input class="input" id="createMerchantName" value="新加坡聚合支付" autocomplete="off">
               </div>
               <div class="field">
-                <label for="createMerchantType">商户类型</label>
-                <select class="select" id="createMerchantType"><option selected>独立商户</option><option>主商户</option><option>子商户</option></select>
-              </div>
-              <div class="field">
                 <label for="createMerchantOwner">联系人</label>
                 <input class="input" id="createMerchantOwner" value="林文" autocomplete="off">
               </div>
@@ -23738,10 +23733,6 @@
                 <label for="createMerchantAccount">初始登录账号</label>
                 <input class="input mono" id="createMerchantAccount" value="admin@newmerchant" autocomplete="off">
                 <small>商户端域名为租户共享入口，因此登录账号必须在当前租户范围内唯一。</small>
-              </div>
-              <div class="field wide" id="createParentField" hidden>
-                <label for="createMerchantParent">上级主商户</label>
-                <select class="select" id="createMerchantParent"><option value="">请选择上级主商户</option>${parentOptions}</select>
               </div>
             </div>
           </div>
@@ -23794,16 +23785,6 @@
       `;
       showModal();
       bindModalEvents();
-      const typeSelect = document.getElementById("createMerchantType");
-      const syncParentField = () => {
-        const isChild = typeSelect.value === "子商户";
-        document.getElementById("createParentField").hidden = !isChild;
-        const parentSelect = document.getElementById("createMerchantParent");
-        parentSelect.disabled = !isChild;
-        if (!isChild) parentSelect.value = "";
-      };
-      typeSelect.addEventListener("change", syncParentField);
-      syncParentField();
       document.getElementById("saveMerchantDraft").addEventListener("click", () => {
         clearInlineError();
         showToast("新增商户草稿已暂存在当前页面；草稿不会创建账号或钱包");
@@ -23815,11 +23796,11 @@
       clearInlineError();
       const submit = document.getElementById("createMerchantSubmit");
       const name = document.getElementById("createMerchantName").value.trim();
-      const type = document.getElementById("createMerchantType").value;
+      const type = "独立商户";
       const owner = document.getElementById("createMerchantOwner").value.trim();
       const phone = document.getElementById("createMerchantPhone").value.trim();
       const merchantAdminAccount = document.getElementById("createMerchantAccount").value.trim().toLowerCase();
-      const parentMerchantId = type === "子商户" ? document.getElementById("createMerchantParent").value : "";
+      const parentMerchantId = "";
       const unifiedCallback = document.getElementById("createUnifiedCallback").value.trim();
       const whitelist = document.getElementById("createMerchantWhitelist").value.trim();
       const google2fa = document.getElementById("createMerchant2fa").value.trim();
@@ -23836,7 +23817,6 @@
       if (!phone) return showInlineError("请填写联系电话。", "createMerchantPhone");
       if (!merchantAdminAccount) return showInlineError("请填写初始登录账号。", "createMerchantAccount");
       if (merchants.some((merchant) => ensureAdminSecurity(merchant).account.toLowerCase() === merchantAdminAccount)) return showInlineError("该登录账号已被当前租户下其他商户使用，请更换账号。", "createMerchantAccount");
-      if (type === "子商户" && !parentMerchantId) return showInlineError("子商户必须选择上级主商户。", "createMerchantParent");
       if (!capabilities.length) return showInlineError("至少选择一项当前租户已开通的业务能力。", "createCapCollect");
       if (unifiedCallback && !isPublicHttpsUrl(unifiedCallback)) return showInlineError("统一回调 URL 必须使用公网 HTTPS，不能使用本机或内网地址。", "createUnifiedCallback");
       if (!validIpList(whitelist)) return showInlineError("请输入有效的公网 IPv4、IPv6 或明确网段，多个条目用逗号或换行分隔。", "createMerchantWhitelist");
