@@ -21475,6 +21475,22 @@
       }
     }
 
+
+    .tenant-tracking-page .order-success-summary{grid-column:auto;display:block;min-width:0;min-height:0;padding:12px 16px;overflow:visible}
+    .tenant-tracking-page .order-success-amounts{display:grid;grid-template-columns:1fr;gap:6px;margin:0}
+    .tenant-tracking-page .order-success-amounts>div{min-width:0}
+    .tenant-tracking-page .order-success-amounts dt{display:flex;align-items:center;gap:3px;font-size:11px;color:var(--muted);margin-bottom:4px}
+    .tenant-tracking-page .order-success-amounts dd{margin:0;font-size:17px;font-weight:600;line-height:1.4;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+    .tenant-tracking-page .order-success-help{position:relative;display:inline-flex}
+    .tenant-tracking-page .order-success-help-button{display:inline-flex;align-items:center;justify-content:center;width:24px!important;min-width:24px!important;height:24px!important;min-height:24px!important;padding:0;border:0;border-radius:4px;background:transparent;color:var(--muted);cursor:help}
+    .tenant-tracking-page .order-success-help-button:hover,.tenant-tracking-page .order-success-help-button:focus-visible{color:var(--primary);outline:2px solid var(--primary);outline-offset:1px}
+    .tenant-tracking-page .order-success-tooltip{display:none;position:absolute;z-index:100;bottom:100%;left:0;width:230px;max-width:calc(100vw - 32px);padding:9px 11px;border:1px solid var(--border);border-radius:6px;background:var(--surface,#fff);color:var(--text);font-size:12px;font-weight:400;line-height:1.6;box-shadow:0 4px 16px #172a321a}
+    .tenant-tracking-page .order-success-amounts>div:last-child .order-success-tooltip{left:auto;right:0}
+    .tenant-tracking-page .order-success-help:hover .order-success-tooltip,.tenant-tracking-page .order-success-help:focus-within .order-success-tooltip{display:block}
+    .tenant-tracking-page .metric-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;align-items:stretch}
+    .tenant-tracking-page .order-success-tooltip{left:auto;right:0}
+    @media(max-width:600px){.tenant-tracking-page .metric-grid{grid-template-columns:repeat(4,minmax(140px,1fr))!important;overflow-x:auto;gap:10px;padding-top:8px;padding-bottom:8px}.tenant-tracking-page .order-success-amounts>div:not(:last-child) .order-success-tooltip{bottom:auto;top:100%}}
+
     /* Scoped to tenant global tracking; CNY business order tables keep their existing layout. */
     .tenant-tracking-page .rich-table{table-layout:fixed;width:100%}
     .tenant-tracking-page .rich-table th,.tenant-tracking-page .rich-table td{min-width:0!important;padding:8px 6px;font-size:12px;line-height:17px;white-space:normal;overflow-wrap:anywhere}
@@ -27724,6 +27740,44 @@
       return `<div class="tracking-order-times" data-updated-at="${escapeHtml(updatedAt)}">${[["创建",times.createdAt,"订单创建的时间"],["支付",times.paidAt,"实际支付完成的时间"],["通道回调",times.channelCallbackAt,"收到通道订单结果通知的时间；主动查单不算通道回调"],["通知商户",times.merchantNotifyAt,"最近一次向商户发送订单结果通知的时间；是否送达看通知结果"]].map(([label,value,help])=>`<div class="tracking-order-time"><span class="tracking-time-label" title="${escapeHtml(help)}">${label}：</span><span class="tracking-time-value">${escapeHtml(value||"—")}</span></div>`).join("\n")}</div>`;
     }
 
+    function tenantTrackingSuccessfulOrderAmounts(records) {
+      const totals = {collection:0n,payout:0n};
+      for (const record of records) {
+        const direction=String(record.direction||'').trim(), status=String(record.status||'').trim();
+        if (status !== '成功' || !['代收','代付'].includes(direction)) continue;
+        const match=/^CNY\s+((?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{1,2})?)$/.exec(String(record.amount||'').trim());
+        if (!match) continue;
+        const [whole,fraction='']=match[1].replaceAll(',','').split('.');
+        totals[direction==='代收'?'collection':'payout'] += BigInt(whole)*100n+BigInt(fraction.padEnd(2,'0'));
+      }
+      const money=cents=>'CNY '+(cents/100n).toLocaleString('en-US')+'.'+String(cents%100n).padStart(2,'0');
+      return {collection:money(totals.collection),payout:money(totals.payout),total:money(totals.collection+totals.payout)};
+    }
+
+    function tenantTrackingSuccessAmountCard(amounts) {
+      const fields=[
+        ['collection','成功代收金额','筛选到的订单里，已成功收款的金额。不含退款。'],
+        ['payout','成功代付金额','筛选到的订单里，已成功支付的金额。'],
+        ['total','成功金额合计','成功代收金额加上成功代付金额。不含退款，翻页不会改变合计。']
+      ];
+      return `<article class="metric-card order-success-summary" aria-label="成功订单金额统计">
+        <dl class="order-success-amounts">${fields.map(([key,label,help])=>`<div><dt>${label}<span class="order-success-help"><button type="button" class="order-success-help-button" aria-label="${label}说明" aria-describedby="tenantTracking-success-help-${key}"><svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true"><circle cx="10" cy="10" r="7.3" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M7.8 7.3a2.2 2.2 0 1 1 3.3 1.9c-.9.5-1.1 1-1.1 1.8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="10" cy="13.4" r=".8" fill="currentColor"/></svg></button><span id="tenantTracking-success-help-${key}" class="order-success-tooltip" role="tooltip">${help}</span></span></dt><dd data-success-amount="${key}">${amounts[key]}</dd></div>`).join('')}</dl>
+      </article>`;
+    }
+
+    function refreshTenantTrackingSuccessAmounts(rows) {
+      if (state.activePage !== '全局订单追踪') return;
+      const target=document.querySelector('main .tenant-tracking-page .order-success-summary');
+      if (!target) return;
+      const records=rows.filter(row=>tenantExportRowCoveredByScope([...row.cells].map(cell=>cell.textContent),currentTenantAccount.dataScope)).map(row=>({
+        direction:row.cells[3]?.querySelector('.stack > span')?.textContent,
+        status:row.cells[4]?.querySelector('.tag')?.textContent,
+        amount:row.cells[3]?.querySelector('strong')?.textContent
+      }));
+      const amounts=tenantTrackingSuccessfulOrderAmounts(records);
+      for (const key of ['collection','payout','total']) target.querySelector('[data-success-amount="'+key+'"]').textContent=amounts[key];
+    }
+
     function renderTenantGlobalOrderTrackingPage() {
       const page = modulePages["全局订单追踪"];
       const metricIcons = ["list-tree", "triangle-alert", "bell-ring"];
@@ -27738,8 +27792,9 @@
             <button class="btn btn-primary" type="button" data-action="export"><i data-lucide="download"></i>导出当前视图</button>
           </div>
         </section>
-        <section class="metric-grid" style="grid-template-columns:repeat(3,minmax(0,1fr));" data-astryx="KPIGrid">
+        <section class="metric-grid" data-astryx="KPIGrid">
           ${page.metrics.map((item, index) => `<article class="metric-card" data-astryx="KPIStatCard"><div><div class="metric-label"><span>${item[0]}</span><i data-lucide="${metricIcons[index]}"></i></div><div class="metric-value">${item[1]}</div></div><div class="metric-sub"><span>${item[2]}</span></div></article>`).join("")}
+          ${tenantTrackingSuccessAmountCard(tenantTrackingSuccessfulOrderAmounts([]))}
         </section>
         <section class="panel data-panel" data-astryx="DataPanel">
           <div class="panel-header"><h2 class="panel-title">全生命周期记录列表</h2></div>
@@ -29402,6 +29457,7 @@
       const matchedRows = rows.filter((row) => row.dataset.filterMatched !== "false");
       const total = matchedRows.length;
       refreshTenantOrderSearchSummary(matchedRows);
+      refreshTenantTrackingSuccessAmounts(matchedRows);
       const totalPages = Math.max(1, Math.ceil(total / pager.pageSize));
       pager.page = Math.min(Math.max(1, pager.page), totalPages);
       const startIndex = (pager.page - 1) * pager.pageSize;
