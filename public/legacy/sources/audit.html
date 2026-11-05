@@ -1939,7 +1939,30 @@
         min-height: var(--topbar-height);
       }
     }
-  </style>
+
+/* Platform audit: development-baseline query fields; independent of the scrollable table. */
+body[data-current-page="audit"] #filters { display:flex; flex-direction:column; gap:10px; padding:16px; }
+body[data-current-page="audit"] .audit-filter-row { display:flex; flex-wrap:wrap; gap:10px 18px; min-width:0; }
+body[data-current-page="audit"] #filters .field { display:flex; align-items:center; flex:1 1 190px; gap:10px; min-width:0; }
+body[data-current-page="audit"] #filters label { flex-shrink:0; margin:0; font-weight:500; white-space:nowrap; }
+body[data-current-page="audit"] #filters .filter-control { min-width:0; width:100%; height:34px; }
+body[data-current-page="audit"] #filters .audit-date-field { flex:1.5 1 360px; }
+body[data-current-page="audit"] .audit-date-range { display:flex; align-items:center; gap:8px; min-width:0; width:100%; }
+body[data-current-page="audit"] #filters .page-actions { display:flex; flex-wrap:wrap; gap:8px; margin:0; justify-content:flex-start; }
+body[data-current-page="audit"] #filters .btn { min-height:34px; padding:6px 14px; }
+body[data-current-page="audit"] table { min-width:1120px; table-layout:fixed; }
+body[data-current-page="audit"] th,body[data-current-page="audit"] td { padding:9px 7px; font-size:12px; line-height:1.5; white-space:normal; overflow-wrap:anywhere; }
+body[data-current-page="audit"] th:nth-child(1) { width:155px; }
+body[data-current-page="audit"] th:nth-child(2) { width:132px; }
+body[data-current-page="audit"] th:nth-child(3) { width:125px; }
+body[data-current-page="audit"] th:nth-child(4) { width:145px; }
+body[data-current-page="audit"] th:nth-child(5),body[data-current-page="audit"] th:nth-child(6) { width:160px; }
+body[data-current-page="audit"] th:nth-child(7),body[data-current-page="audit"] th:nth-child(8) { width:66px; }
+body[data-current-page="audit"] th:nth-child(9) { width:112px; }
+body[data-current-page="audit"] th:nth-child(10) { width:50px; }
+body[data-current-page="audit"] .audit-tenant { display:grid; gap:3px; }
+@media(max-width:600px) { body[data-current-page="audit"] #filters .field { flex-basis:100%; } body[data-current-page="audit"] #filters .audit-date-field { flex-wrap:wrap; } }
+</style>
 </head>
 <body>
   <div class="app">
@@ -5055,8 +5078,8 @@
           ['失败操作', '19', '保留错误摘要', 'red'],
           ['可修改日志', '0', '永久不可变更', 'green']
         ],
-        filters: ['完整日志 / 对象 / 申请 / 订单 / 请求 / 追踪编号', '操作账号', '所属层级', '动作分类', '对象类型', '执行结果', '风险级别', '来源 IP', 'UTC+8 开始日期', 'UTC+8 结束日期'],
-        columns: ['日志编号', '发生时间', '操作账号 / 层级', '动作', '对象', '结果', '风险', '来源 IP', '操作'],
+        filters: ['关键词', '操作账号', '动作分类', '对象类型', '动作明细', '对象编号', 'UTC+8 开始日期', 'UTC+8 结束日期'],
+        columns: ['日志编号', '发生时间', '租户', '操作账号 / 层级', '动作', '对象', '结果', '风险', '来源 IP', '操作'],
         rows: [
           ['AL-20260717-01509', '2026-07-17 08:22:40', 'platform.finance / 平台', '通过并执行人工加款', '资金申请 / PA202607170006', '成功', '高风险', '10.12.9.20'],
           ['AL-20260717-01426', '2026-07-17 08:15:20', 'platform.finance / 平台', '通过并执行人工扣款', '资金申请 / PA202607170005', '成功', '高风险', '10.12.9.20'],
@@ -5501,6 +5524,20 @@
       ['AL-20260717-11790', { operatorAccount: 'finance.ops', operatorScope: '平台', actionCategory: '导出', objectType: '导出任务', objectId: 'EX-20260717-088', platformOrderId: '', relatedApplicationId: '', requestId: 'REQ-20260717-11790', traceId: 'TRACE-20260717-E011790', targetPage: '', targetIdentifier: '' }],
       ['AL-20260717-11622', { operatorAccount: 'unknown', operatorScope: '平台', actionCategory: '登录与账号安全', objectType: '平台账号', objectId: 'finance.ops', platformOrderId: '', relatedApplicationId: '', requestId: 'REQ-20260717-11622', traceId: 'TRACE-20260717-S011622', targetPage: '', targetIdentifier: '' }]
     ]);
+    const platformTenantAuditSamples = [
+      { id:'AL-TEN-20261105-0006', at:'2026-11-05 10:18:24', tenantId:'HS-TEN-001', account:'tenant.ops', action:'保存商户后台登录 IP 白名单', category:'商户管理', objectType:'商户登录白名单', objectId:'MCH-1188', result:'成功', risk:'高风险', ip:'198.51.100.24' },
+      { id:'AL-TEN-20261105-0005', at:'2026-11-05 10:12:06', tenantId:'HS-TEN-017', account:'tenant.finance', action:'查询代付日终统计', category:'日终统计', objectType:'代付日终', objectId:'2026-11-04', result:'成功', risk:'一般', ip:'203.0.113.18' },
+      { id:'AL-TEN-20261105-0004', at:'2026-11-05 09:48:32', tenantId:'HS-TEN-001', account:'tenant.admin', action:'修改代付下单 IP 白名单', category:'代付商户管理', objectType:'代付下单白名单', objectId:'MCH-2031', result:'失败', risk:'高风险', ip:'198.51.100.24' },
+      { id:'AL-TEN-20261105-0003', at:'2026-11-05 09:35:10', tenantId:'HS-TEN-029', account:'tenant.admin', action:'登录失败：密码错误', category:'登录安全', objectType:'租户账号', objectId:'tenant.admin', result:'失败', risk:'高风险', ip:'203.0.113.29' },
+      { id:'AL-TEN-20261105-0002', at:'2026-11-05 09:20:08', tenantId:'HS-TEN-001', account:'tenant.finance', action:'查看代收订单详情', category:'全局订单追踪', objectType:'订单', objectId:'HS-C-260717-000941', result:'成功', risk:'一般', ip:'198.51.100.25' },
+      { id:'AL-TEN-20261105-0001', at:'2026-11-05 09:05:16', tenantId:'HS-TEN-017', account:'tenant.ops', action:'停用通知机器人', category:'通知中心', objectType:'通知机器人', objectId:'BOT-NOTIFY-002', result:'成功', risk:'敏感', ip:'203.0.113.18' }
+    ];
+    platformTenantAuditSamples.forEach(sample => platformAuditMeta.set(sample.id, {
+      tenantId:sample.tenantId, operatorAccount:sample.account, operatorScope:'租户',
+      actionCategory:sample.category, objectType:sample.objectType, objectId:sample.objectId,
+      requestId:`REQ-${sample.id}`, traceId:`TRACE-${sample.id}`, targetPage:'', targetIdentifier:''
+    }));
+    pages.audit.rows.unshift(...platformTenantAuditSamples.map(sample => [sample.id,sample.at,`${sample.account} / 租户`,sample.action,`${sample.objectType} / ${sample.objectId}`,sample.result,sample.risk,sample.ip]));
     let platformLatestReceipt = null;
     let platformFundCorrectionSequence = 1002;
     let platformLedgerSequence = 9902;
@@ -6181,7 +6218,7 @@
     }
 
     function platformFilterInputType(pageId, index) {
-      const dateIndices = { home: [0, 3], report: [2, 3], wallets: [3, 4], funds: [8, 9], orders: [10, 11], ledger: [9, 10], audit: [8, 9] };
+      const dateIndices = { home: [0, 3], report: [2, 3], wallets: [3, 4], funds: [8, 9], orders: [10, 11], ledger: [9, 10], audit: [6, 7] };
       return dateIndices[pageId]?.includes(index) ? 'date' : 'text';
     }
 
@@ -6191,6 +6228,7 @@
         return false;
       }
       currentPage = id;
+      document.body.dataset.currentPage = id;
       if (!integratedRoutes[id] && window.location.hash !== `#${id}`) {
         window.history.replaceState(null, '', `#${id}`);
       }
@@ -6238,12 +6276,12 @@
 
       renderContextPanel(id);
 
-      document.getElementById('tableTools').innerHTML = `
+      document.getElementById('tableTools').innerHTML = id === 'audit' ? '<span class="muted">模拟数据 · 含平台与租户操作</span>' : `
         <button class="btn ghost" data-reset-filters>${iconButton('refresh')}重置</button>
         <button class="btn" data-export-page="${id}">${iconButton('export')}导出</button>
       `;
 
-      document.getElementById('filters').innerHTML = page.filters.map((label, index) => `
+      document.getElementById('filters').innerHTML = id === 'audit' ? renderPlatformAuditFilters() : page.filters.map((label, index) => `
         <div class="field">
           <label for="pageFilter${index}">${label}</label>
           <input class="filter-control" type="${platformFilterInputType(id, index)}" id="pageFilter${index}" data-page-filter="${index}" value="${escapeHtml(filterState[id][index] || '')}" placeholder="${platformFilterInputType(id, index) === 'date' ? 'YYYY-MM-DD' : '全部'}">
@@ -6314,6 +6352,12 @@
         const rowIndex = page.rows.indexOf(row);
         const fundMeta = pageId === 'funds' ? platformFundMeta.get(row[0]) || {} : null;
         const orderMeta = pageId === 'orders' ? platformOrderQueryMetaFor(row) : null;
+        if (pageId === 'audit') {
+          const tenant = platformAuditTenantFor(row);
+          return `<tr data-row="${rowIndex}">${platformAuditDisplayValues(row).map((value,index) => index === 2
+            ? `<td><div class="audit-tenant"><strong>${escapeHtml(tenant.name)}</strong><span class="mono muted">${escapeHtml(tenant.id || '—')}</span></div></td>`
+            : `<td${[0,1,8].includes(index) ? ' class="mono"' : ''}>${[6,7].includes(index) ? `<span class="pill ${statusClass(value)}">${escapeHtml(value)}</span>` : escapeHtml(value)}</td>`).join('')}<td><button class="link-btn" data-detail="${rowIndex}">详情</button></td></tr>`;
+        }
         return `
         <tr data-row="${rowIndex}">
           ${row.map((cell, cellIndex) => {
@@ -6563,6 +6607,44 @@
       ].map(value => String(value || '').trim()).filter(Boolean))];
     }
 
+    function platformAuditTenantFor(row) {
+      const id = platformAuditTenantIdForRow(row);
+      const tenant = pages.tenants.rows.find(item => item[0] === id);
+      return { id: id === 'PLATFORM_GLOBAL' ? '' : id, name: tenant?.[1] || (id === 'PLATFORM_GLOBAL' ? '平台' : '—') };
+    }
+
+    function platformAuditDisplayValues(row) {
+      const tenant = platformAuditTenantFor(row);
+      return [row[0],row[1],tenant.id ? `${tenant.name} / ${tenant.id}` : tenant.name,...row.slice(2)];
+    }
+
+    function platformAuditMatchesFilters(row, filters) {
+      const [keyword, account, category, objectType, detail, objectId, start, end] = filters.map(value => String(value || '').trim().toLowerCase());
+      const meta = platformAuditMetaFor(row);
+      const contains = (value, query) => !query || String(value || '').toLowerCase().includes(query);
+      const keywordText = [...platformAuditIdentifiersFor(row),row[3],row[4],meta.actionCategory,meta.objectType].join(' ');
+      return contains(keywordText,keyword)
+        && (!account || String(meta.operatorAccount || '').toLowerCase() === account)
+        && contains(meta.actionCategory,category) && contains(meta.objectType,objectType)
+        && contains(row[3],detail) && contains(meta.objectId,objectId)
+        && inUtc8DateRange(row[1],start,end);
+    }
+
+    function renderPlatformAuditFilters() {
+      const values = filterState.audit;
+      const accounts = [...new Set(platformExportRowsCoveredByScope('audit',pages.audit.rows,currentPlatformAccount.dataScope).map(row => platformAuditMetaFor(row).operatorAccount).filter(Boolean))].sort();
+      const input = (index,label,placeholder) => `<div class="field"><label for="pageFilter${index}">${label}</label><input class="filter-control" id="pageFilter${index}" data-page-filter="${index}" value="${escapeHtml(values[index] || '')}" placeholder="${placeholder}"></div>`;
+      return `<div class="audit-filter-row">
+        ${input(0,'关键词','对象 / 订单 / 业务编号 / 动作')}
+        <div class="field"><label for="pageFilter1">操作账号</label><select class="filter-control" id="pageFilter1" data-page-filter="1"><option value="">全部</option>${accounts.map(account => `<option value="${escapeHtml(account)}" ${values[1] === account ? 'selected' : ''}>${escapeHtml(account)}</option>`).join('')}</select></div>
+        ${input(2,'动作分类','操作模块')}${input(3,'对象类型','操作名')}${input(4,'动作明细','操作内容')}
+      </div><div class="audit-filter-row">
+        ${input(5,'对象编号','业务编号')}
+        <div class="field audit-date-field"><label for="pageFilter6">UTC+8 时间</label><div class="audit-date-range"><input class="filter-control" aria-label="UTC+8 开始日期" type="date" id="pageFilter6" data-page-filter="6" value="${escapeHtml(values[6] || '')}"><span>—</span><input class="filter-control" aria-label="UTC+8 结束日期" type="date" id="pageFilter7" data-page-filter="7" value="${escapeHtml(values[7] || '')}"></div></div>
+        <div class="page-actions"><button class="btn primary" data-apply-filters>查询日志</button><button class="btn" data-reset-filters>重置</button><button class="btn" data-export-page="audit">审计导出</button></div>
+      </div>`;
+    }
+
     function platformHomeTargetFilters(target, extraFilters = {}) {
       const [startDate, businessDirection, tenant, endDate] = filterState.home || [];
       const mappings = {
@@ -6571,7 +6653,7 @@
         ledger: { 1: tenant, 6: businessDirection, 9: startDate, 10: endDate },
         funds: { 1: tenant, 8: startDate, 9: endDate },
         wallets: { 0: tenant, 3: startDate, 4: endDate },
-        audit: { 8: startDate, 9: endDate }
+        audit: { 6: startDate, 7: endDate }
       };
       return Object.fromEntries(Object.entries({ ...(mappings[target] || {}), ...extraFilters }).filter(([, value]) => String(value || '').trim()));
     }
@@ -6736,23 +6818,12 @@
           return true;
         }
         if (pageId === 'audit') {
-          const [identifier, operatorAccount, operatorScope, actionCategory, objectType, result, risk, sourceIp, startDateUtc8, endDateUtc8] = rawValues;
-          const meta = platformAuditMetaFor(row);
-          const identifiers = platformAuditIdentifiersFor(row).map(value => value.toLowerCase());
-          if (identifier && !identifiers.includes(identifier)) return false;
-          if (operatorAccount && !String(meta.operatorAccount || '').toLowerCase().includes(operatorAccount)) return false;
-          if (operatorScope && String(meta.operatorScope || '').trim().toLowerCase() !== operatorScope) return false;
-          if (actionCategory && String(meta.actionCategory || '').trim().toLowerCase() !== actionCategory) return false;
-          if (objectType && String(meta.objectType || '').trim().toLowerCase() !== objectType) return false;
-          if (result && String(row[5] || '').trim().toLowerCase() !== result) return false;
-          if (risk && String(row[6] || '').trim().toLowerCase() !== risk) return false;
-          if (sourceIp && String(row[7] || '').trim().toLowerCase() !== sourceIp) return false;
-          if (!inUtc8DateRange(row[1], startDateUtc8, endDateUtc8)) return false;
-          return true;
+          return platformAuditMatchesFilters(row, rawValues);
         }
         const text = row.join(' ').toLowerCase();
         return values.every(value => text.includes(value));
       });
+      if (pageId === 'audit') return filtered.sort((left,right) => String(right[1]).localeCompare(String(left[1])));
       return pageId === 'report'
         ? filtered.sort((left, right) => platformReportMetaFor(right).successAmount - platformReportMetaFor(left).successAmount)
         : filtered;
@@ -6831,7 +6902,7 @@
     }
 
     function validatePlatformDateFilters(pageId = currentPage) {
-      const dateIndices = { home: [0, 3], report: [2, 3], wallets: [3, 4], funds: [8, 9], orders: [10, 11], ledger: [9, 10], audit: [8, 9] };
+      const dateIndices = { home: [0, 3], report: [2, 3], wallets: [3, 4], funds: [8, 9], orders: [10, 11], ledger: [9, 10], audit: [6, 7] };
       const indices = dateIndices[pageId];
       if (!indices) return true;
       const [startIndex, endIndex] = indices;
@@ -7020,7 +7091,7 @@
       const visibleRows = pageId === 'home' && dataScope?.scopeCode === 'platform.assigned_tenants'
         ? platformHomeOverviewRows(platformExportRowsCoveredByScope('report', filteredRowsForPage('report'), dataScope), dataScope)
         : platformExportRowsCoveredByScope(pageId, filteredRowsForPage(pageId), dataScope);
-      const rowSnapshot = visibleRows.map(row => fieldSnapshot.map((_, index) => String(row[index] ?? '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()));
+      const rowSnapshot = visibleRows.map(row => { const values = pageId === 'audit' ? platformAuditDisplayValues(row) : row; return fieldSnapshot.map((_, index) => String(values[index] ?? '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()); });
       return { fieldSnapshot, rowSnapshot };
     }
 
@@ -7592,7 +7663,8 @@
     }
 
     function detailMarkup(page, row) {
-      const rowMap = page.columns.slice(0, -1).map((column, index) => [column, row[index] || '-']);
+      const displayValues = page.detailKind === 'audit' ? platformAuditDisplayValues(row) : row;
+      const rowMap = page.columns.slice(0, -1).map((column, index) => [column, displayValues[index] || '-']);
       const shared = renderKv(rowMap);
       const orderFacts = orderFactsFor(row);
       const walletTransferFact = page.detailKind === 'ledger' ? platformWalletTransferForRow(row) : null;
@@ -7984,7 +8056,8 @@
     }
 
     function platformSafeSummary(page, row) {
-      return row.slice(0, page.columns.length - 1).map((value, index) => {
+      const values = page.detailKind === 'audit' ? platformAuditDisplayValues(row) : row;
+      return values.slice(0, page.columns.length - 1).map((value, index) => {
         const holder = document.createElement('div');
         holder.innerHTML = String(value ?? '');
         return `${page.columns[index]}：${holder.textContent.replace(/\s+/g, ' ').trim()}`;

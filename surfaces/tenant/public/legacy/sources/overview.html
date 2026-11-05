@@ -21509,7 +21509,7 @@
     body .blue-order-page .compact-order-table .mono{font-size:11px;line-height:16px;word-break:break-all}
     body .blue-order-page .compact-order-table .stack{gap:4px}
     body .blue-order-page .compact-order-table .order-time-stack{display:grid;gap:4px}
-    body .blue-order-page .compact-order-table .order-time-line{display:grid;grid-template-columns:32px minmax(0,1fr);gap:2px;align-items:baseline;font-size:11px;line-height:17px;white-space:nowrap}
+    body .blue-order-page .compact-order-table .order-time-line{display:grid;grid-template-columns:56px minmax(0,1fr);gap:2px;align-items:baseline;font-size:11px;line-height:17px;white-space:nowrap}
     body .blue-order-page .compact-order-table .order-time-label{color:var(--muted);font-size:11px}
     body .blue-order-page .compact-order-table .order-time-value{font-variant-numeric:tabular-nums;white-space:nowrap;overflow-wrap:normal;word-break:normal}
     body .blue-order-page .compact-order-table .stack>span{min-width:0;overflow-wrap:anywhere}
@@ -25006,6 +25006,22 @@
       ["通道观察", "3 条通道成功率低于本租户阈值", "tag-orange", "授权通道"],
     ];
 
+    // Independent event samples for each business-order snapshot; never infer notification times.
+    const tenantBusinessOrderTimeSamples = new Map([
+      ['HS-C-260717-000031', {submittedAt:'2026-07-17 10:42:00',paidAt:'',channelCallbackAt:'',merchantNotifyAt:''}],
+      ['HS-C-260717-000941', {submittedAt:'2026-07-17 14:31:08',paidAt:'2026-07-17 14:32:50',channelCallbackAt:'2026-07-17 14:33:20',merchantNotifyAt:'2026-07-17 14:33:26'}],
+      ['HS-C-260717-000902', {submittedAt:'2026-07-17 15:48:26',paidAt:'',channelCallbackAt:'',merchantNotifyAt:''}],
+      ['HS-C-260717-000982', {submittedAt:'2026-07-17 15:36:04',paidAt:'',channelCallbackAt:'',merchantNotifyAt:''}],
+      ['HS-C-260716-000051', {submittedAt:'2026-07-16 18:16:30',paidAt:'',channelCallbackAt:'2026-07-16 18:20:18',merchantNotifyAt:'2026-07-16 18:20:35'}],
+      ['HS-C-260716-000058', {submittedAt:'2026-07-16 18:38:25',paidAt:'',channelCallbackAt:'',merchantNotifyAt:''}],
+      ['HS-P-260717-000336', {submittedAt:'2026-07-17 10:29:40',paidAt:'2026-07-17 10:31:04',channelCallbackAt:'2026-07-17 10:31:18',merchantNotifyAt:'2026-07-17 10:31:33'}],
+      ['HS-P-260717-000298', {submittedAt:'2026-07-17 12:41:05',paidAt:'2026-07-17 12:43:00',channelCallbackAt:'2026-07-17 12:43:18',merchantNotifyAt:'2026-07-17 12:43:24'}],
+      ['HS-P-260717-002134', {submittedAt:'2026-07-17 15:38:12',paidAt:'',channelCallbackAt:'',merchantNotifyAt:''}],
+      ['HS-P-260717-000251', {submittedAt:'2026-07-17 15:02:20',paidAt:'',channelCallbackAt:'',merchantNotifyAt:''}],
+      ['HS-P-260717-000219', {submittedAt:'2026-07-17 15:18:14',paidAt:'',channelCallbackAt:'',merchantNotifyAt:'2026-07-17 15:18:40'}],
+      ['HS-P-260715-000172', {submittedAt:'2026-07-15 10:24:18',paidAt:'2026-07-15 10:28:20',channelCallbackAt:'2026-07-15 10:28:42',merchantNotifyAt:'2026-07-15 10:29:05'}]
+    ]);
+
     const tenantTrackingTimeSamples = new Map([
       ['HS-C-260717-000941', {createdAt:'2026-07-17 14:31:08',paidAt:'2026-07-17 14:32:50',channelCallbackAt:'2026-07-17 14:33:20',merchantNotifyAt:'2026-07-17 14:33:26'}],
       ['HS-C-260717-000982', {createdAt:'2026-07-17 15:36:04',paidAt:'',channelCallbackAt:'2026-07-17 15:42:18',merchantNotifyAt:'2026-07-17 15:42:24'}],
@@ -26872,15 +26888,19 @@
       return `<div class="stack"><span>${escapeHtml(name)}</span><span class="mono muted">${escapeHtml(merchantNo)}</span></div>`;
     }
 
-    function blueOrderTimeCell(submittedAt, callbackAt) {
-      return `<div class="stack"><span>${escapeHtml(submittedAt)}</span><span class="muted">${escapeHtml(callbackAt)}</span></div>`;
+    function tenantBusinessOrderTimesFor(orderId) {
+      const sample = tenantBusinessOrderTimeSamples.get(orderId);
+      return sample ? {...sample} : {submittedAt:"",paidAt:"",channelCallbackAt:"",merchantNotifyAt:""};
     }
 
-    function blueCollectOrderTimeCell(submittedAt, paidAt, callbackAt) {
-      return `<div class="order-time-stack">${[["提交", submittedAt], ["支付", paidAt], ["回调", callbackAt]].map(([label, value]) => {
-        const text = !value || ["-", "未付"].includes(value) ? "—" : String(value);
-        return `<div class="order-time-line"><span class="order-time-label">${label}：</span><span class="order-time-value">${escapeHtml(text)}</span></div>`;
-      }).join("\n")}</div>`;
+    function tenantBusinessOrderTimePairs(orderId) {
+      const times = tenantBusinessOrderTimesFor(orderId);
+      return [["提交",times.submittedAt],["支付",times.paidAt],["通道回调",times.channelCallbackAt],["通知商户",times.merchantNotifyAt]];
+    }
+
+    function tenantBusinessOrderTimeCell(orderId) {
+      const help = {"提交":"订单提交的时间","支付":"实际支付完成的时间","通道回调":"收到通道订单结果通知的时间；主动查单不算通道回调","通知商户":"最近一次向商户发送订单结果通知的时间；是否送达看通知状态"};
+      return `<div class="order-time-stack" data-business-order-time="${escapeHtml(orderId)}">${tenantBusinessOrderTimePairs(orderId).map(([label,value]) => `<div class="order-time-line"><span class="order-time-label" title="${escapeHtml(help[label])}">${label}：</span><span class="order-time-value">${escapeHtml(value || "—")}</span></div>`).join("\n")}</div>`;
     }
 
     function blueCollectActionCell({ repair = true, block = true } = {}) {
@@ -26915,7 +26935,7 @@
             { label: "通知状态", type: "select", options: ["全部通知", "未通知", "通知成功", "通知失败"], column: 7 },
             { label: "金额>=", placeholder: "金额>=", match: "amount-min", column: 5 },
             { label: "金额<=", placeholder: "金额<=", match: "amount-max", column: 5 },
-            { label: "时间类型", type: "select", options: ["提交时间", "回调时间"], match: "filter-mode" },
+            { label: "时间类型", type: "select", options: ["提交时间", "通道回调时间"], match: "filter-mode" },
             { label: "时间", type: "date-range", startPlaceholder: "开始时间", endPlaceholder: "结束时间", match: "filter-mode" }
           ],
           actions: [
@@ -26938,9 +26958,9 @@
             ["处理中订单数", "3", ""],
             ["处理中金额", "CNY 20,800.00", ""]
           ],
-          columns: ["系统订单号", "通道订单号/商家订单号", "商户名/号", "通道", "平台产品", "交易金额", "订单状态", "通知状态", "提交/支付/回调时间", "IP", "操作"],
-          tableMinWidth: 1070,
-          columnWidths: [126,150,84,96,100,86,64,72,164,100,64],
+          columns: ["系统订单号", "通道订单号/商家订单号", "商户名/号", "通道", "平台产品", "交易金额", "订单状态", "通知状态", "订单时间（UTC+8）", "IP", "操作"],
+          tableMinWidth: 1102,
+          columnWidths: [126,150,84,96,100,86,64,72,196,100,64],
           rows: [
             [
               `<span class="mono">HS-C-260717-000031</span>`,
@@ -26951,7 +26971,7 @@
               `<strong class="mono">12,840.00</strong>`,
               blueOrderTag("待支付", "orange"),
               blueOrderTag("未通知", "gray"),
-              blueCollectOrderTimeCell("2026-07-17 10:42:00", "", "未付"),
+              tenantBusinessOrderTimeCell("HS-C-260717-000031"),
               `<span class="mono">198.51.100.31</span>`,
               blueCollectActionCell()
             ],
@@ -26964,7 +26984,7 @@
               `<strong class="mono">8,600.00</strong>`,
               blueOrderTag("成功", "green"),
               blueOrderTag("通知成功", "green"),
-              blueCollectOrderTimeCell("2026-07-17 14:31:08", "2026-07-17 14:32:50", "2026-07-17 14:33:20"),
+              tenantBusinessOrderTimeCell("HS-C-260717-000941"),
               `<span class="mono">198.51.100.45</span>`,
               blueCollectActionCell({ repair: false })
             ],
@@ -26977,7 +26997,7 @@
               `<strong class="mono">4,520.00</strong>`,
               `<div class="stack">${blueOrderTag("异常", "red")}<span class="negative">通道返回格式异常</span></div>`,
               blueOrderTag("未通知", "gray"),
-              blueCollectOrderTimeCell("2026-07-17 15:48:26", "", "-"),
+              tenantBusinessOrderTimeCell("HS-C-260717-000902"),
               `<span class="mono">203.0.113.92</span>`,
               blueCollectActionCell()
             ],
@@ -26990,7 +27010,7 @@
               `<strong class="mono">12,800.00</strong>`,
               blueOrderTag("处理中", "blue"),
               blueOrderTag("未通知", "gray"),
-              blueCollectOrderTimeCell("2026-07-17 15:36:04", "", "-"),
+              tenantBusinessOrderTimeCell("HS-C-260717-000982"),
               `<span class="mono">198.51.100.82</span>`,
               blueCollectActionCell()
             ],
@@ -27003,7 +27023,7 @@
               `<strong class="mono">1,500.00</strong>`,
               blueOrderTag("失败", "red"),
               blueOrderTag("通知成功", "green"),
-              blueCollectOrderTimeCell("2026-07-16 18:16:30", "", "2026-07-16 18:20:18"),
+              tenantBusinessOrderTimeCell("HS-C-260716-000051"),
               `<span class="mono">198.51.100.92</span>`,
               blueCollectActionCell()
             ],
@@ -27016,7 +27036,7 @@
               `<strong class="mono">980.00</strong>`,
               blueOrderTag("已过期", "gray"),
               blueOrderTag("未通知", "gray"),
-              blueCollectOrderTimeCell("2026-07-16 18:38:25", "", "未付"),
+              tenantBusinessOrderTimeCell("HS-C-260716-000058"),
               `<span class="mono">198.51.100.99</span>`,
               blueCollectActionCell()
             ]
@@ -27037,7 +27057,7 @@
           { label: "支付状态", type: "select", options: ["全部支付状态", "待支付", "已打款", "已驳回", "异常"], column: 6 },
           { label: "订单类型", type: "select", options: ["全部类型", "bank", "alipay"], column: 4 },
           { label: "通知状态", type: "select", options: ["全部通知", "未通知", "通知成功", "通知失败"], column: 7 },
-          { label: "时间类型", type: "select", options: ["提交时间", "回调时间"], match: "filter-mode" },
+          { label: "时间类型", type: "select", options: ["提交时间", "通道回调时间"], match: "filter-mode" },
           { label: "时间", type: "date-range", startPlaceholder: "开始时间", endPlaceholder: "结束时间", match: "filter-mode" },
           { label: "打款资料", placeholder: "输入打款金额/姓名/卡号" }
         ],
@@ -27061,9 +27081,9 @@
           ["处理中笔", "59", ""]
         ],
         secondaryToolbar: true,
-        columns: ["", "系统订单号", "通道订单号/商家订单号", "商户名/号", "类型", "交易金额", "支付状态", "通知状态", "驳回描述", "通道商", "通道", "提交时间/回调时间", "操作"],
-        tableMinWidth: 1134,
-        columnWidths: [30,126,150,84,48,86,72,72,88,90,96,128,64],
+        columns: ["", "系统订单号", "通道订单号/商家订单号", "商户名/号", "类型", "交易金额", "支付状态", "通知状态", "驳回描述", "通道商", "通道", "订单时间（UTC+8）", "操作"],
+        tableMinWidth: 1202,
+        columnWidths: [30,126,150,84,48,86,72,72,88,90,96,196,64],
         rows: [
           [
             `<input class="checkbox-cell" type="checkbox" aria-label="选择订单 HS-P-260717-000336">`,
@@ -27077,7 +27097,7 @@
             `<span class="muted">-</span>`,
             "PayoutX",
             "PayoutX CNY 代付",
-            blueOrderTimeCell("2026-07-17 10:29:40", "2026-07-17 10:31:18"),
+            tenantBusinessOrderTimeCell("HS-P-260717-000336"),
             bluePayoutActionCell()
           ],
           [
@@ -27092,7 +27112,7 @@
             `<span class="muted">-</span>`,
             "BridgePay",
             "BridgePay CNY 代付",
-            blueOrderTimeCell("2026-07-17 12:41:05", "2026-07-17 12:43:18"),
+            tenantBusinessOrderTimeCell("HS-P-260717-000298"),
             bluePayoutActionCell()
           ],
           [
@@ -27107,7 +27127,7 @@
             `<span class="negative">收款户名校验失败</span>`,
             "PayoutX",
             "PayoutX CNY 代付",
-            blueOrderTimeCell("2026-07-17 15:38:12", "-"),
+            tenantBusinessOrderTimeCell("HS-P-260717-002134"),
             bluePayoutActionCell({ repair: false })
           ],
           [
@@ -27122,7 +27142,7 @@
             `<span class="negative">通道状态不明确</span>`,
             "PayoutX",
             "PayoutX CNY 代付",
-            blueOrderTimeCell("2026-07-17 15:02:20", "-"),
+            tenantBusinessOrderTimeCell("HS-P-260717-000251"),
             bluePayoutActionCell({ repair: false })
           ],
           [
@@ -27137,7 +27157,7 @@
             `<span>租户代付钱包余额不足</span>`,
             "BridgePay",
             "BridgePay CNY 代付",
-            blueOrderTimeCell("2026-07-17 15:18:14", "2026-07-17 15:18:40"),
+            tenantBusinessOrderTimeCell("HS-P-260717-000219"),
             bluePayoutActionCell({ repair: false })
           ],
           [
@@ -27152,7 +27172,7 @@
             `<span class="muted">-</span>`,
             "BridgePay",
             "BridgePay CNY 代付",
-            blueOrderTimeCell("2026-07-15 10:24:18", "2026-07-15 10:28:42"),
+            tenantBusinessOrderTimeCell("HS-P-260715-000172"),
             bluePayoutActionCell()
           ]
         ]
@@ -28621,7 +28641,7 @@
     }
 
     function tenantExportRows(pageName, dataScope = currentTenantAccount.dataScope, notificationSegment = state.notificationSegment, notificationMerchantScope = currentTenantAccount.authorizedMerchantIds) {
-      const page = modulePages[pageName] || {};
+      const page = ["法币代收订单", "法币代付订单"].includes(pageName) ? blueTenantOrderManagementPage(pageName) : modulePages[pageName] || {};
       const fieldSnapshot = (page.columns || []).filter(field => field !== "操作");
       const sanitize = value => String(value ?? "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
       const rowSnapshot = pageName === "通知中心"
@@ -29228,7 +29248,7 @@
           ["通道手续费", "0.00"],
           ["通道代理费", "0.00"],
           ["平台利润", "0.00"],
-          ["提交 / 支付 / 回调时间", value(8)],
+          ...tenantBusinessOrderTimePairs(systemOrderNo).map(([label,value]) => [`${label}时间`, `${value || "—"} · UTC+8`]),
           ["IP", value(9)],
           ["通知状态", noticeStatus],
           ["支付地址", channelOrderNo === "-" ? "-" : `https://pay.example.test/${systemOrderNo}`],
@@ -29275,7 +29295,7 @@
           ["通道代理返佣", "0.00"],
           ["订单成本", "0.00"],
           ["订单利润", "0.00"],
-          ["提交时间 / 回调时间", value(11)],
+          ...tenantBusinessOrderTimePairs(systemOrderNo).map(([label,value]) => [`${label}时间`, `${value || "—"} · UTC+8`]),
           ["交易通道", value(10)],
           ["通道商", value(9)],
           ["提交地址", "https://channel.example.test/payout"]
@@ -29300,7 +29320,7 @@
           ["请求 / 查询回复", "-"]
         ]);
         body += detailSection("下单历史", "", [
-          ["最近下单", `${value(11)} · 租户操作员 · ${value(9)} / ${value(10)}`]
+          ["最近下单", `${tenantBusinessOrderTimesFor(systemOrderNo).submittedAt || "—"} · 租户操作员 · ${value(9)} / ${value(10)}`]
         ]);
         actions = value(6).includes("已打款")
           ? `<button class="btn btn-primary" type="button" data-action="detail-reverse-payout" data-order="${escapeHtml(systemOrderNo)}"><i data-lucide="rotate-ccw"></i>冲销订单</button>`
