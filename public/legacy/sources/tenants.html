@@ -1578,6 +1578,23 @@
     @media(max-width:760px){body .tenant-list-panel .filter-bar .field{width:100%;justify-content:space-between}body .tenant-list-panel .filter-bar input,body .tenant-list-panel .filter-bar select{flex:1;width:0}body #tenantDetailModal{width:100vw}body #tenantDetailModal .kv{grid-template-columns:112px minmax(0,1fr)}body #tenantModal .tenant-billing-settings .form-grid{grid-template-columns:1fr}}
     @media(prefers-reduced-motion:reduce){body #tenantDetailModal,body #tenantModal{transition:none}}
 </style>
+
+  <style id="tenant-list-operating-metrics">
+    body .tenant-list-panel .tenant-statistics-note{margin:0;padding:0 16px;color:var(--text-secondary);font-size:12px;line-height:1.7}
+    body .tenant-list-panel #tableWrap{overflow-x:auto;max-width:100%}
+    body .tenant-list-panel #tableWrap>table{table-layout:fixed;width:100%;min-width:1000px}
+    body .tenant-list-panel #tableWrap th,body .tenant-list-panel #tableWrap td{padding:9px 6px;font-size:12px;vertical-align:top;line-height:18px;overflow-wrap:anywhere}
+    body .tenant-list-panel #tableWrap th:nth-child(1){width:155px}body .tenant-list-panel #tableWrap th:nth-child(2){width:62px}
+    body .tenant-list-panel #tableWrap th:nth-child(3){width:86px}body .tenant-list-panel #tableWrap th:nth-child(4){width:140px}
+    body .tenant-list-panel #tableWrap th:nth-child(5){width:120px}body .tenant-list-panel #tableWrap th:nth-child(6){width:152px}
+    body .tenant-list-panel #tableWrap th:nth-child(7){width:155px}body .tenant-list-panel #tableWrap th:nth-child(8){width:90px}
+    body .tenant-list-panel .tenant-cell strong{font-size:13px}body .tenant-list-panel .tenant-cell .mono{font-size:11px}
+    .tenant-metric-stack{display:grid;gap:4px}.tenant-metric-line{display:grid;grid-template-columns:26px max-content;align-items:baseline;gap:6px}
+    .tenant-metric-line>span:first-child{color:var(--text-secondary);font-size:11px}.tenant-metric-line>strong{font-size:11px;font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap}
+    .tenant-metric-line.tenant-metric-total{padding-top:4px;border-top:1px solid var(--border)}.tenant-metric-hint{font-size:10px;color:var(--text-tertiary)}
+    body .tenant-list-panel #tableWrap .action-link{font-size:12px}.tenant-business-tags{display:grid;gap:4px;justify-items:start}
+    .tenant-metric-help{font:inherit;color:var(--text-secondary);background:transparent;border:0;padding:0 2px;cursor:help}
+  </style>
 </head>
 <body>
   <div class="app-shell">
@@ -1706,6 +1723,7 @@
                 <button class="btn" id="clearFilter">清空</button><button class="btn" id="exportTenants">导出</button><button class="btn primary" id="createTenantTop"><i data-lucide="plus"></i>新增租户</button>
               </div>
 
+              <p class="tenant-statistics-note" id="tenantStatisticsNote" role="status"></p>
               <div class="table-wrap" id="tableWrap">
                 <table aria-label="租户列表表格">
                   <thead>
@@ -1713,6 +1731,10 @@
                       <th>租户</th>
                       <th>状态</th>
                       <th>已开通业务</th>
+                      <th>昨日跑量（CNY）</th>
+                      <th>系统费率</th>
+                      <th>昨日系统费（CNY）</th>
+                      <th>剩余系统费（CNY）<button type="button" class="tenant-metric-help" aria-label="剩余系统费说明" title="代收和代付共用一个系统费钱包，显示当前剩余余额；不重复按业务展示。">ⓘ</button></th>
                       <th class="action-col">操作</th>
                     </tr>
                   </thead>
@@ -1799,7 +1821,7 @@
           <small>不填则创建后在详情安全页配置；填写则与租户原子创建并立即启用。</small>
         </div>
         <div class="field wide tenant-billing-settings">
-          <h3>租户服务费</h3><div class="field"><label><input id="tenantAllowNegative" type="checkbox"> 允许租户钱包为负数</label><small>开启后余额为负仍可接收新订单；租户关闭或停用仍停止新业务。关闭后余额不足拦截新单，在途订单成功仍照常扣费。</small><small id="tenantFeeWalletBalance"></small></div><p class="cell-sub">平台向本租户收取的费用，代收、代付分别设置；两种方式都只对 CNY 成功订单计费，成功时扣钱包，按自然月对账。</p>
+          <h3>租户服务费</h3><div class="field"><label><input id="tenantAllowNegative" type="checkbox"> 允许钱包为负数</label><small>开启后钱包余额为负仍可接收新订单；租户关闭或停用仍停止新业务。关闭后余额不足拦截新单，在途订单成功仍照常扣费。</small><small id="tenantFeeWalletBalance"></small></div><p class="cell-sub">平台向本租户收取的费用，代收、代付分别设置；两种方式都只对 CNY 成功订单计费，成功时扣同一租户钱包，按自然月对账。</p>
           <div class="form-grid"><div class="field"><label for="tenantCollectionBillingMode">代收计费方式</label><select id="tenantCollectionBillingMode"><option value="percentage">交易百分比</option><option value="perTransaction">按单笔</option></select></div><div class="field"><label id="tenantCollectionBillingLabel" for="tenantCollectionBillingValue">代收费率（%）</label><input id="tenantCollectionBillingValue" type="number" min="0" step="0.0001" placeholder="未设置"><small id="tenantCollectionBillingFormula"></small></div><div class="field"><label for="tenantPayoutBillingMode">代付计费方式</label><select id="tenantPayoutBillingMode"><option value="percentage">交易百分比</option><option value="perTransaction">按单笔</option></select></div><div class="field"><label id="tenantPayoutBillingLabel" for="tenantPayoutBillingValue">代付费率（%）</label><input id="tenantPayoutBillingValue" type="number" min="0" step="0.0001" placeholder="未设置"><small id="tenantPayoutBillingFormula"></small></div></div><p class="cell-sub">交易百分比按每笔成功订单金额计算并保留精度，成功时按原精度扣减同一租户钱包，月底汇总后四舍五入至分对账，不重复扣费；按单笔只按成功笔数计费。未填写表示尚未设置，填写 0 表示免费。</p>
         </div>
         <div class="field wide">
@@ -2439,8 +2461,66 @@
       return '<span class="tag ' + tone + '">' + text + '</span>';
     }
 
+    function tenantStatisticsDate() {
+      const today = window.HSProviderDemo.now().slice(0,10);
+      return new Date(Date.parse(today + 'T00:00:00Z') - 86400000).toISOString().slice(0,10);
+    }
+
+    function tenantStatisticsMoney(value) {
+      const text = String(value), match = /^(-?)(\d+)(?:\.(\d{1,8}))?$/.exec(text);
+      if (!match) throw new Error('系统费金额格式无效');
+      return match[1] + BigInt(match[2]).toLocaleString('en-US') + '.' + (match[3] || '').padEnd(2,'0');
+    }
+
+    function tenantStatisticsRate(policy) {
+      if (!policy || policy.value === '' || policy.value == null) return '未设置';
+      return policy.mode === 'percentage' ? policy.value + '%' : 'CNY ' + policy.value + ' / 笔';
+    }
+
+    function tenantListStatistics(tenant, date = tenantStatisticsDate()) {
+      if (!tenantInCurrentScope(tenant)) throw new Error('无权查看该租户统计');
+      const model = window.HSFeeWallets, daily = model.daily(tenant.id,date.slice(0,7),{from:date,to:date,source:'live'}).totals;
+      return {date, collection:daily.collection, payout:daily.payout, exactTotal:daily.exactTotal,
+        rates:window.HSProviderDemo.tenantBilling(tenant.id),
+        balance:model.wallet(tenant.id).balance};
+    }
+
+    function tenantStatisticsLines(collect, payout, total) {
+      const line=(label,value,extra='')=>'<div class="tenant-metric-line '+extra+'"><span>'+label+'</span><strong>'+escapeHtml(value)+'</strong></div>';
+      return '<div class="tenant-metric-stack">'+line('代收',collect)+line('代付',payout)+(total===undefined?'':line('合计',total,'tenant-metric-total'))+'</div>';
+    }
+
+    function tenantStatisticsCells(stats) {
+      const fee = item => tenantStatisticsMoney(item.exactFee) + (item.pendingCount ? ' + 待计费' + item.pendingCount + '笔' : '');
+      const pending = stats.collection.pendingCount + stats.payout.pendingCount;
+      return '<td data-tenant-metric="volume">'+tenantStatisticsLines(tenantStatisticsMoney(stats.collection.amount),tenantStatisticsMoney(stats.payout.amount))+'</td>'+
+        '<td data-tenant-metric="rates">'+tenantStatisticsLines(tenantStatisticsRate(stats.rates.collection),tenantStatisticsRate(stats.rates.payout))+'</td>'+
+        '<td data-tenant-metric="fees">'+tenantStatisticsLines(fee(stats.collection),fee(stats.payout),tenantStatisticsMoney(stats.exactTotal)+(pending?'（待计费'+pending+'笔）':''))+'</td>'+
+        '<td data-tenant-metric="balances"><strong class="mono">'+tenantStatisticsMoney(stats.balance)+'</strong><div class="tenant-metric-hint">代收／代付共用</div></td>';
+    }
+
+    function canExportTenantList() {
+      if (!platformTenantAuthorization) return true;
+      const guard = window.HSPlatformAuthRouteGuard;
+      const authorization = guard.getAuthorizationContext();
+      return guard.allowBusinessBoot() && Boolean(authorization?.actionPermissions?.includes('platform.tenant.export'));
+    }
+
+    function tenantListExportRows() {
+      if (!canExportTenantList()) throw new Error('无租户列表导出权限');
+      const date=tenantStatisticsDate();
+      const rows=[['租户名称','租户编号','联系人','状态','已开通业务','统计日期（UTC+8）','昨日代收跑量（CNY）','昨日代付跑量（CNY）','代收系统费率','代付系统费率','昨日代收已扣系统费（CNY）','昨日代付已扣系统费（CNY）','昨日已扣系统费合计（CNY）','代收待计费笔数','代付待计费笔数','当前剩余系统费（CNY，代收代付共用）']];
+      for(const tenant of appState.filtered.filter(tenantInCurrentScope)) {
+        const m=tenantListStatistics(tenant,date);
+        rows.push([tenant.name,tenant.id,tenant.contact,tenant.status,tenantBusinessDirections(tenant).map(d=>'CNY '+d).join(' / '),date,m.collection.amount,m.payout.amount,tenantStatisticsRate(m.rates.collection),tenantStatisticsRate(m.rates.payout),m.collection.exactFee,m.payout.exactFee,m.exactTotal,m.collection.pendingCount,m.payout.pendingCount,m.balance]);
+      }
+      return rows;
+    }
+
     function renderRows() {
       const rows = document.getElementById('tenantRows');
+      const statisticsDate = tenantStatisticsDate();
+      document.getElementById('tenantStatisticsNote').textContent = '昨日：' + statisticsDate + '（UTC+8） · 跑量按成功订单统计 · 系统费按计费快照汇总 · 剩余为当前共用系统费钱包余额';
       const total = appState.filtered.length;
       const pages = Math.max(1, Math.ceil(total / appState.pageSize));
       appState.page = Math.min(appState.page, pages);
@@ -2455,12 +2535,13 @@
       document.getElementById('createTenantTop').title = createAllowed ? '' : (permissions.canCreate ? '新增顶层租户要求“全部租户”数据范围' : appState.currentRole + ' 无新增租户权限');
 
       if (result.length === 0) {
-        rows.innerHTML = '<tr><td colspan="4" class="table-empty"><strong>没有符合条件的租户</strong><span>请调整筛选条件后再查看列表。</span><br><button class="btn" data-clear-filters><i data-lucide="rotate-ccw"></i>清空筛选</button></td></tr>';
+        rows.innerHTML = '<tr><td colspan="8" class="table-empty"><strong>没有符合条件的租户</strong><span>请调整筛选条件后再查看列表。</span><br><button class="btn" data-clear-filters><i data-lucide="rotate-ccw"></i>清空筛选</button></td></tr>';
         refreshIcons();
         return;
       }
 
-      rows.innerHTML = result.map((tenant, index) => {
+      rows.innerHTML = result.filter(tenantInCurrentScope).map((tenant, index) => {
+        const statistics = tenantListStatistics(tenant,statisticsDate);
         const statusAction = !permissions.canSecurity
           ? ''
           : tenant.status === '正常'
@@ -2471,10 +2552,13 @@
         return '<tr data-index="' + index + '">' +
           '<td><div class="tenant-cell"><strong>' + tenant.name + '</strong><span class="mono">' + tenant.id + (tenant.contact ? ' / ' + escapeHtml(tenant.contact) : '') + '</span>' + '</div></td>' +
           '<td>' + tag(tenant.status, tenant.statusTone) + '</td>' +
-          '<td>' + tenantBusinessDirections(tenant).map(d => tag('CNY ' + d, 'blue')).join(' ') + '</td>' +
+          '<td><div class="tenant-business-tags">' + tenantBusinessDirections(tenant).map(d => tag('CNY ' + d, 'blue')).join('') + '</div></td>' +
+          tenantStatisticsCells(statistics) +
           '<td class="action-col"><div class="table-actions">' +
             '<button class="action-link" data-open="' + tenant.id + '">详情</button>' +
             statusAction +
+            (permissions.canEdit && tenant.status !== '关闭' ? '<button class="action-link" data-billing="' + tenant.id + '">系统费设置</button>' : '') +
+            (permissions.canAdjustWallet && tenant.status !== '关闭' ? '<button class="action-link" data-wallet-adjust="' + tenant.id + '">调整余额</button>' : '') +
           '</div></td>' +
         '</tr>';
       }).join('');
@@ -2945,7 +3029,8 @@
     }
 
     function exportTenantList() {
-      const rows = [['租户名称', '租户编号', '联系人', '状态', '已开通业务'], ...appState.filtered.filter(tenantInCurrentScope).map(tenant => [tenant.name, tenant.id, tenant.contact, tenant.status, tenantBusinessDirections(tenant).map(d => 'CNY ' + d).join(' / ')])];
+      if (!canExportTenantList()) { showToast('无导出权限', '请联系管理员配置租户列表导出权限。'); return; }
+      const rows = tenantListExportRows();
       const csv = '\uFEFF' + rows.map(row => row.map(value => '"' + String(value).replace(/^[=+@-]/, "'$&").replaceAll('"', '""') + '"').join(',')).join('\r\n');
       const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
       const link = document.createElement('a'); link.href = url; link.download = '租户列表.csv'; link.click(); URL.revokeObjectURL(url);
@@ -3135,7 +3220,7 @@
           addTenantAudit(tenant, e.type, '成功', e.id + ' · CNY ' + e.change + ' · ' + e.beforeBalance + ' → ' + e.afterBalance + ' · ' + e.reason);
         }
         closeWalletAdjustment();
-        renderDetailSections(tenant); activateDetailTab('wallet');
+        renderRows(); renderDetailSections(tenant); activateDetailTab('wallet');
         showToast('钱包调整已完成', result.entry.id);
       } catch (error) { showFormError('walletAdjustError', error.message, ['walletAdjustAmount']); }
     }
@@ -3307,6 +3392,8 @@
     }
 
     function applyPlatformTenantAuthorization() {
+      const exportButton = document.getElementById('exportTenants');
+      if (exportButton) { exportButton.hidden = !canExportTenantList(); exportButton.disabled = !canExportTenantList(); }
       if (!platformTenantAuthorization) return;
       document.querySelectorAll('[data-master-page]').forEach(button => {
         const required = platformMasterPermissions[button.dataset.masterPage];

@@ -17,5 +17,17 @@ const assert=require('node:assert/strict'),puppeteer=require('puppeteer-core'),{
  await page.setViewport({width:375,height:900});assert.equal(await gf.$eval('.grant-tenant-picker select',el=>{const r=el.getBoundingClientRect();return r.width>0&&r.right<=innerWidth+1;}),true);await gf.click('[data-provider="V-001"][data-direction="代付"]');await gf.click('#saveButton');assert.equal(await gf.$eval('.modal',el=>{const r=el.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth+1;}),true);await gf.click('#modalFoot [data-action="close"]');await page.setViewport({width:1440,height:1000});
  console.log('PLATFORM_GRANT_WORKSPACE_PASS 先选租户、全通道商、方向限制、跨筛选草稿、切换确认、统一MFA保存、其他租户隔离、取消及窄屏');
 
+ const tenantsMenu=await shell.waitForFunction(()=>[...document.querySelectorAll('.arco-menu-item')].find(el=>el.textContent.trim()==='租户管理'));await tenantsMenu.asElement().click();
+ await shell.waitForFunction(()=>document.querySelector('iframe')?.contentDocument?.querySelector('#tenantRows tr'));const tf=await(await shell.$('iframe')).contentFrame();
+ assert.equal(await tf.$$eval('#tenantRows tr:first-child td',els=>els.length),8);
+ assert.match(await tf.$eval('#tenantRows tr:first-child [data-tenant-metric="balances"]',el=>el.textContent),/936.94688/);
+ await tf.focus('[data-billing="HS-TEN-001"]');await page.keyboard.press('Enter');await tf.waitForSelector('#tenantModal.open');assert.equal(await tf.$eval('#tenantModal',el=>el.classList.contains('billing-only')),true);assert(await tf.$('#tenantCollectionBillingValue'));assert(await tf.$('#tenantPayoutBillingValue'));
+ await tf.click('#tenantModal [data-close-modal]');
+ await tf.focus('[data-wallet-adjust="HS-TEN-001"]');await page.keyboard.press('Enter');await tf.waitForSelector('#walletAdjustModal.open');await tf.type('#walletAdjustAmount','10.00');await tf.type('#walletAdjustReason','平台系统费钱包补记');
+ assert.equal(await tf.$eval('#walletAdjustBefore',el=>el.value),'936.94688');assert.equal(await tf.$eval('#walletAdjustAfter',el=>el.value),'946.94688');await tf.focus('#walletAdjustSubmit');await page.keyboard.press('Enter');
+ await tf.waitForFunction(()=>!document.querySelector('#walletAdjustModal').classList.contains('open'));assert.equal(await tf.evaluate(()=>window.HSFeeWallets.wallet('HS-TEN-001').balance),'946.94688');
+ assert.match(await tf.$eval('#tenantRows tr:first-child [data-tenant-metric="balances"]',el=>el.textContent),/946.94688/);
+ await page.setViewport({width:999,height:960});assert.equal(await tf.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
+ console.log('PLATFORM_TENANT_METRICS_PASS 四项经营指标、系统费设置入口、共用系统费钱包调额、窄屏');
  assert.deepEqual(errors,[]);console.log('DIST_SMOKE_PASS 月结统计、费率计算、生成回显与无订单月份检查通过');
  }finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1;});
