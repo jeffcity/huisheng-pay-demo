@@ -10,7 +10,7 @@ function fixture(auth=null){
  const tenant={id:'HS-TEN-001',name:'汇盛东南亚',status:'正常'};
  const state={currentRole:'平台超管',walletAdjustment:{tenantId:tenant.id,requestId:'adjust-platform-001',expectedRevision:4}};
  const context=vm.createContext({window,Date,Map,Set,JSON,Error,BigInt,document:{getElementById:el},tenants:[tenant],appState:state,platformTenantAuthorization:auth,
- getPermissions:()=>({canAdjustWallet:permission}),tenantInCurrentScope:t=>Boolean(t&&scope),showFormError:(id,msg)=>errors.push(msg),addTenantAudit:(...args)=>audits.push(args),showToast(){},renderDetailSections(){},activateDetailTab(){},closeWalletAdjustment(){state.walletAdjustment=null;}});
+ getPermissions:()=>({canAdjustWallet:permission}),tenantInCurrentScope:t=>Boolean(t&&scope),showFormError:(id,msg)=>errors.push(msg),addTenantAudit:(...args)=>audits.push(args),showToast(){},renderRows(){},renderDetailSections(){},activateDetailTab(){},closeWalletAdjustment(){state.walletAdjustment=null;}});
  for(const name of ['provider-model','settlement-model','tenant-fee-wallet-model'])vm.runInContext(fs.readFileSync(new URL('../src/'+name+'.js',import.meta.url),'utf8'),context);
  for(const [start,next] of [['walletOperator','renderTenantWallet'],['walletAdjustmentInput','previewWalletAdjustment'],['submitWalletAdjustment','sectionTitle']]) {const a=source.indexOf('    function '+start+'('),b=source.indexOf('    function '+next+'(',a);assert(a>0&&b>a);vm.runInContext(source.slice(a,b),context);}
  el('walletAdjustDirection').value='increase';el('walletAdjustAmount').value='10.00';el('walletAdjustReason').value='测试到账';

@@ -148,7 +148,7 @@
         }
         if (from && to && from > to) throw new Error('开始日期不能晚于结束日期');
         const saved = owner.__HSTenantSettlements?.find(tenantId, month);
-        if (saved?.entries) { entries = saved.entries; missing = []; }
+        if (saved?.entries && filters.source !== 'live') { entries = saved.entries; missing = []; }
         const empty = () => ({ count:0, amount:0n, fee:0n, pendingCount:0 });
         const group = () => ({ collection:empty(), payout:empty() });
         const days = new Map(), totals = group();

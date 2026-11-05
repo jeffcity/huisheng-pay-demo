@@ -21156,7 +21156,7 @@
 
 
     /* Scope compact density to the merchant management list; business lists keep their own styles. */
-    .merchant-list-table { min-width:956px; table-layout:fixed; }
+    .merchant-list-table { min-width:856px; table-layout:fixed; }
     .merchant-list-table th,.merchant-list-table td { padding:7px 6px !important; white-space:normal; overflow-wrap:anywhere; line-height:1.4; }
     .merchant-list-table th { font-size:12px; }
     .merchant-list-table td { font-size:12px; }
@@ -21248,8 +21248,81 @@
       }, true);
     })();
   </script>
+
+  <style id="merchant-management-tidewell-theme">
+    /* Main merchant management only. Business merchant pages retain their own layout and theme. */
+    body[data-merchant-ui="management"] {
+      --color-primary:#245665; --color-primary-hover:#193f4b; --color-primary-light:#e8f1f3;
+      --primary:var(--color-primary); --primary-hover:var(--color-primary-hover); --primary-light:var(--color-primary-light); --primary-soft:var(--color-primary-light);
+      --color-bg-page:#f3f6f7; --color-bg-surface:#fff; --color-bg-subtle:#f7f9fa;
+      --bg:var(--color-bg-page); --surface:var(--color-bg-surface); --surface-soft:var(--color-bg-subtle);
+      --color-text-primary:#172a32; --color-text-secondary:#536b77; --color-text-tertiary:#647a85;
+      --text:var(--color-text-primary); --text-secondary:var(--color-text-secondary); --text-tertiary:var(--color-text-tertiary);
+      --color-border:#e5ecef; --color-border-strong:#cfdae0; --border:var(--color-border); --border-strong:var(--color-border-strong);
+      --font-ui:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+      --font:var(--font-ui); --font-display:var(--font-ui); --shadow:none;
+      background:var(--bg)!important; color:var(--text); font-family:var(--font-ui);
+    }
+    body[data-merchant-ui="management"] .content { padding:22px 24px 28px; gap:18px; }
+    body[data-merchant-ui="management"] .page-head { flex-direction:row; align-items:center; gap:14px; padding:0; }
+    body[data-merchant-ui="management"] .page-head h1 { color:var(--text); font-size:24px; line-height:32px; font-weight:650; letter-spacing:-.02em; }
+    body[data-merchant-ui="management"] .page-head p { max-width:720px; font-size:12px; line-height:1.7; color:var(--text-secondary); margin-top:7px; }
+    body[data-merchant-ui="management"] .panel { border:1px solid var(--border); border-radius:10px; box-shadow:none; background:var(--surface); }
+    body[data-merchant-ui="management"] .panel-head { min-height:48px; padding:12px 16px; }
+    body[data-merchant-ui="management"] .panel-title { font-size:14px; font-weight:600; }
+    body[data-merchant-ui="management"] .panel-title svg { color:var(--primary); width:16px; height:16px; }
+    body[data-merchant-ui="management"] .filters { grid-template-columns:minmax(0,1.5fr) repeat(2,minmax(0,1fr)); padding:16px; gap:12px; background:var(--surface); }
+    body[data-merchant-ui="management"] .field label { font-size:12px; color:var(--text-secondary); }
+    body[data-merchant-ui="management"] .input,
+    body[data-merchant-ui="management"] .select { min-height:34px!important; height:34px; border-color:var(--border-strong); border-radius:7px!important; background:var(--surface); font-size:13px!important; color:var(--text); }
+    body[data-merchant-ui="management"] textarea.input { height:auto; min-height:76px!important; padding:9px 10px; line-height:1.6; }
+    body[data-merchant-ui="management"] input[readonly] { background:var(--surface-soft); color:var(--text-secondary); }
+    body[data-merchant-ui="management"] .btn { min-height:34px!important; height:34px; border-radius:7px!important; font-size:12px; font-weight:500; box-shadow:none; }
+    body[data-merchant-ui="management"] .btn:not(.primary):not(.danger):hover { background:var(--primary-light); border-color:var(--border-strong); }
+    body[data-merchant-ui="management"] .btn.primary { color:#fff; background:var(--primary); border-color:var(--primary); }
+    body[data-merchant-ui="management"] .btn.primary:hover { background:var(--primary-hover); border-color:var(--primary-hover); }
+    body[data-merchant-ui="management"] .table-actions { padding:10px 16px; min-height:50px; }
+    body[data-merchant-ui="management"] .selection-info { color:var(--text-secondary); font-size:12px; }
+    body[data-merchant-ui="management"] .merchant-list-table { width:100%; }
+    body[data-merchant-ui="management"] .merchant-list-table thead th { color:var(--text-secondary); background:var(--surface-soft)!important; height:36px; font-weight:500; }
+    body[data-merchant-ui="management"] .merchant-list-table tbody tr:hover { background:#f8fafb; }
+    body[data-merchant-ui="management"] .merchant-list-table .merchant-money-heading { color:var(--text); }
+    body[data-merchant-ui="management"] .merchant-list-table .volume-rate { color:var(--text-secondary); }
+    body[data-merchant-ui="management"] .modal { border-radius:10px!important; box-shadow:0 20px 56px #172a3226; }
+    body[data-merchant-ui="management"] .modal-head { padding:16px 18px; }
+    body[data-merchant-ui="management"] .modal-head h2 { font-size:20px; font-weight:600; color:var(--text); }
+    body[data-merchant-ui="management"] .modal-head p { font-size:12px; color:var(--text-secondary); }
+    body[data-merchant-ui="management"] .modal-body { padding:16px 18px 20px; gap:14px; }
+    body[data-merchant-ui="management"] .modal-footer { padding:12px 18px; background:var(--surface); border-top:1px solid var(--border); }
+    body[data-merchant-ui="management"] .modal-close { color:var(--text-secondary); border-radius:7px!important; }
+    body[data-merchant-ui="management"] .admin-security-row > .btn,
+    body[data-merchant-ui="management"] .admin-security-fields input { min-height:44px!important; height:44px; }
+    body[data-merchant-ui="management"] .sub-panel { border-color:var(--border); border-radius:8px; box-shadow:none; }
+    body[data-merchant-ui="management"] .sub-panel h3 { background:var(--surface-soft); color:var(--text); font-size:13px; padding:11px 12px; }
+    body[data-merchant-ui="management"] .modal-tab { font-size:12px; color:var(--text-secondary); }
+    body[data-merchant-ui="management"] .modal-tab.active { color:var(--primary); border-bottom-color:var(--primary); }
+    body[data-merchant-ui="management"] .form-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    body[data-merchant-ui="management"] .check-card { border-color:var(--border); background:var(--surface); border-radius:7px; padding:10px 12px; font-size:13px; }
+    body[data-merchant-ui="management"] input[type="checkbox"] { accent-color:var(--primary); }
+    body[data-merchant-ui="management"] :focus-visible,
+    body[data-merchant-ui="management"] [role="dialog"] :focus { outline:2px solid var(--primary)!important; outline-offset:2px!important; box-shadow:0 0 0 3px #fff!important; }
+    body[data-merchant-ui="management"] .is-invalid:focus { outline-color:var(--danger)!important; }
+    @media(max-width:640px) {
+      body[data-merchant-ui="management"] .content { padding:18px 14px 24px; gap:16px; }
+      body[data-merchant-ui="management"] .page-head { align-items:flex-start; flex-direction:column; gap:12px; }
+      body[data-merchant-ui="management"] .filters { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      body[data-merchant-ui="management"] .filters > .field:first-child { grid-column:1/-1; }
+      body[data-merchant-ui="management"] .form-grid { grid-template-columns:minmax(0,1fr); }
+      body[data-merchant-ui="management"] .modal { width:calc(100vw - 24px); max-height:calc(100vh - 24px); }
+      body[data-merchant-ui="management"] .btn,
+      body[data-merchant-ui="management"] .modal-close { min-height:40px!important; }
+    }
+    @media(max-width:360px) {
+      body[data-merchant-ui="management"] .filters { grid-template-columns:minmax(0,1fr); }
+    }
+  </style>
 </head>
-<body>
+<body data-merchant-ui="management">
   <div class="app app-shell" data-astryx="AppShell">
     <aside class="sidebar" data-astryx="SidebarNav">
       <div class="brand" data-astryx="BrandLockup">
@@ -21326,13 +21399,6 @@
               <input class="input" id="keyword" placeholder="商户名 / 编号 / 联系人">
             </div>
             <div class="field">
-              <label for="merchantType">商户类型</label>
-              <select class="select" id="merchantType">
-                <option>全部类型</option>
-                <option>独立商户</option>
-              </select>
-            </div>
-            <div class="field">
               <label for="statusFilter">商户状态</label>
               <select class="select" id="statusFilter">
                 <option>全部状态</option>
@@ -21362,12 +21428,11 @@
 
           <div class="table-wrap" data-astryx="DataTable">
             <table id="merchantListTable" class="merchant-list-table" data-astryx="Table">
-              <colgroup><col style="width:28px"><col style="width:150px"><col style="width:100px"><col style="width:180px"><col style="width:58px"><col style="width:234px"><col style="width:106px"><col style="width:100px"></colgroup>
+              <colgroup><col style="width:28px"><col style="width:150px"><col style="width:180px"><col style="width:58px"><col style="width:234px"><col style="width:106px"><col style="width:100px"></colgroup>
               <thead>
                 <tr>
                   <th><label class="table-check"><input type="checkbox" id="selectAllMerchants" aria-label="选择当前结果全部商户"></label></th>
                   <th>商户</th>
-                  <th>类型 / 关系</th>
                   <th>今日跑量</th>
                   <th>状态</th>
                   <th>业务资金</th>
@@ -22067,15 +22132,13 @@
 
     function filteredMerchants() {
       const keyword = document.getElementById("keyword").value.trim().toLowerCase();
-      const type = document.getElementById("merchantType").value;
       const status = document.getElementById("statusFilter").value;
 
       return merchants.filter((item) => !item.deletedAt).filter((item) => {
         const text = `${item.id} ${item.name} ${item.owner}`.toLowerCase();
         const byKeyword = !keyword || text.includes(keyword);
-        const byType = type === "全部类型" || item.type === type;
         const byStatus = status === "全部状态" || item.status === status;
-        return byKeyword && byType && byStatus;
+        return byKeyword && byStatus;
       }).sort((a, b) => a.id.localeCompare(b.id));
     }
 
@@ -22273,13 +22336,6 @@
       const selectedCount = selectedMerchantIds.size;
       document.getElementById("resultInfo").textContent = selectedCount ? `共 ${list.length} 个商户，已选 ${selectedCount} 个` : `共 ${list.length} 个商户`;
       document.getElementById("merchantRows").innerHTML = list.map((item) => {
-        const parent = item.parentMerchantId ? merchants.find((merchant) => merchant.id === item.parentMerchantId) : null;
-        const childCount = merchants.filter((merchant) => !merchant.deletedAt && merchant.parentMerchantId === item.id).length;
-        const relation = item.type === "主商户"
-          ? `直属子商户 ${childCount} 个`
-          : item.type === "子商户"
-            ? `上级：${parent ? parent.name : "未关联"}`
-            : "无上级关系";
         return `
           <tr>
             <td><label class="table-check"><input type="checkbox" data-merchant-select="${item.id}" aria-label="选择 ${escapeHtml(item.name)}" ${selectedMerchantIds.has(item.id) ? "checked" : ""}></label></td>
@@ -22287,12 +22343,6 @@
               <div class="stack">
                 <strong>${escapeHtml(item.name)}</strong>
                 <span class="mono muted">${item.id}</span>
-              </div>
-            </td>
-            <td>
-              <div class="stack">
-                ${tag(item.type)}
-                <span class="muted">${escapeHtml(relation)}</span>
               </div>
             </td>
             <td class="volume-cell">${renderVolumeSummary(item)}</td>
@@ -22442,12 +22492,6 @@
     }
 
     function renderOverview(item) {
-      const typeOptions = ["独立商户", "主商户", "子商户"].map((type) => `
-        <option${item.type === type ? " selected" : ""}>${type}</option>
-      `).join("");
-      const parentOptions = merchants.filter((merchant) => !merchant.deletedAt && merchant.id !== item.id && merchant.type !== "子商户").map((merchant) => `
-        <option value="${merchant.id}"${item.parentMerchantId === merchant.id ? " selected" : ""}>${escapeHtml(merchant.name)} · ${merchant.id}</option>
-      `).join("");
       return `
         ${section("基础资料", `
           <div style="padding:12px" class="form-grid">
@@ -22456,20 +22500,12 @@
               <input class="input" id="merchantBasicName" value="${escapeHtml(item.name)}">
             </div>
             <div class="field">
-              <label for="merchantBasicType">商户类型</label>
-              <select class="select" id="merchantBasicType">${typeOptions}</select>
-            </div>
-            <div class="field">
               <label for="merchantBasicOwner">联系人</label>
               <input class="input" id="merchantBasicOwner" value="${escapeHtml(item.owner)}">
             </div>
             <div class="field">
               <label for="merchantBasicPhone">联系电话</label>
               <input class="input mono" id="merchantBasicPhone" value="${escapeHtml(item.phone)}">
-            </div>
-            <div class="field wide" id="merchantBasicParentField" ${item.type === "子商户" ? "" : "hidden"}>
-              <label for="merchantBasicParent">上级主商户</label>
-              <select class="select" id="merchantBasicParent"><option value="">请选择上级主商户</option>${parentOptions}</select>
             </div>
             <div class="field">
               <label>商户编号</label>
@@ -23119,11 +23155,8 @@
 
     function renderCommonConfig(item) {
       const access = `<div class="merchant-security-single">${renderLoginWhitelist(item)}</div>`;
-      const callbacks = `<div class="merchant-security-grid merchant-security-callbacks">
-        ${renderSecuritySetting("统一回调 URL", `<div class="field"><label for="accessCallback-shared">回调地址</label><textarea class="input mono" id="accessCallback-shared" rows="2" placeholder="未部署自有系统可留空">${escapeHtml(merchantCallback(item))}</textarea></div>`, `<button class="btn primary" type="button" data-access-save="callback">保存回调 URL</button>`)}
-        ${renderBusinessCallbackIps(item)}</div>`;
-      const key = `<div class="merchant-security-key">${renderSecuritySetting("对接密钥", renderIntegrationValue("accessKeyStatus", "当前密钥", merchantIntegrationKey(item)), `<button class="btn" type="button" id="resetMerchantApiKey">重置密钥</button>`)}</div>`;
-      const tabs = [["access", "访问控制", access], ["callbacks", "业务回调", callbacks], ["key", "对接密钥", key]];
+      activeSecurityTab = "access";
+      const tabs = [["access", "访问控制", access]];
       return `<div class="merchant-security-settings">
         <div class="merchant-security-tabs" role="tablist" aria-label="安全配置分类">${tabs.map(([id, title]) => `<button class="merchant-security-tab" type="button" id="security-tab-${id}" data-security-tab="${id}" role="tab" aria-controls="security-panel-${id}" aria-selected="${activeSecurityTab === id}" tabindex="${activeSecurityTab === id ? "0" : "-1"}">${title}</button>`).join("")}</div>
         ${tabs.map(([id, title, body]) => `<div class="merchant-security-panel" id="security-panel-${id}" role="tabpanel" aria-labelledby="security-tab-${id}" ${activeSecurityTab === id ? "" : "hidden"}>${body}</div>`).join("")}
@@ -23209,12 +23242,6 @@
         });
       });
       bindMerchantIpEditors();
-      const typeSelect = document.getElementById("merchantBasicType");
-      typeSelect?.addEventListener("change", () => {
-        const parentField = document.getElementById("merchantBasicParentField");
-        parentField.hidden = typeSelect.value !== "子商户";
-        if (parentField.hidden) document.getElementById("merchantBasicParent").value = "";
-      });
       document.getElementById("saveMerchantBasic")?.addEventListener("click", () => saveMerchantBasic(item));
       document.querySelectorAll("[data-callback-ip-save]").forEach((button) => button.addEventListener("click", () => saveMerchantCallbackIps(item, button.dataset.callbackIpSave)));
       document.querySelectorAll("[data-business-config-save]").forEach((button) => {
@@ -23338,20 +23365,15 @@
       const snapshot = JSON.stringify(item);
       const button = document.getElementById("saveMerchantBasic");
       const name = document.getElementById("merchantBasicName").value.trim();
-      const type = document.getElementById("merchantBasicType").value;
       const owner = document.getElementById("merchantBasicOwner").value.trim();
       const phone = document.getElementById("merchantBasicPhone").value.trim();
-      const parentMerchantId = document.getElementById("merchantBasicParent").value;
-      const childCount = merchants.filter((merchant) => !merchant.deletedAt && merchant.parentMerchantId === item.id).length;
 
       if (!name) return showInlineError("请填写商户名称。", "merchantBasicName");
       if (merchants.some((merchant) => merchant.id !== item.id && merchant.name.toLowerCase() === name.toLowerCase())) return showInlineError("当前租户已存在同名商户。", "merchantBasicName");
       if (!owner) return showInlineError("请填写联系人。", "merchantBasicOwner");
       if (!phone) return showInlineError("请填写联系电话。", "merchantBasicPhone");
-      if (type === "子商户" && !parentMerchantId) return showInlineError("子商户必须选择上级主商户。", "merchantBasicParent");
-      if (type !== "主商户" && childCount > 0) return showInlineError(`该商户仍有 ${childCount} 个子商户，请先调整子商户归属后再修改类型。`, "merchantBasicType");
-      const before = `${item.name} / ${item.type}${item.parentMerchantId ? ` / ${item.parentMerchantId}` : ""}`;
-      const after = `${name} / ${type}${parentMerchantId ? ` / ${parentMerchantId}` : ""}`;
+      const before = `${item.name} / ${item.owner} / ${item.phone}`;
+      const after = `${name} / ${owner} / ${phone}`;
       if (before === after && item.owner === owner && item.phone === phone) return showInlineError("当前基础资料没有变化，无需重复保存。");
 
       button.disabled = true;
@@ -23359,13 +23381,11 @@
       setTimeout(() => {
         if (!merchantMoreAllowed(item, snapshot)) {button.disabled=false;return showToast("租户或商户资料已变化，未保存");}
         item.name = name;
-        item.type = type;
         item.owner = owner;
         item.phone = phone;
-        item.parentMerchantId = type === "子商户" ? parentMerchantId : "";
         item.logs.unshift([nowText(), "保存基础资料", currentTenantOperator.account, `${before} → ${after}`]);
         renderDetailModal(item);
-        showToast("商户基础资料已保存，列表和关系信息已刷新");
+        showToast("商户基础资料已保存，列表资料已刷新");
       }, 300);
     }
 
@@ -23688,7 +23708,7 @@
         <div class="modal-head" data-astryx="DialogHeader">
           <div>
             <h2>${escapeHtml(item.name)}</h2>
-            <p><span class="mono">${item.id}</span> · ${item.type} · ${item.status}</p>
+            <p><span class="mono">${item.id}</span> · ${item.status}</p>
           </div>
           <div class="merchant-detail-actions"><button class="modal-close" type="button" id="modalClose" aria-label="关闭"><i data-lucide="x"></i></button></div>
         </div>
@@ -23705,7 +23725,6 @@
     }
 
     function openCreateModal() {
-      const parentOptions = merchants.filter((merchant) => merchant.type !== "子商户").map((merchant) => `<option value="${merchant.id}">${escapeHtml(merchant.name)} · ${merchant.id}</option>`).join("");
       document.getElementById("modal").innerHTML = `
         <div class="modal-head" data-astryx="DialogHeader">
           <div>
@@ -23723,10 +23742,6 @@
                 <input class="input" id="createMerchantName" value="新加坡聚合支付" autocomplete="off">
               </div>
               <div class="field">
-                <label for="createMerchantType">商户类型</label>
-                <select class="select" id="createMerchantType"><option selected>独立商户</option><option>主商户</option><option>子商户</option></select>
-              </div>
-              <div class="field">
                 <label for="createMerchantOwner">联系人</label>
                 <input class="input" id="createMerchantOwner" value="林文" autocomplete="off">
               </div>
@@ -23739,10 +23754,6 @@
                 <input class="input mono" id="createMerchantAccount" value="admin@newmerchant" autocomplete="off">
                 <small>商户端域名为租户共享入口，因此登录账号必须在当前租户范围内唯一。</small>
               </div>
-              <div class="field wide" id="createParentField" hidden>
-                <label for="createMerchantParent">上级主商户</label>
-                <select class="select" id="createMerchantParent"><option value="">请选择上级主商户</option>${parentOptions}</select>
-              </div>
             </div>
           </div>
           <div class="sub-panel" data-astryx="DataPanel">
@@ -23753,20 +23764,9 @@
             </div>
           </div>
           <div class="sub-panel" data-astryx="DataPanel">
-            <h3>接入信息</h3>
-            <div style="padding:12px" class="form-grid">
-              <div class="field wide">
-                <label for="createUnifiedCallback">统一回调 URL</label>
-                <input class="input" id="createUnifiedCallback" value="https://merchant.example/huisheng/notify" placeholder="未部署自有系统可留空" autocomplete="off">
-              </div>
-              <div class="field wide">
-                <label for="createMerchantWhitelist">API 请求 IP 白名单</label>
-                <input class="input" id="createMerchantWhitelist" placeholder="可留空；支持公网 IPv4、IPv6 和明确网段" autocomplete="off">
-              </div>
-              <div class="field">
-                <label>对接密钥</label>
-                <input class="input" value="平台配置，一户一把，默认脱敏" readonly>
-              </div>
+            <h3>登录安全</h3>
+            <div style="padding:12px">
+              ${renderMerchantIpEditor("createMerchantLoginWhitelist", "商户后台登录 IP 白名单", "", "填写允许登录商户后台的公网 IP 或网段；与代付下单 API 白名单分开设置。")}
             </div>
           </div>
           <div class="sub-panel" data-astryx="DataPanel">
@@ -23781,7 +23781,7 @@
             <div style="padding:12px" class="form-grid">
               <div class="field wide">
                 <label for="createMerchant2fa">当前操作人 Google 2FA 验证码</label>
-                <input class="input mono" id="createMerchant2fa" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="填写白名单时，输入当前操作人的 6 位验证码">
+                <input class="input mono" id="createMerchant2fa" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="设置登录白名单时，输入当前操作人的 6 位验证码">
               </div>
             </div>
           </div>
@@ -23794,16 +23794,7 @@
       `;
       showModal();
       bindModalEvents();
-      const typeSelect = document.getElementById("createMerchantType");
-      const syncParentField = () => {
-        const isChild = typeSelect.value === "子商户";
-        document.getElementById("createParentField").hidden = !isChild;
-        const parentSelect = document.getElementById("createMerchantParent");
-        parentSelect.disabled = !isChild;
-        if (!isChild) parentSelect.value = "";
-      };
-      typeSelect.addEventListener("change", syncParentField);
-      syncParentField();
+      bindMerchantIpEditors();
       document.getElementById("saveMerchantDraft").addEventListener("click", () => {
         clearInlineError();
         showToast("新增商户草稿已暂存在当前页面；草稿不会创建账号或钱包");
@@ -23815,13 +23806,14 @@
       clearInlineError();
       const submit = document.getElementById("createMerchantSubmit");
       const name = document.getElementById("createMerchantName").value.trim();
-      const type = document.getElementById("createMerchantType").value;
+      const type = "独立商户";
       const owner = document.getElementById("createMerchantOwner").value.trim();
       const phone = document.getElementById("createMerchantPhone").value.trim();
       const merchantAdminAccount = document.getElementById("createMerchantAccount").value.trim().toLowerCase();
-      const parentMerchantId = type === "子商户" ? document.getElementById("createMerchantParent").value : "";
-      const unifiedCallback = document.getElementById("createUnifiedCallback").value.trim();
-      const whitelist = document.getElementById("createMerchantWhitelist").value.trim();
+      const parentMerchantId = "";
+      const loginInput = merchantIpInputValue("createMerchantLoginWhitelist");
+      const loginEntries = whitelistEntries(loginInput).map(value => value.split("/").map(part => part.trim()).join("/"));
+      const whitelist = "";
       const google2fa = document.getElementById("createMerchant2fa").value.trim();
       const singleLimit = parseCnyInput(document.getElementById("createSingleLimit").value);
       const dailyLimit = parseCnyInput(document.getElementById("createDailyLimit").value);
@@ -23836,14 +23828,14 @@
       if (!phone) return showInlineError("请填写联系电话。", "createMerchantPhone");
       if (!merchantAdminAccount) return showInlineError("请填写初始登录账号。", "createMerchantAccount");
       if (merchants.some((merchant) => ensureAdminSecurity(merchant).account.toLowerCase() === merchantAdminAccount)) return showInlineError("该登录账号已被当前租户下其他商户使用，请更换账号。", "createMerchantAccount");
-      if (type === "子商户" && !parentMerchantId) return showInlineError("子商户必须选择上级主商户。", "createMerchantParent");
       if (!capabilities.length) return showInlineError("至少选择一项当前租户已开通的业务能力。", "createCapCollect");
-      if (unifiedCallback && !isPublicHttpsUrl(unifiedCallback)) return showInlineError("统一回调 URL 必须使用公网 HTTPS，不能使用本机或内网地址。", "createUnifiedCallback");
-      if (!validIpList(whitelist)) return showInlineError("请输入有效的公网 IPv4、IPv6 或明确网段，多个条目用逗号或换行分隔。", "createMerchantWhitelist");
+      const loginIdentities = loginEntries.map(loginWhitelistIdentity);
+      if ((loginInput && !loginEntries.length) || loginIdentities.some(value => value === null)) return showInlineError("商户后台登录白名单须填写有效的公网 IPv4、IPv6 或网段。", "createMerchantLoginWhitelist");
+      if (new Set(loginIdentities).size !== loginIdentities.length) return showInlineError("商户后台登录 IP 或网段不能重复。", "createMerchantLoginWhitelist");
       if (singleLimit === null) return showInlineError("单笔限额必须大于 0，且最多两位小数。", "createSingleLimit");
       if (dailyLimit === null) return showInlineError("日限额必须大于 0，且最多两位小数。", "createDailyLimit");
       if (dailyLimit < singleLimit) return showInlineError("日限额不能小于单笔限额。", "createDailyLimit");
-      if (whitelist && google2fa !== currentTenantOperator.google2fa) return showInlineError("Google 2FA 验证失败，商户尚未创建。", "createMerchant2fa");
+      if ((loginEntries.length || google2fa) && google2fa !== currentTenantOperator.google2fa) return showInlineError("Google 2FA 验证失败，商户尚未创建。", "createMerchant2fa");
 
       submit.disabled = true;
       submit.textContent = "创建中…";
@@ -23879,7 +23871,8 @@
           orderApi: "https://gateway.huisheng.example/payout/create", queryApi: "https://gateway.huisheng.example/payout/query", doc: "ShowDoc / 代付 API", orderIp: whitelist || "未配置", callbackIp: ""
         },
         created,
-        callback: unifiedCallback || "未配置",
+        callback: "未配置",
+        loginWhitelist: loginEntries.join("\n"),
         whitelist: whitelist || "未配置",
         limits: { single: singleLimit, daily: dailyLimit },
         wallets: [
@@ -24092,6 +24085,7 @@
     }
 
     function renderBusinessMerchantPage(mode) {
+      document.body.dataset.merchantUi = mode;
       activeBusinessPageMode = mode;
       activeBusinessDialogMode = null;
       const label = mode === "collect" ? "代收" : "代付", title = `${label}商户管理`;
@@ -24443,6 +24437,7 @@
 
 
     function renderMerchantListPage() {
+      document.body.dataset.merchantUi = "management";
       activeBusinessPageMode = null;
       activeBusinessDialogMode = null;
       document.querySelector(".content").innerHTML = merchantListTemplate;
@@ -24456,7 +24451,7 @@
 
     function bindMerchantListEvents() {
       bindMerchantMoreEvents();
-      ["keyword", "merchantType", "statusFilter", "dateFilter"].forEach((id) => {
+      ["keyword", "statusFilter", "dateFilter"].forEach((id) => {
         document.getElementById(id).addEventListener("input", renderRows);
       });
 

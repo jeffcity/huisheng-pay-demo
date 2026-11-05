@@ -144,20 +144,20 @@ test('开关保留待配置状态，无能力时禁用，单纯启停无需费�
   assert.match(html, /aria-describedby="testState"/);
 });
 
-test('方向接口在对应配置页，安全配置仅保留共用设置及独立登录白名单', () => {
+test('方向接口在对应业务页，安全配置仅保留访问控制和登录白名单', () => {
   const f = fixture(), html = f.api.renderCommonConfig(f.item);
   assert.doesNotMatch(html, /代收对接信息|代付对接信息|access-collect-order|access-payout-order/);
   assert.match(html, /商户后台登录 IP 白名单/);
   assert.doesNotMatch(html,/accessWhitelist|API 请求 IP 白名单/);
-  for (const id of ['loginWhitelistInput', 'accessCallback-shared']) assert.equal(html.split(`id="${id}"`).length - 1, 1);
+  for (const id of ['loginWhitelistInput']) assert.equal(html.split(`id="${id}"`).length - 1, 1);
   const collect = f.api.renderCollectConfig(f.item), payout = f.api.renderPayoutConfig(f.item);
   assert.match(collect, /id="access-collect-order"[^>]*>https:\/\/demo\.example\/collect\/create/);
   assert.doesNotMatch(collect, /access-payout-order|账务归属|平台不参与/);
   assert.match(payout, /id="access-payout-order"[^>]*>https:\/\/demo\.example\/payout\/create/);
   assert.doesNotMatch(payout, /access-collect-order|<select|不按商户绑定/);
   assert.doesNotMatch(collect + payout, /id="merchant(?:Collect|Payout)CallbackIp"/);
-  assert.match(html, /id="merchantCollectCallbackIp"/);
-  assert.match(html, /id="merchantPayoutCallbackIp"/);
+  assert.doesNotMatch(html, /业务回调|对接密钥|accessCallback-shared|merchantCollectCallbackIp|merchantPayoutCallbackIp|resetMerchantApiKey/);
+  assert.equal((html.match(/data-security-tab=/g)||[]).length,1);
 });
 
 test('登录白名单不复制API配置，错误格式和重复均不进入确认', () => {
@@ -192,7 +192,8 @@ test('登录白名单只提出确认变更，正式保存留待确认弹窗验�
 test('安全配置无内联验证码，验证函数失败清空且不提交敏感值', () => {
   const f = fixture(), html = f.api.renderCommonConfig(f.item);
   assert.doesNotMatch(html, /id="(?:loginWhitelist2fa|access2fa-shared)"/);
-  assert.match(html, /data-access-save="callback"/);
+  assert.match(html, /id="saveLoginWhitelist"/);
+  assert.doesNotMatch(html, /data-access-save="callback"/);
   assert.doesNotMatch(html, /data-access-save="whitelist"/);
   f.el('mfa').value = '000000';
   assert.equal(f.api.verifyMerchantMfa('mfa'), undefined);
@@ -412,13 +413,14 @@ test('代付主表无原因和验证码，费用变更才在提交弹窗显示MF
 });
 
 
-test('登录、API、两业务回调IP共用列表编辑，多个输入都参与校验且不跨区读取', () => {
+test('安全配置只展示登录IP编辑器，保留多项校验和既有数据隔离', () => {
   const f = fixture(), html = f.api.renderCommonConfig(f.item);
-  for (const id of ['loginWhitelistInput', 'merchantCollectCallbackIp', 'merchantPayoutCallbackIp']) {
+  for (const id of ['loginWhitelistInput']) {
     assert(html.includes(`data-ip-editor="${id}"`));
     assert(html.includes(`data-ip-entry="${id}"`));
   }
-  assert.equal((html.match(/data-ip-add/g) || []).length, 3);
+  assert.equal((html.match(/data-ip-add/g) || []).length, 1);
+  assert.doesNotMatch(html,/data-ip-editor="merchant(?:Collect|Payout)CallbackIp"/);
   assert.doesNotMatch(html, /<textarea[^>]*id="(?:loginWhitelistInput|merchantCollectCallbackIp|merchantPayoutCallbackIp)"/);
   f.el('loginWhitelistInput').value = '8.8.8.8';
   f.el('loginWhitelistInput-1').value = '8.8.8.8/32';
