@@ -38,6 +38,17 @@ const assert=require('node:assert/strict'),puppeteer=require('puppeteer-core'),{
  await of.select('#pageFilter2','代付');await of.click('[data-apply-filters]');assert.deepEqual(await amounts(of),['CNY 0.00','CNY 59,750.00','CNY 59,750.00']);
  await of.select('#pageFilter3','失败');await of.click('[data-apply-filters]');assert.deepEqual(await amounts(of),['CNY 0.00','CNY 0.00','CNY 0.00']);
  await of.click('[data-reset-filters]');assert.equal((await amounts(of))[2],'CNY 72,870.00');
+
+ const auditMenu=await shell.waitForFunction(()=>[...document.querySelectorAll('.arco-menu-item')].find(el=>el.textContent.trim()==='审计日志'));await auditMenu.asElement().click();
+ await shell.waitForFunction(()=>document.querySelector('iframe')?.contentDocument?.querySelector('.audit-filter-row'));const af=await(await shell.$('iframe')).contentFrame();
+ assert.equal(await af.$$eval('#filters [data-page-filter]',els=>els.length),8);assert.equal(await af.$$eval('#tableHead th',els=>els.length),10);
+ assert.match(await af.$eval('#tableBody',el=>el.textContent),/HS-TEN-001/);assert.match(await af.$eval('#tableBody',el=>el.textContent),/HS-TEN-017/);assert.match(await af.$eval('#tableBody',el=>el.textContent),/租户/);
+ await af.type('#pageFilter0','MCH-1188');await af.click('#filters [data-apply-filters]');assert.equal(await af.$$eval('#tableBody tr',els=>els.length),1);assert.match(await af.$eval('#tableBody',el=>el.textContent),/保存商户后台登录 IP 白名单/);
+ await af.click('#tableBody [data-detail]');await af.waitForSelector('#drawer.open');assert.match(await af.$eval('#drawer',el=>el.textContent),/汇盛东南亚 \/ HS-TEN-001/);await page.keyboard.press('Escape');
+ await af.click('#filters [data-reset-filters]');await af.select('#pageFilter1','tenant.finance');await af.click('#filters [data-apply-filters]');assert.equal(await af.$$eval('#tableBody tr',els=>els.length),2);
+ await af.click('#filters [data-reset-filters]');await af.type('#pageFilter4','不存在的操作');await af.click('#filters [data-apply-filters]');assert.match(await af.$eval('#tableBody',el=>el.textContent),/当前条件没有数据/);await af.click('#filters [data-reset-filters]');
+ for(const width of [1012,650]){await page.setViewport({width,height:960});assert.equal(await af.$eval('#filters',el=>el.scrollWidth<=el.clientWidth+1),true);assert.equal(await af.$eval('body',el=>el.scrollWidth<=innerWidth+1),true);}
+ await page.setViewport({width:1440,height:1000});console.log('PLATFORM_AUDIT_QUERY_PASS 开发筛选、多租户日志、详情、重置、空数据及窄屏');
  await page.click('#tab-tenant');const ts=await(await page.waitForSelector('#surface-panel > iframe')).contentFrame();
  const trackMenu=await ts.waitForFunction(()=>[...document.querySelectorAll('.arco-menu-item')].find(el=>el.textContent.trim()==='全局订单追踪'));await trackMenu.asElement().click();
  await ts.waitForFunction(()=>document.querySelector('iframe')?.contentDocument?.querySelector('[data-success-amount="total"]'));const tr=await(await ts.$('iframe')).contentFrame();
@@ -54,5 +65,19 @@ const assert=require('node:assert/strict'),puppeteer=require('puppeteer-core'),{
  await tr.hover('.page-title');assert.equal(await tr.$eval('.order-success-tooltip',el=>getComputedStyle(el).display),'none');await tr.focus('.order-success-help-button');assert.equal(await tr.$eval('.order-success-tooltip',el=>getComputedStyle(el).display),'block');
  await page.keyboard.press('Tab');assert.equal(await tr.$eval('.order-success-tooltip',el=>getComputedStyle(el).display),'none');
  console.log('GLOBAL_ORDER_SUCCESS_AMOUNTS_PASS 两端成功金额、退款失败排除、筛选重置、全分页及窄屏');
+
+ await page.setViewport({width:1440,height:1000});
+ for(const [label,timeIndex,firstId] of [['CNY 代收订单',8,'HS-C-260717-000031'],['CNY 代付订单',11,'HS-P-260717-000336']]){
+  const bm=await ts.waitForFunction(text=>[...document.querySelectorAll('.arco-menu-item')].find(el=>el.textContent.trim()===text),{},label);await bm.asElement().click();
+  await ts.waitForFunction(()=>document.querySelector('iframe')?.contentDocument?.querySelector('[data-business-order-time]'));const bf=await(await ts.$('iframe')).contentFrame();
+  assert.equal(await bf.$$eval('main .order-time-stack',els=>els.length),6);assert.equal(await bf.$$eval('main .order-time-line',els=>els.length),24);
+  assert.match(await bf.$eval('main thead',el=>el.textContent),/订单时间（UTC\+8）/);
+  const exported=await bf.evaluate(()=>tenantExportRows(state.activePage));assert.equal(exported.rowSnapshot.length,6);assert.equal(exported.fieldSnapshot[timeIndex],'订单时间（UTC+8）');for(const row of exported.rowSnapshot){assert.equal(row.length,exported.fieldSnapshot.length);for(const text of ['提交：','支付：','通道回调：','通知商户：'])assert(row[timeIndex].includes(text));}
+  if(label==='CNY 代收订单'){await bf.click('main tbody tr:first-child .order-more summary');await bf.click('main tbody tr:first-child [data-action="order-detail"]');}else await bf.click('main tbody tr:first-child [data-action="blue-payout-detail"]');
+  await bf.waitForSelector('#drawer.show');const detail=await bf.$eval('#drawer',el=>el.textContent);for(const text of ['提交时间','支付时间','通道回调时间','通知商户时间'])assert(detail.includes(text));assert(detail.includes(firstId));await page.keyboard.press('Escape');
+  for(const width of [1012,650]){await page.setViewport({width,height:960});assert.equal(await bf.$eval('main',el=>el.scrollWidth<=el.clientWidth+1),true);assert.equal(await bf.$$eval('main .order-time-value',els=>els.every(el=>el.scrollWidth<=el.clientWidth+1)),true);}
+  await page.setViewport({width:1440,height:1000});
+ }
+ console.log('TENANT_BUSINESS_ORDER_TIMES_PASS 两订单页四时间、详情导出、列对齐及宽窄布局');
  assert.deepEqual(errors,[]);console.log('DIST_SMOKE_PASS 月结统计、费率计算、生成回显与无订单月份检查通过');
  }finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1;});
