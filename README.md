@@ -281,3 +281,10 @@ CNY代收、代付订单表格使用紧凑列宽，分别约1070px与1134px；�
 平台审计支持租户名称、编号与租户侧日志，查询字段按开发环境排列。租户CNY代收、代付订单分别展示提交、支付、通道回调、通知商户四行时间，详情与导出同步。
 
 [界面调整与验证说明](docs/delivery/2026-11-05-audit-and-business-order-times/README.md) · [租户系统费开发任务清单](docs/delivery/2026-11-05-audit-and-business-order-times/租户系统费-开发任务清单.md)。
+
+
+## 代收子通道展示与批量搜索
+
+每通道默认显示3条子编码，最多3个常用；提供原表展开／收起、名称和编码批量搜索、可见项全选与隐藏已选提示。常用按租户和账号在本机保存，原有业务操作与权限保持原规则。
+
+[开发任务清单](docs/delivery/2026-11-06-collection-code-visibility/开发任务清单.md) · [交付说明](docs/delivery/2026-11-06-collection-code-visibility/README.md)。
