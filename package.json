@@ -8,7 +8,7 @@
     "preview": "vite preview",
     "build": "node scripts/build-unified.mjs",
     "test": "node --test",
-    "smoke": "node scripts/unified-smoke.cjs && node scripts/dist-smoke.cjs dist/index.html && node scripts/tenant-merchant-smoke.cjs dist/index.html && node scripts/tenant-login-system-smoke.cjs && node scripts/merchant-notification-smoke.cjs && node scripts/collection-code-visibility-smoke.cjs dist/index.html",
+    "smoke": "node scripts/unified-smoke.cjs && node scripts/dist-smoke.cjs dist/index.html && node scripts/tenant-merchant-smoke.cjs dist/index.html && node scripts/tenant-login-system-smoke.cjs && node scripts/merchant-notification-smoke.cjs && node scripts/collection-code-visibility-smoke.cjs dist/index.html && node scripts/payout-provider-usage-smoke.cjs dist/index.html",
     "check": "npm run build && node --test && node scripts/check.mjs"
   },
   "dependencies": {

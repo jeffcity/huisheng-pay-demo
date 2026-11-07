@@ -11,7 +11,7 @@ function fixture(){
  const window={document:{}};window.top=window;
  const ctx=vm.createContext({window,Map,Set,URL,setTimeout(){},document:{querySelector:el,querySelectorAll:selector=>selector==='[data-payout-apply]:checked'?applies:[],addEventListener(type,fn){if(!listeners.has(type))listeners.set(type,[]);listeners.get(type).push(fn);}}});vm.runInContext(providerSource,ctx);
  const script=source.slice(source.lastIndexOf('<script>')+8,source.lastIndexOf('</script>'));
- const modified=script.replace(/ function close\(\)\{[^\n]+\}/,' function close(){context=null;}').replace(/ function finish\(text,object\)\{[^\n]+\}/,' function finish(text,object){model.log(text,object,tenantId);}').replace(/ render\(\);\s*\}\)\(\);\s*$/,`window.payoutTest={collectionTestProducts,openTest,runTest,productBindingRows,bindingsFor,availableBindings,setCodeBinding,saveBindingEdit,openBindCodes,openBindMerchants,saveMerchantRate,renderProductRow,saveCollectionCode,collectionRateAction,confirmDeleteProduct,configurationActionAllowed,productAction,savePayoutChannel,savePayoutDev,savePayoutBulk,savePayoutLimit,setPayoutType,confirmPayoutDelete,runPayoutMoney,runPayoutTest,saveReplicaProduct,setContext(value){context=value;}};})();`);
+ const modified=script.replace(/ function close\(\)\{[^\n]+\}/,' function close(){context=null;}').replace(/ function finish\(text,object\)\{[^\n]+\}/,' function finish(text,object){model.log(text,object,tenantId);}').replace(/ render\(\);\s*\}\)\(\);\s*$/,`window.payoutTest={collectionTestProducts,openTest,runTest,productBindingRows,bindingsFor,availableBindings,setCodeBinding,saveBindingEdit,openBindCodes,openBindMerchants,saveMerchantRate,renderProductRow,saveCollectionCode,collectionRateAction,confirmDeleteProduct,configurationActionAllowed,productAction,savePayoutChannel,savePayoutDev,savePayoutBulk,savePayoutLimit,setPayoutType,confirmPayoutDelete,openPayoutMoney,runPayoutMoney,runPayoutTest,saveReplicaProduct,setContext(value){context=value;}};})();`);
  assert.notEqual(modified,script);vm.runInContext(modified,ctx);
  return {key(event){for(const fn of listeners.get('keydown')||[])fn(event);},change(target){target.hasAttribute||=()=>false;for(const fn of listeners.get('change')||[])fn({target});},noModalFeedback(){feedbackAbsent=true;},click(action,id,extra={}){const button={dataset:{action,id,...extra},closest(){return null;}};const event={target:{closest(selector){return selector==='button'?button:null;}}};for(const fn of listeners.get('click')||[])fn(event);},el,ctx,model:window.HSProviderDemo,api:window.payoutTest,applies,set:(id,value)=>el('#'+id).value=value};
 }
@@ -47,9 +47,9 @@ test('删除代付通道清理关联并禁止新订单使用，历史快照结�
  const f=fixture(),d=f.model.tenantData(),r=d.channels.find(c=>c.id==='CH-FIAT-OUT-012');assert(r);d.connectionConfigs.set(r.id,{secret:'DEMO'});d.payoutLimits.set(r.id,{min:'1',max:'100'});d.payoutMerchantBindings.set(r.id,{merchant:{bound:true}});f.api.setContext({id:r.id});f.api.confirmPayoutDelete();assert(!d.channels.includes(r));assert(d.products.every(p=>!p.channelIds.includes(r.id)));assert(!d.connectionConfigs.has(r.id));assert(!d.payoutLimits.has(r.id));assert(!d.payoutMerchantBindings.has(r.id));assert(d.deletedChannelIds.has(r.id));
  f.ctx.tenantChannelMaster=new Map([[r.id,{id:r.id,name:r.name,acceptsNewOrders:true,products:[]}]]);f.ctx.currentTenantAccount={tenantId:f.model.tenantId};const start=overviewSource.indexOf('    if (window.HSProviderDemo) {',overviewSource.indexOf('// Only overlay edited configuration'));const end=overviewSource.indexOf('    const tenantBusinessGrantSnapshots',start);vm.runInContext(overviewSource.slice(start,end),f.ctx);assert.equal(f.ctx.tenantChannelMaster.get(r.id).acceptsNewOrders,false);assert.equal(f.ctx.tenantChannelMaster.get(r.id).name,r.name);
 });
-test('调额和付款测试只生成预览，余额不变且不保存收款个人资料',()=>{
- const f=fixture(),d=f.model.tenantData(),r=d.channels.find(c=>c.direction==='代付'&&c.status==='开启'),before=r.balance;f.api.setContext({id:r.id,key:'balance'});for(const [k,v] of Object.entries({paAmount:'10',paDirection:'increase',paRemark:'演示',paGoogle:'123456'}))f.set(k,v);f.api.runPayoutMoney();assert.equal(r.balance,before);assert(f.el('#payoutMoneyResult').textContent.includes('当前余额未改变'));
- f.api.setContext({id:r.id});for(const [k,v] of Object.entries({pxAmount:'200',pxAccount:'DEMO-ACCOUNT-1234',pxRecipient:'DEMO-RECIPIENT',pxBank:'DEMO-BANK',pxBranch:'',pxBankCode:'',pxExtra:'{}'}))f.set(k,v);f.api.runPayoutTest();assert.equal(JSON.parse(f.el('#pxResponse').value).code,'DEMO_SUCCESS');assert.equal(r.balance,before);assert(!JSON.stringify(d).includes('DEMO-ACCOUNT-1234'));assert(!JSON.stringify(f.model.audits).includes('DEMO-RECIPIENT'));
+test('余额调额更新本地模拟值，付款测试不再改变余额且不保存收款个人资料',()=>{
+ const f=fixture(),d=f.model.tenantData(),r=d.channels.find(c=>c.direction==='代付'&&c.status==='开启'),before=r.balance;f.api.setContext({kind:'payoutMoney',id:r.id,key:'balance',balanceBefore:Number(before.replaceAll(',',''))});for(const [k,v] of Object.entries({paAmount:'10',paDirection:'increase',paRemark:'演示',paGoogle:'123456'}))f.set(k,v);f.api.runPayoutMoney();const updated=(Number(before.replaceAll(',',''))+10).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});assert.equal(r.balance,updated);assert.equal(f.el('#paGoogle').value,'');f.api.runPayoutMoney();assert.equal(r.balance,updated,'重复调用不重复调额');
+ f.api.setContext({id:r.id});for(const [k,v] of Object.entries({pxAmount:'200',pxAccount:'DEMO-ACCOUNT-1234',pxRecipient:'DEMO-RECIPIENT',pxBank:'DEMO-BANK',pxBranch:'',pxBankCode:'',pxExtra:'{}'}))f.set(k,v);f.api.runPayoutTest();assert.equal(JSON.parse(f.el('#pxResponse').value).code,'DEMO_SUCCESS');assert.equal(r.balance,updated);assert(!JSON.stringify(d).includes('DEMO-ACCOUNT-1234'));assert(!JSON.stringify(f.model.audits).includes('DEMO-RECIPIENT'));
 });
 
 
@@ -263,4 +263,15 @@ test('出码测试点击请求时先清空旧地址，通道授权撤销的外�
  f.api.setContext({kind:'test',id:r.id,codeId:code.id});f.set('testAmount','200');f.set('testProduct',p.id);f.click('runTest');assert(f.el('#testResult').value.includes('product='+p.id));
  for(const g of f.model.grants.filter(g=>g.tenantId===f.model.tenantId&&g.providerId===r.providerId))g.status='未授权';
  const before=JSON.stringify(d);f.click('runTest');assert.equal(f.el('#testResult').value,'');assert.match(f.el('#modalFeedback').textContent,/未获/);assert.equal(JSON.stringify(d),before);
+});
+
+
+test('余额演示调额校验失败、余额过期或撤销授权时不改变数值',()=>{
+ const f=fixture(),r=f.model.tenantData().channels.find(c=>c.id==='CH-FIAT-OUT-022'),before=r.balance;
+ const open=()=>{f.api.setContext({kind:'payoutMoney',id:r.id,key:'balance',balanceBefore:Number(r.balance.replaceAll(',',''))});for(const [k,v] of Object.entries({paAmount:'10000',paDirection:'decrease',paRemark:'演示减少',paGoogle:'123456'}))f.set(k,v);};
+ for(const [key,value] of [['paAmount','-1'],['paAmount','1.001'],['paDirection','invalid'],['paRemark',''],['paGoogle','000000'],['paAmount','99999999']]){open();f.set(key,value);f.api.runPayoutMoney();assert.equal(r.balance,before);}
+ open();r.balance='417,999.99';f.api.runPayoutMoney();assert.equal(r.balance,'417,999.99');assert.match(f.el('#modalFeedback').textContent,/余额已变化/);
+ r.balance=before;open();f.model.grantFor('HS-TEN-001',r.providerId).directions=['代收'];f.api.runPayoutMoney();assert.equal(r.balance,before);
+ f.model.grantFor('HS-TEN-001',r.providerId).directions=['代收','代付'];open();f.api.runPayoutMoney();assert.equal(r.balance,'408,000.00');
+ assert(!JSON.stringify(f.model.audits).includes('123456'));
 });
