@@ -10,7 +10,7 @@ function fixture(shared,tenantId='HS-TEN-001'){
  const window={document:{}};window.top=window;
  const ctx=vm.createContext({window,Map,Set,URL:ExportURL,Blob,Date,setTimeout(){},document:{createElement(){return {click(){}};},querySelector:el,querySelectorAll(){return [];},addEventListener(t,f){if(!listeners.has(t))listeners.set(t,[]);listeners.get(t).push(f);}}});
  if(shared)window.HSProviderDemo=shared;else vm.runInContext(providerSource,ctx);window.HSProviderDemo.tenantId=tenantId;
- const script=source.slice(source.lastIndexOf('<script>')+8,source.lastIndexOf('</script>'));const modified=script.replace(/ function close\(\)\{[^\n]+\}/,' function close(){context=null;}').replace(/ function finish\(text,object\)\{[^\n]+\}/,' function finish(text,object){model.log(text,object,tenantId);}').replace(/ render\(\);\s*\}\)\(\);\s*$/,`window.providerTests={list,render,changeProviderUsage,payoutProviderUsed,selection(){return [...selectedProviders];},context(){return context;},exportPayoutProviders,payoutProvider,syncProviderMoneyChannel,saveProviderEdit,previewProviderMoney,providerActionAllowed,providerAction,setContext(v){context=v;},business(d){providerBusiness=d;active='providers';context=null;selectedProviders.clear();},select(ids){selectedProviders=new Set(ids);}};})();`);
+ const script=source.slice(source.lastIndexOf('<script>')+8,source.lastIndexOf('</script>'));const modified=script.replace(/ function close\(\)\{[^\n]+\}/,' function close(){context=null;}').replace(/ function finish\(text,object\)\{[^\n]+\}/,' function finish(text,object){model.log(text,object,tenantId);}').replace(/ render\(\);\s*\}\)\(\);\s*$/,`window.providerTests={list,render,changeProviderUsage,payoutProviderUsed,selection(){return [...selectedProviders];},context(){return context;},exportPayoutProviders,payoutProvider,saveProviderAutoSettlement,syncProviderMoneyChannel,saveProviderEdit,previewProviderMoney,providerActionAllowed,providerAction,setContext(v){context=v;},business(d){providerBusiness=d;active='providers';context=null;selectedProviders.clear();},select(ids){selectedProviders=new Set(ids);}};})();`);
  assert.notEqual(modified,script);vm.runInContext(modified,ctx);return {downloads,model:window.HSProviderDemo,api:window.providerTests,el,set(id,value){el('#'+id).value=value;},radio(name,value){el('input[name="'+name+'"]:checked').value=value;}};
 }
 function form(f){for(const [key,val] of Object.entries({ppName:'本租户代付别名',ppCallback:'8',ppLimit:'1250.00',ppUncallbacked:'3',ppDeposit:'2000.00',ppBot:'DEMO-GROUP'}))f.set(key,val);f.radio('ppStatus','关闭');}
@@ -20,7 +20,7 @@ test('授权按业务分栏：双业务各出现，单方向及停用准确过�
 });
 test('代收表格保持原内容，代付显示管理列且不含新增删除或USDT入口',()=>{
  const f=fixture();f.api.business('代收');f.api.render();assert.match(f.el('#tableHead').innerHTML,/通道商编号/);assert.match(f.el('#tableHead').innerHTML,/授权业务/);assert.match(f.el('#tableHead').innerHTML,/最近变更/);assert(f.el('#providerPayoutOverview').hidden);
- f.api.business('代付');f.api.render();const head=f.el('#tableHead').innerHTML,body=f.el('#tableBody').innerHTML;assert.equal((head.match(/<th\b[^>]*>/g)||[]).length,15);for(const col of ['余额','剩余预付限额','回调时间','保证金'])assert(head.includes(col));assert(!head.includes('USDT'));assert(!head.includes('是否自营'));assert(!body.includes('删除'));assert(!body.includes('新增'));assert(body.includes('providerEdit'));assert(body.includes('providerSettle'));assert(f.el('#primaryAction').hidden);
+ f.api.business('代付');f.api.render();const head=f.el('#tableHead').innerHTML,body=f.el('#tableBody').innerHTML;assert.equal((head.match(/<th\b[^>]*>/g)||[]).length,16);for(const col of ['余额','剩余预付限额','回调时间','保证金'])assert(head.includes(col));assert(!head.includes('USDT'));assert(!head.includes('是否自营'));assert(!body.includes('删除'));assert(!body.includes('新增'));assert(body.includes('providerEdit'));assert(body.includes('providerSettle'));assert(f.el('#primaryAction').hidden);
 });
 test('代付保存忽略被篡改的名称，经营设置按租户独立保存且切页保留',()=>{
  const f=fixture();f.api.business('代付');const platformBefore=JSON.stringify(f.model.providers),other=fixture(f.model,'HS-TEN-017');const otherBefore=JSON.stringify(other.api.payoutProvider('V-001'));form(f);f.api.setContext({kind:'providerEdit',id:'V-001'});f.api.saveProviderEdit();assert.equal(f.api.payoutProvider('V-001').name,'QuickPay');assert.equal(f.api.payoutProvider('V-001').status,'关闭');assert.equal(JSON.stringify(other.api.payoutProvider('V-001')),otherBefore);assert.equal(JSON.stringify(f.model.providers),platformBefore);
@@ -41,7 +41,7 @@ test('查询只作用于当前业务授权，平台名称更新同步回显且�
 });
 
 test('代付CSV只导出当前授权筛选结果，字段顺序匹配且无USDT或操作列',async()=>{
- const f=fixture();f.api.business('代付');f.set('keyword','PayoutX');f.api.exportPayoutProviders();const csv=await f.downloads[0].text(),lines=csv.trim().split('\n');assert.equal(lines.length,2);assert(lines[0].includes('剩余预付限额'));assert(!lines[0].includes('USDT'));assert(!csv.includes('自营'));assert(!csv.includes('第三方'));assert(!lines[0].includes('操作'));assert(lines[1].startsWith('"PayoutX","V-004"'));assert(!csv.includes('QuickPay'));assert.equal(lines[0].match(/"(?:[^"]|"")*"/g).length,13);f.model.grantFor('HS-TEN-001','V-004').status='已停用';f.api.exportPayoutProviders();assert.equal((await f.downloads[1].text()).trim().split('\n').length,1);
+ const f=fixture();f.api.business('代付');f.set('keyword','PayoutX');f.api.exportPayoutProviders();const csv=await f.downloads[0].text(),lines=csv.trim().split('\n');assert.equal(lines.length,2);assert(lines[0].includes('剩余预付限额'));assert(!lines[0].includes('USDT'));assert(!csv.includes('自营'));assert(!csv.includes('第三方'));assert(!lines[0].includes('操作'));assert(lines[1].startsWith('"PayoutX","V-004"'));assert(!csv.includes('QuickPay'));assert.equal(lines[0].match(/"(?:[^"]|"")*"/g).length,14);f.model.grantFor('HS-TEN-001','V-004').status='已停用';f.api.exportPayoutProviders();assert.equal((await f.downloads[1].text()).trim().split('\n').length,1);
 });
 
 test('代付编辑名称只读且不提供自营设置，其他经营字段仍可保存',()=>{
@@ -109,4 +109,17 @@ test('通道商余额调额必选本租户对应通道，只改所选明细并�
  open();f.set('pmChannel',r.id);f.api.syncProviderMoneyChannel();r.balance='407,999.99';f.api.previewProviderMoney();assert.equal(r.balance,'407,999.99');assert.match(f.el('#modalFeedback').textContent,/余额已变化/);
  const unused='TEST-EMPTY';f.model.providers.push({id:unused,name:'未使用',directions:['代付']});f.model.grants.push({tenantId:'HS-TEN-001',providerId:unused,directions:['代付'],status:'已授权'});f.api.changeProviderUsage('unused');f.api.providerAction('providerMoney',unused,{dataset:{key:'balance'}});assert(f.el('#modalFoot [data-action="providerRunMoney"]').disabled);
  assert(!JSON.stringify(f.model.audits).includes('123456'));
+});
+
+
+test('自动清算默认关闭，确认后按租户和通道商保存，撤权与过期设置不能提交',async()=>{
+ const f=fixture();f.api.business('代付');const r=f.api.payoutProvider('V-001'),before=r.balance,other=fixture(f.model,'HS-TEN-017');assert.equal(r.autoSettlement,false);
+ f.api.providerAction('providerAutoSettlement','V-001');assert.match(f.el('#modalBody').innerHTML,/00:00（UTC\+8）/);assert.match(f.el('#modalBody').innerHTML,/现有手动清算/);assert.match(f.el('#modalBody').innerHTML,/TG/);assert.equal(r.autoSettlement,false,'未确认不变化');
+ f.api.setContext(null);assert.equal(r.autoSettlement,false,'取消保留关闭');
+ f.api.providerAction('providerAutoSettlement','V-001');f.api.saveProviderAutoSettlement();assert.equal(r.autoSettlement,true);assert.equal(r.balance,before);assert.equal(other.api.payoutProvider('V-001').autoSettlement,false);assert.equal(f.api.payoutProvider('V-003').autoSettlement,false);f.api.saveProviderAutoSettlement();assert.equal(r.autoSettlement,true,'重复确认不翻转');
+ f.api.exportPayoutProviders();const csv=await f.downloads[0].text();assert(csv.includes('自动清算'));assert.match(csv,/"开启"/);
+ const again=fixture(f.model);again.api.business('代付');assert.equal(again.api.payoutProvider('V-001').autoSettlement,true,'切页保留');
+ f.api.providerAction('providerAutoSettlement','V-001');r.autoSettlement=false;f.api.saveProviderAutoSettlement();assert.equal(r.autoSettlement,false);assert.match(f.el('#modalFeedback').textContent,/已变化/);
+ f.api.providerAction('providerAutoSettlement','V-001');f.model.grantFor('HS-TEN-001','V-001').directions=['代收'];f.api.saveProviderAutoSettlement();assert.equal(r.autoSettlement,false);
+ f.model.grantFor('HS-TEN-001','V-001').directions=['代收','代付'];f.api.providerAction('providerAutoSettlement','V-001');f.api.saveProviderAutoSettlement();assert.equal(r.autoSettlement,true);f.api.providerAction('providerAutoSettlement','V-001');assert.match(f.el('#modalBody').innerHTML,/停止后续自动清算/);f.api.saveProviderAutoSettlement();assert.equal(r.autoSettlement,false);
 });

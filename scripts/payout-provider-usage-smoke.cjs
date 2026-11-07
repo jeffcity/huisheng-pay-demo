@@ -6,11 +6,16 @@ const assert=require('node:assert/strict'),puppeteer=require('puppeteer-core'),{
  assert.equal(await frame.$eval('#providerUsageTabs',e=>e.hidden),true);
  await click('[data-provider-business="代付"]');assert.equal(await frame.$eval('[data-provider-usage="used"]',e=>e.getAttribute('aria-selected')),'true');assert.equal(await frame.$$eval('[data-payout-provider]',e=>e.length),4);
  const compact=await frame.evaluate(()=>({row:document.querySelector('#tableBody tr').getBoundingClientRect().height,width:document.querySelector('#dataTable').getBoundingClientRect().width,top:document.querySelector('.tenant-page-table').getBoundingClientRect().top,columns:document.querySelectorAll('#tableHead th').length,unrelatedFilter:getComputedStyle(document.querySelector('#productCodeFilter')).display}));
- assert(compact.row<=58,'常规行高不超过开发页示例');assert(compact.width<=1400,'常规表宽收紧');assert(compact.top<350,'压缩重复标题和上方留白');assert.equal(compact.columns,15,'全部业务字段保留');assert.equal(compact.unrelatedFilter,'none','隐藏筛选不因布局覆盖出现');
+ assert(compact.row<=58,'常规行高不超过开发页示例');assert(compact.width<=1500,'常规表宽收紧');assert(compact.top<350,'压缩重复标题和上方留白');assert.equal(compact.columns,16,'全部业务字段保留');assert.equal(compact.unrelatedFilter,'none','隐藏筛选不因布局覆盖出现');
  await frame.evaluate(()=>{const channels=window.HSProviderDemo.tenantData().channels.filter(c=>c.providerId==='V-001'&&c.direction==='代付'&&c.asset==='CNY');window.__densityBalances=channels.map(c=>[c.id,c.balance]);channels.forEach((c,i)=>c.balance=i===0?'9876543210.99':'0');});await click('[data-action="refresh"]');
  assert.match(await frame.$eval('[data-payout-provider="V-001"] td:nth-child(4)',e=>e.textContent),/9,876,543,210.99/);
  assert.equal(await frame.$eval('[data-payout-provider="V-001"] td:nth-child(4)',e=>e.scrollWidth<=e.clientWidth+1),true,'大金额完整显示不溢出单元格');
  await frame.evaluate(()=>{for(const [id,balance] of window.__densityBalances)window.HSProviderDemo.tenantData().channels.find(c=>c.id===id).balance=balance;});await click('[data-action="refresh"]');
+ // The automatic-settlement switch is visible without increasing row height.
+ const automatic='[data-action="providerAutoSettlement"][data-id="V-001"]';
+ assert.equal(await frame.$eval(automatic,e=>e.getAttribute('aria-checked')),'false');await click(automatic);assert.match(await frame.$eval('#modalBody',e=>e.textContent),/00:00（UTC\+8）/);assert.match(await frame.$eval('#modalBody',e=>e.textContent),/TG/);await click('#modalFoot [data-action="close"]');assert.equal(await frame.$eval(automatic,e=>e.getAttribute('aria-checked')),'false');
+ await click(automatic);await click('#modalFoot [data-action="providerConfirmAutoSettlement"]');assert.equal(await frame.$eval(automatic,e=>e.getAttribute('aria-checked')),'true');assert.match(await frame.$eval(automatic,e=>e.parentElement.textContent),/开启/);
+ await click(automatic);await click('#modalFoot [data-action="providerConfirmAutoSettlement"]');assert.equal(await frame.$eval(automatic,e=>e.getAttribute('aria-checked')),'false');
  // Provider adjustment must select a concrete channel and keep both pages in sync.
  const providerBalanceCell='[data-payout-provider="V-001"] td:nth-child(4)';
  await click('[data-action="providerMoney"][data-id="V-001"][data-key="balance"]');
