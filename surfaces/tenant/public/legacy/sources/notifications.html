@@ -133,6 +133,10 @@
     .readonly { min-height: 34px; display: flex; align-items: center; gap: 8px; }
     .variables { display: flex; flex-wrap: wrap; gap: 7px; min-height: 50px; padding: 9px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-soft); }
     .chip { display: inline-flex; align-items: center; height: 28px; padding: 0 9px; border: 1px solid #bedaff; border-radius: 14px; background: var(--primary-soft); color: #0e42d2; font-family: "SFMono-Regular", Consolas, monospace; font-size: 12px; }
+    #configMask .modal{max-height:calc(100dvh - 80px);display:flex;flex-direction:column}
+    #configMask .modal-body{overflow:auto;min-height:0}
+    #configMask .modal-head,#configMask .modal-actions{flex-shrink:0}
+    #modalPreview {max-height:360px;overflow:auto;overflow-wrap:anywhere}
     .preview { min-height: 118px; padding: 11px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-soft); color: var(--text-2); white-space: pre-wrap; }
     .hint { margin-top: 5px; color: var(--text-3); font-size: 12px; }
     .modal-actions { justify-content: flex-end; padding: 14px 18px; border-top: 1px solid var(--border); }
@@ -342,7 +346,7 @@
           <div class="field"><label for="modalGroup">TG 群 ID</label><input class="control mono" id="modalGroup" placeholder="请输入当前租户 TG 群 ID"><span class="field-error" id="modalGroupError">请输入 TG 群 ID</span></div>
           <div class="field"><label for="modalRobot">通知机器人</label><select class="control" id="modalRobot"><option value="">请选择通知机器人</option></select><span class="field-error" id="modalRobotError">请选择通知机器人</span></div>
           <div class="field"><label>风险等级</label><div class="readonly" id="modalRisk"><span class="tag gray">请选择消息类型</span><span class="muted">系统自动判定</span></div></div>
-          <div class="field full"><label>可用变量</label><div class="variables" id="modalVariables"><span class="muted">请选择消息类型</span></div></div>
+          <div class="field full"><label>可用变量</label><div class="variables" id="modalVariables"><span class="muted">请选择消息类型</span></div><span class="hint" id="settlementTemplateHint" hidden>结算明细会列出本批次全部通道商。手动、自动结算共用此模板；过长时分条发送。预览金额为示例，不参与结算。</span></div>
           <div class="field full"><label for="modalTemplate">消息模板</label><textarea class="control" id="modalTemplate" placeholder="支持 ${变量名} 占位符"></textarea><span class="hint">只能使用当前消息类型提供的变量。</span><span class="field-error" id="modalTemplateError">请输入消息模板</span></div>
           <div class="field full"><label>模板预览</label><div class="preview" id="modalPreview">请选择消息类型</div></div>
         </div>
@@ -403,8 +407,14 @@
   <script>
     const notificationModel=window.HSNotificationBots;
     const notificationTenantId=window.HSProviderDemo?.tenantId||"HS-TEN-001";
+    // 固定消息快照只演示格式，示例金额不参与结算，也不定义资金算法。
+    const settlementMessageTemplate = "【代付通道商结算通知】\n租户：${tenantName}（${tenantNo}）\n方式：${settlementMode}\n时间：${settledAt}（UTC+8）\n批次：${batchNo} ｜ 第 ${partNo}/${partCount} 条\n\n共 ${providerCount} 家｜成功 ${successCount} 家｜失败 ${failedCount} 家｜待确认 ${pendingCount} 家\n\n${settlementDetails}";
+    const settlementBatchValues = {"tenantName": "汇盛东南亚", "tenantNo": "HS-TEN-001", "settlementMode": "自动结算", "settledAt": "2026-11-07 00:00:00", "batchNo": "SET-20261107-0001", "partNo": 1, "partCount": 1, "providerCount": 4, "successCount": 2, "failedCount": 1, "pendingCount": 1, "settlementDetails": "✅ QuickPay（V-001）\n余额：5,000.00 → 0.00 CNY\n剩余预付：220,000.00 → 225,000.00 CNY\n总预付：500,000.00 → 505,000.00 CNY\n\n✅ BridgePay（V-003）\n余额：3,000.00 → 0.00 CNY\n剩余预付：120,000.00 → 123,000.00 CNY\n总预付：300,000.00 → 303,000.00 CNY\n\n❌ PayoutX（V-004）\n失败原因：通道响应异常\n\n⏳ FastCollect（V-002）\n超时，结果待确认"};
+    const settlementSingleValues = {"tenantName": "汇盛东南亚", "tenantNo": "HS-TEN-001", "settlementMode": "手动结算", "settledAt": "2026-11-06 18:30:00", "batchNo": "SET-20261106-0012", "partNo": 1, "partCount": 1, "providerCount": 1, "successCount": 1, "failedCount": 0, "pendingCount": 0, "settlementDetails": "✅ QuickPay（V-001）\n余额：2,000.00 → 0.00 CNY\n剩余预付：218,000.00 → 220,000.00 CNY\n总预付：498,000.00 → 500,000.00 CNY"};
     // TG 消息历史按推送当时的模板快照保存；后续修改配置不会回写已发送内容。
     const messageData = [
+      {type:"代付通道商结算通知",group:"-5211818661",time:"2026-11-07 00:00:12",date:"2026-11-07",template:settlementMessageTemplate,values:settlementBatchValues},
+      {type:"代付通道商结算通知",group:"-5211818661",time:"2026-11-06 18:30:02",date:"2026-11-06",template:settlementMessageTemplate,values:settlementSingleValues},
       { type: "商户资金划转", group: "-5211818661", time: "2026-09-02 10:30:00", date: "2026-09-02", template: "【商户资金划转】\n划转单号：${transferOrderNo}\n从：${sourceMerchantName}\n到：${targetMerchantName}\n划转金额：${transferAmount} ${currency}\n手续费：${feeAmount} ${currency}\n状态：${orderStatus}", values: { transferOrderNo: "TRF202609020006", sourceMerchantName: "星河游戏", targetMerchantName: "东盛电商", transferAmount: "18,000.00", feeAmount: "20.00", currency: "CNY", orderStatus: "已完成" } },
       { type: "商户钱包地址变更", group: "-5211818661", time: "2026-09-02 10:18:35", date: "2026-09-02", template: "【商户钱包地址变更】\n商户：${merchantName}（${merchantNo}）\n原地址：${oldWalletAddress}\n新地址：${newWalletAddress}\n操作人：${operator}", values: { merchantName: "星河游戏", merchantNo: "MCH-2031", oldWalletAddress: "TQx7…91mA", newWalletAddress: "TNp4…28kQ", operator: "tenant.admin" } },
       { type: "代付订单驳回", group: "-5211818661", time: "2026-09-01 18:03:09", date: "2026-09-01", template: "【代付订单驳回】\n商户：${merchantName}\n平台订单号：${platformOrderNo}\n商户订单号：${merchantOrderNo}\n金额：${payoutAmount}\n驳回原因：${rejectReason}", values: { merchantName: "星河游戏", platformOrderNo: "HS-P-260902-001218", merchantOrderNo: "PO-M-0902-1218", payoutAmount: "CNY 5,000.00", rejectReason: "收款信息校验失败" } },
@@ -415,6 +425,7 @@
     ];
 
     const typeMeta = {
+      "代付通道商结算通知": {risk:"高风险",vars:["tenantName", "tenantNo", "settlementMode", "settledAt", "batchNo", "partNo", "partCount", "providerCount", "successCount", "failedCount", "pendingCount", "settlementDetails"],labels:{"tenantName": "租户名称", "tenantNo": "租户编号", "settlementMode": "手动／自动结算", "settledAt": "执行时间", "batchNo": "结算批次号", "partNo": "当前条数", "partCount": "总条数", "providerCount": "通道商总数", "successCount": "成功家数", "failedCount": "失败家数", "pendingCount": "待确认家数", "settlementDetails": "通道商结算明细"},template:settlementMessageTemplate},
       "商户钱包地址变更": { risk: "高风险", vars: ["merchantName", "merchantNo", "oldWalletAddress", "newWalletAddress", "operator", "occurredAt"], template: "【商户钱包地址变更】\n商户：${merchantName}（${merchantNo}）\n原地址：${oldWalletAddress}\n新地址：${newWalletAddress}\n操作人：${operator}" },
       "商户资金划转": { risk: "高风险", vars: ["transferOrderNo", "sourceMerchantName", "targetMerchantName", "transferAmount", "feeAmount", "currency", "orderStatus", "operator"], template: "【商户资金划转】\n划转单号：${transferOrderNo}\n从：${sourceMerchantName}\n到：${targetMerchantName}\n划转金额：${transferAmount} ${currency}\n手续费：${feeAmount} ${currency}\n状态：${orderStatus}" },
       "代付订单驳回": { risk: "中风险", vars: ["merchantName", "platformOrderNo", "merchantOrderNo", "payoutAmount", "rejectReason", "rejectedAt"], template: "【代付订单驳回】\n商户：${merchantName}\n平台订单号：${platformOrderNo}\n商户订单号：${merchantOrderNo}\n金额：${payoutAmount}\n驳回原因：${rejectReason}" },
@@ -438,6 +449,7 @@
     };
 
     let configData = [
+      {type:"代付通道商结算通知",group:"-5211818661",robot:"汇盛资金审核",on:true,time:"2026-11-07 00:00:00"},
       { type: "商户资金划转", group: "-5211818661", robot: "汇盛资金审核", on: true, time: "2026-09-02 09:58:12" },
       { type: "同一IP登录失败过多", group: "-5151564225", robot: "汇盛风控", on: true, time: "2026-09-01 21:44:51" },
       { type: "代付订单驳回", group: "-5211818661", robot: "汇盛通知 A", on: true, time: "2026-09-01 18:03:09" },
@@ -488,7 +500,7 @@
     }
 
     function renderPushedContent(item) {
-      return item.template.replace(/\$\{(\w+)\}/g, function (_, variable) { return item.values[variable] || "${" + variable + "}"; });
+      return item.template.replace(/\$\{(\w+)\}/g, function (_, variable) { return item.values[variable] ?? "${" + variable + "}"; });
     }
 
     function renderMessages() {
@@ -558,6 +570,7 @@
     function updateModalMeta() {
       const type = byId("modalType").value;
       const meta = typeMeta[type];
+      byId("settlementTemplateHint").hidden = type !== "代付通道商结算通知";
       if (!meta) {
         byId("modalRisk").innerHTML = '<span class="tag gray">请选择消息类型</span><span class="muted">系统自动判定</span>';
         byId("modalVariables").innerHTML = '<span class="muted">请选择消息类型</span>';
@@ -565,7 +578,7 @@
         return;
       }
       byId("modalRisk").innerHTML = '<span class="tag ' + riskTone[meta.risk] + '">' + meta.risk + '</span><span class="muted">系统自动判定</span>';
-      byId("modalVariables").innerHTML = meta.vars.map(function (variable) { return '<span class="chip">${' + variable + '}</span>'; }).join("");
+      byId("modalVariables").innerHTML = meta.vars.map(function (variable) { return '<span class="chip" title="${' + variable + '}">' + escapeHtml(meta.labels?.[variable] || '${' + variable + '}') + '</span>'; }).join("");
       if (editingConfigIndex === null && !byId("modalTemplate").value) byId("modalTemplate").value = meta.template;
       renderPreview();
     }
@@ -573,8 +586,9 @@
     function renderPreview() {
       const type = byId("modalType").value;
       const text = byId("modalTemplate").value;
+      const previewValues = type === "代付通道商结算通知" ? settlementBatchValues : sample;
       if (!type) { byId("modalPreview").textContent = "请选择消息类型"; return; }
-      byId("modalPreview").textContent = text ? text.replace(/\$\{(\w+)\}/g, function (_, variable) { return sample[variable] || "${" + variable + "}"; }) : "请输入消息模板";
+      byId("modalPreview").textContent = text ? text.replace(/\$\{(\w+)\}/g, function (_, variable) { return previewValues[variable] ?? "${" + variable + "}"; }) : "请输入消息模板";
     }
 
     function clearConfigErrors() {
@@ -781,6 +795,7 @@
       else if (byId("configMask").classList.contains("show")) closeConfigModal();
     });
 
+    byId("messageEvent").insertAdjacentHTML("beforeend", '<option>代付通道商结算通知</option>');
     Object.keys(typeMeta).forEach(function (type) {
       byId("configType").insertAdjacentHTML("beforeend", '<option>' + escapeHtml(type) + '</option>');
       byId("modalType").insertAdjacentHTML("beforeend", '<option>' + escapeHtml(type) + '</option>');
