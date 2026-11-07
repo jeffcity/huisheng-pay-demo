@@ -2485,11 +2485,11 @@
  function renderProviderSummary(rows){
   const values=rows.map(g=>payoutProvider(g.providerId));$('#providerPayoutOverview').innerHTML=`<button class="btn" data-action="providerSettleAll" ${rows.length?'':'disabled'}>一键结算代付通道商</button><div class="provider-summary"><span>通道商数量：<strong>${rows.length}</strong></span><span>总余额：${fmt(values.reduce((sum,r)=>sum+money(r.balance),0))}元</span><span>剩余预付：${fmt(values.reduce((sum,r)=>sum+money(r.remainingPrepaid),0))}元</span><span>总预付：${fmt(values.reduce((sum,r)=>sum+money(r.totalPrepaid),0))}元</span></div>`;
  }
- function providerAutoSettlementSwitch(id){const on=payoutProvider(id).autoSettlement;return `<button class="collection-switch ${on?'on':''}" role="switch" aria-checked="${on}" aria-label="${esc(payoutProvider(id).name+' 自动结算')}" title="每天00:00（UTC+8）按现有规则结算，并通过现有TG机器人和群通知" data-action="providerAutoSettlement" data-id="${esc(id)}"><span></span></button><span class="provider-switch-label">${on?'开启':'关闭'}</span>`;}
+ function providerAutoSettlementSwitch(id){const on=payoutProvider(id).autoSettlement;return `<button class="collection-switch ${on?'on':''}" role="switch" aria-checked="${on}" aria-label="${esc(payoutProvider(id).name+' 自动结算')}" title="每天00:00（UTC+8）按现有规则结算，并按通知中心的结算通知配置发送" data-action="providerAutoSettlement" data-id="${esc(id)}"><span></span></button><span class="provider-switch-label">${on?'开启':'关闭'}</span>`;}
  function openProviderAutoSettlement(id){
   if(!permitted.has(permission('providerAutoSettlement'))||!providerActionAllowed('providerAutoSettlement',id))return;
   const r=payoutProvider(id),before=r.autoSettlement,enabled=!before;context={kind:'providerAutoSettlement',id,before,enabled,submitted:false};
-  modal(`${enabled?'开启':'关闭'}自动结算`,enabled?`<p><strong>${esc(r.name)}</strong></p><p>每天 <strong>00:00（UTC+8）</strong>，按现有手动结算规则自动结算。</p><p>结算结果发送至这家通道商现有的 TG 机器人和群。</p><p class="muted">同一天不会重复结算；通知发送失败只重试通知。</p>`:`<p>确认关闭 <strong>${esc(r.name)}</strong> 的自动结算？</p><p>关闭后停止后续自动结算，已有结算记录保留。</p>`,'providerConfirmAutoSettlement',enabled?'开启自动结算':'关闭自动结算');
+  modal(`${enabled?'开启':'关闭'}自动结算`,enabled?`<p><strong>${esc(r.name)}</strong></p><p>每天 <strong>00:00（UTC+8）</strong>，按现有手动结算规则自动结算。</p><p>同一批次的通道商结果汇总发送，接收机器人和 TG 群在「通知中心 → 通知配置 → 代付通道商结算通知」设置。</p><p class="muted">同一天不会重复结算；通知发送失败只重试通知。</p>`:`<p>确认关闭 <strong>${esc(r.name)}</strong> 的自动结算？</p><p>关闭后停止后续自动结算，已有结算记录保留。</p>`,'providerConfirmAutoSettlement',enabled?'开启自动结算':'关闭自动结算');
  }
  function saveProviderAutoSettlement(){
   if(context?.kind!=='providerAutoSettlement'||context.submitted)return;
