@@ -44,5 +44,5 @@ const assert=require('node:assert/strict'),puppeteer=require('puppeteer-core'),{
  await frame.evaluate(()=>{const d=window.HSProviderDemo.tenantData();d.channels=d.channels.filter(c=>c.id!=='usage-created');});await click('[data-action="refresh"]');assert.equal(await frame.$$eval('[data-payout-provider]',e=>e.length),2);
  for(const width of [999,680]){await page.setViewport({width,height:960});assert.equal(await frame.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true,'only table scrolls '+width);}
  await click('[data-provider-business="代收"]');assert.equal(await frame.$eval('#providerUsageTabs',e=>e.hidden),true);assert.equal(await frame.$$eval('#tableBody tr',e=>e.length),3);assert.deepEqual(errors,[]);
- console.log('PAYOUT_PROVIDER_USAGE_PASS 22家授权／2家使用、分组计数、分页搜索、选择隔离、清算范围、通道增删归组、代收边界与窄屏');
+ console.log('PAYOUT_PROVIDER_USAGE_PASS 22家授权／2家使用、分组计数、分页搜索、选择隔离、结算范围、通道增删归组、代收边界与窄屏');
 }finally{await browser.close();}})().catch(e=>{console.error(e);process.exit(1);});
