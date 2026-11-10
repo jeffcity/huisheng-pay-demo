@@ -32,9 +32,10 @@ test('编辑校验失败或弹窗期间撤销授权时设置与日志保持不�
 test('批量结算复验每个通道商代付授权且不改变资金',()=>{
  const f=fixture();f.api.business('代付');f.api.setContext({kind:'providerSettle',ids:['V-001','V-003']});const r=f.api.payoutProvider('V-001'),before=JSON.stringify(r);assert(f.api.providerActionAllowed('providerConfirmSettle'));f.model.grantFor('HS-TEN-001','V-003').status='已停用';assert.equal(f.api.providerActionAllowed('providerConfirmSettle'),false);f.model.grantFor('HS-TEN-001','V-003').status='已授权';f.api.providerAction('providerConfirmSettle');assert.equal(JSON.stringify(r),before);assert.match(f.el('#providerResult').textContent,/当前余额未改变/);assert.equal(f.model.audits.at(-1).tenantId,'HS-TEN-001');
 });
-test('总预付预览校验验证码与金额，不改变额度或保存验证码',()=>{
- const f=fixture();f.api.business('代付');f.api.setContext({kind:'providerMoney',id:'V-001',key:'totalPrepaid'});const r=f.api.payoutProvider('V-001'),before=JSON.stringify(r);f.set('pmAmount','100.25');f.set('pmGoogle','000000');f.radio('pmOperation','increase');f.api.previewProviderMoney();assert.equal(f.model.audits.length,0);assert.equal(f.el('#pmGoogle').value,'');f.set('pmGoogle','123456');f.api.previewProviderMoney();assert.match(f.el('#providerResult').textContent,/0.00 → 100.25/);assert.equal(JSON.stringify(r),before);assert.equal(f.el('#pmGoogle').value,'');assert(!JSON.stringify(f.model.audits).includes('123456'));
- f.el('#providerResult').textContent='';f.set('pmAmount','0.001');f.set('pmGoogle','123456');f.api.previewProviderMoney();assert.equal(f.el('#providerResult').textContent,'');f.set('pmAmount',String(r.totalPrepaid+1));f.radio('pmOperation','decrease');f.api.previewProviderMoney();assert.match(f.el('#modalFeedback').textContent,/不能大于/);
+test('总预付预览无需验证码，校验金额并保留现有预览行为',()=>{
+ const f=fixture();f.api.business('代付');f.api.providerAction('providerMoney','V-001',{dataset:{key:'totalPrepaid'}});assert.doesNotMatch(f.el('#modalBody').innerHTML,/pmGoogle|谷歌验证|演示验证码/);const r=f.api.payoutProvider('V-001'),before=JSON.stringify(r);f.set('pmAmount','100.25');f.set('pmRemark','预付调整');f.radio('pmOperation','increase');f.api.previewProviderMoney();assert.match(f.el('#providerResult').textContent,/0.00 → 100.25/);assert.equal(JSON.stringify(r),before);
+ f.el('#providerResult').textContent='';f.set('pmAmount','0.001');f.api.previewProviderMoney();assert.equal(f.el('#providerResult').textContent,'');f.set('pmAmount',String(r.totalPrepaid+1));f.radio('pmOperation','decrease');f.api.previewProviderMoney();assert.match(f.el('#modalFeedback').textContent,/不能大于/);
+ f.api.providerAction('providerResetMoney');assert.equal(f.el('#pmAmount').value,'');assert.equal(f.el('#pmRemark').value,'');assert.equal(f.el('#providerResult').textContent,'');
 });
 test('查询只作用于当前业务授权，平台名称更新同步回显且不沿用租户别名',()=>{
  const f=fixture();f.api.business('代付');f.api.payoutProvider('V-001').name='历史租户别名';f.model.providers.find(p=>p.id==='V-001').name='平台更新名称';f.set('keyword','平台更新');assert.equal(f.api.list().length,1);assert.equal(f.api.list()[0].name,'平台更新名称');f.set('keyword','V-004');assert.equal(f.api.list().length,1);f.model.grantFor('HS-TEN-001','V-004').status='已停用';assert.equal(f.api.list().length,0);f.api.business('代收');f.set('keyword','平台更新');assert.equal(f.api.list().length,1);
@@ -99,9 +100,9 @@ test('通道商余额汇总本租户同供应商CNY代付通道，随通道变�
 });
 
 
-test('通道商余额调额必选本租户对应通道，只改所选明细并重新汇总',()=>{
+test('通道商余额调额无需验证码，必选本租户通道，只改所选明细并重新汇总',()=>{
  const f=fixture();f.api.business('代付');const d=f.model.tenantData(),r=d.channels.find(c=>c.id==='CH-FIAT-OUT-022'),other=d.channels.find(c=>c.id==='CH-FIAT-OUT-006'),beforeOther=other.balance;
- const open=()=>{f.api.providerAction('providerMoney','V-001',{dataset:{key:'balance'}});f.set('pmAmount','10000');f.set('pmRemark','演示');f.set('pmGoogle','123456');f.radio('pmOperation','decrease');};
+ const open=()=>{f.api.providerAction('providerMoney','V-001',{dataset:{key:'balance'}});f.set('pmAmount','10000');f.set('pmRemark','演示');assert.doesNotMatch(f.el('#modalBody').innerHTML,/pmGoogle|谷歌验证|演示验证码/);f.radio('pmOperation','decrease');};
  open();f.api.previewProviderMoney();assert.equal(r.balance,'418,000.00');assert.match(f.el('#modalFeedback').textContent,/请选择/);
  f.set('pmChannel',r.id);f.api.syncProviderMoneyChannel();f.api.previewProviderMoney();assert.equal(r.balance,'408,000.00');assert.equal(other.balance,beforeOther);assert.equal(f.api.payoutProvider('V-001').balance,1041800);f.api.previewProviderMoney();assert.equal(r.balance,'408,000.00');
  open();f.set('pmChannel','CH-FIAT-OUT-004');f.api.syncProviderMoneyChannel();f.api.previewProviderMoney();assert.equal(r.balance,'408,000.00');assert.match(f.el('#modalFeedback').textContent,/请选择/);

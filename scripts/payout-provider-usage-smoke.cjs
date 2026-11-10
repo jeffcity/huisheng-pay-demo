@@ -19,17 +19,23 @@ const assert=require('node:assert/strict'),puppeteer=require('puppeteer-core'),{
  // Provider adjustment must select a concrete channel and keep both pages in sync.
  const providerBalanceCell='[data-payout-provider="V-001"] td:nth-child(4)';
  await click('[data-action="providerMoney"][data-id="V-001"][data-key="balance"]');
+ assert.equal(await frame.$('#pmGoogle'),null);
  const choices=await frame.$$eval('#pmChannel option',els=>els.map(e=>e.value));assert.deepEqual(choices,['','CH-FIAT-OUT-006','CH-FIAT-OUT-022']);
  assert.equal(await frame.$eval('#pmChannel',e=>e.value),'');await frame.select('#pmChannel','CH-FIAT-OUT-022');assert.match(await frame.$eval('#pmChannelBalance',e=>e.textContent),/418,000.00/);
  await click('#modalFoot [data-action="close"]');assert.match(await frame.$eval(providerBalanceCell,e=>e.textContent),/1,051,800.00/,'取消不修改余额');
  await click('[data-action="providerMoney"][data-id="V-001"][data-key="balance"]');await frame.select('#pmChannel','CH-FIAT-OUT-022');
- await frame.click('input[name="pmOperation"][value="decrease"]');for(const [id,value] of Object.entries({pmAmount:'10000',pmRemark:'核对演示',pmGoogle:'123456'}))await frame.$eval('#'+id,(e,v)=>e.value=v,value);
+ await frame.click('input[name="pmOperation"][value="decrease"]');for(const [id,value] of Object.entries({pmAmount:'10000',pmRemark:'核对演示'}))await frame.$eval('#'+id,(e,v)=>e.value=v,value);
  await click('#modalFoot [data-action="providerRunMoney"]');assert.equal(await frame.$eval('#modalBackdrop',e=>e.classList.contains('show')),false);assert.match(await frame.$eval(providerBalanceCell,e=>e.textContent),/1,041,800.00/);
  await shell.evaluate(()=>[...document.querySelectorAll('.arco-menu-item')].find(e=>e.textContent.trim()==='代付通道管理').click());await shell.waitForFunction(()=>document.querySelector('iframe')?.contentDocument?.querySelector('[data-action="payoutMoney"][data-id="CH-FIAT-OUT-022"]'));frame=await(await shell.$('iframe')).contentFrame();
  assert.match(await frame.$eval('[data-action="payoutMoney"][data-id="CH-FIAT-OUT-022"][data-key="balance"]',e=>e.closest('tr').querySelector('.payout-balance').textContent),/408,000.00/);
- await click('[data-action="payoutMoney"][data-id="CH-FIAT-OUT-022"][data-key="balance"]');for(const [id,value] of Object.entries({paAmount:'10000',paRemark:'恢复演示',paGoogle:'123456'}))await frame.$eval('#'+id,(e,v)=>e.value=v,value);
+ await click('[data-action="payoutMoney"][data-id="CH-FIAT-OUT-022"][data-key="balance"]');assert.equal(await frame.$('#paGoogle'),null);for(const [id,value] of Object.entries({paAmount:'10000',paRemark:'恢复演示'}))await frame.$eval('#'+id,(e,v)=>e.value=v,value);
  await click('#modalFoot [data-action="runPayoutMoney"]');assert.equal(await frame.$eval('#modalBackdrop',e=>e.classList.contains('show')),false);assert.match(await frame.$eval('[data-action="payoutMoney"][data-id="CH-FIAT-OUT-022"][data-key="balance"]',e=>e.closest('tr').querySelector('.payout-balance').textContent),/418,000.00/);
  await shell.evaluate(()=>[...document.querySelectorAll('.arco-menu-item')].find(e=>e.textContent.trim()==='已授权通道商').click());await shell.waitForFunction(()=>document.querySelector('iframe')?.contentDocument?.querySelector('#providerBusinessTabs'));frame=await(await shell.$('iframe')).contentFrame();await click('[data-provider-business="代付"]');assert.match(await frame.$eval(providerBalanceCell,e=>e.textContent),/1,051,800.00/,'通道页调额后通道商同步');
+ // Total-prepayment adjustment also submits and resets without a Google field.
+ await click('[data-action="providerMoney"][data-id="V-001"][data-key="totalPrepaid"]');assert.equal(await frame.$('#pmGoogle'),null);assert.doesNotMatch(await frame.$eval('#modalBody',e=>e.textContent),/谷歌验证|演示验证码/);
+ for(const [id,value] of Object.entries({pmAmount:'100',pmRemark:'预付演示'}))await frame.$eval('#'+id,(e,v)=>e.value=v,value);
+ await click('#modalFoot [data-action="providerRunMoney"]');assert.match(await frame.$eval('#providerResult',e=>e.textContent),/0.00 → 100.00/);
+ await click('[data-action="providerResetMoney"]');assert.equal(await frame.$eval('#pmAmount',e=>e.value),'');assert.equal(await frame.$eval('#pmRemark',e=>e.value),'');await click('#modalFoot [data-action="close"]');
  // Test-only fixtures: 22 authorized providers, two used; no mutation of shipping seed data.
  await frame.evaluate(()=>{const m=window.HSProviderDemo,d=m.tenantData();d.channels=d.channels.filter(c=>c.direction!=='代付'||['V-001','V-003'].includes(c.providerId));for(let i=5;i<=22;i++){const id='TEST-'+i;m.providers.push({id,name:'演示代付通道商'+i,directions:['代付']});m.grants.push({id:'GRANT-'+i,tenantId:m.tenantId,providerId:id,directions:['代付'],status:'已授权'});}});
  await click('[data-action="refresh"]');assert.equal(await frame.$$eval('[data-payout-provider]',e=>e.length),2);assert.match(await frame.$eval('#providerUsageTabs',e=>e.textContent),/未使用20/);
