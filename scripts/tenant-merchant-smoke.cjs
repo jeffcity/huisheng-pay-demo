@@ -570,7 +570,11 @@ const puppeteer = require('puppeteer-core');
     console.log('MERCHANT_PAYOUT_BLUE_ACTIONS_PASS 六入口、列内开关及单笔费用、IP最终复验、通道权重和原子保存、三列费率（隐藏代理字段）、清算/USDT模拟与钱包回显');
     console.log('MERCHANT_CREATE_PASS 新增无类型及上级选择、默认无上级关系、操作人2FA置底与验证、一次性密码及交付内容');
     await merchantPage('main');
-    const moreAction = async (action,id='MCH-1188') => {await frame.click(`[data-merchant-more="${id}"]`);await frame.click(`[data-merchant-more-action="${action}"]`);};
+    const moreAction = async (action,id='MCH-1188') => {
+      // Resize closes this menu. Flush viewport layout and its resize event before opening it.
+      await frame.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+      await frame.click(`[data-merchant-more="${id}"]`);await frame.click(`[data-merchant-more-action="${action}"]`);
+    };
     await frame.click('[data-merchant-more="MCH-1188"]');
     assert.deepEqual(await frame.$$eval('#merchantMoreMenu button',els=>els.map(el=>el.textContent)),['修改','服务费配置','编辑密码','查看密钥','设置汇率','通道测试','调整预付服务费','解绑','删除']);
     await page.keyboard.press('End');assert.equal(await frame.$eval('#merchantMoreMenu button:last-child',el=>el===document.activeElement),true);
