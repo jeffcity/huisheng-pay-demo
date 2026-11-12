@@ -198,15 +198,90 @@
     .bot-form-grid .full { grid-column: 1 / -1; }
     .bot-switch-field { display: flex; align-items: center; gap: 12px; min-height: 34px; }
     .bot-switch-field label { margin: 0; }
-    .bot-form-actions { display: flex; align-items: center; gap: 12px; padding: 0 20px 20px; }
+    .bot-form-actions { display: flex; align-items: center; gap: 12px; padding: 20px 20px 24px; }
     .bot-save-status { color: var(--text-2); font-size: 12px; }
     .tab { flex-shrink: 0; }
     @media (max-width: 720px) {
       .bot-form-grid { grid-template-columns: 1fr; gap: 16px; padding: 16px; }
       .bot-form-grid .full { grid-column: auto; }
-      .bot-form-actions { padding: 0 16px 16px; }
+      .bot-form-actions { padding: 20px 16px; }
     }
     .notify-bot-table{min-width:1050px}.notify-remark{white-space:pre-wrap;min-width:120px;max-width:260px;overflow-wrap:anywhere}.token-eye{display:inline-flex;vertical-align:middle;margin-left:5px}.token-eye:focus-visible{outline:2px solid var(--primary)}#notifyBotForm .field+.field{margin-top:16px}#notifyBotForm textarea{min-height:90px}#testNotifyBotMask .preview{min-height:72px}
+
+    .bot-command-guide { margin:0 20px 20px; border:1px solid var(--border); border-radius:6px; background:var(--surface); }
+    .bot-command-guide summary { padding:12px 14px; font-size:13px; font-weight:600; cursor:pointer; color:var(--text-1); }
+    .bot-command-guide .command-list { padding:0 14px 12px; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 18px; }
+    .bot-command-guide .command-item { padding:9px 0; border-top:1px solid var(--border); min-width:0; }
+    .bot-command-guide code { display:block; font-size:12px; overflow-wrap:anywhere; color:var(--text-1); }
+    .bot-command-guide small { display:block; font-size:12px; margin-top:4px; color:var(--text-3); }
+    .bot-command-guide .command-note { padding:0 14px 14px; margin:0; font-size:12px; color:var(--text-3); }
+    @media(max-width:640px){.bot-command-guide .command-list{grid-template-columns:minmax(0,1fr)}}
+
+    .bot-broadcast-settings { margin:0 20px; padding:20px; border:1px solid var(--border); border-radius:6px; background:var(--surface); }
+    .bot-broadcast-settings h3 { margin:0 0 14px; font-size:14px; color:var(--text-1); }
+    .bot-broadcast-settings .bot-form-grid { padding:0; gap:20px 24px; align-items:center; }
+    .bot-broadcast-settings .broadcast-toggle { display:flex; align-items:center; gap:12px; }
+    .bot-broadcast-settings .broadcast-toggle label { margin:0; }
+    .bot-broadcast-settings .broadcast-help { margin:16px 0 0; font-size:12px; line-height:1.7; color:var(--text-3); }
+    .bot-broadcast-settings .control:disabled { opacity:.65; background:var(--bg); cursor:not-allowed; }
+
+    /* Notification center follows the shared Tidewell baseline, scoped to this document. */
+    body {
+      --primary:#245665; --primary-hover:#193f4b; --primary-soft:#edf3f5;
+      --bg:#f3f6f7; --surface-soft:#f7f9fa; --text:#172a32;
+      --text-1:var(--text); --text-2:#536b77; --text-3:#627985;
+      --border:#e5ecef; --border-strong:#d2dfe5; --radius:10px; --radius-sm:6px;
+      --shadow:none;
+      background:var(--bg) !important;
+    }
+    .page-head h1 { font-size:24px; }
+    .tabs { gap:24px; margin-bottom:20px; }
+    .card { margin-bottom:20px; }
+    .card-head { padding:16px 20px; }
+    .tenant-scope,.scope-note,.tag.blue,.chip { border-color:var(--border-strong); color:var(--primary); }
+    .scope-note { background:var(--primary-soft); }
+    .scope-dot { box-shadow:0 0 0 3px var(--primary-soft); }
+    .btn { min-height:36px; padding:0 16px; }
+    .filter-actions,.page-actions,.modal-actions,.special-actions { gap:12px; flex-wrap:wrap; }
+    .btn:not(.primary):not(.danger):hover { border-color:var(--primary); color:var(--primary); background:var(--primary-soft); }
+    .control:hover { border-color:var(--primary); }
+    .control:focus { box-shadow:0 0 0 2px var(--primary-soft); }
+    button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible { outline:2px solid var(--primary); outline-offset:3px; }
+    #queryBotsPanel .bot-form-grid { gap:20px 24px; }
+    #queryBotsPanel .control { height:36px; }
+    #queryBotsPanel .bot-command-guide { border-radius:8px; }
+    #queryBotsPanel .bot-command-guide summary { padding:16px; }
+    #queryBotsPanel .bot-command-guide .command-list { padding:0 16px 16px; gap:0 24px; }
+    #queryBotsPanel .bot-command-guide .command-item { padding:12px 0; }
+    #queryBotsPanel .bot-command-guide .command-note { padding:0 16px 16px; }
+    @media(max-width:720px) {
+      html,body { font-size:14px; }
+      .card-head { padding:16px; }
+      .tabs { gap:20px; }
+      .bot-broadcast-settings,.bot-command-guide { margin-left:16px; margin-right:16px; }
+      .bot-broadcast-settings { padding:16px; }
+      .bot-form-actions { flex-wrap:wrap; }
+    }
+
+    #messageDetailMask { align-items:center; padding:20px; }
+    #messageDetailMask .modal { display:flex; flex-direction:column; width:min(900px,100%); max-height:calc(100dvh - 40px); }
+    #messageDetailMask .modal-head,#messageDetailMask .modal-actions { flex-shrink:0; }
+    #messageDetailMask .modal-body { overflow:auto; min-height:0; padding:20px; }
+    #messageDetailMask .message-detail-meta { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px 24px; margin:0 0 20px; }
+    #messageDetailMask .message-detail-meta div { min-width:0; }
+    #messageDetailMask dt { color:var(--text-2); font-size:12px; }
+    #messageDetailMask dd { margin:4px 0 0; overflow-wrap:anywhere; font-size:13px; }
+    #messageDetailMask h4 { margin:20px 0 10px; font-size:14px; }
+    #messageDetailMask .message-original { margin:0; padding:16px; border:1px solid var(--border); border-radius:8px; background:var(--surface-soft); white-space:pre-wrap; overflow-wrap:anywhere; font:inherit; font-size:13px; }
+    #messageDetailMask .message-target-table { min-width:660px; table-layout:fixed; }
+    #messageDetailMask th,#messageDetailMask td { padding:10px 8px; font-size:12px; white-space:normal; overflow-wrap:anywhere; vertical-align:top; }
+    #messageDetailMask th:nth-child(1) { width:30%; } #messageDetailMask th:nth-child(2) { width:24%; } #messageDetailMask th:nth-child(3) { width:14%; }
+    #messageDetailMask .message-content-section + .message-content-section { margin-top:24px; padding-top:4px; border-top:1px solid var(--border); }
+    #messageDetailMask .message-delivery-meta { margin:0 0 12px; display:flex; gap:8px 20px; flex-wrap:wrap; color:var(--text-2); font-size:12px; }
+    #messageDetailMask .message-feedback { margin:0; padding:16px; border:1px solid var(--border); border-radius:8px; background:var(--surface-soft); white-space:pre-wrap; overflow-wrap:anywhere; font:inherit; font-size:13px; }
+    #messageDetailMask .message-targets { margin-top:14px; }
+    #messageDetailMask .message-targets summary { cursor:pointer; font-size:13px; color:var(--text-2); padding:8px 0; }
+    @media(max-width:720px){#messageDetailMask .message-detail-meta{grid-template-columns:minmax(0,1fr);}}
   </style>
 </head>
 <body>
@@ -228,7 +303,7 @@
 
     <section class="panel" id="messagesPanel" role="tabpanel" aria-labelledby="messagesTab">
       <section class="card filter-card push-filter" aria-label="TG 推送记录筛选">
-        <div class="field"><label for="messageEvent">推送事件</label><select class="control" id="messageEvent"><option value="">全部事件</option><option>商户钱包地址变更</option><option>商户资金划转</option><option>代付订单驳回</option><option>恶意拉单预警</option><option>同一IP登录失败过多</option><option>账号与角色权限变更</option><option>通知配置变更</option></select></div>
+        <div class="field"><label for="messageEvent">推送事件</label><select class="control" id="messageEvent"><option value="">全部事件</option><option>群发通知商户</option><option>群发通知通道</option><option>商户钱包地址变更</option><option>商户资金划转</option><option>代付订单驳回</option><option>恶意拉单预警</option><option>同一IP登录失败过多</option><option>账号与角色权限变更</option><option>通知配置变更</option></select></div>
         <div class="field"><label for="messageGroup">TG 群 ID</label><input class="control" id="messageGroup" placeholder="请输入 TG 群 ID"></div>
         <div class="field"><label for="messageDate">推送日期（UTC+8）</label><input class="control" id="messageDate" type="date"></div>
         <div class="filter-actions"><button class="btn" id="resetMessages" type="button">重置</button><button class="btn primary" id="searchMessages" type="button">搜索</button></div>
@@ -298,7 +373,8 @@
           <div class="field"><label for="collectBotQueryToken">查单机器人token</label><input class="control mono" id="collectBotQueryToken" name="QueryToken" value="demo_collect_query_token" placeholder="请输入" autocomplete="off" spellcheck="false"></div>
           <div class="field full"><label for="collectBotCallbackGroup">回调群ID</label><input class="control mono" id="collectBotCallbackGroup" name="CallbackGroup" value="-1002003004001" placeholder="输入群组id" autocomplete="off" spellcheck="false"></div>
         </div>
-        <div class="bot-form-actions"><button class="btn primary" type="submit">保存</button><span class="bot-save-status" id="collectBotStatus" role="status"></span></div>
+        <section class="bot-broadcast-settings" aria-labelledby="collectBroadcastTitle"><h3 id="collectBroadcastTitle">群发消息</h3><div class="bot-form-grid"><div class="field broadcast-toggle"><label id="collectBotBroadcastLabel">开启群发消息功能</label><button class="switch" id="collectBotBroadcastEnabled" type="button" role="switch" aria-checked="false" aria-labelledby="collectBotBroadcastLabel" data-bot-switch="BroadcastEnabled"></button></div><div class="field"><label for="collectBotBroadcastGroup">群发指令群 Chat ID</label><input class="control mono" id="collectBotBroadcastGroup" name="BroadcastGroup" maxlength="20" placeholder="例如 -1002003004001" aria-describedby="collectBotBroadcastGroupError" disabled><span class="field-error" id="collectBotBroadcastGroupError"></span></div></div><p class="broadcast-help">仅指定群的群主或管理员可发起群发；请先引用通知内容，再发送指令。</p></section>
+        <div class="bot-form-actions"><button class="btn primary" type="submit">保存</button><span class="bot-save-status" id="collectBotStatus" role="status"></span></div><details class="bot-command-guide" id="collectCommandGuide" open><summary>代收查单机器人 · 命令指南</summary><div class="command-list"><div class="command-item"><code>/关联商户=你的商户名</code><small>将当前群加入该商户的通知群列表</small></div><div class="command-item"><code>/关联通道=你的通道名</code><small>将当前群加入该具体通道的通知群列表</small></div><div class="command-item"><code>/解绑商户=你的商户名</code><small>只解除当前群与该商户的关联</small></div><div class="command-item"><code>/解绑通道=你的通道名</code><small>只解除当前群与该通道的关联</small></div><div class="command-item"><code>/查单 单号 备注</code><small>查询订单</small></div><div class="command-item"><code>/回单 单号 备注</code><small>按线上现有回单功能处理</small></div><div class="command-item"><code>/撤单 单号 备注</code><small>按线上现有撤单功能处理</small></div><div class="command-item"><code>/预付+金额或表达式</code><small>示例：/预付+100*0.7</small></div><div class="command-item"><code>/预付-金额或表达式</code><small>示例：/预付-100</small></div><div class="command-item"><code>/帮助</code><small>查看机器人帮助</small></div><div class="command-item"><code>通知商户 / 通知商户=商户1，商户2</code><small>通知本租户全部商户，或指定名称的商户</small></div><div class="command-item"><code>通知通道 / 通知通道=通道1，通道2</code><small>通知全部具体通道，或指定名称的通道</small></div></div><p class="command-note">查单、回单、撤单支持多笔：第一行写指令与单号，后续每行一笔单号及备注。请在对应业务的机器人群里使用；操作权限沿用 TG 操作员配置。</p></details>
       </form>
       <form class="card" id="payoutBotForm" aria-labelledby="payoutBotTitle" novalidate>
         <header class="card-head"><div><h2 id="payoutBotTitle">代付机器人</h2></div></header>
@@ -312,7 +388,8 @@
           <div class="field"><label for="payoutBotMerchantBalance">商户预付报警余额</label><input class="control" id="payoutBotMerchantBalance" name="MerchantBalance" type="number" min="0" step="1" value="2.00" aria-describedby="payoutBotMerchantBalanceError"><span class="field-error" id="payoutBotMerchantBalanceError">请输入大于或等于 0 的余额</span></div>
           <div class="field"><label for="payoutBotChannelBalance">通道预付报警余额</label><input class="control" id="payoutBotChannelBalance" name="ChannelBalance" type="number" min="0" step="1" value="0.00" aria-describedby="payoutBotChannelBalanceError"><span class="field-error" id="payoutBotChannelBalanceError">请输入大于或等于 0 的余额</span></div>
         </div>
-        <div class="bot-form-actions"><button class="btn primary" type="submit">保存</button><span class="bot-save-status" id="payoutBotStatus" role="status"></span></div>
+        <section class="bot-broadcast-settings" aria-labelledby="payoutBroadcastTitle"><h3 id="payoutBroadcastTitle">群发消息</h3><div class="bot-form-grid"><div class="field broadcast-toggle"><label id="payoutBotBroadcastLabel">开启群发消息功能</label><button class="switch" id="payoutBotBroadcastEnabled" type="button" role="switch" aria-checked="false" aria-labelledby="payoutBotBroadcastLabel" data-bot-switch="BroadcastEnabled"></button></div><div class="field"><label for="payoutBotBroadcastGroup">群发指令群 Chat ID</label><input class="control mono" id="payoutBotBroadcastGroup" name="BroadcastGroup" maxlength="20" placeholder="例如 -1002003004001" aria-describedby="payoutBotBroadcastGroupError" disabled><span class="field-error" id="payoutBotBroadcastGroupError"></span></div></div><p class="broadcast-help">仅指定群的群主或管理员可发起群发；请先引用通知内容，再发送指令。</p></section>
+        <div class="bot-form-actions"><button class="btn primary" type="submit">保存</button><span class="bot-save-status" id="payoutBotStatus" role="status"></span></div><details class="bot-command-guide" id="payoutCommandGuide" open><summary>代付查单机器人 · 命令指南</summary><div class="command-list"><div class="command-item"><code>/关联商户=你的商户名</code><small>将当前群加入该商户的通知群列表</small></div><div class="command-item"><code>/关联通道=你的通道名</code><small>将当前群加入该具体通道的通知群列表</small></div><div class="command-item"><code>/解绑商户=你的商户名</code><small>只解除当前群与该商户的关联</small></div><div class="command-item"><code>/解绑通道=你的通道名</code><small>只解除当前群与该通道的关联</small></div><div class="command-item"><code>/查单 单号 备注</code><small>查询订单</small></div><div class="command-item"><code>/回单 单号 备注</code><small>按线上现有回单功能处理</small></div><div class="command-item"><code>/撤单 单号 备注</code><small>按线上现有撤单功能处理</small></div><div class="command-item"><code>/预付+金额或表达式</code><small>示例：/预付+100*0.7</small></div><div class="command-item"><code>/预付-金额或表达式</code><small>示例：/预付-100</small></div><div class="command-item"><code>/总预付增加=金额或表达式</code><small>示例：/总预付增加=100</small></div><div class="command-item"><code>/总预付减少=金额或表达式</code><small>示例：/总预付减少=100</small></div><div class="command-item"><code>/代付通道商结算=你的通道商名</code><small>示例：/代付通道商结算=通道商</small></div><div class="command-item"><code>/自动结算=开或关</code><small>示例：/自动结算=开</small></div><div class="command-item"><code>/帮助</code><small>查看机器人帮助</small></div><div class="command-item"><code>通知商户 / 通知商户=商户1，商户2</code><small>通知本租户全部商户，或指定名称的商户</small></div><div class="command-item"><code>通知通道 / 通知通道=通道1，通道2</code><small>通知全部具体通道，或指定名称的通道</small></div></div><p class="command-note">查单、回单、撤单支持多笔：第一行写指令与单号，后续每行一笔单号及备注。请在对应业务的机器人群里使用；操作权限沿用 TG 操作员配置。</p></details>
       </form>
       <section class="card" id="tgOperatorsCard" aria-labelledby="tgOperatorsTitle">
         <header class="card-head"><div><h2 id="tgOperatorsTitle">TG操作员</h2></div></header>
@@ -376,6 +453,14 @@
     </form>
   </div>
 
+  <div class="mask" id="messageDetailMask" role="dialog" aria-modal="true" aria-labelledby="messageDetailTitle">
+    <section class="modal message-detail-modal">
+      <header class="modal-head"><h3 id="messageDetailTitle">推送详情</h3><button class="close" id="closeMessageDetail" type="button" aria-label="关闭推送详情">×</button></header>
+      <div class="modal-body" id="messageDetailBody"></div>
+      <footer class="modal-actions"><button class="btn" id="messageDetailDone" type="button">关闭</button></footer>
+    </section>
+  </div>
+
   <div class="mask" id="operatorMask" role="dialog" aria-modal="true" aria-labelledby="operatorModalTitle">
     <form class="modal" id="operatorForm" novalidate>
       <header class="modal-head"><h3 id="operatorModalTitle">新增TG操作员</h3><button class="close" id="closeOperatorModal" type="button" aria-label="关闭TG操作员弹窗">×</button></header>
@@ -424,6 +509,18 @@
       { type: "通知配置变更", group: "-5211818661", time: "2026-08-29 09:36:22", date: "2026-08-29", template: "【通知配置变更】\n消息类型：${configType}\n操作人：${operator}\n发生时间：${occurredAt}", values: { configType: "商户资金划转", operator: "tenant.admin", occurredAt: "2026-08-29 09:36:22" } }
     ];
 
+
+    const broadcastMessageData = [
+      {id:"BC-20261112-004",type:"群发通知商户",time:"2026-11-12 11:42:08",date:"2026-11-12",operator:"@tenant_ops",robot:"代收查单机器人",sourceGroup:"-1009005001",command:"通知商户",scope:"本租户全部商户",content:"【维护通知】\n今日 23:00—23:10 进行系统维护，请提前安排订单。维护完成后另行通知。",targets:[{objects:"东盛电商 · MCH-1188",chatId:"-1009001001",status:"成功",reason:""},{objects:"星河游戏 · MCH-2031 / 百胜聚合 · MCH-4116",chatId:"-1009001002",status:"成功",reason:""},{objects:"北辰游戏 · MCH-2209",chatId:"-1009001003",status:"失败",reason:"机器人已被移出该群"}]},
+      {id:"BC-20261112-003",type:"群发通知通道",time:"2026-11-12 11:30:12",date:"2026-11-12",operator:"@finance_ops",robot:"代付查单机器人",sourceGroup:"-1009006001",command:"通知通道=QuickPay CNY 代付，NorthLink 银行卡代付",scope:"指定 2 个通道",content:"【额度核对】\n请核对当前代付可用额度，并在本群回复确认。",targets:[{objects:"QuickPay CNY 代付",chatId:"-1009003001",status:"成功",reason:""},{objects:"NorthLink 银行卡代付",chatId:"-1009003002",status:"成功",reason:""}]},
+      {id:"BC-20261112-002",type:"群发通知商户",time:"2026-11-12 11:15:34",date:"2026-11-12",operator:"@tenant_ops",robot:"代收查单机器人",sourceGroup:"-1009005001",command:"通知商户=东盛电商，北辰游戏",scope:"指定 2 个商户",content:"【对账通知】\n请核对昨日交易数据，有差异请在群内反馈订单号。",targets:[{objects:"东盛电商 · MCH-1188",chatId:"-1009001001",status:"失败",reason:"机器人没有在该群发送消息的权限"},{objects:"北辰游戏 · MCH-2209",chatId:"-1009001003",status:"失败",reason:"接收群不存在或无法访问"}]},
+      {id:"BC-20261112-001",type:"群发通知商户",time:"2026-11-12 10:55:06",date:"2026-11-12",operator:"@finance_ops",robot:"代付查单机器人",sourceGroup:"-1009006001",command:"通知商户",scope:"本租户全部商户",content:"【业务通知】\n今日代付正常受理，请留意剩余预付。",targets:[{objects:"东盛电商 · MCH-1188",chatId:"-1009001001",status:"成功",reason:""},{objects:"星河游戏 · MCH-2031 / 百胜聚合 · MCH-4116",chatId:"-1009001002",status:"成功",reason:""},{objects:"北辰游戏 · MCH-2209",chatId:"-1009001003",status:"成功",reason:""}]}
+    ];
+    // 推送原文与统计反馈分别保存消息快照，打开详情时不拼成同一条通知。
+    const broadcastFeedbackSnapshots={"BC-20261112-004":{"time":"2026-11-12 11:42:12","group":"-1009005001","status":"成功","content":"通知类型：商户通知\n通知范围：本租户全部商户\n目标群数：3\n发送成功：2\n发送失败：1\n\n操作人员：@tenant_ops\n执行时间：2026-11-12 11:42:08（UTC+8）\n批次：BC-20261112-004\n\n失败详情：\n北辰游戏（MCH-2209），群 -1009001003：机器人已被移出该群"},"BC-20261112-003":{"time":"2026-11-12 11:30:16","group":"-1009006001","status":"成功","content":"通知类型：通道通知\n通知对象：QuickPay CNY 代付、NorthLink 银行卡代付\n目标群数：2\n发送成功：2\n发送失败：0\n执行状态：全部发送成功\n\n操作人员：@finance_ops\n执行时间：2026-11-12 11:30:12（UTC+8）\n批次：BC-20261112-003"},"BC-20261112-002":{"time":"2026-11-12 11:15:39","group":"-1009005001","status":"成功","content":"通知类型：商户通知\n通知对象：东盛电商、北辰游戏\n目标群数：2\n发送成功：0\n发送失败：2\n\n操作人员：@tenant_ops\n执行时间：2026-11-12 11:15:34（UTC+8）\n批次：BC-20261112-002\n\n失败详情：\n东盛电商（MCH-1188），群 -1009001001：机器人没有在该群发送消息的权限\n北辰游戏（MCH-2209），群 -1009001003：接收群不存在或无法访问"},"BC-20261112-001":{"time":"2026-11-12 10:55:10","group":"-1009006001","status":"成功","content":"通知类型：商户通知\n通知范围：本租户全部商户\n目标群数：3\n发送成功：3\n发送失败：0\n执行状态：全部发送成功\n\n操作人员：@finance_ops\n执行时间：2026-11-12 10:55:06（UTC+8）\n批次：BC-20261112-001"}};
+    broadcastMessageData.forEach(item=>{item.feedback=broadcastFeedbackSnapshots[item.id];});
+    messageData.unshift(...broadcastMessageData);
+
     const typeMeta = {
       "代付通道商结算通知": {risk:"高风险",vars:["tenantName", "tenantNo", "settlementMode", "settledAt", "batchNo", "partNo", "partCount", "providerCount", "successCount", "failedCount", "pendingCount", "settlementDetails"],labels:{"tenantName": "租户名称", "tenantNo": "租户编号", "settlementMode": "手动／自动结算", "settledAt": "执行时间", "batchNo": "结算批次号", "partNo": "当前条数", "partCount": "总条数", "providerCount": "通道商总数", "successCount": "成功家数", "failedCount": "失败家数", "pendingCount": "待确认家数", "settlementDetails": "通道商结算明细"},template:settlementMessageTemplate},
       "商户钱包地址变更": { risk: "高风险", vars: ["merchantName", "merchantNo", "oldWalletAddress", "newWalletAddress", "operator", "occurredAt"], template: "【商户钱包地址变更】\n商户：${merchantName}（${merchantNo}）\n原地址：${oldWalletAddress}\n新地址：${newWalletAddress}\n操作人：${operator}" },
@@ -462,11 +559,14 @@
     configData.forEach(function (item) { item.template = item.template || typeMeta[item.type].template; });
     const notificationOwner=window.HSProviderDemo?.tenantData(notificationTenantId)||{};
     const notificationState=notificationOwner.notificationCenter ||= notificationModel.createState(notificationTenantId,notificationTenantId==='HS-TEN-001'?configData:[]);
+    // Preserve live-aligned merchant notification bindings when the center opens later.
+    (notificationOwner.merchantProfiles||[]).filter(m=>!m.deletedAt&&m.editProfile?.notifyBotId).forEach(m=>{const bot=notificationModel.find(notificationState,m.editProfile.notifyBotId);if(bot&&!bot.merchantIds.includes(m.id))bot.merchantIds.push(m.id)});
     configData=notificationState.configs;
     if(notificationTenantId!=='HS-TEN-001')messageData.length=0;
 
 
     let filteredMessages = messageData.slice();
+    let messageDetailReturnFocus=null;
     let filteredConfigs = configData.slice();
     let editingConfigIndex = null;
     let pendingConfirm = null;
@@ -503,32 +603,37 @@
       return item.template.replace(/\$\{(\w+)\}/g, function (_, variable) { return item.values[variable] ?? "${" + variable + "}"; });
     }
 
+    function messageTargets(item) {
+      return item.targets || [{objects:item.values?.merchantName || "通知配置接收群",chatId:item.group,status:"成功",reason:""}];
+    }
+    function messageStats(item) {
+      const targets=messageTargets(item),success=targets.filter(row=>row.status==="成功").length,failed=targets.filter(row=>row.status==="失败").length;
+      return {total:targets.length,success,failed,status:failed===0?"成功":success===0?"失败":"部分成功"};
+    }
+    function messageContent(item) { return item.content ?? renderPushedContent(item); }
+    function messageOperator(item) { return item.operator || item.values?.operator || "系统"; }
+    function messageStatusTag(status) { return '<span class="tag '+({成功:"green",部分成功:"orange",失败:"red"}[status] || "gray")+'">'+escapeHtml(status)+'</span>'; }
     function renderMessages() {
-      byId("messageRows").innerHTML = filteredMessages.length ? filteredMessages.map(function (item) {
-        return '<tr><td class="mono">' + escapeHtml(item.time) + '</td><td><span class="tag blue">' + escapeHtml(item.type) + '</span></td><td><div class="push-content">' + escapeHtml(renderPushedContent(item)) + '</div></td></tr>';
-      }).join("") : '<tr><td class="empty" colspan="3">暂无符合条件的 TG 推送记录</td></tr>';
-      byId("messageCount").textContent = "共 " + filteredMessages.length + " 条";
-      byId("messagePagerText").textContent = "共 " + filteredMessages.length + " 条";
-      byId("messageTabCount").textContent = messageData.length;
+      byId("messageRows").innerHTML=filteredMessages.length?filteredMessages.map(function(item){
+        const detail=item.id?'<button class="link-btn" type="button" data-message-detail="'+messageData.indexOf(item)+'" aria-label="查看'+escapeHtml(item.id)+'详情">群发详情</button>':'';
+        return '<tr><td class="mono">'+escapeHtml(item.time)+'</td><td><span class="tag blue">'+escapeHtml(item.type)+'</span></td><td><div class="push-content">'+escapeHtml(messageContent(item))+'</div>'+detail+'</td></tr>';
+      }).join(''):'<tr><td class="empty" colspan="3">暂无符合条件的 TG 推送记录</td></tr>';
+      byId("messageCount").textContent="共 "+filteredMessages.length+" 条";byId("messagePagerText").textContent="共 "+filteredMessages.length+" 条";byId("messageTabCount").textContent=messageData.length;
     }
-
     function searchMessages() {
-      const event = byId("messageEvent").value;
-      const group = byId("messageGroup").value.trim();
-      const date = byId("messageDate").value;
-      filteredMessages = messageData.filter(function (item) {
-        return (!event || item.type === event) && (!group || item.group.includes(group)) && (!date || item.date === date);
-      });
-      renderMessages();
-      toast("已找到 " + filteredMessages.length + " 条 TG 推送记录");
+      const event=byId("messageEvent").value,group=byId("messageGroup").value.trim(),date=byId("messageDate").value;
+      filteredMessages=messageData.filter(item=>(!event||item.type===event)&&(!group||messageTargets(item).some(target=>target.chatId.includes(group)))&&(!date||item.date===date));renderMessages();toast("已找到 "+filteredMessages.length+" 条 TG 推送记录");
     }
-
-    function resetMessages() {
-      ["messageEvent", "messageGroup", "messageDate"].forEach(function (id) { byId(id).value = ""; });
-      filteredMessages = messageData.slice();
-      renderMessages();
-      toast("TG 推送记录筛选条件已重置");
+    function resetMessages() { ["messageEvent","messageGroup","messageDate"].forEach(id=>byId(id).value="");filteredMessages=messageData.slice();renderMessages();toast("TG 推送记录筛选条件已重置"); }
+    function openMessageDetail(index,button) {
+      const item=messageData[index];if(!item)return;
+      const stats=messageStats(item),fields=[["发生时间（UTC+8）",item.time],["推送事件",item.type],["操作人",messageOperator(item)],["机器人",item.robot||"—"],["群发批次",item.id||"—"],["发起群 Chat ID",item.sourceGroup||"—"],["发送范围",item.scope||"通知配置接收群"],["原始指令",item.command||"—"]];
+      const feedback=item.feedback;
+      const feedbackSection=feedback?'<section class="message-content-section" aria-labelledby="messageFeedbackTitle"><h4 id="messageFeedbackTitle">反馈内容</h4><div class="message-delivery-meta"><span>接收群（管理群）：<span class="mono">'+escapeHtml(feedback.group)+'</span></span><span>反馈时间：'+escapeHtml(feedback.time)+'（UTC+8）</span><span>反馈消息发送：'+escapeHtml(feedback.status)+'</span></div><pre class="message-feedback">'+escapeHtml(feedback.content)+'</pre></section>':'';
+      byId("messageDetailBody").innerHTML='<dl class="message-detail-meta">'+fields.map(([label,value])=>'<div><dt>'+escapeHtml(label)+'</dt><dd>'+escapeHtml(value)+'</dd></div>').join('')+'</dl><section class="message-content-section" aria-labelledby="messagePushTitle"><h4 id="messagePushTitle">推送内容</h4><div class="message-delivery-meta"><span>接收群：商户／通道群，共 '+stats.total+' 个</span><span>推送时间：'+escapeHtml(item.time)+'（UTC+8）</span><span>群发结果：'+messageStatusTag(stats.status)+'</span></div><pre class="message-original">'+escapeHtml(messageContent(item))+'</pre><details class="message-targets"><summary>查看各接收群结果</summary><div class="table-wrap"><table class="message-target-table"><thead><tr><th>接收对象</th><th>接收群 Chat ID</th><th>发送结果</th><th>失败原因</th></tr></thead><tbody>'+messageTargets(item).map(target=>'<tr><td>'+escapeHtml(target.objects)+'</td><td class="mono">'+escapeHtml(target.chatId)+'</td><td>'+messageStatusTag(target.status)+'</td><td>'+escapeHtml(target.reason||"—")+'</td></tr>').join('')+'</tbody></table></div></details></section>'+feedbackSection;
+      messageDetailReturnFocus=button;byId("messageDetailMask").classList.add("show");byId("closeMessageDetail").focus();
     }
+    function closeMessageDetail() { byId("messageDetailMask").classList.remove("show");if(messageDetailReturnFocus?.isConnected)messageDetailReturnFocus.focus(); }
 
     function renderConfigs() {
       byId("configRows").innerHTML = filteredConfigs.length ? filteredConfigs.map(function (item, visibleIndex) {
@@ -693,13 +798,16 @@
       button.addEventListener("click", function () { setActiveTab(button.dataset.tab); });
     });
 
-    byId("searchMessages").addEventListener("click", searchMessages);
-    byId("resetMessages").addEventListener("click", resetMessages);
-    byId("refreshMessages").addEventListener("click", function () { filteredMessages = messageData.slice(); renderMessages(); toast("TG 推送记录已刷新"); });
-    byId("messageGroup").addEventListener("keydown", function (event) { if (event.key === "Enter") searchMessages(); });
-    byId("exportMessages").addEventListener("click", function () {
-      exportCsv("汇盛租户端-TG推送记录.csv", "推送时间,推送事件,推送内容", filteredMessages.map(function (item) { return [item.time, item.type, renderPushedContent(item).replace(/\n/g, " / ")]; }));
-      toast("已按当前筛选条件导出 TG 推送记录");
+    byId("searchMessages").addEventListener("click",searchMessages);
+    byId("resetMessages").addEventListener("click",resetMessages);
+    byId("refreshMessages").addEventListener("click",function(){filteredMessages=messageData.slice();renderMessages();toast("TG 推送记录已刷新");});
+    byId("messageGroup").addEventListener("keydown",event=>{if(event.key==="Enter")searchMessages();});
+    byId("messageRows").addEventListener("click",event=>{const button=event.target.closest("[data-message-detail]");if(button)openMessageDetail(Number(button.dataset.messageDetail),button);});
+    byId("closeMessageDetail").addEventListener("click",closeMessageDetail);byId("messageDetailDone").addEventListener("click",closeMessageDetail);
+    byId("messageDetailMask").addEventListener("click",event=>{if(event.target===byId("messageDetailMask"))closeMessageDetail();});
+    document.addEventListener("keydown",event=>{if(!byId("messageDetailMask").classList.contains("show"))return;if(event.key==="Escape"){event.preventDefault();closeMessageDetail();}if(event.key==="Tab"){const first=byId("closeMessageDetail"),last=byId("messageDetailDone");if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}}});
+    byId("exportMessages").addEventListener("click",function(){
+      exportCsv("汇盛租户端-TG推送记录.csv","推送时间,推送事件,推送内容,反馈内容,反馈接收群ChatID,反馈时间",filteredMessages.map(item=>[item.time,item.type,messageContent(item),item.feedback?.content||"",item.feedback?.group||"",item.feedback?.time||""]));toast("已按当前筛选条件导出 TG 推送记录");
     });
 
     byId("searchConfigs").addEventListener("click", searchConfigs);
@@ -803,14 +911,21 @@
 
     // Local demo state only: production Telegram handlers are migrated separately.
     const savedQueryBots = {};
+    const broadcastModel=window.HSNotificationBroadcast;
     ["collect", "payout"].forEach(function (business) {
       const prefix = business + "Bot";
       const form = byId(prefix + "Form");
+      let broadcastSaved=broadcastModel.read(notificationTenantId,business);
+      const broadcastToggle=byId(prefix+"BroadcastEnabled"),broadcastGroup=byId(prefix+"BroadcastGroup");
+      broadcastToggle.setAttribute("aria-checked",String(broadcastSaved.enabled));broadcastToggle.classList.toggle("on",broadcastSaved.enabled);broadcastGroup.value=broadcastSaved.chatId;
+      const syncBroadcastControl=function(){broadcastGroup.disabled=broadcastToggle.getAttribute("aria-checked")!=="true";};syncBroadcastControl();
+
       form.querySelectorAll("[data-bot-switch]").forEach(function (button) {
         button.addEventListener("click", function () {
           const on = button.getAttribute("aria-checked") !== "true";
           button.setAttribute("aria-checked", String(on));
           button.classList.toggle("on", on);
+          syncBroadcastControl();
           byId(prefix + "Status").textContent = "未保存";
         });
       });
@@ -832,6 +947,9 @@
           if (!valid && !firstInvalid) firstInvalid = input;
         });
         if (firstInvalid) { firstInvalid.focus(); return; }
+        try{broadcastSaved=broadcastModel.save(notificationTenantId,business,{enabled:broadcastToggle.getAttribute("aria-checked")==="true",chatId:broadcastGroup.value},broadcastSaved.version);}
+        catch(error){broadcastGroup.classList.add("invalid");broadcastGroup.setAttribute("aria-invalid","true");byId(prefix+"BroadcastGroupError").textContent=error.message;byId(prefix+"BroadcastGroupError").classList.add("show");byId(prefix+"Status").textContent="未保存";if(!broadcastGroup.disabled)broadcastGroup.focus();return;}
+        byId(prefix+"BroadcastGroupError").classList.remove("show");
         const values = Object.fromEntries(new FormData(form));
         form.querySelectorAll("[data-bot-switch]").forEach(function (button) {
           values[button.dataset.botSwitch] = button.getAttribute("aria-checked") === "true";
@@ -840,11 +958,12 @@
         byId(prefix + "Status").textContent = "已保存";
         toast((business === "collect" ? "代收" : "代付") + "机器人配置已保存");
       });
+
     });
     // Local demonstration only; real operator permission codes and Telegram auth come from the original service.
     const operatorPermissions = {
-      collect: ["绑定商户", "绑定通道", "下发资金", "预付增加", "预付扣减", "结算", "执行对账", "启用商户/通道", "禁用商户/通道", "查单反馈", "代收回调", "代收回调确认"],
-      payout: ["绑定商户", "绑定通道", "查单反馈", "代付预付增加", "代付预付扣减", "代付回调", "代付回调确认"]
+      collect: ["绑定商户", "绑定通道", "解绑商户", "解绑通道", "下发资金", "预付增加", "预付扣减", "结算", "执行对账", "启用商户/通道", "禁用商户/通道", "查单反馈", "代收回调", "代收回调确认"],
+      payout: ["绑定商户", "绑定通道", "解绑商户", "解绑通道", "查单反馈", "代付预付增加", "代付预付扣减", "代付回调", "代付回调确认"]
     };
     const operatorBusinessNames = { collect: "代收", payout: "代付" };
     const operatorTenantId = window.HSProviderDemo?.tenantId || "HS-TEN-001";
