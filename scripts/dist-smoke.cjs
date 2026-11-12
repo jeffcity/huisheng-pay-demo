@@ -23,7 +23,9 @@ const assert=require('node:assert/strict'),puppeteer=require('puppeteer-core'),{
  assert.match(await tf.$eval('#tenantRows tr:first-child [data-tenant-metric="balances"]',el=>el.textContent),/936.94688/);
  await tf.focus('[data-billing="HS-TEN-001"]');await page.keyboard.press('Enter');await tf.waitForSelector('#tenantModal.open');assert.equal(await tf.$eval('#tenantModal',el=>el.classList.contains('billing-only')),true);assert(await tf.$('#tenantCollectionBillingValue'));assert(await tf.$('#tenantPayoutBillingValue'));
  await tf.click('#tenantModal [data-close-modal]');
- await tf.focus('[data-wallet-adjust="HS-TEN-001"]');await page.keyboard.press('Enter');await tf.waitForSelector('#walletAdjustModal.open');await tf.type('#walletAdjustAmount','10.00');await tf.type('#walletAdjustReason','平台系统费钱包补记');
+ await tf.focus('[data-wallet-adjust="HS-TEN-001"]');await page.keyboard.press('Enter');await tf.waitForSelector('#walletAdjustModal.open');
+ // Dialog initialization schedules focus on the next frame; let it settle before typing.
+ await tf.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));await tf.type('#walletAdjustAmount','10.00');await tf.type('#walletAdjustReason','平台系统费钱包补记');
  assert.equal(await tf.$eval('#walletAdjustBefore',el=>el.value),'936.94688');assert.equal(await tf.$eval('#walletAdjustAfter',el=>el.value),'946.94688');await tf.focus('#walletAdjustSubmit');await page.keyboard.press('Enter');
  await tf.waitForFunction(()=>!document.querySelector('#walletAdjustModal').classList.contains('open'));assert.equal(await tf.evaluate(()=>window.HSFeeWallets.wallet('HS-TEN-001').balance),'946.94688');
  assert.match(await tf.$eval('#tenantRows tr:first-child [data-tenant-metric="balances"]',el=>el.textContent),/946.94688/);
