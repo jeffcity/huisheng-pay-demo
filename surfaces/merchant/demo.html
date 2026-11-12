@@ -6412,6 +6412,14 @@
   .base-info { width:100%; border-collapse:collapse; margin-top:16px; } .base-info th { width:160px; color:#737b8d; background:#f8f9fb; } .base-info td,.base-info th { padding:13px 18px; border:1px solid #e5e8ef; text-align:left; overflow-wrap:anywhere; }
   .base-extension-banner { margin-bottom:18px; color:#60648b; padding:12px 16px; border:1px solid #dedff6; background:#f4f4ff; border-radius:6px; }
   .base-manual input { width:140px; padding:8px; border:1px solid #dce0e9; border-radius:4px; } .base-feedback { color:#217b5a; min-height:24px; margin-top:15px; }
+  .base-manual[data-mode="alipay"] table { min-width:740px; table-layout:fixed; }
+  .base-manual[data-mode="alipay"] th,.base-manual[data-mode="alipay"] td { padding:10px 8px; }
+  .base-manual[data-mode="alipay"] th:first-child { width:36px; }
+  .base-manual[data-mode="alipay"] th:last-child { width:68px; }
+  .base-manual[data-mode="alipay"] th:nth-child(3),.base-manual[data-mode="alipay"] th:nth-child(4) { width:104px; }
+  .base-manual[data-mode="alipay"] th:nth-child(2) { width:136px; }
+  .base-manual[data-mode="alipay"] input[readonly] { background:var(--color-bg-page,#f3f6f7); color:var(--color-text-secondary,#536b77); }
+  .base-manual[data-mode="alipay"] input { width:100%; min-width:0; box-sizing:border-box; }
   .modal-backdrop .modal { min-height:0; } .modal-head,.modal-foot { flex-shrink:0; }
   @media(max-width:1100px) { .base-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); } .base-stats { grid-template-columns:repeat(3,minmax(0,1fr)); } }
   @media(max-width:760px) { .app-shell { display:grid; grid-template-columns:170px minmax(0,1fr); } .sidebar { display:block; width:auto; height:100vh; overflow-y:auto; } .sidebar .nav-list { display:grid; width:auto; } .sidebar .nav-item { width:100%; min-width:0; } .brand { padding-left:14px; } .base-group summary,.nav-item { padding-left:14px; } .base-group .nav-item { padding-left:24px; } .workspace { padding:12px; } .base-columns,.base-metrics.three { grid-template-columns:1fr; } .base-quick { grid-template-columns:1fr 1fr; } .topbar { padding:10px; top:0; } .top-user-label,.top-actions:before { display:none; } .base-info th { width:100px; } }
@@ -6733,12 +6741,51 @@
     const info=rows=>`<table class="base-info"><tbody>${rows.map(([a,b])=>`<tr><th>${a}</th><td>${b}</td></tr>`).join('')}</tbody></table>`;
     return `<h1 class="base-title">对接信息</h1><section class="base-card"><h2 class="base-title">商户信息</h2>${info([['商户号','DEMO-001'],['商户名称','演示商户'],['登录名','demo-merchant'],['登录 IP 白名单','—'],['回调 IP','192.0.2.10（文档示例地址）']])}</section><section class="base-card"><h2 class="base-title">安全密钥</h2>${info([['安全密钥','DEMO****ONLY · 非真实密钥']])}</section><section class="base-card"><h2 class="base-title">API 地址</h2>${info(['登录地址','代收接口','代付接口','代收查询','代付查询','代收余额查询','代付余额查询','代收文档','代付文档'].map((name,i)=>[name,`https://api.example.invalid/${['login','payment/create','withdraw/create','payment/query','withdraw/query','balance/collect','balance/payout','docs/collect','docs/payout'][i]}`]))}<p class="base-muted">仅展示接口分类；演示地址不可连接，不包含开发环境地址或凭据。</p></section><section class="base-card"><h2 class="base-title">已开通产品</h2><div class="base-scroll"><table><thead><tr>${['通道名称','通道类型','商户费率','最小限额','最大限额','单笔手续费','状态'].map(t=>`<th>${t}</th>`).join('')}</tr></thead><tbody><tr><td>演示通道 A</td><td>银行卡</td><td>0.20%</td><td>100.00</td><td>50,000.00</td><td>2.00</td><td>启用</td></tr></tbody></table></div></section>`;
   }
+  const manualColumns = {
+    bank: [['amount','请求金额(元)',true],['bank','银行名称',true],['branch','支行名称',false],['union','银联号',false],['account','卡号 / 账号',true],['payee','收款人姓名',true]],
+    alipay: [['amount','请求金额(元)',true],['bank','银行名称',true],['branch','支行名称',true],['account','支付宝账号',true],['payee','支付宝姓名',true]]
+  };
+  const manualDrafts = new WeakMap();
+  function manualHead(mode) { return ['#',...manualColumns[mode].map(field=>field[1]),'操作'].map(label=>`<th scope="col">${label}</th>`).join(''); }
   function manual() {
-    return `<section class="base-card"><h1 class="base-title">手动下单</h1><p class="base-muted">本页仅校验演示表单，不发送订单，不扣减余额。请勿输入真实收款信息。</p><form data-base-manual data-required-permission="merchant.payout.apply"><div class="base-filter"><label>通道类型 <select name="channel" required aria-label="通道类型"><option value="">请选择通道类型</option><option>银行卡（演示）</option></select></label><span>商户：DEMO-001</span></div><div class="base-scroll base-manual" style="margin:20px 0"><table><thead><tr>${['#','请求金额(元)','银行名称','支行名称','银联号','卡号 / 账号','收款人姓名','操作'].map(t=>`<th>${t}</th>`).join('')}</tr></thead><tbody data-base-manual-rows></tbody></table></div><button type="button" class="btn" data-base-add>＋ 新增一笔</button><div class="base-filter" style="margin:20px 0"><label>谷歌验证码 <input name="otp" required pattern="[0-9]{6}" maxlength="6" inputmode="numeric" placeholder="演示验证码 382641" aria-label="谷歌验证码"></label></div><div class="base-actions"><button class="btn primary" type="submit">确认下单（演示校验）</button>${routeButton('payout','查看订单列表')}</div><div class="base-feedback" role="status" aria-live="polite"></div></form></section>`;
+    return `<section class="base-card"><h1 class="base-title">手动下单</h1><p class="base-muted">本页仅校验演示表单，不发送订单，不扣减余额。请勿输入真实收款信息。</p><form data-base-manual data-required-permission="merchant.payout.apply"><div class="base-filter"><label>通道 <select name="channel" required aria-label="通道"><option value="">请选择通道</option><option value="DEMO-CH-A">演示通道 A · DEMO-CH-A</option></select></label><label>支付类型 <select name="paymentType" required aria-label="支付类型"><option value="bank" selected>银行卡</option><option value="alipay">支付宝</option></select></label><span>商户：DEMO-001</span></div><div class="base-scroll base-manual" data-mode="bank" style="margin:20px 0"><table><thead><tr>${manualHead('bank')}</tr></thead><tbody data-base-manual-rows></tbody></table></div><button type="button" class="btn" data-base-add>＋ 新增一笔</button><div class="base-filter" style="margin:20px 0"><label>谷歌验证码 <input name="otp" required pattern="[0-9]{6}" maxlength="6" inputmode="numeric" placeholder="演示验证码 382641" aria-label="谷歌验证码"></label></div><div class="base-actions"><button class="btn primary" type="submit">确认下单（演示校验）</button>${routeButton('payout','查看订单列表')}</div><div class="base-feedback" role="status" aria-live="polite"></div></form></section>`;
+  }
+  function numberManualRows(body,mode) {
+    Array.from(body.children).forEach((row,index)=>{
+      row.firstElementChild.textContent=index+1;
+      row.querySelectorAll('[data-manual-field]').forEach(input=>{
+        const label=manualColumns[mode].find(field=>field[0]===input.dataset.manualField)[1];
+        input.name=`${mode}[${index}][${input.dataset.manualField}]`;
+        input.setAttribute('aria-label',`第 ${index+1} 笔${label}`);
+      });
+    });
   }
   function addManualRow(root) {
-    const body=root.querySelector('[data-base-manual-rows]'); if(body.children.length>=50) return showToast('最多 50 笔');
-    const tr=document.createElement('tr'); tr.innerHTML=`<td>${body.children.length+1}</td>${['请求金额','银行名称','支行名称','银联号','卡号 / 账号','收款人姓名'].map((label,i)=>`<td><input aria-label="第 ${body.children.length+1} 笔${label}" ${i===0?'type="number" min="0.01" step="0.01"':'type="text"'} ${[0,1,4,5].includes(i)?'required':''} placeholder="${label}"></td>`).join('')}<td><button class="btn" type="button" data-base-remove>删除</button></td>`; body.append(tr);
+    const body=root.querySelector('[data-base-manual-rows]'),mode=root.querySelector('.base-manual').dataset.mode;
+    if(body.children.length>=50) return showToast('最多 50 笔');
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td></td>${manualColumns[mode].map(([key,label,required])=>`<td><input data-manual-field="${key}" ${key==='amount'?'type="number" min="0.01" step="0.01"':'type="text"'} ${required?'required':''} ${mode==='alipay'&&(key==='bank'||key==='branch')?'value="支付宝" readonly':''} placeholder="${label}"></td>`).join('')}<td><button class="btn" type="button" data-base-remove>删除</button></td>`;
+    body.append(tr);numberManualRows(body,mode);
+    root.querySelector('.base-feedback').textContent='';
+  }
+  function switchManualMode(form) {
+    const mode=form.elements.paymentType.value;
+    if(mode!=='bank'&&mode!=='alipay') return;
+    const table=form.querySelector('.base-manual'),body=table.querySelector('tbody'),drafts=manualDrafts.get(form)||{};
+    drafts[table.dataset.mode]=Array.from(body.children);manualDrafts.set(form,drafts);
+    table.dataset.mode=mode;table.querySelector('thead tr').innerHTML=manualHead(mode);
+    body.replaceChildren(...(drafts[mode]||[]));
+    if(!body.children.length)addManualRow(form);
+    form.querySelector('.base-feedback').textContent='';
+  }
+  function submitManual(form) {
+    if(!merchantAuthorizeCurrentOperation('merchant.payout.apply',{pageId:'payout'}).ok)return blockMerchantPermission('merchant.payout.apply');
+    const output=form.querySelector('.base-feedback'),mode=form.elements.paymentType.value;
+    output.textContent='';
+    if((mode!=='bank'&&mode!=='alipay')||form.querySelector('.base-manual').dataset.mode!==mode) { output.textContent='请选择银行卡或支付宝。';return; }
+    form.querySelectorAll('[data-manual-field]').forEach(input=>input.setCustomValidity(input.required&&!input.value.trim()?'请填写'+input.placeholder+'。':''));
+    if(!form.reportValidity())return;
+    output.textContent=form.elements.otp.value==='382641'?`${mode==='alipay'?'支付宝':'银行卡'}代付演示校验通过；未发送订单、未扣款。`:'演示验证码不匹配，请输入 382641。';
   }
   function render(owner) {
     clearInterval(refreshTimer);
@@ -6795,7 +6842,7 @@
     if(page) { s.page=Number(page.dataset.basePage); refreshResults(root,s); }
     if(event.target.closest('[data-base-refresh]')) { refreshResults(root,s); showToast('演示数据已刷新'); }
     if(event.target.closest('[data-base-add]')) addManualRow(root);
-    if(event.target.closest('[data-base-remove]')) { const rows=root.querySelector('[data-base-manual-rows]'); if(rows.children.length===1) return showToast('至少保留一笔'); event.target.closest('tr').remove(); Array.from(rows.children).forEach((row,i)=>{row.firstElementChild.textContent=i+1;}); }
+    if(event.target.closest('[data-base-remove]')) { const rows=root.querySelector('[data-base-manual-rows]'); if(rows.children.length===1) return showToast('至少保留一笔'); event.target.closest('tr').remove(); numberManualRows(rows,root.querySelector('.base-manual').dataset.mode);root.querySelector('.base-feedback').textContent=''; }
     if(event.target.closest('[data-base-export]')) {
       const owner=routes[activeRoute][1], permission={collect:'merchant.collect.export',payout:'merchant.payout.export',wallet:'merchant.wallet.export',recon:'merchant.reconciliation.export'}[owner];
       if(!merchantAuthorizeCurrentOperation(permission,{pageId:owner}).ok) return blockMerchantPermission(permission);
@@ -6812,11 +6859,12 @@
     }
     if(form.matches('[data-base-recharge]')) {event.preventDefault();if(!merchantAuthorizeCurrentOperation('merchant.fund_application.create',{pageId:'wallet'}).ok)return blockMerchantPermission('merchant.fund_application.create');form.querySelector('.base-feedback').textContent='演示订单已生成：DEMO-FEE-PREVIEW · 不提供收款地址或支付二维码，不改变余额。';}
     if(form.matches('[data-base-filter]')) { event.preventDefault(); const s=state[activeRoute];s.query=Object.fromEntries(new FormData(form));s.page=1;refreshResults(form.closest('.baseline-root'),s); }
-    if(form.matches('[data-base-manual]')) { event.preventDefault(); if(!merchantAuthorizeCurrentOperation('merchant.payout.apply',{pageId:'payout'}).ok)return blockMerchantPermission('merchant.payout.apply'); const output=form.querySelector('.base-feedback'); output.textContent=form.elements.otp.value==='382641'?'演示校验通过；未发送订单、未扣款。':'演示验证码不匹配，请输入 382641。'; }
+    if(form.matches('[data-base-manual]')) { event.preventDefault();submitManual(form); }
   });
   document.addEventListener('reset',event=>{if(event.target.matches('[data-base-filter]')) {state[activeRoute].query={};state[activeRoute].page=1;refreshResults(event.target.closest('.baseline-root'),state[activeRoute]);}});
-  document.addEventListener('input',event=>{if(event.target.id==='baseRechargeAmount')event.target.closest('form').querySelector('[data-base-recharge-estimate]').textContent='¥ '+(Math.max(0,Number(event.target.value)||0)*7).toFixed(2);});
+  document.addEventListener('input',event=>{if(event.target.closest('[data-base-manual]'))event.target.closest('form').querySelector('.base-feedback').textContent='';if(event.target.matches('[data-manual-field]'))event.target.setCustomValidity('');if(event.target.id==='baseRechargeAmount')event.target.closest('form').querySelector('[data-base-recharge-estimate]').textContent='¥ '+(Math.max(0,Number(event.target.value)||0)*7).toFixed(2);});
   document.addEventListener('change',event=>{
+    if(event.target.matches('[data-base-manual] select[name=paymentType]'))switchManualMode(event.target.form);
     if(event.target.matches('[data-base-size]')){state[activeRoute].size=Number(event.target.value);state[activeRoute].page=1;refreshResults(event.target.closest('.baseline-root'),state[activeRoute]);}
     if(event.target.matches('[data-base-auto]')){clearInterval(refreshTimer);if(event.target.checked){const id=activeRoute,root=event.target.closest('.baseline-root');refreshTimer=setInterval(()=>{if(activeRoute===id&&canAccessMerchantPage(routes[id][1]))refreshResults(root,state[id]);else clearInterval(refreshTimer);},15000);}}
   });
