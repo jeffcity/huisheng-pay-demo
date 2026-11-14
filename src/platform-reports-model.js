@@ -1,7 +1,7 @@
 // Cross-tenant read-only review adapter. Tenant report definitions and query rules remain unchanged.
 (() => {
  const daily=window.HSDailyReports,records=window.HSChannelRecords;
- const configs=Object.fromEntries([[daily,'日终'],[records,'账户记录']].flatMap(([base,category])=>Object.entries(base.configs).map(([route,c])=>[route,Object.freeze({...c,category,columns:[...(c.columns[0][0]==='id'?[c.columns[0]]:[]),['tenant','租户'],...c.columns.slice(c.columns[0][0]==='id'?1:0)],permissions:{view:'platform.report.'+route+'.view',query:'platform.report.'+route+'.query',export:'platform.report.'+route+'.export'}})])));
+ const configs=Object.fromEntries([[daily,'日终'],[records,'账户记录']].flatMap(([base,category])=>Object.entries(base.configs).filter(([,c])=>!c.tenantOnly).map(([route,c])=>[route,Object.freeze({...c,category,columns:[...(c.columns[0][0]==='id'?[c.columns[0]]:[]),['tenant','租户'],...c.columns.slice(c.columns[0][0]==='id'?1:0)],permissions:{view:'platform.report.'+route+'.view',query:'platform.report.'+route+'.query',export:'platform.report.'+route+'.export'}})])));
  const baseFor=route=>configs[route]?.category==='日终'?daily:records;
  const tenantList=catalog=>[...new Map((catalog||[]).filter(t=>t&&t.id&&t.name).map(t=>[t.id,{id:String(t.id),name:String(t.name)}])).values()];
  function accessible(catalog,authorization,preview=false){

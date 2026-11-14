@@ -16,6 +16,7 @@ const MenuItem = Menu.Item;
 const ItemGroup = Menu.ItemGroup;
 const SubMenu = Menu.SubMenu;
 
+const PREPAY_REPORT_IDS = new Set(["channel-collect-prepay-change", "channel-payout-receipt-change"]);
 const NAV_ICONS = { home:0, merchantList:1, merchantCollect:1, merchantPayout:1, channels:2, collect:4, payout:4, wallets:4, "order-tracking":5, notifications:4, settings:6, accounts:1, roles:3, security:3, audit:5, "collection-channels":5, "payout-channels":5, "collection-products":2, "payout-products":2 };
 const NAV_PATHS = [
   'M3 10 12 3l9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z',
@@ -124,7 +125,7 @@ export default function App() {
               {group.subgroups.map(title => (
                 <SubMenu key={`${group.title}/${title}`} title={title} className="tenant-nav-submenu">
                   {group.items.filter(item => item.subgroup === title).map(item => (
-                    <MenuItem key={item.id} className="tenant-nav-leaf"><span>{item.label}</span></MenuItem>
+                    <MenuItem key={item.id} className={"tenant-nav-leaf" + (PREPAY_REPORT_IDS.has(item.id) ? " tenant-prepay-leaf" : "")}>{PREPAY_REPORT_IDS.has(item.id) && <NavIcon index={4} small />}<span>{item.label}</span></MenuItem>
                   ))}
                 </SubMenu>
               ))}

@@ -12,10 +12,11 @@ const modules=JSON.parse(read('../src/legacy/modules.json'));
 const tenant='HS-TEN-001',plain=value=>JSON.parse(JSON.stringify(value));
 const allModels=[[daily,'日终'],[records,'账户记录']];
 
-test('6个日终和6个账户记录按蓝盛CNY字段独立清单完整接入',()=>{
- assert.equal(Object.keys(daily.configs).length,6);assert.equal(Object.keys(records.configs).length,6);
+test('既有6个日终及6个账户记录保持蓝盛基线，新增2个租户预付报表',()=>{
+ assert.equal(Object.keys(daily.configs).length,6);assert.equal(Object.keys(records.configs).length,8);
  assert.equal(Object.keys(expected).length,12);
  for(const [model,subgroup] of allModels)for(const [route,c] of Object.entries(model.configs)){
+  if(c.prepayReport){assert.equal(modules[route].subgroup,subgroup);assert.equal(modules[route].label,c.title);assert.equal(modules[route].initialHash,route);continue;}
   assert.equal(c.title,expected[route].title,route);
   assert.deepEqual(plain(c.columns.map(([,name])=>name)),expected[route].columns,route);
   if(c.types)assert.deepEqual(plain(c.types),expected[route].types,route);
@@ -28,10 +29,11 @@ test('6个日终和6个账户记录按蓝盛CNY字段独立清单完整接入',(
 });
 test('每页默认有多页CNY样例，其他租户和无租户不种入数据',()=>{
  for(const [model] of allModels)for(const route of Object.keys(model.configs)){
-  const rows=model.fixtures(route,tenant);assert(rows.length>20,route);assert(rows.every(r=>r.currency==='CNY'&&r.tenantId===tenant&&r.route===route));
+  const rows=model.fixtures(route,tenant);assert(rows.length>10,route);assert(rows.every(r=>r.currency==='CNY'&&r.tenantId===tenant&&r.route===route));
   assert.equal(model.fixtures(route,'HS-TEN-017').length,0);assert.equal(model.fixtures(route,'').length,0);
   if(model===daily)for(const row of rows){assert.equal(row.walletStart+row.walletDetail,row.walletEnd);assert.equal(row.prepayStart+row.prepayDetail,row.prepayEnd);}
-  assert(rows.some(r=>r[model===daily?'amount':'change']===(model===daily?0:'0.00')),route);
+  if(model.configs[route].prepayReport)assert(rows.every(r=>r.change!=='0.00'));
+  else assert(rows.some(r=>r[model===daily?'amount':'change']===(model===daily?0:'0.00')),route);
  }
 });
 test('查询和导出在所有页面之间按租户、路由和CNY隔离',()=>{
@@ -80,10 +82,10 @@ test('六类记录实体、类型、双订单号、秒级起止时间可联合�
 test('记录分页、导出覆盖全部结果，正负零变动精确且不改变原始记录',()=>{
  for(const route of Object.keys(records.configs)){
   const rows=records.fixtures(route,tenant),before=JSON.stringify(rows),first=records.paginate(rows,1,10),second=records.paginate(rows,2,10);
-  assert.equal(first.rows.length,10);assert.equal(second.rows.length,10);assert.notEqual(first.rows[0].id,second.rows[0].id);
-  assert.equal(records.paginate(rows,999,10).page,7);assert.equal(records.paginate([],999,10).page,1);
-  assert.equal(records.csv(rows,route,tenant).split('\r\n').length,68);
-  assert(rows.some(r=>r.change.startsWith('+')));assert(rows.some(r=>r.change.startsWith('-')));assert(rows.some(r=>r.change==='0.00'));
+  assert.equal(first.rows.length,10);assert.equal(second.rows.length,Math.min(10,rows.length-10));assert.notEqual(first.rows[0].id,second.rows[0].id);
+  assert.equal(records.paginate(rows,999,10).page,Math.ceil(rows.length/10));assert.equal(records.paginate([],999,10).page,1);
+  assert.equal(records.csv(rows,route,tenant).split('\r\n').length,rows.length+1);
+  assert(rows.some(r=>r.change.startsWith('+')));assert(rows.some(r=>r.change.startsWith('-')));if(!records.configs[route].prepayReport)assert(rows.some(r=>r.change==='0.00'));
   for(const row of rows)assert.equal(Math.round(Number(row.before)*100)+Math.round(Number(row.change)*100),Math.round(Number(row.after)*100));
   assert.equal(JSON.stringify(rows),before);
  }

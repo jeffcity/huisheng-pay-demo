@@ -10,6 +10,7 @@ const tenants=[{id:'HS-TEN-001',name:'汇盛东南亚'},{id:'HS-TEN-018',name:'�
 
 test('平台十二页与租户字段和类型一致，仅增加租户列，旧报表模块退出',()=>{
  const modules=JSON.parse(read('src/legacy/modules.json')),nav=read('src/modules.js');
+ for(const route of ['channel-collect-prepay-change','channel-payout-receipt-change'])assert.equal(m.configs[route],undefined);
  assert.equal(Object.keys(m.configs).length,12);assert.equal(Object.values(m.configs).filter(c=>c.category==='日终').length,6);
  for(const [route,c] of Object.entries(m.configs)){
   const base=c.category==='日终'?d:r;assert.deepEqual(plain(c.columns.filter(([key])=>key!=='tenant')),plain(base.configs[route].columns));assert.deepEqual(plain(c.types),plain(base.configs[route].types));
