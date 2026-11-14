@@ -8,8 +8,8 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const modules = JSON.parse(await readFile(path.join(root, "src/legacy/modules.json"), "utf8"));
 
-test("页面注册表包含 33 个页面", () => {
-  assert.equal(Object.keys(modules).length, 33);
+test("页面注册表包含 35 个页面", () => {
+  assert.equal(Object.keys(modules).length, 35);
   assert.equal(modules.todos, undefined);
   assert.equal(modules.tickets, undefined);
 });

@@ -68,3 +68,33 @@ test('只读页面无远程业务请求或钱包写入，内联脚本语法有�
  assert.match(html,/provider\?\.tenantId!==tenantId/);assert.match(html,/暂无数据/);assert.match(html,/aria-label="商户订单号"/);
  for(const match of html.matchAll(/<script>([\s\S]*?)<\/script>/g))new vm.Script(match[1]);
 });
+
+
+test('新通道预付报表分别取具体通道预付与通道商总预付，金额连续且不混账',()=>{
+ const routes=['channel-collect-prepay-change','channel-payout-receipt-change'];
+ assert.equal(model.configs[routes[0]].fundField,'cnyPrepaid');
+ assert.equal(model.configs[routes[1]].fundField,'totalPrepaid');
+ assert.equal(model.configs[routes[1]].kind,'provider');
+ for(const route of routes){
+  const config=model.configs[route],samples=model.fixtures(route,tenant);
+  assert.equal(samples.length,16);
+  assert(samples.some(r=>Number(r.change)>0)&&samples.some(r=>Number(r.change)<0));
+  assert(samples.every(r=>Number(r.change)!==0&&r.fundField===config.fundField&&r.type==='后台调整'));
+  for(const [id,,,expected] of model.entities(route)){
+   const chain=model.query(samples,route,tenant,{currency:'CNY',entity:id}).reverse();
+   assert.equal(chain.length,4);
+   chain.forEach((row,i)=>{
+    assert.equal(Math.round(Number(row.after)*100),Math.round(Number(row.before)*100)+Math.round(Number(row.change)*100));
+    if(i)assert.equal(row.before,chain[i-1].after);
+   });
+   assert.equal(Number(chain.at(-1).after),expected);
+  }
+  const id=model.entities(route)[0][0];
+  const selected=model.query([...samples,{...samples[0],tenantId:'OTHER'}],route,tenant,{currency:'CNY',entity:id,type:'后台调整',start:'2026-11-14',end:'2026-11-14'});
+  assert.equal(selected.length,1);assert.equal(selected[0].entityId,id);
+  const exported=model.csv(selected,route,tenant);assert(exported.includes(id));assert(!exported.includes('OTHER'));
+  assert.equal(model.query(samples,route,tenant,{currency:'USDT'}).length,0);
+  assert.equal(model.fixtures(route,'OTHER').length,0);
+  assert.equal(model.paginate(samples,2,10).rows.length,6);
+ }
+});

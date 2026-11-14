@@ -135,6 +135,24 @@
     "initialHash": "channel-payout-change",
     "subgroup": "账户记录"
   },
+  "channel-collect-prepay-change": {
+    "label": "通道代收预付记录",
+    "group": "运营中心",
+    "subgroup": "账户记录",
+    "module": "channel-records",
+    "sourceKey": "channel-records",
+    "sourceName": "运营中心 / 账户记录",
+    "initialHash": "channel-collect-prepay-change"
+  },
+  "channel-payout-receipt-change": {
+    "label": "通道代付预收记录",
+    "group": "运营中心",
+    "subgroup": "账户记录",
+    "module": "channel-records",
+    "sourceKey": "channel-records",
+    "sourceName": "运营中心 / 账户记录",
+    "initialHash": "channel-payout-receipt-change"
+  },
   "merchant-collect-change": {
     "label": "商户代收流水记录",
     "group": "运营中心",
