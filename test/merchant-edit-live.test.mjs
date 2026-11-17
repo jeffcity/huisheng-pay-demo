@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 const source=fs.readFileSync(new URL('../surfaces/tenant/public/legacy/sources/merchants.html',import.meta.url),'utf8');
-const names=['merchantEditProfile','merchantEditIpValid','merchantMoreDecimal','expandIpv6','merchantEditIpIdentity','openMerchantEdit'];
+const names=['merchantBalanceAlerts','merchantEditProfile','merchantEditIpValid','merchantMoreDecimal','expandIpv6','merchantEditIpIdentity','openMerchantEdit'];
 const code=names.map(name=>{const a=source.indexOf(`    function ${name}(`),b=source.indexOf('\n    function ',a+1);return source.slice(a,b);}).join('\n');
 function fixture(){
  const els=new Map();const el=id=>{if(!els.has(id))els.set(id,{value:'',checked:false,disabled:false,hidden:false,textContent:'',innerHTML:'',focus(){},addEventListener(){}});return els.get(id);};
