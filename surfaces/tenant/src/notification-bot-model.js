@@ -23,7 +23,12 @@
   function remove(state,tenantId,currentTenant,id){guard(state,tenantId,currentTenant);const row=find(state,id);if(!row)throw new Error('机器人记录已变化');if(row.merchantIds?.length)throw new Error('已绑定商户，无法删除');state.bots.splice(state.bots.indexOf(row),1)}
   function list(state,keyword='',page=1,size=10){const matches=state.bots.filter(b=>b.tenantId===state.tenantId&&b.name.toLowerCase().includes(String(keyword).trim().toLowerCase()));const per=[10,20,50].includes(Number(size))?Number(size):10,pages=Math.max(1,Math.ceil(matches.length/per)),current=Math.max(1,Math.min(pages,Math.trunc(Number(page))||1));return {total:matches.length,page:current,pages,rows:matches.slice((current-1)*per,current*per)}}
   const masked=token=>String(token).length>10?String(token).slice(0,6)+'******'+String(token).slice(-4):'******';
-  const label=(state,config)=>find(state,config.robotId)?.name||config.robot||'—';
+  function queryReferences(state) {
+    return ['collect','payout'].map(business=>({id:state.tenantId+'-QUERY-'+business,tenantId:state.tenantId,kind:'query',business,name:(business==='collect'?'代收':'代付')+'查单机器人',on:true}));
+  }
+  const selectable=state=>[...state.bots,...queryReferences(state)];
+  const resolve=(state,id)=>selectable(state).find(row=>row.id===id&&row.tenantId===state.tenantId);
+  const label=(state,config)=>resolve(state,config.robotId)?.name||config.robot||'—';
   function test(state,tenantId,currentTenant,id,group){guard(state,tenantId,currentTenant);const row=find(state,id);if(!row)throw new Error('机器人记录已变化');if(!/^-?\d+$/.test(String(group).trim()))throw new Error('请输入正确的测试群ID');return {robotId:row.id,group:String(group).trim(),simulated:true}}
-  window.HSNotificationBots=Object.freeze({createState,guard,find,save,toggle,remove,list,masked,label,test,now});
+  window.HSNotificationBots=Object.freeze({createState,guard,find,save,toggle,remove,list,masked,label,test,now,selectable,resolve});
 })();

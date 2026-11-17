@@ -21367,7 +21367,14 @@
       body[data-merchant-ui="management"] .filters { grid-template-columns:minmax(0,1fr); }
     }
   </style>
-</head>
+<style id="merchant-balance-alert-style">
+body[data-merchant-ui="management"] .merchant-balance-alert{margin-top:24px;border-top:1px solid var(--color-border,#e5ecef);padding-top:20px;display:grid;gap:14px}
+body[data-merchant-ui="management"] .merchant-balance-alert-business{display:grid;gap:12px;padding:16px;border:1px solid var(--color-border,#e5ecef);border-radius:8px}
+body[data-merchant-ui="management"] .merchant-balance-alert-business h5{margin:0;font-size:14px}
+body[data-merchant-ui="management"] .merchant-balance-alert h4{margin:0;font-size:15px}
+body[data-merchant-ui="management"] .merchant-balance-alert .inline-note{margin:0;line-height:1.7}
+body[data-merchant-ui="management"] .merchant-balance-alert input:disabled{background:var(--color-bg-page,#f3f6f7);color:var(--color-text-secondary,#536b77);cursor:not-allowed}
+</style></head>
 <body data-merchant-ui="management">
   <div class="app app-shell" data-astryx="AppShell">
     <aside class="sidebar" data-astryx="SidebarNav">
@@ -21955,8 +21962,16 @@
     }
 
     // Dedicated live-aligned edit form; drafts never change merchant state before Save.
+    function merchantBalanceAlerts(value) {
+      const legacy=value&&typeof value.enabled==='boolean'?value:{};
+      return Object.fromEntries(['collect','payout'].map(business=>{
+        const settings=value?.[business]||legacy;
+        return [business,{enabled:settings.enabled===true,threshold:String(settings.threshold??'')}];
+      }));
+    }
+
     function merchantEditProfile(item) {
-      return JSON.parse(JSON.stringify({email:item.email||"",deposit:"0",auditGroup:"",prepaidGroup:"",usernames:[],notifyGroup:"",notifyBotId:"",...(item.editProfile||{})}));
+      return JSON.parse(JSON.stringify({email:item.email||"",deposit:"0",auditGroup:"",prepaidGroup:"",usernames:[],notifyGroup:"",notifyBotId:"",balanceAlert:{enabled:false,threshold:""},...(item.editProfile||{})}));
     }
 
     function merchantEditBots() {
@@ -21981,6 +21996,7 @@
     function openMerchantEdit(item) {
       if(!merchantMoreAllowed(item))return;
       const snapshot=JSON.stringify(item),draft=merchantEditProfile(item),originalBot=draft.notifyBotId;
+      draft.balanceAlert=merchantBalanceAlerts(draft.balanceAlert);
       const field=(id,label,value,extra="")=>`<div class="field"><label for="${id}">${label}</label><input class="input" id="${id}" value="${escapeHtml(value)}" ${extra}></div>`;
       const tabs=[["基础资料","名称、状态与联系邮箱"],["业务能力","法币代收与法币代付"],["接入信息","登录与API请求白名单"],["运营配置","保证金、群与操作人员"],["Telegram 通知","商户通知群与机器人"]];
       let panelIndex=0;
@@ -21993,7 +22009,15 @@
         ${panel("接入信息",`${renderMerchantIpEditor("moreEditLoginIp","登录 IP 白名单",item.loginWhitelist||"","限制商户后台登录来源；每项填写一个 IP 或网段。全部留空表示不限制。")}${renderMerchantIpEditor("moreEditApiIp","API 请求 IP 白名单",merchantWhitelist(item),"用于商户自有系统下单请求；与登录白名单分开配置。全部留空表示不限制 IP。")}
         `)}
         ${panel("运营配置",`<div class="form-grid">${field("moreEditDeposit","保证金",draft.deposit,'inputmode="decimal"')}${field("moreEditAuditGroup","审核风控群ID",draft.auditGroup,'inputmode="text"')}${field("moreEditPrepaidGroup","独立操作预付群",draft.prepaidGroup)}</div><p class="inline-note">该商户审核消息发送到审核风控群。</p><div class="field"><label for="moreEditUsername">TG username 白名单</label><div class="merchant-edit-chips" id="moreEditUsernames"></div><div class="merchant-edit-add"><input class="input" id="moreEditUsername" placeholder="输入 TG username"><button class="btn" type="button" id="moreEditAddUsername">+ 添加</button></div></div>`)}
-        ${panel("Telegram 通知配置",`<div class="form-grid"><div class="field wide"><label>商户通知群</label><div id="moreEditNotifyGroups"></div></div><div class="field"><label for="moreEditBot">通知机器人</label><select class="select" id="moreEditBot"><option value="">请选择通知机器人</option>${originalBot&&!merchantEditBots().some(bot=>bot.id===originalBot)?`<option value="${escapeHtml(originalBot)}" selected disabled>原机器人（已删除）</option>`:""}${merchantEditBots().map(bot=>`<option value="${escapeHtml(bot.id)}" ${bot.id===draft.notifyBotId?"selected":""} ${bot.on?"":"disabled"}>${escapeHtml(bot.name)}${bot.on?"":"（已停用）"}</option>`).join("")}</select><span class="inline-note">仅展示已启用项可选；已停用项灰显</span></div></div><p class="inline-note">下分订单状态变更时推送至商户通知群。</p>`)}
+        ${panel("Telegram 通知配置",`<div class="form-grid"><div class="field wide"><label>商户通知群</label><div id="moreEditNotifyGroups"></div></div><div class="field"><label for="moreEditBot">通知机器人</label><select class="select" id="moreEditBot"><option value="">请选择通知机器人</option>${originalBot&&!merchantEditBots().some(bot=>bot.id===originalBot)?`<option value="${escapeHtml(originalBot)}" selected disabled>原机器人（已删除）</option>`:""}${merchantEditBots().map(bot=>`<option value="${escapeHtml(bot.id)}" ${bot.id===draft.notifyBotId?"selected":""} ${bot.on?"":"disabled"}>${escapeHtml(bot.name)}${bot.on?"":"（已停用）"}</option>`).join("")}</select><span class="inline-note">仅展示已启用项可选；已停用项灰显</span></div></div><p class="inline-note">下分订单状态变更时推送至商户通知群。</p>
+        <section class="merchant-balance-alert" id="merchantBalanceAlertSettings" aria-labelledby="merchantBalanceAlertTitle"><h4 id="merchantBalanceAlertTitle">余额预警</h4>
+          ${[['collect','代收','Collect'],['payout','代付','Payout']].map(([business,label,key])=>`<section class="merchant-balance-alert-business" aria-labelledby="moreEdit${key}AlertTitle"><h5 id="moreEdit${key}AlertTitle">${label}余额预警</h5>
+            <div class="merchant-edit-options"><label><input id="moreEdit${key}BalanceAlertEnabled" type="checkbox" ${draft.balanceAlert[business].enabled?'checked':''}> 开启${label}余额预警</label></div>
+            <div class="field"><label for="moreEdit${key}BalanceAlertThreshold">${label}预警阈值（元）</label><input class="input mono" id="moreEdit${key}BalanceAlertThreshold" inputmode="decimal" maxlength="18" value="${escapeHtml(draft.balanceAlert[business].threshold)}" placeholder="请输入${label}预警阈值" ${draft.balanceAlert[business].enabled?'':'disabled'}></div>
+          </section>`).join('')}
+          <p class="inline-note">代收、代付分别按各自的剩余预付和阈值判断。达到或低于阈值时通知一次，恢复后再次达到阈值才重新通知。</p>
+          <p class="inline-note">消息模板和发送机器人分别在「通知中心」配置，消息发送至上方商户通知群。</p>
+        </section>`)}
         </form>`,`<div class="merchant-edit-verification"><label for="moreEditMfa">谷歌验证码 <span aria-hidden="true">*</span></label><input class="input mono" id="moreEditMfa" form="merchantEditForm" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="6 位验证码" aria-describedby="moreEditMfaHint"><small id="moreEditMfaHint">演示：123456</small></div><div class="merchant-edit-footer-actions"><button class="btn" type="button" id="merchantMoreCancel">取消</button><button class="btn primary" type="submit" form="merchantEditForm" id="moreEditSave">保存</button></div>`,"large");
       const setTab=index=>{
         document.querySelectorAll("[data-edit-tab]").forEach(button=>{const selected=Number(button.dataset.editTab)===index;button.classList.toggle("active",selected);button.setAttribute("aria-selected",String(selected));button.tabIndex=selected?0:-1;});
@@ -22006,6 +22030,10 @@
       const fail=(message,id)=>{const section=id?document.getElementById(id)?.closest?.("[data-edit-panel]"):null;if(section)setTab(Number(section.dataset.editPanel));return showInlineError(message,id);};
       const groupModel=window.HSNotificationGroups,groupSnapshot=JSON.stringify(groupModel.read(item,"merchant"));
       const groupEditor=groupModel.mount(document.getElementById("moreEditNotifyGroups"),groupModel.read(item,"merchant"));
+      ['Collect','Payout'].forEach(key=>{
+        const enabled=document.getElementById('moreEdit'+key+'BalanceAlertEnabled'),threshold=document.getElementById('moreEdit'+key+'BalanceAlertThreshold');
+        enabled.onchange=()=>{threshold.disabled=!enabled.checked;};
+      });
       bindMerchantIpEditors();
       const el=id=>document.getElementById(id),chips=(id,values,remove)=>{el(id).innerHTML=values.map((value,i)=>`<span class="merchant-edit-chip">${escapeHtml(value)}<button type="button" class="link-btn" aria-label="移除 ${escapeHtml(value)}" data-remove="${i}">×</button></span>`).join("")||'<span class="muted">暂未添加</span>';el(id).onclick=event=>{const button=event.target.closest("[data-remove]");if(button)remove(Number(button.dataset.remove));};};
       const addUsername=(input,values,render)=>{const value=el(input).value.trim().replace(/^@/,"");if(!/^[A-Za-z0-9_]{5,32}$/.test(value))return fail("TG username 须为5至32位字母、数字或下划线。",input);if(values.some(name=>name.toLowerCase().replace(/^@/,"")===value.toLowerCase()))return fail("该 TG username 已添加。",input);values.push(value);el(input).value="";render();};
@@ -22027,6 +22055,13 @@
         const bot=merchantEditBots().find(row=>row.id===next.notifyBotId);
         if(next.notifyBotId&&(!bot||(!bot.on&&next.notifyBotId!==originalBot)))return fail("通知机器人已停用或不存在，请重新选择。","moreEditBot");
         let groups;try{groups=groupEditor.read();}catch(error){return fail(error.message,"moreEditNotifyGroups");}
+        next.balanceAlert={};
+        for(const [business,label,key] of [['collect','代收','Collect'],['payout','代付','Payout']]){
+          const settings={enabled:el('moreEdit'+key+'BalanceAlertEnabled').checked,threshold:el('moreEdit'+key+'BalanceAlertThreshold').value.trim()};
+          if(settings.enabled&&merchantMoreDecimal(settings.threshold,2)===null)return fail(label+'预警阈值须为大于或等于 0 的金额，最多2位小数。','moreEdit'+key+'BalanceAlertThreshold');
+          next.balanceAlert[business]=settings;
+        }
+        if(Object.values(next.balanceAlert).some(settings=>settings.enabled)&&!groups.length)return fail('开启余额预警前，请添加商户通知群。','moreEditNotifyGroups');
         if(!verifyMerchantMfa("moreEditMfa"))return;
         try{groupModel.replace(merchantProfileTenantId,"merchant",item,groups,groupSnapshot);}catch(error){return fail(error.message,"moreEditNotifyGroups");}
         next.notifyGroup=groups.map(row=>row.chatId).join("\n");
@@ -22034,7 +22069,7 @@
         merchantCapabilityOptions.forEach((cap,i)=>{if(item.capabilities.includes(cap)!==capabilities.includes(cap)){const cfg=i===0?item.collectConfig:item.payoutConfig;if(cfg)cfg.status=capabilities.includes(cap)?"开启":"未开通";}});
         Object.assign(item,{name,status,capabilities,email:next.email,loginWhitelist:lists.login,whitelist:lists.api,editProfile:next});
         const state=merchantProfileTenantData?.notificationCenter;if(state)state.bots.forEach(row=>{row.merchantIds=(row.merchantIds||[]).filter(id=>id!==item.id);if(row.id===next.notifyBotId)row.merchantIds.push(item.id);});
-        finishMerchantMore(item,"修改商户","保存基础资料、业务能力、接入信息及运营配置");
+        finishMerchantMore(item,"修改商户","保存基础资料、业务能力、接入信息、运营配置及 Telegram 通知");
       };
     }
 
