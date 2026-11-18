@@ -22016,7 +22016,7 @@ body[data-merchant-ui="management"] .merchant-balance-alert input:disabled{backg
             <div class="field"><label for="moreEdit${key}BalanceAlertThreshold">${label}预警阈值（元）</label><input class="input mono" id="moreEdit${key}BalanceAlertThreshold" inputmode="decimal" maxlength="18" value="${escapeHtml(draft.balanceAlert[business].threshold)}" placeholder="请输入${label}预警阈值" ${draft.balanceAlert[business].enabled?'':'disabled'}></div>
           </section>`).join('')}
           <p class="inline-note">代收、代付分别按各自的剩余预付和阈值判断。达到或低于阈值时通知一次，恢复后再次达到阈值才重新通知。</p>
-          <p class="inline-note">消息模板和发送机器人分别在「通知中心」配置，消息发送至上方商户通知群。</p>
+          <p class="inline-note">代收、代付消息模板分别在「通知中心」配置；发送机器人和接收群沿用上方商户通知配置。</p>
         </section>`)}
         </form>`,`<div class="merchant-edit-verification"><label for="moreEditMfa">谷歌验证码 <span aria-hidden="true">*</span></label><input class="input mono" id="moreEditMfa" form="merchantEditForm" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="6 位验证码" aria-describedby="moreEditMfaHint"><small id="moreEditMfaHint">演示：123456</small></div><div class="merchant-edit-footer-actions"><button class="btn" type="button" id="merchantMoreCancel">取消</button><button class="btn primary" type="submit" form="merchantEditForm" id="moreEditSave">保存</button></div>`,"large");
       const setTab=index=>{
