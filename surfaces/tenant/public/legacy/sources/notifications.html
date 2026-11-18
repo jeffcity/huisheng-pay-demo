@@ -283,7 +283,7 @@
     #messageDetailMask .message-targets summary { cursor:pointer; font-size:13px; color:var(--text-2); padding:8px 0; }
     @media(max-width:720px){#messageDetailMask .message-detail-meta{grid-template-columns:minmax(0,1fr);}}
   </style>
-<style id="merchant-alert-template-style">#configMask #modalGroup:disabled{background:var(--soft,#f3f6f7);color:var(--muted,#536b77);cursor:not-allowed}</style></head>
+<style id="merchant-alert-template-style">#configMask #modalGroup:disabled,#configMask #modalRobot:disabled{background:var(--soft,#f3f6f7);color:var(--muted,#536b77);cursor:not-allowed}</style></head>
 <body>
   <main class="page">
     <header class="page-head">
@@ -421,7 +421,7 @@
         <div class="modal-grid">
           <div class="field"><label for="modalType">消息类型</label><select class="control" id="modalType"><option value="">请选择消息类型</option></select><span class="field-error" id="modalTypeError">请选择消息类型</span></div>
           <div class="field"><label for="modalGroup">TG 群 ID</label><input class="control mono" id="modalGroup" placeholder="请输入当前租户 TG 群 ID"><span class="hint" id="merchantAlertGroupHint" hidden>自动发送到触发商户的通知群，无需在此填写。</span><span class="field-error" id="modalGroupError">请输入 TG 群 ID</span></div>
-          <div class="field"><label for="modalRobot">通知机器人</label><select class="control" id="modalRobot"><option value="">请选择通知机器人</option></select><span class="field-error" id="modalRobotError">请选择通知机器人</span></div>
+          <div class="field"><label for="modalRobot">通知机器人</label><select class="control" id="modalRobot"><option value="">请选择通知机器人</option></select><span class="hint" id="merchantAlertRobotHint" hidden>使用触发商户在「Telegram 通知」中指定的通知机器人，无需在此选择。</span><span class="field-error" id="modalRobotError">请选择通知机器人</span></div>
           <div class="field"><label>风险等级</label><div class="readonly" id="modalRisk"><span class="tag gray">请选择消息类型</span><span class="muted">系统自动判定</span></div></div>
           <div class="field full"><label>可用变量</label><div class="variables" id="modalVariables"><span class="muted">请选择消息类型</span></div><span class="hint" id="settlementTemplateHint" hidden>结算明细会列出本批次全部通道商。手动、自动结算共用此模板；过长时分条发送。预览金额为示例，不参与结算。</span></div>
           <div class="field full"><label for="modalTemplate">消息模板</label><textarea class="control" id="modalTemplate" placeholder="支持 ${变量名} 占位符"></textarea><span class="hint">只能使用当前消息类型提供的变量。</span><span class="field-error" id="modalTemplateError">请输入消息模板</span></div>
@@ -574,7 +574,7 @@
     let messageDetailReturnFocus=null;
     let filteredConfigs = configData.slice();
     let editingConfigIndex = null;
-    let standardGroupDraft="";
+    let standardGroupDraft="",standardRobotDraft="";
     let pendingConfirm = null;
     let confirmNeedsReason = false;
     let toastTimer = null;
@@ -647,8 +647,8 @@
         const meta = typeMeta[item.type];
         const summary = item.template.replace(/\n/g, " / ");
         return '<tr><td>' + (visibleIndex + 1) + '</td><td><span class="tag blue">' + escapeHtml(item.type) + '</span>' + (item.special ? '<span class="tag special">特殊类型</span>' : '') + '</td>' +
-          '<td><span class="tag ' + riskTone[meta.risk] + '">' + meta.risk + '</span></td><td class="mono">' + escapeHtml(isMerchantAlert(item.type)?'触发商户的通知群':item.group) + '</td>' +
-          '<td><div class="stack"><span>' + escapeHtml(robotName(item)) + '</span>' + (notificationModel.resolve(notificationState,item.robotId)?.on===false?'<span class="muted">已停用</span>':'') + '</div></td>' +
+          '<td><span class="tag ' + riskTone[meta.risk] + '">' + meta.risk + '</span></td><td class="mono">' + escapeHtml(isMerchantAlert(item.type)?'使用商户配置':item.group) + '</td>' +
+          '<td><div class="stack"><span>' + escapeHtml(robotName(item)) + '</span>' + (!isMerchantAlert(item.type)&&notificationModel.resolve(notificationState,item.robotId)?.on===false?'<span class="muted">已停用</span>':'') + '</div></td>' +
           '<td><button class="switch ' + (item.on ? 'on' : '') + '" type="button" role="switch" aria-checked="' + item.on + '" aria-label="' + (item.on ? '停用' : '启用') + ' ' + escapeHtml(item.type) + '" data-config-toggle="' + index + '"></button><span class="switch-label">' + (item.on ? '启用' : '停用') + '</span></td>' +
           '<td><span class="template-summary" title="' + escapeHtml(summary) + '">' + escapeHtml(summary) + '</span></td><td>' + item.time + '</td>' +
           '<td><div class="row-actions"><button class="link-btn" type="button" data-config-edit="' + index + '">修改</button>' + (item.special ? '<button class="link-btn" type="button" data-config-special="' + index + '">专属配置</button>' : '') + '<button class="link-btn danger" type="button" data-config-delete="' + index + '">删除</button></div></td></tr>';
@@ -665,7 +665,7 @@
       const robot = byId("configRobot").value;
       const group = byId("configGroup").value.trim();
       filteredConfigs = configData.filter(function (item) {
-        return (!type || item.type === type) && (!status || (status === "on") === item.on) && (!risk || typeMeta[item.type].risk === risk) && (!robot || item.robotId === robot) && (!group || item.group.includes(group));
+        return (!type || item.type === type) && (!status || (status === "on") === item.on) && (!risk || typeMeta[item.type].risk === risk) && (!robot || (!isMerchantAlert(item.type)&&item.robotId === robot)) && (!group || (!isMerchantAlert(item.type)&&item.group.includes(group)));
       });
       renderConfigs();
       if(quiet!==true)toast("已找到 " + filteredConfigs.length + " 条通知配置");
@@ -685,7 +685,7 @@
       if(merchantTarget&&!groupInput.disabled)standardGroupDraft=groupInput.value;
       if(!merchantTarget&&groupInput.disabled)groupInput.value=standardGroupDraft;
       groupInput.disabled=merchantTarget;
-      groupInput.placeholder=merchantTarget?'发送至触发商户的通知群':'请输入当前租户 TG 群 ID';
+      groupInput.placeholder=merchantTarget?'使用商户配置':'请输入当前租户 TG 群 ID';
       if(merchantTarget)groupInput.value='';
       byId('merchantAlertGroupHint').hidden=!merchantTarget;
       refreshRobotSelectors();
@@ -723,16 +723,18 @@
       byId("modalType").disabled = Boolean(row);
       byId("modalType").value = row ? row.type : "";
       standardGroupDraft=row?.group||"";
+      standardRobotDraft=isMerchantAlert(row?.type)?"":row?.robotId||"";
+      byId("modalRobot").disabled=false;
       byId("modalGroup").disabled=false;
       byId("modalGroup").value = standardGroupDraft;
       byId("modalRobot").value="";
       refreshRobotSelectors();
-      byId("modalRobot").value = row ? row.robotId : "";
+      if(!isMerchantAlert(row?.type))byId("modalRobot").value=standardRobotDraft;
       byId("modalTemplate").value = row ? row.template : "";
       clearConfigErrors();
       updateModalMeta();
       byId("configMask").classList.add("show");
-      window.setTimeout(function () { (row ? byId(isMerchantAlert(row.type)?"modalRobot":"modalGroup") : byId("modalType")).focus(); }, 20);
+      window.setTimeout(function () { (row ? byId(isMerchantAlert(row.type)?"modalTemplate":"modalGroup") : byId("modalType")).focus(); }, 20);
     }
 
     function closeConfigModal() {
@@ -746,12 +748,12 @@
       const values = {
         type: byId("modalType").value,
         group: isMerchantAlert(byId("modalType").value)?"":byId("modalGroup").value.trim(),
-        robot: byId("modalRobot").value,
+        robot: isMerchantAlert(byId("modalType").value)?"":byId("modalRobot").value,
         template: byId("modalTemplate").value.trim()
       };
       let valid = true;
       [["type", "modalType"], ["group", "modalGroup"], ["robot", "modalRobot"], ["template", "modalTemplate"]].forEach(function (entry) {
-        if (entry[0]==="group"&&isMerchantAlert(values.type))return;
+        if (["group","robot"].includes(entry[0])&&isMerchantAlert(values.type))return;
         if (!values[entry[0]]) {
           valid = false;
           byId(entry[1]).classList.add("invalid");
@@ -761,8 +763,7 @@
       if (!valid) return;
       const original=editingConfigIndex===null?null:configData[editingConfigIndex];
       const selectedRobot=notificationModel.resolve(notificationState,values.robot);
-      if(!typeMeta[values.type]||(!selectedRobot&&values.robot!==original?.robotId)){byId('modalRobotError').textContent='请选择当前租户的通知机器人';byId('modalRobotError').classList.add('show');return}
-      if(isMerchantAlert(values.type)&&selectedRobot?.kind!=='query'){byId('modalRobotError').textContent='请选择代收或代付查单机器人';byId('modalRobotError').classList.add('show');return}
+      if(!typeMeta[values.type]||(!isMerchantAlert(values.type)&&!selectedRobot&&values.robot!==original?.robotId)){byId('modalRobotError').textContent='请选择当前租户的通知机器人';byId('modalRobotError').classList.add('show');return}
       if(selectedRobot?.on===false&&values.robot!==original?.robotId){byId('modalRobotError').textContent='所选机器人已停用，请重新选择';byId('modalRobotError').classList.add('show');return}
       if(isMerchantAlert(values.type)&&configData.some(row=>row.type===values.type&&row!==original)){byId('modalTypeError').textContent='该消息模板已配置，请修改原配置';byId('modalTypeError').classList.add('show');return}
       const allowed = new Set(typeMeta[values.type].vars);
@@ -774,7 +775,7 @@
         byId("modalTemplateError").classList.add("show");
         return;
       }
-      const row = { type: values.type, ...(isMerchantAlert(values.type)?{audience:"merchant"}:{}), group: values.group, robotId: values.robot, robot: selectedRobot?.name||original.robot, template: values.template, on: editingConfigIndex === null ? true : configData[editingConfigIndex].on, time: notificationModel.now(), special: values.type === "恶意拉单预警" };
+      const row = { type: values.type, ...(isMerchantAlert(values.type)?{audience:"merchant"}:{}), group: values.group, robotId: values.robot, robot: isMerchantAlert(values.type)?"使用商户配置":selectedRobot?.name||original?.robot||"", template: values.template, on: editingConfigIndex === null ? true : configData[editingConfigIndex].on, time: notificationModel.now(), special: values.type === "恶意拉单预警" };
       const added = editingConfigIndex === null;
       if (added) configData.unshift(row); else configData[editingConfigIndex] = row;
       filteredConfigs = configData.slice();
@@ -836,7 +837,7 @@
     byId("configGroup").addEventListener("keydown", function (event) { if (event.key === "Enter") searchConfigs(); });
     byId("addConfig").addEventListener("click", function () { openConfigModal(); });
     byId("exportConfigs").addEventListener("click", function () {
-      exportCsv("汇盛租户端-通知配置.csv", "消息类型,风险等级,TG群ID,通知机器人,状态,更新时间", filteredConfigs.map(function (item) { return [item.type, typeMeta[item.type].risk, isMerchantAlert(item.type)?'触发商户的通知群':item.group, robotName(item), item.on ? "启用" : "停用", item.time]; }));
+      exportCsv("汇盛租户端-通知配置.csv", "消息类型,风险等级,TG群ID,通知机器人,状态,更新时间", filteredConfigs.map(function (item) { return [item.type, typeMeta[item.type].risk, isMerchantAlert(item.type)?'使用商户配置':item.group, robotName(item), item.on ? "启用" : "停用", item.time]; }));
       toast("已按当前筛选条件导出通知配置");
     });
 
@@ -1145,15 +1146,20 @@
       try{notificationModel.guard(notificationState,notificationTenantId,window.HSProviderDemo?.tenantId||'HS-TEN-001');return true}
       catch(error){closeNotifyBotModal();closeTestNotifyBot();closeConfigModal();closeConfirm();toast(error.message);return false}
     }
-    function robotName(item){return notificationModel.label(notificationState,item)}
+    function robotName(item){return isMerchantAlert(item.type)?"使用商户配置":notificationModel.label(notificationState,item)}
     function refreshRobotSelectors(){
       const robots=notificationModel.selectable(notificationState);
       const chosen=byId('configRobot').value;
       byId('configRobot').innerHTML='<option value="">全部机器人</option>'+robots.map(b=>'<option value="'+escapeHtml(b.id)+'">'+escapeHtml(b.name)+(b.on?'':'（已停用）')+'</option>').join('');
       byId('configRobot').value=notificationModel.resolve(notificationState,chosen)?chosen:'';
       const original=editingConfigIndex===null?null:configData[editingConfigIndex];
-      const selected=byId('modalRobot').value||original?.robotId||'';
-      const choices=isMerchantAlert(byId('modalType').value)?robots.filter(b=>b.kind==='query'):robots;
+      const robotInput=byId('modalRobot'),merchantTarget=isMerchantAlert(byId('modalType').value);
+      if(merchantTarget&&!robotInput.disabled)standardRobotDraft=robotInput.value;
+      const selected=robotInput.disabled?standardRobotDraft:robotInput.value||original?.robotId||'';
+      robotInput.disabled=merchantTarget;
+      byId('merchantAlertRobotHint').hidden=!merchantTarget;
+      if(merchantTarget){robotInput.innerHTML='<option value="">使用商户配置</option>';robotInput.value='';return}
+      const choices=robots;
       byId('modalRobot').innerHTML='<option value="">请选择通知机器人</option>'+choices.map(b=>'<option value="'+escapeHtml(b.id)+'" '+(!b.on?'disabled':'')+'>'+escapeHtml(b.name)+(b.on?'':'（已停用）')+'</option>').join('');
       if(original?.robotId&&!notificationModel.resolve(notificationState,original.robotId))byId('modalRobot').insertAdjacentHTML('beforeend','<option value="'+escapeHtml(original.robotId)+'">'+escapeHtml(original.robot)+'（记录已删除）</option>');
       byId('modalRobot').value=selected;
