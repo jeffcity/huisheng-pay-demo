@@ -294,5 +294,47 @@
     "sourceKey": "channels",
     "sourceName": "通道管理",
     "initialHash": "payoutProducts"
+  },
+  "admin-pay-order": {
+    "label": "订单管理",
+    "group": "美人桥业务",
+    "module": "beauty",
+    "sourceKey": "beauty-orders",
+    "initialHash": "",
+    "sourceName": "美人桥业务 / 订单管理"
+  },
+  "admin-beauty-wallet": {
+    "label": "商户管理",
+    "group": "美人桥业务",
+    "module": "beauty",
+    "sourceKey": "beauty-wallet",
+    "initialHash": "admin-merchants",
+    "sourceName": "美人桥业务 / 商户管理"
+  },
+  "admin-beauty-wallet-management": {
+    "label": "钱包管理",
+    "group": "美人桥业务",
+    "module": "beauty",
+    "sourceKey": "beauty-wallet",
+    "initialHash": "admin-topups",
+    "sourceName": "美人桥业务 / 钱包管理"
+  },
+  "admin-beauty-statistical-reports": {
+    "label": "统计报表",
+    "group": "美人桥业务",
+    "module": "beauty",
+    "sourceKey": "beauty-reports",
+    "initialHash": "",
+    "sourceName": "美人桥业务 / 统计报表"
+  },
+  "admin-beauty-wallet-ledger": {
+    "label": "钱包流水",
+    "group": "美人桥业务",
+    "module": "beauty",
+    "sourceKey": "beauty-wallet",
+    "initialHash": "admin-ledger",
+    "hidden": true,
+    "sourceName": "美人桥业务 / 钱包流水",
+    "navId": "admin-beauty-wallet-management"
   }
 }

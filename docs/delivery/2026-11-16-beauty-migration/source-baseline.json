@@ -1,0 +1,18 @@
+{
+  "beauty-orders": {
+    "source": "src/pages/美人桥订单管理/美人桥订单管理-demo.html",
+    "sha256": "fbe38fc4eaffa3fc34bed3dca1292decd962136669091d19aa4aab4d77694922"
+  },
+  "beauty-wallet": {
+    "source": "src/pages/美人桥商户钱包/美人桥商户钱包-demo.html",
+    "sha256": "fe35b15cc5a007d9c6522694aee9aae3ce2a9ea9232d0c4bb7d5213a89708fd1"
+  },
+  "beauty-reports": {
+    "source": "src/pages/美人桥统计报表/美人桥统计报表-demo.html",
+    "sha256": "a2bbddde4c84b8d651a83fdad83686fca6c4ec5d05183ecf35765dd64d25ab77"
+  },
+  "beauty-merchant-orders": {
+    "source": "src/pages/美人桥商户端订单列表/美人桥商户端订单列表-demo.html",
+    "sha256": "92a2751ed45cc6f42c5b589b81f2c0fd4cfe7c54e5e22920c8b23e5b34d207d1"
+  }
+}

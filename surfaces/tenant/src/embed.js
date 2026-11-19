@@ -1,3 +1,4 @@
+import { prepareBeautyDocument } from '../../../src/beauty-document.js';
 import feeWalletModel from '../../../src/tenant-fee-wallet-model.js?raw';
 import providerModel from '../../../src/provider-model.js?raw';
 import settlementModel from '../../../src/settlement-model.js?raw';
@@ -81,7 +82,9 @@ function prepareEmbeddedModule(html, moduleName) {
   return withHead.includes('</body>') ? withHead.replace('</body>', routeBridge(moduleName) + '</body>') : withHead + routeBridge(moduleName);
 }
 
-export async function prepareEmbeddedDocument(sourceKey, moduleName) {
+export async function prepareEmbeddedDocument(sourceKey, moduleName, config = {}) {
+  const tenantId = moduleName === 'beauty' ? (config.tenantId || window.HSBeautyDemo.currentTenantId) : null;
   const html = await fetchSource(sourceKey);
+  if (moduleName === 'beauty') return prepareBeautyDocument(html, { boot: config.initialHash, pageId: config.id, tenantId });
   return prepareEmbeddedModule(html, moduleName);
 }

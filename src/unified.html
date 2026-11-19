@@ -15,6 +15,7 @@
     .brand small{margin-left:9px;font-size:11px;font-weight:400;color:var(--muted)}
     .tabs{display:flex;align-items:center;gap:4px;padding:3px;background:var(--canvas);border:1px solid var(--line);border-radius:9px}
     .tabs button{min-width:80px;height:32px;padding:0 17px;border:0;border-radius:6px;background:transparent;color:var(--muted);font:inherit;font-size:12px;font-weight:500;cursor:pointer;transition:background .16s ease-out,color .16s ease-out}
+    @media(max-width:650px){.tabs{max-width:100%;gap:1px}.tabs button{min-width:0;padding:0 10px;font-size:12px}}
     .tabs button:hover{background:var(--soft);color:var(--primary)}
     .tabs button[aria-selected="true"]{color:#fff;background:var(--primary)}
     button:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
@@ -35,6 +36,7 @@
         <button id="tab-platform" role="tab" type="button" data-surface="platform" aria-controls="surface-panel" aria-selected="false">平台端</button>
         <button id="tab-tenant" role="tab" type="button" data-surface="tenant" aria-controls="surface-panel" aria-selected="false" tabindex="-1">租户端</button>
         <button id="tab-merchant" role="tab" type="button" data-surface="merchant" aria-controls="surface-panel" aria-selected="false" tabindex="-1">商户端</button>
+        <button id="tab-beauty" role="tab" type="button" data-surface="beauty" aria-controls="surface-panel" aria-selected="false" tabindex="-1">美人桥商户端</button>
       </nav>
     </header>
     <main class="workspace" id="surface-panel" role="tabpanel" aria-labelledby="tab-platform">
@@ -92,7 +94,7 @@
       buttons.forEach((button, index) => {
         button.addEventListener('click', () => openSurface(button.dataset.surface));
         button.addEventListener('keydown', event => {
-          const next = {ArrowRight:(index+1)%3, ArrowLeft:(index+2)%3, Home:0, End:2}[event.key];
+          const next = {ArrowRight:(index+1)%buttons.length, ArrowLeft:(index+buttons.length-1)%buttons.length, Home:0, End:buttons.length-1}[event.key];
           if (next === undefined) return;
           event.preventDefault();
           buttons[next].focus();

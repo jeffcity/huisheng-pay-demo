@@ -1,3 +1,4 @@
+import { prepareBeautyDocument } from '../src/beauty-document.js';
 import { build } from 'vite';
 import react from '@vitejs/plugin-react';
 import { readFile, readdir, mkdir, writeFile, rm } from 'node:fs/promises';
@@ -34,7 +35,7 @@ async function bundleSurface(directory, title) {
   if (assets.some(item => !item.fileName.endsWith('.css'))) throw new Error(`${title} 存在未内联的资源`);
   const sourceDirectory = path.join(directory, 'public/legacy/sources');
   const sources = {};
-  for (const file of (await readdir(sourceDirectory)).filter(file => file.endsWith('.html')).sort()) {
+  for (const file of (await readdir(sourceDirectory)).filter(file => file.endsWith('.html') && file !== 'beauty-risk.html').sort()) {
     sources[file.slice(0, -5)] = await readFile(path.join(sourceDirectory, file), 'utf8');
   }
   return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title><style>${assets.map(item => item.source).join('\n')}</style></head><body><div id="root"></div><script>window.__HS_EMBEDDED_SOURCES__=${json(sources)};</script><script>${script(chunks[0].code)}</script></body></html>`;
@@ -44,10 +45,24 @@ async function bundleSurface(directory, title) {
 const merchantSource = await readFile(path.join(root, 'surfaces/merchant/demo.html'), 'utf8');
 const merchantModels = (await Promise.all(['provider-model','settlement-model','tenant-fee-wallet-model'].map(name=>readFile(path.join(root,'src',name+'.js'),'utf8')))).join('\n');
 const merchantDocument = `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>汇盛支付商户端</title><style>html,body{height:100%;margin:0}iframe{display:block;width:100%;height:100%;border:0}</style></head><body><iframe id="demoFrame" title="汇盛支付商户端页面" referrerpolicy="no-referrer"></iframe><script id="merchant-source" type="application/json">${json(merchantSource)}</script><script>${script(merchantModels)}</script><script>const embedded=document.getElementById('demoFrame').contentDocument;embedded.open();embedded.write(JSON.parse(document.getElementById('merchant-source').textContent));embedded.close();</script></body></html>`;
+const beautySource = await readFile(path.join(root, 'surfaces/beauty/demo.html'), 'utf8');
+const beautyRoutes = {
+  'beauty-order-list': ['beauty-merchant-orders', ''],
+  'beauty-wallet-home': ['beauty-wallet', 'home'],
+  'beauty-wallet-records': ['beauty-wallet', 'records']
+};
+const beautyDocuments = {};
+for (const [id, [key, boot]] of Object.entries(beautyRoutes)) {
+  const source = await readFile(path.join(root, 'surfaces/tenant/public/legacy/sources', key + '.html'), 'utf8');
+  beautyDocuments[id] = { source, boot, pageId: id };
+}
+const beautyModel = await readFile(path.join(root, 'src/beauty-model.js'), 'utf8');
+const beautyDocument = beautySource.replace('<!-- BEAUTY_PAYLOAD -->', () => `<script>${script(beautyModel)};window.prepareBeautyDocument=${script(prepareBeautyDocument.toString())};</script><script id="beauty-documents" type="application/json">${json(beautyDocuments)}</script>`);
 const documents = {
   platform: await bundleSurface(root, '汇盛支付平台端'),
   tenant: await bundleSurface(path.join(root, 'surfaces/tenant'), '汇盛支付租户端'),
-  merchant: merchantDocument
+  merchant: merchantDocument,
+  beauty: beautyDocument
 };
 const template = await readFile(path.join(root, 'src/unified.html'), 'utf8');
 const payload = Object.entries(documents).map(([id, html]) =>
@@ -58,4 +73,4 @@ await rm(path.join(root, 'dist'), { recursive: true, force: true });
 await mkdir(path.join(root, 'dist'), { recursive: true });
 await writeFile(path.join(root, 'index.html'), html);
 await writeFile(path.join(root, 'dist/index.html'), html);
-console.log(`统一 Demo：三端已打包到一个 index.html（${(Buffer.byteLength(html) / 1024 / 1024).toFixed(1)} MB），运行时仅挂载当前端。`);
+console.log(`统一 Demo：四端已打包到一个 index.html（${(Buffer.byteLength(html) / 1024 / 1024).toFixed(1)} MB），运行时仅挂载当前端。`);

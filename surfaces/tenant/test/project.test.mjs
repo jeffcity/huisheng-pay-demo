@@ -8,8 +8,8 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const modules = JSON.parse(await readFile(path.join(root, "src/legacy/modules.json"), "utf8"));
 
-test("页面注册表包含 35 个页面", () => {
-  assert.equal(Object.keys(modules).length, 35);
+test("页面注册表包含 40 个页面", () => {
+  assert.equal(Object.keys(modules).length, 40);
   assert.equal(modules.todos, undefined);
   assert.equal(modules.tickets, undefined);
 });
@@ -68,7 +68,7 @@ test("登录页提供 2FA 已绑定与未绑定两条可验证流程", async () 
 
 test("每个页面的源文件存在于 public/legacy/sources", async () => {
   const keys = new Set(Object.values(modules).map(m => m.sourceKey));
-  assert.equal(keys.size, 8);
+  assert.equal(keys.size, 11);
   for (const key of keys) {
     await stat(path.join(root, "public/legacy/sources", `${key}.html`));
   }
@@ -95,7 +95,8 @@ test("每个页面都有 label/group/module/sourceKey/sourceName", () => {
     assert.ok(m.module, `${id} 缺 module`);
     assert.ok(m.sourceKey, `${id} 缺 sourceKey`);
     assert.ok(m.sourceName, `${id} 缺 sourceName`);
-    assert.equal(m.sourceKey, m.module, `${id} sourceKey 与 module 不一致`);
+    if (m.module === 'beauty') assert.ok(m.sourceKey.startsWith('beauty-'));
+    else assert.equal(m.sourceKey, m.module, `${id} sourceKey 与 module 不一致`);
   }
 });
 
@@ -104,9 +105,9 @@ test("导航覆盖全部非 utility 页面，utility 页面恰好 2 个", async 
   const navIds = NAV_GROUPS.flatMap(g => g.items.map(i => i.id));
   const utilityIds = UTILITY_ITEMS.map(i => i.id);
   assert.equal(utilityIds.length, 2);
-  for (const id of Object.keys(MODULES)) {
+  for (const id of Object.keys(MODULES).filter(id => !MODULES[id].hidden)) {
     const covered = navIds.includes(id) || utilityIds.includes(id);
     assert.ok(covered, `${id} 未出现在导航或工具区`);
   }
-  assert.equal(new Set([...navIds, ...utilityIds]).size, Object.keys(MODULES).length);
+  assert.equal(new Set([...navIds, ...utilityIds]).size, Object.values(MODULES).filter(m => !m.hidden).length);
 });

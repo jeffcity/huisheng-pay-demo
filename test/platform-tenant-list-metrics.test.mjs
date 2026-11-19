@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 const source=fs.readFileSync(new URL('../public/legacy/sources/tenants.html',import.meta.url),'utf8');
 function fixture(auth=null){
- const window={document:{}};window.top=window;
+ const window={document:{},HSBeautyDemo:{enabled:()=>false}};window.top=window;
  const tenants=[{id:'HS-TEN-001',name:'汇盛东南亚',contact:'Lin',status:'正常'},{id:'HS-TEN-017',name:'其他',contact:'',status:'正常'}];
  let scope=new Set(tenants.map(t=>t.id)),authorization=auth,downloads=0;
  window.HSPlatformAuthRouteGuard={getAuthorizationContext:()=>authorization,allowBusinessBoot:()=>true};
