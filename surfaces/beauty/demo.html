@@ -1,0 +1,36 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>汇盛支付美人桥商户端</title><style>
+:root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;color:#172a32;background:#f3f6f7}*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden}.shell{display:grid;grid-template-columns:220px minmax(0,1fr);height:100%}aside{background:white;border-right:1px solid #e5ecef;overflow:auto;padding:20px 10px}.brand{padding:0 12px 24px;font-size:16px;font-weight:600}.brand small{display:block;font-size:12px;color:#536b77;margin-top:6px;font-weight:400}nav{display:grid;gap:4px}nav button{display:flex;align-items:center;gap:10px;width:100%;border:0;background:transparent;color:#536b77;text-align:left;padding:10px 12px;font:inherit;font-size:13px;border-radius:7px;cursor:pointer}nav svg{width:18px;height:18px;flex-shrink:0}nav button:hover{background:#edf3f5}nav button[aria-current="page"]{background:#173b47;color:white}nav button.child{padding-left:42px}button:focus-visible{outline:2px solid #245665;outline-offset:2px}.workspace{min-width:0;display:grid;grid-template-rows:64px 34px minmax(0,1fr)}header{background:white;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid #e5ecef}h1{font-size:18px;font-weight:600;margin:0}.context{font-size:12px;color:#536b77}.path{background:white;padding:8px 24px;font-size:12px;color:#536b77;border-bottom:1px solid #e5ecef}#content{position:relative;min-width:0;min-height:0}iframe{width:100%;height:100%;border:0;display:block}.empty{margin:24px;padding:40px 24px;border:1px solid #e5ecef;border-radius:8px;background:white;text-align:center}.empty h2{font-size:18px}.empty p{font-size:14px;color:#536b77}@media(max-width:680px){.shell{grid-template-columns:180px minmax(0,1fr)}header{padding:0 14px}.context{display:none}.path{padding:8px 14px}}@media(max-width:500px){.shell{grid-template-columns:130px minmax(0,1fr)}aside{padding:16px 6px}nav button{font-size:12px;padding:10px 8px;gap:6px}.brand{padding-left:8px;font-size:14px}nav button.child{padding-left:30px}}
+</style></head><body><div class="shell"><aside><div class="brand">汇盛支付<small>美人桥商户端</small></div><nav id="menu" aria-label="美人桥商户端导航"></nav></aside><main class="workspace"><header><h1 id="title">订单列表</h1><span class="context">当前租户：HS-TEN-001 · 演示数据</span></header><div class="path" id="path">美人桥商户端 / 订单列表</div><div id="content"></div></main></div>
+<!-- BEAUTY_PAYLOAD -->
+<script>
+(() => {
+ const routes = [
+  {id:'beauty-order-list',title:'订单列表'},
+  {id:'beauty-wallet-home',title:'首页钱包'},
+  {id:'beauty-wallet-records',title:'钱包记录',child:true},
+  {id:'beauty-change-password',title:'修改密码',placeholder:true},
+  {id:'beauty-backup-site',title:'备用网址',placeholder:true},
+  {id:'beauty-work-orders',title:'我的工单',placeholder:true}
+ ];
+ const beauty=window.HSBeautyDemo, menu=document.getElementById('menu'), content=document.getElementById('content');
+ let active='';
+ const docs=JSON.parse(document.getElementById('beauty-documents').textContent);
+ function open(id){
+  const route=routes.find(r=>r.id===id)||routes[0];active=route.id;
+  content.replaceChildren();
+  const tenantId=beauty.currentTenantId;
+  document.querySelector('.context').textContent='当前租户：'+tenantId+' · 演示数据';
+  document.getElementById('title').textContent=route.title;document.getElementById('path').textContent='美人桥商户端 / '+route.title;
+  menu.replaceChildren();
+  if(!beauty.enabled(beauty.currentTenantId)){
+   content.innerHTML='<section class="empty"><h2>当前租户未开通美人桥业务</h2><p>请联系平台管理员开通后使用。</p></section>';return;
+  }
+  routes.forEach(r=>{const b=document.createElement('button');b.type='button';b.className=r.child?'child':'';if(r.id===active)b.setAttribute('aria-current','page');b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 3h14v18H5zM8 8h8M8 12h8M8 16h5"/></svg><span></span>';b.querySelector('span').textContent=r.title;b.onclick=()=>{try{history.replaceState(null,'','#'+r.id)}catch{}open(r.id)};menu.append(b)});
+  if(route.placeholder){content.innerHTML='<section class="empty"><h2>'+route.title+'</h2><p>沿用蓝盛原型，当前入口暂无可演示页面。</p></section>';return}
+  const frame=document.createElement('iframe');frame.title='美人桥商户端 · '+route.title;content.append(frame);const d=frame.contentDocument;d.open();d.write(window.prepareBeautyDocument(docs[route.id].source,{surface:'BEAUTY_MERCHANT',boot:docs[route.id].boot,pageId:route.id,tenantId}));d.close();
+ }
+ window.addEventListener('hashchange',()=>open(location.hash.slice(1)));
+ beauty.subscribe(id=>{if(id===beauty.currentTenantId)open(active)}, window);
+ open(location.hash.slice(1));
+})();
+</script></body></html>

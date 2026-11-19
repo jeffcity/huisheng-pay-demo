@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>蓝盛支付 - 统计报表</title>
+  <style>
+    :root{--blue:#409eff;--blue-hover:#2688e9;--blue-soft:#eaf4ff;--bg:#f3f6fa;--surface:#fff;--text:#303133;--muted:#8b939d;--line:#e7ebf1;--line-strong:#d8dee8;--orange:#e6a23c;font-family:"PingFang SC","Microsoft YaHei",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    *{box-sizing:border-box}html,body{margin:0;min-width:1120px;min-height:100%;background:var(--bg);color:var(--text);font-size:14px;line-height:1.45}button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid rgba(64,158,255,.24);outline-offset:2px}
+    .app{display:grid;grid-template-columns:240px minmax(0,1fr);min-height:100vh}.rail{background:#fff;border-right:1px solid var(--line)}.brand{height:56px;display:flex;align-items:center;padding:0 30px;color:#fff;background:linear-gradient(90deg,#3f93ee,#68acf2);font-size:24px;font-weight:650;letter-spacing:1px}.rail-nav{padding:8px 0 20px}.nav-row{height:56px;display:flex;align-items:center;gap:12px;padding:0 26px;color:#77818c}.nav-row svg{width:17px;height:17px;fill:none;stroke:#83b7ef;stroke-width:1.7}.nav-row .arrow{margin-left:auto;color:#91bce9}.nav-row.group{color:#5d6772}.subnav{background:#f9fbfd}.subnav .nav-row{height:50px;padding-left:58px}.subnav .nav-row.active{border-left:4px solid var(--blue);padding-left:54px;color:#4b91df;background:#dcecff}.main{min-width:0}.top{height:56px;display:flex;align-items:center;justify-content:flex-end;padding:0 24px;color:#fff;background:linear-gradient(90deg,#3f93ee,#68acf2)}.user{display:flex;align-items:center;gap:9px}.avatar{width:30px;height:30px;border-radius:50%;background:#c1c9d2;border:1px solid rgba(255,255,255,.55)}.tabs{height:40px;display:flex;align-items:center;gap:6px;padding:5px 16px;background:#fff;border-bottom:1px solid var(--line)}.tab{height:30px;padding:0 12px;border:1px solid #e1e6ed;border-radius:3px;background:#fff;color:#6c7580}.tab.active{border-color:var(--blue);background:var(--blue);color:#fff}.titlebar{height:64px;display:flex;align-items:center;padding:0 22px;background:#fff;border-bottom:1px solid var(--line);font-size:18px;font-weight:600}.page{padding:16px 18px 28px}
+    .panel{overflow:hidden;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 2px 9px rgba(36,61,90,.035)}.report-tabs{height:56px;display:flex;align-items:flex-end;gap:38px;padding:0 22px;border-bottom:1px solid var(--line)}.report-tab{position:relative;height:56px;padding:0;border:0;background:transparent;color:#747d88;font-size:16px}.report-tab.active{color:var(--blue);font-weight:600}.report-tab.active::after{content:"";position:absolute;right:0;bottom:0;left:0;height:3px;background:var(--blue)}.view[hidden]{display:none}.toolbar{padding:22px}.filters{min-height:76px;display:flex;align-items:center;gap:16px;padding:14px 20px;border-radius:12px;background:#f7f9fc}.field{display:flex;align-items:center;gap:10px;min-width:0}.field label{flex:0 0 auto;color:#505965;font-size:15px;font-weight:600}.control{height:38px;min-width:0;padding:0 12px;border:1px solid var(--line-strong);border-radius:4px;background:#fff;color:#5b6571}.control::placeholder{color:#abb2bc}.control:focus{border-color:#8fc3fa;outline:2px solid rgba(64,158,255,.09)}.merchant-input{width:220px}.owner-select{width:195px}.address-input{width:280px}.date-range{display:grid;grid-template-columns:1fr 32px 1fr;align-items:center;width:405px;height:38px;border:1px solid var(--line-strong);border-radius:4px;background:#fff}.date-range input{min-width:0;height:36px;padding:0 12px;border:0;text-align:center;color:#5b6571;background:transparent}.date-range input:focus{outline:0}.date-range span{text-align:center;color:#727b86}.filter-actions{margin-left:auto;display:flex;gap:12px}.btn{height:38px;padding:0 18px;border:1px solid var(--line-strong);border-radius:4px;background:#fff;color:#5f6975;white-space:nowrap;transition:.18s}.btn:hover{border-color:#9fcafb;color:var(--blue);background:#f7fbff}.btn.primary{border-color:var(--blue);background:var(--blue);color:#fff}.btn.primary:hover{border-color:var(--blue-hover);background:var(--blue-hover);color:#fff}.btn.refresh{border-color:#f1d6ad;color:var(--orange);background:#fffaf2}.result-head{height:66px;display:flex;align-items:center;padding:0 22px;color:#8b939d}.result-actions{margin-left:auto;display:flex;gap:22px}.table-wrap{margin:0 22px;overflow:auto;border-top:1px dashed #edf0f4}table{width:100%;min-width:1380px;border-collapse:collapse;table-layout:fixed}.merchant-table th:nth-child(3),.merchant-table td:nth-child(3){width:150px}th,td{height:48px;padding:8px 12px;border-right:1px solid #edf0f4;border-bottom:1px solid #e9edf2;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}th{height:46px;background:#f4f6f9;color:#3f4752;font-weight:600}th:first-child,td:first-child{text-align:left}tbody tr:nth-child(even){background:#fbfcfd}tbody tr:hover{background:#f5f9ff}.empty-row td{height:150px;color:#9aa1aa;text-align:center}.footer{min-height:78px;display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:12px 22px;color:#68727e}.footer .total{margin-right:12px}.page-size{width:106px;height:34px;padding:0 9px;border:1px solid var(--line-strong);border-radius:4px;background:#fff;color:#68727e}.page-btn{min-width:31px;height:31px;padding:0 9px;border:0;border-radius:3px;background:transparent;color:#4d5661}.page-btn:hover{background:#f0f6fd;color:var(--blue)}.page-btn.active{color:var(--blue);font-weight:700}.page-btn:disabled{opacity:.4;cursor:not-allowed}.jump{width:56px;height:34px;padding:0 6px;border:1px solid var(--line-strong);border-radius:4px;text-align:center}.notes{margin:18px 22px 4px;padding:14px 18px;border:1px solid var(--line);border-radius:6px;background:#fafbfd;color:#717a85}.notes strong{display:block;margin-bottom:6px;color:#515a65}.notes ul{margin:0;padding-left:20px}.notes li+li{margin-top:4px}.toast{position:fixed;right:22px;bottom:22px;z-index:100;padding:11px 16px;border-radius:4px;background:#303845;color:#fff;box-shadow:0 9px 28px rgba(17,28,44,.25);opacity:0;transform:translateY(8px);pointer-events:none;transition:.2s}.toast.show{opacity:1;transform:none}
+    html.bp-embed .titlebar{padding-top:0}.bp-embed .page{padding-top:14px}
+    @media(max-width:1300px){.filters{flex-wrap:wrap}.filter-actions{margin-left:0}.page{padding:14px}.merchant-input{width:190px}.date-range{width:360px}}
+    @media(max-width:900px){html,body{min-width:0}.app{display:block}.rail,.top,.tabs{display:none}.page{padding:10px}.toolbar{padding:14px}.filters{align-items:stretch;flex-direction:column}.field{align-items:flex-start;flex-direction:column}.field .control,.date-range{width:100%}.filter-actions{width:100%}.filter-actions .btn{flex:1}.result-head{height:auto;align-items:flex-start;flex-direction:column;gap:12px;padding:14px}.result-actions{margin-left:0}.table-wrap{margin:0 14px}.footer{justify-content:flex-start;overflow:auto}.notes{margin:14px}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="rail" aria-label="蓝盛后台导航">
+      <div class="brand">蓝盛支付</div>
+      <nav class="rail-nav">
+        <div class="nav-row"><svg viewBox="0 0 24 24"><path d="m4 11 8-7 8 7v9H4z"/></svg>首页</div>
+        <div class="nav-row"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/></svg>商户管理<span class="arrow">⌄</span></div>
+        <div class="nav-row"><svg viewBox="0 0 24 24"><path d="M5 7h14v11H5zM8 4h8"/></svg>虚拟币订单管理<span class="arrow">⌄</span></div>
+        <div class="nav-row group"><svg viewBox="0 0 24 24"><path d="M12 3v18M5 12h14"/></svg>美人桥业务<span class="arrow">⌃</span></div>
+        <div class="subnav"><div class="nav-row">订单管理</div><div class="nav-row">商户管理</div><div class="nav-row">备用网站</div><div class="nav-row">工单处理中心</div><div class="nav-row active">统计报表</div><div class="nav-row">订单追踪</div></div>
+        <div class="nav-row"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/></svg>地址查询</div>
+        <div class="nav-row"><svg viewBox="0 0 24 24"><path d="M5 6h14v12H5z"/></svg>代付管理<span class="arrow">⌄</span></div>
+        <div class="nav-row"><svg viewBox="0 0 24 24"><path d="M5 5h14v14H5z"/></svg>代收管理<span class="arrow">⌄</span></div>
+      </nav>
+    </aside>
+    <main class="main">
+      <header class="top"><div class="user"><span class="avatar"></span><span>管理员</span></div></header>
+      <div class="tabs"><button class="tab">封禁ip管理 ×</button><button class="tab active">● 统计报表 ×</button></div>
+      <div class="titlebar">统计报表</div>
+      <div class="page">
+        <section class="panel" aria-label="美人桥统计报表">
+          <div class="report-tabs" role="tablist" aria-label="统计报表分类"><button class="report-tab active" type="button" role="tab" aria-selected="true" data-report="merchant">商户报表</button><button class="report-tab" type="button" role="tab" aria-selected="false" data-report="owner">归属收款统计报表</button></div>
+          <section class="view" id="merchantView" role="tabpanel" aria-label="商户报表">
+            <div class="toolbar"><div class="filters">
+              <div class="field"><label for="merchantName">商户名</label><input class="control merchant-input" id="merchantName" placeholder="输入商户名称"></div>
+              <div class="field"><label>查询时间</label><div class="date-range"><input id="merchantStart" placeholder="开始日期" aria-label="开始日期"><span>−</span><input id="merchantEnd" placeholder="结束日期" aria-label="结束日期"></div></div>
+              <div class="field"><label for="merchantOwner">归属</label><select class="control owner-select" id="merchantOwner"><option value="">请选择归属</option><option>归属1</option><option>归属2</option><option>归属3</option></select></div>
+              <div class="filter-actions"><button class="btn primary" type="button" data-search="merchant">搜索</button><button class="btn" type="button" data-reset="merchant">重置</button></div>
+            </div></div>
+            <div class="result-head"><span id="merchantTotal">共 18 条</span><div class="result-actions"><button class="btn refresh" id="refreshBtn" type="button">更新数据</button><button class="btn primary" id="exportBtn" type="button">导出 Excel</button></div></div>
+            <div class="table-wrap"><table class="merchant-table"><thead><tr><th>商户</th><th>归属</th><th>上分金额（CNY）</th><th>充值数量</th><th>充值币种</th><th>费率</th><th>产生费率</th><th>上浮费率</th><th>上浮费用</th><th>实际手续费</th><th>百分比</th><th>统计时间</th></tr></thead><tbody id="merchantRows"></tbody></table></div>
+            <footer class="footer"><span class="total">共 18 条</span><select class="page-size" aria-label="每页条数"><option>10条/页</option><option>20条/页</option></select><button class="page-btn" disabled aria-label="上一页">‹</button><button class="page-btn active" data-page="1">1</button><button class="page-btn" data-page="2">2</button><button class="page-btn" aria-label="下一页">›</button><span>前往</span><input class="jump" value="1" inputmode="numeric" aria-label="页"><span>页</span></footer>
+          </section>
+          <section class="view" id="ownerView" role="tabpanel" aria-label="归属收款统计报表" hidden>
+            <div class="toolbar"><div class="filters">
+              <div class="field"><label>时间</label><div class="date-range"><input id="ownerStart" value="2026-05-01" placeholder="开始时间" aria-label="开始时间"><span>−</span><input id="ownerEnd" value="2026-05-30" placeholder="结束时间" aria-label="结束时间"></div></div>
+              <div class="field"><label for="ownerName">归属</label><select class="control owner-select" id="ownerName"><option value="">请选择归属</option><option>归属1</option><option>归属2</option><option>归属3</option></select></div>
+              <div class="field"><label for="receiveAddress">收款地址</label><input class="control address-input" id="receiveAddress" placeholder="输入收款地址搜索"></div>
+              <div class="filter-actions"><button class="btn primary" type="button" data-search="owner">搜索</button><button class="btn" type="button" data-reset="owner">重置</button></div>
+            </div></div>
+            <div class="result-head"><span id="ownerTotal">共 2 条</span></div>
+            <div class="table-wrap"><table><thead><tr><th>归属名称</th><th>收款地址</th><th>收入总额</th><th>TRX充值数量</th><th>人民币总金额</th><th>平均汇率</th></tr></thead><tbody id="ownerRows"></tbody></table></div>
+            <footer class="footer"><span class="total" id="ownerFooterTotal">共 2 条</span><select class="page-size" aria-label="每页条数"><option>10条/页</option><option>20条/页</option></select><button class="page-btn" disabled aria-label="上一页">‹</button><button class="page-btn active">1</button><button class="page-btn" disabled aria-label="下一页">›</button><span>前往</span><input class="jump" value="1" inputmode="numeric" aria-label="页"><span>页</span></footer>
+          </section>
+          <div class="notes"><strong>使用说明｜数据口径与更新节奏</strong><ul><li>报表默认展示昨日汇总数据。</li><li>选择查询时间后，展示该时间段内的合计统计。</li><li>统计维度来源于支付订单金额与手续费等字段。</li><li>同一商户同一天存在不同充值币种时按币种分行统计，充值数量不跨币种合计。</li><li>系统于每日凌晨 1 点滚动更新昨日数据（每日一次）。</li></ul></div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script>
+    const merchantData=[
+      ['演示商户 A','归属2','850.00','894.736842','TRX','7','0.60','0','0','0.60','0.07%','2026-08-18'],
+      ['演示商户 A','归属2','200.00','29.411765','USDT','0','0','0','0','0','0.00%','2026-08-18'],
+      ['DEMO-0022','归属3','120.00','126.315789','TRX','200','2.40','0.1','1.20','3.60','3.00%','2026-08-17'],
+      ['演示商户 C','归属3','1050.00','150.000000','USDT','1','0.11','0.2','30.00','30.11','2.87%','2026-08-16'],
+      ['DEMO-0022','归属3','12600.00','1800.000000','USDT','200','196.00','0.1','1200','1396.00','11.08%','2026-08-16'],
+      ['演示商户 D','归属1','500.00','526.315789','TRX','200','1.90','0.1','76.00','77.90','15.58%','2026-08-16'],
+      ['演示商户 E','归属1','9500.00','1357.142857','USDT','1','33.00','2','84.00','117.00','1.23%','2026-08-16'],
+      ['测试商户','归属1','21000.00','21000.00','CNY','1','5.00','0','7000','7005.00','33.36%','2026-08-15'],
+      ['演示商户 E','归属1','35.00','36.842105','TRX','1','0','2','0','0','0.00%','2026-08-14'],
+      ['演示商户 C','归属3','2200.00','310.000000','USDT','1','0.22','0.2','62','62.22','2.83%','2026-08-14']
+    ];
+    const ownerData=[
+      ['归属1','TDEMO-TRON-ADDRESS-01','95.45','678.947368','644.00','6.7857','2026-05-15'],
+      ['归属2','TDEMO-TRON-ADDRESS-01','122.05','873.684211','830.00','6.8000','2026-05-20']
+    ];
+    const $=id=>document.getElementById(id);let toastTimer;
+    function toast(message){$('toast').textContent=message;$('toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.remove('show'),1800)}
+    function filteredMerchant(){const name=$('merchantName').value.trim().toLowerCase(),owner=$('merchantOwner').value;return merchantData.filter(row=>(!name||row[0].toLowerCase().includes(name))&&(!owner||row[1]===owner))}
+    function renderMerchant(){const rows=filteredMerchant();$('merchantRows').innerHTML=rows.length?rows.map(row=>`<tr>${row.map(cell=>`<td title="${cell}">${cell}</td>`).join('')}</tr>`).join(''):'<tr class="empty-row"><td colspan="12">暂无数据，可调整筛选条件后重试</td></tr>';$('merchantTotal').textContent=`共 ${rows.length===merchantData.length?18:rows.length} 条`}
+    function filterOwnerRows(rows,{owner='',address='',start='',end=''}){const term=address.trim().toLowerCase();return rows.filter(row=>(!owner||row[0]===owner)&&(!term||row[1].toLowerCase().includes(term))&&(!start||row[6]>=start)&&(!end||row[6]<=end))}
+    function filteredOwner(){return filterOwnerRows(ownerData,{owner:$('ownerName').value,address:$('receiveAddress').value,start:$('ownerStart').value.trim(),end:$('ownerEnd').value.trim()})}
+    function renderOwner(){const rows=filteredOwner();$('ownerRows').innerHTML=rows.length?rows.map(row=>`<tr>${row.slice(0,6).map(cell=>`<td title="${cell}">${cell}</td>`).join('')}</tr>`).join(''):'<tr class="empty-row"><td colspan="6">暂无数据，可调整筛选条件后重试</td></tr>';const total=`共 ${rows.length} 条`;$('ownerTotal').textContent=total;$('ownerFooterTotal').textContent=total}
+    document.querySelector('.report-tabs').onclick=event=>{const button=event.target.closest('[data-report]');if(!button)return;document.querySelectorAll('[data-report]').forEach(tab=>{const active=tab===button;tab.classList.toggle('active',active);tab.setAttribute('aria-selected',String(active))});$('merchantView').hidden=button.dataset.report!=='merchant';$('ownerView').hidden=button.dataset.report!=='owner'};
+    document.querySelectorAll('[data-search]').forEach(button=>button.onclick=()=>{button.dataset.search==='merchant'?renderMerchant():renderOwner();toast('已按当前条件查询')});
+    document.querySelectorAll('[data-reset]').forEach(button=>button.onclick=()=>{if(button.dataset.reset==='merchant'){['merchantName','merchantStart','merchantEnd'].forEach(id=>$(id).value='');$('merchantOwner').value='';renderMerchant()}else{['ownerStart','ownerEnd','receiveAddress'].forEach(id=>$(id).value='');$('ownerName').value='';renderOwner()}toast('筛选条件已重置')});
+    $('refreshBtn').onclick=()=>toast('数据已更新');$('exportBtn').onclick=()=>toast('已按当前条件导出 Excel');
+    document.querySelectorAll('[data-page]').forEach(button=>button.onclick=()=>{document.querySelectorAll('[data-page]').forEach(page=>page.classList.toggle('active',page===button));document.querySelector('#merchantView .jump').value=button.dataset.page;toast(`已切换到第 ${button.dataset.page} 页`)});
+    document.querySelectorAll('.jump').forEach(input=>input.addEventListener('change',()=>toast(`已前往第 ${input.value||1} 页`)));
+    renderMerchant();renderOwner();
+  </script>
+</body>
+</html>

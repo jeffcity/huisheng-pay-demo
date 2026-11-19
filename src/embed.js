@@ -1,3 +1,4 @@
+import beautyModel from './beauty-model.js?raw';
 import dailyReportsModel from '../surfaces/tenant/src/daily-reports-model.js?raw';
 import channelRecordsModel from '../surfaces/tenant/src/channel-records-model.js?raw';
 import platformReportsModel from './platform-reports-model.js?raw';
@@ -432,7 +433,7 @@ export async function prepareEmbeddedDocument(sourceKey, initialHash = '') {
   );
   const reportModels = ['report','ledger','system','login'].includes(sourceKey) ? [dailyReportsModel,channelRecordsModel,platformReportsModel].map(code => '<script>'+code.replace(/<\/script/gi, '<\\/script')+'</script>').join('') : '';
   const dashboardModel = sourceKey === 'home' ? '<script>'+platformDashboardModel.replace(/<\/script/gi, '<\\/script')+'</script>' : '';
-  html = html.replace(/<\/head>/i, () => `<script>${providerModel.replace(/<\/script/gi, '<\\/script')}</script><script>${settlementModel.replace(/<\/script/gi, '<\\/script')}</script><script>${feeWalletModel.replace(/<\/script/gi, '<\\/script')}</script>${reportModels}${dashboardModel}${shellPatch(normalizedHash, sourceKey)}${retiredReportBridge}</head>`);
+  html = html.replace(/<\/head>/i, () => `<script>${providerModel.replace(/<\/script/gi, '<\\/script')}</script><script>${settlementModel.replace(/<\/script/gi, '<\\/script')}</script><script>${feeWalletModel.replace(/<\/script/gi, '<\\/script')}</script><script>${beautyModel.replace(/<\/script/gi, '<\\/script')}</script>${reportModels}${dashboardModel}${shellPatch(normalizedHash, sourceKey)}${retiredReportBridge}</head>`);
   html = html.replace(/<\/body>/i, `${routeSync}</body>`);
   return html;
 }

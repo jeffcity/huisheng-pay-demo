@@ -22337,6 +22337,14 @@ body[data-merchant-ui="management"] .merchant-balance-alert input:disabled{backg
       return `<div class="sub-panel" data-astryx="DataPanel"><h3>${title}</h3>${body}</div>`;
     }
 
+    function renderMerchantBeautyLogin() {
+      const model=window.HSBeautyDemo || window.top?.__HSBeautyDemo;
+      if(!model?.enabled(merchantProfileTenantId))return '';
+      const addresses=model.portalAddresses(merchantProfileTenantId);
+      const fields=addresses.length?addresses.map((address,index)=>`<input class="input mono" ${index===0?'id="merchantBeautyLoginAddress"':''} aria-label="美人桥商户端登录地址${index+1}" value="${escapeHtml(address)}" readonly>`).join(''):'<input class="input mono" id="merchantBeautyLoginAddress" placeholder="暂无可用登录地址" value="" readonly>';
+      return `<div class="field wide" id="merchantBeautyLoginField"><label for="merchantBeautyLoginAddress">美人桥商户端登录地址</label>${fields}<small>${addresses.length?'当前租户下的美人桥商户共用；先按网址识别租户，再使用该租户的美人桥商户账号登录。':'当前没有可用域名，请由平台在租户管理的「域名管理」中启用美人桥商户端域名。'}</small></div>`;
+    }
+
     function renderOverview(item) {
       return `
         ${section("基础资料", `
@@ -22370,6 +22378,7 @@ body[data-merchant-ui="management"] .merchant-balance-alert input:disabled{backg
               <input class="input mono" value="https://${escapeHtml(ensureMerchantLoginDomain().loginDomain)}/login" readonly>
               <small>共享入口状态：${escapeHtml(tenantMerchantLoginAccess.loginDomainStatus)}。当前租户下全部商户共用，账号登录后再识别具体商户。</small>
             </div>
+            <div id="merchantBeautyLoginSlot" style="display:contents">${renderMerchantBeautyLogin()}</div>
           </div>
           <div class="field-error" id="modalError" role="alert"></div>
           <div class="toolbar" data-astryx="FooterActions">
@@ -22379,6 +22388,12 @@ body[data-merchant-ui="management"] .merchant-balance-alert input:disabled{backg
       `;
     }
 
+
+    (window.HSBeautyDemo || window.top?.__HSBeautyDemo)?.subscribe(id=>{
+      if(id!==merchantProfileTenantId)return;
+      const slot=document.getElementById('merchantBeautyLoginSlot');
+      if(slot)slot.innerHTML=renderMerchantBeautyLogin();
+    },window);
 
     function renderVolumeTab(item) {
       return `

@@ -10,14 +10,19 @@ assert.equal(html, await readFile(path.join(root, 'index.html'), 'utf8'));
 assert.match(html, /<title>汇盛支付统一 Demo<\/title>/);
 assert.doesNotMatch(html, /\/Users\/|file:\/\//i, '不能包含本机绝对路径');
 assert.doesNotMatch(html, /<(?:script|link)\b[^>]+(?:src|href)=["'](?:https?:|\/|\.\/assets)/i, '统一壳不能请求外部构建资源');
-for (const id of ['platform', 'tenant', 'merchant']) {
+for (const id of ['platform', 'tenant', 'merchant', 'beauty']) {
   const payload = html.match(new RegExp('<script id="surface-' + id + '" type="application/json">([\\s\\S]*?)<\\/script>'));
   assert.ok(payload, '缺少 ' + id);
   const document = JSON.parse(payload[1]);
   assert.match(document, /<!doctype html>/i);
   assert.doesNotMatch(document, /<(?:script|link)\b[^>]+(?:src|href)=["']\.\//i, id + ' 遗留本地资源依赖');
-  if (id !== 'merchant') {
+  if (id === 'beauty') {
+    assert.match(document, /beauty-documents/);
+    assert.doesNotMatch(document, /beauty-risk-library|beauty-risk\.html|骗子库/);
+    assert.match(document, /当前租户未开通美人桥业务/);
+  } else if (id !== 'merchant') {
     const sources = JSON.parse(document.match(/window\.__HS_EMBEDDED_SOURCES__=([\s\S]*?);<\/script>/)[1]);
+    if(id==='tenant')assert.equal(sources['beauty-risk'],undefined,'骗子库不在本期迁移打包范围');
     const base = id === 'platform' ? root : path.join(root, 'surfaces/tenant');
     const modules = JSON.parse(await readFile(path.join(base, 'src/legacy/modules.json'), 'utf8'));
     for (const module of Object.values(modules)) assert.equal(typeof sources[module.sourceKey], 'string');
@@ -33,4 +38,4 @@ for (const id of ['platform', 'tenant', 'merchant']) {
   }
 }
 assert.ok(Buffer.byteLength(html) < 50 * 1024 * 1024, '单文件超过项目大小门禁');
-console.log('检查通过：发布目录只有 index.html，三端源完整内联，无本机路径或跨项目构建依赖。');
+console.log('检查通过：发布目录只有 index.html，四端源完整内联，无本机路径或跨项目构建依赖。');

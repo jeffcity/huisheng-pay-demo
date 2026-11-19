@@ -1,3 +1,4 @@
+import '../../../src/beauty-model.js';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { mountFrameDocument } from '../../../src/frame-document.js';
 import { Layout, Menu, Breadcrumb, Spin, Result, Tag, Button } from '@arco-design/web-react';
@@ -5,6 +6,8 @@ import AccountMenu from '../../../src/AccountMenu.jsx';
 import { createOwnAccountSession } from '../../../src/own-account-session.js';
 import { MODULES, NAV_GROUPS, UTILITY_ITEMS } from './modules.js';
 import { prepareEmbeddedDocument } from './embed.js';
+
+const beauty = window.HSBeautyDemo;
 
 const accountSession = createOwnAccountSession({ account: 'admin@tenant.example', baselinePassword: 'Tenant#2026', otp: '246810' });
 window.__HSOwnAccountDemo = accountSession;
@@ -40,6 +43,7 @@ export default function App() {
     const fromHash = resolvePageId(window.location.hash.slice(1));
     return MODULES[fromHash] ? fromHash : 'home';
   });
+  const [beautyEnabled, setBeautyEnabled] = useState(() => beauty.enabled(beauty.currentTenantId));
   const [openKeys, setOpenKeys] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -50,15 +54,25 @@ export default function App() {
 
   const openPage = useCallback(async (pageId, { updateHash = true } = {}) => {
     const request = ++requestRef.current;
+    const tenantId = beauty.currentTenantId;
     pageId = resolvePageId(pageId);
     const config = MODULES[pageId] || MODULES.home;
     const resolved = MODULES[pageId] ? pageId : 'home';
     setActivePage(resolved);
+    if (config.module === 'beauty' && !beauty.enabled(beauty.currentTenantId)) {
+      frameHostRef.current?.replaceChildren();
+      setLoading(false); loadingRef.current = false;
+      setError('当前租户未开通美人桥业务，请联系平台管理员。');
+      return;
+    }
+    if (config.module === 'beauty') { frameHostRef.current?.replaceChildren(); frameRef.current=null; }
     setLoading(true);
     loadingRef.current = true;
     setError('');
     try {
-      const doc = await prepareEmbeddedDocument(config.sourceKey, config.module);
+      const doc = await prepareEmbeddedDocument(config.sourceKey, config.module, { ...config, id: resolved, tenantId });
+      if (config.module === 'beauty' && tenantId !== beauty.currentTenantId) throw new Error('租户上下文已变化，请重新打开页面。');
+      if (config.module === 'beauty' && !beauty.enabled(beauty.currentTenantId)) throw new Error('当前租户未开通美人桥业务，请联系平台管理员。');
       const host = frameHostRef.current;
       if (!host || request !== requestRef.current) return;
       mountFrameDocument(host, doc, { title: '汇盛支付租户端 · ' + config.label, frameRef, dataset: { initialHash: config.initialHash || '' }, onLoad: () => {
@@ -83,6 +97,12 @@ export default function App() {
     const key = `${page.group}/${page.subgroup}`;
     setOpenKeys(keys => keys.includes(key) ? keys : [...keys, key]);
   }, [activePage]);
+
+  useEffect(() => beauty.subscribe(id => {
+    if (id !== beauty.currentTenantId) return;
+    setBeautyEnabled(beauty.enabled(id));
+    if (MODULES[activePage]?.module === 'beauty') openPage(activePage);
+  }, window), [activePage, openPage]);
 
   useEffect(() => () => { requestRef.current++; }, []);
 
@@ -115,12 +135,12 @@ export default function App() {
         </div>
         <Menu
           style={{ flex: 1, overflowY: 'auto' }}
-          selectedKeys={[activePage]}
+          selectedKeys={[MODULES[activePage]?.navId || activePage]}
           openKeys={openKeys}
           onClickSubMenu={(_, keys) => setOpenKeys(keys)}
           onClickMenuItem={(key) => openPage(key)}
         >
-          {NAV_GROUPS.map((group) => (
+          {NAV_GROUPS.filter(group => group.title !== '美人桥业务' || beautyEnabled).map((group) => (
             <ItemGroup key={group.title} title={<span className="tenant-nav-group">{group.title}</span>}>
               {group.subgroups.map(title => (
                 <SubMenu key={`${group.title}/${title}`} title={title} className="tenant-nav-submenu">

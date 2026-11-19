@@ -67,8 +67,8 @@ test('解禁原因、验证码格式、权限或租户范围无效时保留原�
 test('正常或已到期账号提示无需解禁，不写成功审计',()=>{
   for(const expired of [false,true]) {const f=unbanFixture();if(expired)f.tenant.loginBanUntil='2000-01-01T00:00:00Z';else {f.tenant.adminLocked=false;f.tenant.loginBanUntil='';}const before=JSON.stringify(f.tenant);f.apply();assert.equal(JSON.stringify(f.tenant),before);assert.equal(f.receipts.length,0);assert.equal(f.notices[0].title,'无需解禁');}
 });
-test('业务页仅保留已授权通道商列表，安全入口使用解禁名称',()=>{
+test('业务页对齐开发环境的业务开通与已授权通道，安全入口使用解禁名称',()=>{
   const start=source.indexOf('    function renderTenantBusiness(');const end=source.indexOf('    function isAdminLoginBanned',start);const business=source.slice(start,end);
-  assert.match(business,/已授权通道商列表/);assert.doesNotMatch(business,/业务开通|去业务开通|授权通道商<\/th>/);
+  assert.match(business,/aria-label="业务开通"/);assert.match(business,/aria-label="已授权通道"/);assert.match(business,/beautyAuthorizationRow/);
   assert.match(source,/data-confirm="解禁"/);assert.doesNotMatch(source,/data-confirm="解锁登录"/);
 });

@@ -1717,6 +1717,7 @@
                   <select id="businessFilter">
                     <option value="all">全部业务</option>
                     <option value="法币业务">法币业务</option>
+                    <option value="美人桥业务">美人桥业务</option>
                   </select>
                 </div>
                 <button class="btn primary" id="applyFilter"><i data-lucide="sliders-horizontal"></i>筛选</button>
@@ -1766,8 +1767,8 @@
       <button class="detail-tab active" data-tab="overview">概览</button>
       <button class="detail-tab" data-tab="business">业务</button>
       <button class="detail-tab" data-tab="security">安全</button>
-      <button class="detail-tab" data-tab="wallet">钱包</button>
       <button class="detail-tab" data-tab="domains">域名管理</button>
+      <button class="detail-tab" data-tab="wallet">租户钱包</button>
       <button class="detail-tab" data-tab="audit">审计日志</button>
     </div>
     <div class="detail-modal-body">
@@ -2193,6 +2194,13 @@
       return tenant;
     }
 
+    const statusTone = {
+      '正常': 'green',
+      '审核中': 'orange',
+      '停用': 'red',
+      '关闭': 'red'
+    };
+
     tenants.forEach(ensureTenantAccessState);
     for (const tenant of tenants) {
       window.HSTenantSettlements?.registerTenant(tenant);
@@ -2313,12 +2321,7 @@
       ]
     ];
 
-    const statusTone = {
-      '正常': 'green',
-      '审核中': 'orange',
-      '停用': 'red',
-      '关闭': 'red'
-    };
+
 
     function platformNow() {
       return new Date().toLocaleString('sv-SE', {
@@ -2512,7 +2515,7 @@
       const rows=[['租户名称','租户编号','联系人','状态','已开通业务','统计日期（UTC+8）','昨日代收跑量（CNY）','昨日代付跑量（CNY）','代收系统费率','代付系统费率','昨日代收已扣系统费（CNY）','昨日代付已扣系统费（CNY）','昨日已扣系统费合计（CNY）','代收待计费笔数','代付待计费笔数','当前剩余系统费（CNY，代收代付共用）']];
       for(const tenant of appState.filtered.filter(tenantInCurrentScope)) {
         const m=tenantListStatistics(tenant,date);
-        rows.push([tenant.name,tenant.id,tenant.contact,tenant.status,tenantBusinessDirections(tenant).map(d=>'CNY '+d).join(' / '),date,m.collection.amount,m.payout.amount,tenantStatisticsRate(m.rates.collection),tenantStatisticsRate(m.rates.payout),m.collection.exactFee,m.payout.exactFee,m.exactTotal,m.collection.pendingCount,m.payout.pendingCount,m.balance]);
+        rows.push([tenant.name,tenant.id,tenant.contact,tenant.status,[...tenantBusinessDirections(tenant).map(d=>'CNY '+d), ...(window.HSBeautyDemo.enabled(tenant.id) ? ['美人桥'] : [])].join(' / '),date,m.collection.amount,m.payout.amount,tenantStatisticsRate(m.rates.collection),tenantStatisticsRate(m.rates.payout),m.collection.exactFee,m.payout.exactFee,m.exactTotal,m.collection.pendingCount,m.payout.pendingCount,m.balance]);
       }
       return rows;
     }
@@ -2552,7 +2555,7 @@
         return '<tr data-index="' + index + '">' +
           '<td><div class="tenant-cell"><strong>' + tenant.name + '</strong><span class="mono">' + tenant.id + (tenant.contact ? ' / ' + escapeHtml(tenant.contact) : '') + '</span>' + '</div></td>' +
           '<td>' + tag(tenant.status, tenant.statusTone) + '</td>' +
-          '<td><div class="tenant-business-tags">' + tenantBusinessDirections(tenant).map(d => tag('CNY ' + d, 'blue')).join('') + '</div></td>' +
+          '<td><div class="tenant-business-tags">' + tenantBusinessDirections(tenant).map(d => tag('CNY ' + d, 'blue')).join('') + (window.HSBeautyDemo.enabled(tenant.id) ? tag('美人桥', 'blue') : '') + '</div></td>' +
           tenantStatisticsCells(statistics) +
           '<td class="action-col"><div class="table-actions">' +
             '<button class="action-link" data-open="' + tenant.id + '">详情</button>' +
@@ -2594,7 +2597,29 @@
     }
 
     function renderTenantBusiness(tenant) {
-      return sectionTitle('已授权通道商') + '<div class="table-wrap"><table aria-label="已授权通道商列表"><thead><tr><th>通道商</th><th>通道商编号</th><th>授权业务</th><th>授权状态</th><th>最近变更</th></tr></thead><tbody>' + renderAuthorizedChannelRows(tenant) + '</tbody></table></div>';
+      const model = window.HSProviderDemo, permissions = getPermissions();
+      const canManage = permissions.canBusinessAuth && tenantInCurrentScope(tenant) && tenant.status !== '关闭';
+      const grants = model.grants.filter(g => g.tenantId === tenant.id && g.status === '已授权');
+      const rows = (tenant.businessCatalog || []).map(item => {
+        const direction = item.name.includes('代收') ? '代收' : '代付';
+        const count = grants.filter(g => model.grantDirections(tenant.id, g.providerId).includes(direction)).length;
+        const action = item.status === '已授权' ? '关闭业务授权' : item.status === '已停用' ? '重新开通业务授权' : '发起业务授权';
+        const actionLabel = item.status === '已授权' ? '停用' : '开通';
+        return '<tr><td>' + escapeHtml(item.name) + '</td><td>CNY</td><td>' + tag(item.status, item.tone || 'gray') + '</td><td>' + count + '</td><td>业务开通模块</td><td>' + escapeHtml(item.updatedAt || (item.status === '已授权' ? '已开通' : '待申请')) + '</td><td><div class="table-actions">' +
+          (canManage ? '<button class="btn" data-confirm="' + action + '" data-confirm-tenant="' + tenant.id + '" data-confirm-business="' + escapeHtml(item.name) + '">' + actionLabel + '</button>' : disabledButton(actionLabel, 'shield', '当前角色或租户状态不允许操作')) +
+          '<button class="btn" data-business-module>去业务开通</button></div></td></tr>';
+      }).join('');
+      const enabled = window.HSBeautyDemo.enabled(tenant.id);
+      const beauty = '<tr id="beautyAuthorizationRow"><td>美人桥</td><td>—</td><td>' + tag(enabled ? '已授权' : '未授权', enabled ? 'green' : 'gray') + '</td><td>—</td><td>美人桥业务</td><td>' + escapeHtml(tenant.beautyUpdatedAt || '—') + '</td><td><div class="table-actions">' +
+        (canManage ? '<button class="btn" data-confirm="' + (enabled ? '停用' : '开通') + '美人桥业务" data-confirm-tenant="' + tenant.id + '">' + (enabled ? '停用' : '开通') + '</button>' : disabledButton(enabled ? '停用' : '开通', 'shield', '当前角色或租户状态不允许操作')) + '</div></td></tr>';
+      const channels = grants.flatMap(g => model.grantDirections(tenant.id,g.providerId).map(direction => {
+        const provider = model.providers.find(p => p.id === g.providerId);
+        return '<tr><td>法币' + direction + '</td><td>' + escapeHtml(provider?.name || g.providerId) + ' / ' + escapeHtml(g.providerId) + '</td><td>当前租户</td><td>' + tag(g.status,'green') + '</td></tr>';
+      })).join('');
+      return '<div class="detail-section-heading"><h3>业务开通</h3><span class="cell-sub">业务开通情况与已授权通道；变更会写入审计</span></div>' +
+        '<div class="table-wrap"><table aria-label="业务开通"><thead><tr><th>业务</th><th>币种</th><th>授权状态</th><th>授权通道</th><th>归属模块</th><th>最近变更</th><th>操作</th></tr></thead><tbody>' + rows + beauty + '</tbody></table></div>' +
+        sectionTitle('已授权通道') + '<div class="table-wrap"><table aria-label="已授权通道"><thead><tr><th>业务</th><th>通道</th><th>授权范围</th><th>状态</th></tr></thead><tbody>' + (channels || '<tr><td colspan="4" class="table-empty">暂无授权通道</td></tr>') + '</tbody></table></div>' +
+        '<div class="notice">停用/重新开通需二次确认并记录审计；复杂通道变更请到业务开通模块。</div>';
     }
 
     function isAdminLoginBanned(tenant) {
@@ -2618,7 +2643,7 @@
     }
 
     function allTenantDomains(tenant) {
-      return [...(tenant.domains || []), ...(tenant.merchantDomains || [])];
+      return [...(tenant.domains || []), ...(tenant.merchantDomains || []), ...(window.HSBeautyDemo?.portalDomains?.(tenant.id)||[])];
     }
 
     function domainActionButtons(domain, permissions) {
@@ -2649,6 +2674,15 @@
           '<td><div class="table-actions">' + domainActionButtons(domain, permissions) + '</div></td>' +
         '</tr>';
       }).join('');
+    }
+
+    function renderBeautyDomainSection(tenant,permissions,readonlyTenant){
+      if(!window.HSBeautyDemo.enabled(tenant.id))return '';
+      const allowed=permissions.canAccessProcess&&!readonlyTenant&&tenantInCurrentScope(tenant);
+      return '<section id="beautyDomainSection">'+sectionTitle('美人桥商户端域名')+
+        '<div class="tag-row" style="margin-bottom:12px">'+(allowed?'<button class="btn primary" data-domain-action="新增美人桥商户端域名"><i data-lucide="plus"></i>新增域名</button>':disabledButton('新增域名','plus','当前角色或租户状态不允许管理域名'))+
+        '<span class="cell-sub">仅用于当前租户的美人桥商户端；可用域名识别租户，登录账号再识别具体商户。</span></div>'+
+        '<div class="table-wrap detail-table"><table aria-label="美人桥商户端域名列表"><thead><tr><th>域名</th><th>状态</th><th style="text-align:right">操作</th></tr></thead><tbody id="beautyDomainRows">'+renderDomainRows(window.HSBeautyDemo.portalDomains(tenant.id),{...permissions,canAccessProcess:allowed})+'</tbody></table></div></section>';
     }
 
     function renderIpRuleRows(type, rules, permissions, readonlyTenant) {
@@ -2754,10 +2788,10 @@
     function renderDomainConfirmForm(title, form, actionBtn) {
       const tenant = currentTenantForAction();
       const domain = currentDomainForAction();
-      if (title === '新增自定义域名' || title === '新增商户端域名') {
-        const merchantPortal = title === '新增商户端域名';
+      if (title === '新增自定义域名' || title === '新增商户端域名' || title === '新增美人桥商户端域名') {
+        const merchantPortal = title === '新增商户端域名' || title === '新增美人桥商户端域名';
         document.getElementById('confirmDetail').textContent = merchantPortal
-          ? '仅平台人员录入当前租户的商户端域名；保存后进入未启用状态，当前租户下全部商户共用。'
+          ? (title === '新增美人桥商户端域名' ? '仅平台人员录入当前租户的美人桥商户端域名；保存后未启用，需启用后才允许识别并登录该租户的美人桥商户端。' : '仅平台人员录入当前租户的商户端域名；保存后进入未启用状态，当前租户下全部商户共用。')
           : '仅平台人员录入租户后台自定义域名；保存后进入未启用状态，不会直接开放登录。';
         form.innerHTML =
           '<div class="field wide"><label for="newCustomDomain">完整域名</label><input id="newCustomDomain" class="mono" placeholder="pay.example.com" autocomplete="off"></div>' +
@@ -2925,6 +2959,13 @@
           '<label for="confirmOperator2fa">当前操作人 2FA 验证码</label>' +
           '<input id="confirmOperator2fa" inputmode="numeric" maxlength="6" placeholder="6 位验证码" autocomplete="one-time-code">' +
         '</div>';
+      if (title === '开通美人桥业务' || title === '停用美人桥业务') {
+        document.getElementById('confirmReason').value = '';
+        actionBtn.className = title.startsWith('开通') ? 'btn primary' : 'btn danger';
+        actionBtn.textContent = title.startsWith('开通') ? '确认开通' : '确认停用';
+        document.getElementById('confirmDetail').textContent = title.startsWith('开通') ? '开通后，该租户可使用美人桥业务及美人桥商户端。' : '停用后，隐藏该租户的美人桥菜单并停止访问相关页面；已有业务数据保留。';
+        return;
+      }
       if (title === '停用租户') {
         form.insertAdjacentHTML('beforeend',
           '<div class="field wide"><label>跨端影响</label><input value="租户端、商户端后续登录与全部新业务被阻止" readonly></div>' +
@@ -3020,7 +3061,7 @@
         const text = [tenant.id, tenant.name, tenant.contact, tenant.domain].join(' ').toLowerCase();
         const okSearch = !search || text.includes(search);
         const okStatus = status === 'all' || tenant.status === status;
-        const okBusiness = business === 'all' || tenant.businessTypes.includes(business);
+        const okBusiness = business === 'all' || (business === '美人桥业务' ? window.HSBeautyDemo.enabled(tenant.id) : tenant.businessTypes.includes(business));
         return tenantInCurrentScope(tenant) && okSearch && okStatus && okBusiness;
       });
 
@@ -3084,7 +3125,7 @@
           kv('租户后台域名', escapeHtml(tenant.domain)) +
           kv('当前状态', tag(tenant.status, tenant.statusTone)) +
           kv('账号配额', String(tenant.accountQuota || 30)) +
-          kv('业务授权数', String(tenantBusinessDirections(tenant).length)) +
+          kv('业务授权数', String(tenantBusinessDirections(tenant).length + (window.HSBeautyDemo.enabled(tenant.id) ? 1 : 0))) +
           kv('创建时间', tenant.createdAt || '2026-07-01 09:00:00') +
           kv('更新时间', tenant.updatedAt || '2026-10-24 10:20:00') +
           kv('租户服务费', escapeHtml(tenantBillingSummary(tenant))) +
@@ -3144,7 +3185,7 @@
         '</div>' +
         '<div class="table-wrap detail-table"><table aria-label="商户端域名列表"><thead><tr><th>域名</th><th>状态</th><th style="text-align:right">操作</th></tr></thead><tbody id="merchantDomainRows">' +
           renderDomainRows(merchantDomains, permissions) +
-        '</tbody></table></div>';
+        '</tbody></table></div>' + renderBeautyDomainSection(tenant,permissions,readonlyTenant);
 
       document.getElementById('tab-audit').innerHTML = '<div class="table-wrap"><table aria-label="租户详情审计日志表格"><thead><tr><th>操作人</th><th>类型</th><th>子类型</th><th>动作</th><th>IP</th><th>时间</th></tr></thead><tbody>' +
         (tenantAuditRows.map(event => '<tr><td>' + escapeHtml(event.operator) + '</td><td>' + escapeHtml(event.role) + '</td><td>' + tag(event.result, event.tone) + '</td><td><strong>' + escapeHtml(event.action) + '</strong><div class="cell-sub">' + escapeHtml(event.object) + '</div><div class="cell-sub">原因：' + escapeHtml(event.reason || '—') + '</div></td><td>' + escapeHtml(event.ip) + '</td><td>' + escapeHtml(event.time) + '</td></tr>').join('') || '<tr><td colspan="6" class="table-empty">暂无审计记录</td></tr>') + '</tbody></table></div>';
@@ -3593,8 +3634,11 @@
         return;
       }
 
-      if (appState.currentConfirm === '新增自定义域名' || appState.currentConfirm === '新增商户端域名') {
+      if (appState.currentConfirm === '新增自定义域名' || appState.currentConfirm === '新增商户端域名' || appState.currentConfirm === '新增美人桥商户端域名') {
         const merchantPortal = appState.currentConfirm === '新增商户端域名';
+        const beautyPortal=appState.currentConfirm==='新增美人桥商户端域名';
+        if(beautyPortal&&(!getPermissions().canAccessProcess||!tenantInCurrentScope(tenant)||!window.HSBeautyDemo.enabled(tenant.id))){showFormError('confirmFormError','当前权限、租户范围或美人桥业务授权已变化，本次未保存。');return}
+
         const raw = document.getElementById('newCustomDomain')?.value.trim().toLowerCase() || '';
         const reason = document.getElementById('domainAddReason')?.value.trim() || '';
         const hostname = raw.replace(/\.$/, '');
@@ -3610,6 +3654,10 @@
         if (duplicate) {
           showFormError('confirmFormError', '该域名已经存在，不能重复绑定。', ['newCustomDomain']);
           return;
+        }
+        if(beautyPortal){
+          try{window.HSBeautyDemo.addPortalDomain(tenant.id,hostname)}catch(error){showFormError('confirmFormError',error.message,['newCustomDomain']);return}
+          finishTenantAction(tenant,{action:'录入美人桥商户端域名',detail:hostname+' 已保存为未启用，启用后可访问当前租户的美人桥商户端',reason});return;
         }
         const domain = {
           id: merchantPortal ? nextMerchantPortalDomainId(tenant) : nextTenantDomainId(tenant),
@@ -3638,9 +3686,16 @@
           return;
         }
         const action = appState.currentConfirm;
+        const beautyPortal=domain.subjectType==='beauty_portal';
+        if(beautyPortal&&(!getPermissions().canAccessProcess||!tenantInCurrentScope(tenant)||!window.HSBeautyDemo.enabled(tenant.id))){showFormError('confirmFormError','当前权限、租户范围或美人桥业务授权已变化，本次未保存。');return}
         const reason = document.getElementById('domainActionReason')?.value.trim() || '';
         const otpField = document.getElementById('domainAction2fa');
         const otp = otpField?.value.trim() || '';
+        if(beautyPortal){
+          if(!reason||!/^\d{6}$/.test(otp)){if(otpField)otpField.value='';showFormError('confirmFormError','请填写原因并输入当前操作人的 6 位 Google 2FA 验证码。');return}
+          try{window.HSBeautyDemo.changePortalDomain(tenant.id,domain.id,action)}catch(error){showFormError('confirmFormError',error.message);return}
+          finishTenantAction(tenant,{action,detail:domain.value+'：'+action+'，仅影响当前租户的美人桥商户端入口',reason});return;
+        }
         if (action === '启用域名') {
           if (!['未启用', '已停用'].includes(domain.status)) {
             showFormError('confirmFormError', '只有未启用或已停用的域名可以启用。');
@@ -3813,6 +3868,19 @@
         return;
       }
 
+      if (appState.currentConfirm === '开通美人桥业务' || appState.currentConfirm === '停用美人桥业务') {
+        if (!getPermissions().canBusinessAuth || !tenantInCurrentScope(tenant)) {
+          otpField.value = '';
+          showFormError('confirmFormError', '当前账号无权变更该租户的美人桥授权，本次未修改状态。');
+          return;
+        }
+        const enabled = appState.currentConfirm === '开通美人桥业务';
+        tenant.beautyUpdatedAt = platformNow();
+        window.HSBeautyDemo.setEnabled(tenant.id, enabled);
+        finishTenantAction(tenant, { action: appState.currentConfirm, detail: enabled ? '该租户已开通美人桥业务' : '该租户美人桥业务已停用，历史数据保留', reason });
+        return;
+      }
+
       if (appState.currentConfirm === '解禁') {
         if (!getPermissions().canSecurity || !tenantInCurrentScope(tenant)) {
           otpField.value = '';
@@ -3859,6 +3927,11 @@
       }
 
       if (appState.currentConfirm === '关闭业务授权' || appState.currentConfirm === '发起业务授权' || appState.currentConfirm === '重新开通业务授权') {
+        if (!getPermissions().canBusinessAuth || !tenantInCurrentScope(tenant)) {
+          otpField.value = '';
+          showFormError('confirmFormError', '当前账号无权变更该租户的业务授权，本次未修改状态。');
+          return;
+        }
         const item = (tenant.businessCatalog || []).find(entry => entry.name === appState.confirmBusinessName);
         if (!item) {
           otpField.value = '';
@@ -3900,6 +3973,15 @@
 
     function bindEvents() {
       document.addEventListener('click', event => {
+        if (event.target.closest('[data-business-module]')) {
+          const guard = window.HSPlatformAuthRouteGuard;
+          if (guard?.isAuthRouteMode()) {
+            const navigation = guard.createAuthorizedNavigation({ href: window.location.pathname + '?platformPage=business#business', pagePermission: 'platform.business_grant.view' });
+            if (!navigation.ok) { showToast('无权访问业务开通', '当前登录权限或状态已变化。'); return; }
+            window.top.location.assign(navigation.href);
+          } else window.parent.postMessage({ type: 'hs-demo-open-module', module: 'business' }, '*');
+          return;
+        }
         const receiptTenant = event.target.closest('[data-receipt-tenant]');
         if (receiptTenant) {
           openDetailModal(receiptTenant.dataset.receiptTenant);
@@ -3960,7 +4042,7 @@
         if (domainFilterBtn) {
           const keyword = (document.getElementById('domainKeyword')?.value || '').trim().toLowerCase();
           const status = document.getElementById('domainStatusFilter')?.value || '';
-          document.querySelectorAll('#tenantDomainRows tr, #merchantDomainRows tr').forEach(row => {
+          document.querySelectorAll('#tenantDomainRows tr, #merchantDomainRows tr, #beautyDomainRows tr').forEach(row => {
             const text = row.textContent.toLowerCase();
             row.hidden = Boolean((keyword && !text.includes(keyword)) || (status && !text.includes(status)));
           });
@@ -3974,7 +4056,7 @@
           const status = document.getElementById('domainStatusFilter');
           if (keyword) keyword.value = '';
           if (status) status.value = '';
-          document.querySelectorAll('#tenantDomainRows tr, #merchantDomainRows tr').forEach(row => { row.hidden = false; });
+          document.querySelectorAll('#tenantDomainRows tr, #merchantDomainRows tr, #beautyDomainRows tr').forEach(row => { row.hidden = false; });
           showToast('域名筛选已重置', '已展示当前租户全部域名记录。');
           return;
         }
