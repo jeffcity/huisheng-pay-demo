@@ -657,8 +657,32 @@ const puppeteer = require('puppeteer-core');
     await set('#messageDate','2026-11-12');await frame.click('#searchMessages');assert.match(await frame.$eval('#messageRows',el=>el.textContent),/暂无符合条件/);
     await frame.click('#resetMessages');await set('#messageGroup','-1009001002');await frame.click('#searchMessages');assert.match(await frame.$eval('#messageRows',el=>el.textContent),/暂无符合条件/);
     await frame.click('#resetMessages');await frame.select('#messageEvent','代付通道商结算通知');await frame.click('#searchMessages');assert.equal(await frame.$$eval('#messageRows tr',els=>els.length),2);assert.match(await frame.$eval('#messageRows .push-content',el=>el.textContent),/共 4 家[\s\S]*通道响应异常/,'原通知保留全文');
-    await frame.evaluate(()=>{const original=URL.createObjectURL;window.__csvRestore=()=>{URL.createObjectURL=original;};URL.createObjectURL=blob=>{window.__messageCsv=blob.text();return original(blob);};});await frame.click('#exportMessages');const csv=await frame.evaluate(()=>window.__messageCsv);await frame.evaluate(()=>window.__csvRestore());assert.match(csv,/"推送时间","推送事件","推送内容"/);assert.match(csv,/代付通道商结算通知/);assert.doesNotMatch(csv,/群发通知商户|群发通知通道|反馈内容|反馈接收群|维护通知|额度核对/);
+    const exportPushHistory = async () => {
+      await frame.evaluate(() => {
+        const original = URL.createObjectURL;
+        window.__csvRestore = () => { URL.createObjectURL = original; };
+        URL.createObjectURL = blob => {
+          window.__messageCsv = blob.text();
+          return original(blob);
+        };
+      });
+      try {
+        await frame.click('#exportMessages');
+        return await frame.evaluate(() => window.__messageCsv);
+      } finally {
+        await frame.evaluate(() => window.__csvRestore());
+      }
+    };
+    const filteredCsv = await exportPushHistory();
+    assert.equal((filteredCsv.match(/^"\d{4}-\d{2}-\d{2} /gm) || []).length, 2);
+    assert.match(filteredCsv, /代付通道商结算通知/);
+    assert.doesNotMatch(filteredCsv, /商户资金划转|群发通知/);
     await frame.click('#resetMessages');
+    const allCsv = await exportPushHistory();
+    assert.match(allCsv, /"推送时间","推送事件","推送内容"/);
+    assert.equal((allCsv.match(/^"\d{4}-\d{2}-\d{2} /gm) || []).length, 9);
+    assert.match(allCsv, /商户资金划转/);
+    assert.doesNotMatch(allCsv, /群发通知商户|群发通知通道|反馈内容|反馈接收群|维护通知|额度核对/);
     console.log('BROADCAST_RECORD_REMOVAL_PASS 9条原通知保留、指令群发及详情移除、刷新筛选导出一致');
     await frame.click('#queryBotsTab');
     assert.equal(await frame.$eval('#collectBotBroadcastEnabled',el=>el.getAttribute('aria-checked')),'false');
