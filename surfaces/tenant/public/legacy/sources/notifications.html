@@ -263,25 +263,6 @@
       .bot-form-actions { flex-wrap:wrap; }
     }
 
-    #messageDetailMask { align-items:center; padding:20px; }
-    #messageDetailMask .modal { display:flex; flex-direction:column; width:min(900px,100%); max-height:calc(100dvh - 40px); }
-    #messageDetailMask .modal-head,#messageDetailMask .modal-actions { flex-shrink:0; }
-    #messageDetailMask .modal-body { overflow:auto; min-height:0; padding:20px; }
-    #messageDetailMask .message-detail-meta { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px 24px; margin:0 0 20px; }
-    #messageDetailMask .message-detail-meta div { min-width:0; }
-    #messageDetailMask dt { color:var(--text-2); font-size:12px; }
-    #messageDetailMask dd { margin:4px 0 0; overflow-wrap:anywhere; font-size:13px; }
-    #messageDetailMask h4 { margin:20px 0 10px; font-size:14px; }
-    #messageDetailMask .message-original { margin:0; padding:16px; border:1px solid var(--border); border-radius:8px; background:var(--surface-soft); white-space:pre-wrap; overflow-wrap:anywhere; font:inherit; font-size:13px; }
-    #messageDetailMask .message-target-table { min-width:660px; table-layout:fixed; }
-    #messageDetailMask th,#messageDetailMask td { padding:10px 8px; font-size:12px; white-space:normal; overflow-wrap:anywhere; vertical-align:top; }
-    #messageDetailMask th:nth-child(1) { width:30%; } #messageDetailMask th:nth-child(2) { width:24%; } #messageDetailMask th:nth-child(3) { width:14%; }
-    #messageDetailMask .message-content-section + .message-content-section { margin-top:24px; padding-top:4px; border-top:1px solid var(--border); }
-    #messageDetailMask .message-delivery-meta { margin:0 0 12px; display:flex; gap:8px 20px; flex-wrap:wrap; color:var(--text-2); font-size:12px; }
-    #messageDetailMask .message-feedback { margin:0; padding:16px; border:1px solid var(--border); border-radius:8px; background:var(--surface-soft); white-space:pre-wrap; overflow-wrap:anywhere; font:inherit; font-size:13px; }
-    #messageDetailMask .message-targets { margin-top:14px; }
-    #messageDetailMask .message-targets summary { cursor:pointer; font-size:13px; color:var(--text-2); padding:8px 0; }
-    @media(max-width:720px){#messageDetailMask .message-detail-meta{grid-template-columns:minmax(0,1fr);}}
   </style>
 <style id="merchant-alert-template-style">#configMask #modalGroup:disabled,#configMask #modalRobot:disabled{background:var(--soft,#f3f6f7);color:var(--muted,#536b77);cursor:not-allowed}</style></head>
 <body>
@@ -303,7 +284,7 @@
 
     <section class="panel" id="messagesPanel" role="tabpanel" aria-labelledby="messagesTab">
       <section class="card filter-card push-filter" aria-label="TG 推送记录筛选">
-        <div class="field"><label for="messageEvent">推送事件</label><select class="control" id="messageEvent"><option value="">全部事件</option><option>群发通知商户</option><option>群发通知通道</option><option>商户钱包地址变更</option><option>商户资金划转</option><option>代付订单驳回</option><option>恶意拉单预警</option><option>同一IP登录失败过多</option><option>账号与角色权限变更</option><option>通知配置变更</option></select></div>
+        <div class="field"><label for="messageEvent">推送事件</label><select class="control" id="messageEvent"><option value="">全部事件</option><option>商户钱包地址变更</option><option>商户资金划转</option><option>代付订单驳回</option><option>恶意拉单预警</option><option>同一IP登录失败过多</option><option>账号与角色权限变更</option><option>通知配置变更</option></select></div>
         <div class="field"><label for="messageGroup">TG 群 ID</label><input class="control" id="messageGroup" placeholder="请输入 TG 群 ID"></div>
         <div class="field"><label for="messageDate">推送日期（UTC+8）</label><input class="control" id="messageDate" type="date"></div>
         <div class="filter-actions"><button class="btn" id="resetMessages" type="button">重置</button><button class="btn primary" id="searchMessages" type="button">搜索</button></div>
@@ -453,14 +434,6 @@
     </form>
   </div>
 
-  <div class="mask" id="messageDetailMask" role="dialog" aria-modal="true" aria-labelledby="messageDetailTitle">
-    <section class="modal message-detail-modal">
-      <header class="modal-head"><h3 id="messageDetailTitle">推送详情</h3><button class="close" id="closeMessageDetail" type="button" aria-label="关闭推送详情">×</button></header>
-      <div class="modal-body" id="messageDetailBody"></div>
-      <footer class="modal-actions"><button class="btn" id="messageDetailDone" type="button">关闭</button></footer>
-    </section>
-  </div>
-
   <div class="mask" id="operatorMask" role="dialog" aria-modal="true" aria-labelledby="operatorModalTitle">
     <form class="modal" id="operatorForm" novalidate>
       <header class="modal-head"><h3 id="operatorModalTitle">新增TG操作员</h3><button class="close" id="closeOperatorModal" type="button" aria-label="关闭TG操作员弹窗">×</button></header>
@@ -510,16 +483,7 @@
     ];
 
 
-    const broadcastMessageData = [
-      {id:"BC-20261112-004",type:"群发通知商户",time:"2026-11-12 11:42:08",date:"2026-11-12",operator:"@tenant_ops",robot:"代收查单机器人",sourceGroup:"-1009005001",command:"通知商户",scope:"本租户全部商户",content:"【维护通知】\n今日 23:00—23:10 进行系统维护，请提前安排订单。维护完成后另行通知。",targets:[{objects:"东盛电商 · MCH-1188",chatId:"-1009001001",status:"成功",reason:""},{objects:"星河游戏 · MCH-2031 / 百胜聚合 · MCH-4116",chatId:"-1009001002",status:"成功",reason:""},{objects:"北辰游戏 · MCH-2209",chatId:"-1009001003",status:"失败",reason:"机器人已被移出该群"}]},
-      {id:"BC-20261112-003",type:"群发通知通道",time:"2026-11-12 11:30:12",date:"2026-11-12",operator:"@finance_ops",robot:"代付查单机器人",sourceGroup:"-1009006001",command:"通知通道=QuickPay CNY 代付，NorthLink 银行卡代付",scope:"指定 2 个通道",content:"【额度核对】\n请核对当前代付可用额度，并在本群回复确认。",targets:[{objects:"QuickPay CNY 代付",chatId:"-1009003001",status:"成功",reason:""},{objects:"NorthLink 银行卡代付",chatId:"-1009003002",status:"成功",reason:""}]},
-      {id:"BC-20261112-002",type:"群发通知商户",time:"2026-11-12 11:15:34",date:"2026-11-12",operator:"@tenant_ops",robot:"代收查单机器人",sourceGroup:"-1009005001",command:"通知商户=东盛电商，北辰游戏",scope:"指定 2 个商户",content:"【对账通知】\n请核对昨日交易数据，有差异请在群内反馈订单号。",targets:[{objects:"东盛电商 · MCH-1188",chatId:"-1009001001",status:"失败",reason:"机器人没有在该群发送消息的权限"},{objects:"北辰游戏 · MCH-2209",chatId:"-1009001003",status:"失败",reason:"接收群不存在或无法访问"}]},
-      {id:"BC-20261112-001",type:"群发通知商户",time:"2026-11-12 10:55:06",date:"2026-11-12",operator:"@finance_ops",robot:"代付查单机器人",sourceGroup:"-1009006001",command:"通知商户",scope:"本租户全部商户",content:"【业务通知】\n今日代付正常受理，请留意剩余预付。",targets:[{objects:"东盛电商 · MCH-1188",chatId:"-1009001001",status:"成功",reason:""},{objects:"星河游戏 · MCH-2031 / 百胜聚合 · MCH-4116",chatId:"-1009001002",status:"成功",reason:""},{objects:"北辰游戏 · MCH-2209",chatId:"-1009001003",status:"成功",reason:""}]}
-    ];
-    // 推送原文与统计反馈分别保存消息快照，打开详情时不拼成同一条通知。
-    const broadcastFeedbackSnapshots={"BC-20261112-004":{"time":"2026-11-12 11:42:12","group":"-1009005001","status":"成功","content":"通知类型：商户通知\n通知范围：本租户全部商户\n目标群数：3\n发送成功：2\n发送失败：1\n\n操作人员：@tenant_ops\n执行时间：2026-11-12 11:42:08（UTC+8）\n批次：BC-20261112-004\n\n失败详情：\n北辰游戏（MCH-2209），群 -1009001003：机器人已被移出该群"},"BC-20261112-003":{"time":"2026-11-12 11:30:16","group":"-1009006001","status":"成功","content":"通知类型：通道通知\n通知对象：QuickPay CNY 代付、NorthLink 银行卡代付\n目标群数：2\n发送成功：2\n发送失败：0\n执行状态：全部发送成功\n\n操作人员：@finance_ops\n执行时间：2026-11-12 11:30:12（UTC+8）\n批次：BC-20261112-003"},"BC-20261112-002":{"time":"2026-11-12 11:15:39","group":"-1009005001","status":"成功","content":"通知类型：商户通知\n通知对象：东盛电商、北辰游戏\n目标群数：2\n发送成功：0\n发送失败：2\n\n操作人员：@tenant_ops\n执行时间：2026-11-12 11:15:34（UTC+8）\n批次：BC-20261112-002\n\n失败详情：\n东盛电商（MCH-1188），群 -1009001001：机器人没有在该群发送消息的权限\n北辰游戏（MCH-2209），群 -1009001003：接收群不存在或无法访问"},"BC-20261112-001":{"time":"2026-11-12 10:55:10","group":"-1009006001","status":"成功","content":"通知类型：商户通知\n通知范围：本租户全部商户\n目标群数：3\n发送成功：3\n发送失败：0\n执行状态：全部发送成功\n\n操作人员：@finance_ops\n执行时间：2026-11-12 10:55:06（UTC+8）\n批次：BC-20261112-001"}};
-    broadcastMessageData.forEach(item=>{item.feedback=broadcastFeedbackSnapshots[item.id];});
-    messageData.unshift(...broadcastMessageData);
+
 
     const merchantAlertTypes=['商户代收余额不足','商户代付余额不足'];
     const isMerchantAlert=type=>merchantAlertTypes.includes(type);
@@ -571,7 +535,6 @@
 
 
     let filteredMessages = messageData.slice();
-    let messageDetailReturnFocus=null;
     let filteredConfigs = configData.slice();
     let editingConfigIndex = null;
     let standardGroupDraft="",standardRobotDraft="";
@@ -609,38 +572,17 @@
       return item.template.replace(/\$\{(\w+)\}/g, function (_, variable) { return item.values[variable] ?? "${" + variable + "}"; });
     }
 
-    function messageTargets(item) {
-      return item.targets || [{objects:item.values?.merchantName || "通知配置接收群",chatId:item.group,status:"成功",reason:""}];
-    }
-    function messageStats(item) {
-      const targets=messageTargets(item),success=targets.filter(row=>row.status==="成功").length,failed=targets.filter(row=>row.status==="失败").length;
-      return {total:targets.length,success,failed,status:failed===0?"成功":success===0?"失败":"部分成功"};
-    }
-    function messageContent(item) { return item.content ?? renderPushedContent(item); }
-    function messageOperator(item) { return item.operator || item.values?.operator || "系统"; }
-    function messageStatusTag(status) { return '<span class="tag '+({成功:"green",部分成功:"orange",失败:"red"}[status] || "gray")+'">'+escapeHtml(status)+'</span>'; }
     function renderMessages() {
       byId("messageRows").innerHTML=filteredMessages.length?filteredMessages.map(function(item){
-        const detail=item.id?'<button class="link-btn" type="button" data-message-detail="'+messageData.indexOf(item)+'" aria-label="查看'+escapeHtml(item.id)+'详情">群发详情</button>':'';
-        return '<tr><td class="mono">'+escapeHtml(item.time)+'</td><td><span class="tag blue">'+escapeHtml(item.type)+'</span></td><td><div class="push-content">'+escapeHtml(messageContent(item))+'</div>'+detail+'</td></tr>';
+        return '<tr><td class="mono">'+escapeHtml(item.time)+'</td><td><span class="tag blue">'+escapeHtml(item.type)+'</span></td><td><div class="push-content">'+escapeHtml(renderPushedContent(item))+'</div></td></tr>';
       }).join(''):'<tr><td class="empty" colspan="3">暂无符合条件的 TG 推送记录</td></tr>';
       byId("messageCount").textContent="共 "+filteredMessages.length+" 条";byId("messagePagerText").textContent="共 "+filteredMessages.length+" 条";byId("messageTabCount").textContent=messageData.length;
     }
     function searchMessages() {
       const event=byId("messageEvent").value,group=byId("messageGroup").value.trim(),date=byId("messageDate").value;
-      filteredMessages=messageData.filter(item=>(!event||item.type===event)&&(!group||messageTargets(item).some(target=>target.chatId.includes(group)))&&(!date||item.date===date));renderMessages();toast("已找到 "+filteredMessages.length+" 条 TG 推送记录");
+      filteredMessages=messageData.filter(item=>(!event||item.type===event)&&(!group||item.group.includes(group))&&(!date||item.date===date));renderMessages();toast("已找到 "+filteredMessages.length+" 条 TG 推送记录");
     }
     function resetMessages() { ["messageEvent","messageGroup","messageDate"].forEach(id=>byId(id).value="");filteredMessages=messageData.slice();renderMessages();toast("TG 推送记录筛选条件已重置"); }
-    function openMessageDetail(index,button) {
-      const item=messageData[index];if(!item)return;
-      const stats=messageStats(item),fields=[["发生时间（UTC+8）",item.time],["推送事件",item.type],["操作人",messageOperator(item)],["机器人",item.robot||"—"],["群发批次",item.id||"—"],["发起群 Chat ID",item.sourceGroup||"—"],["发送范围",item.scope||"通知配置接收群"],["原始指令",item.command||"—"]];
-      const feedback=item.feedback;
-      const feedbackSection=feedback?'<section class="message-content-section" aria-labelledby="messageFeedbackTitle"><h4 id="messageFeedbackTitle">反馈内容</h4><div class="message-delivery-meta"><span>接收群（管理群）：<span class="mono">'+escapeHtml(feedback.group)+'</span></span><span>反馈时间：'+escapeHtml(feedback.time)+'（UTC+8）</span><span>反馈消息发送：'+escapeHtml(feedback.status)+'</span></div><pre class="message-feedback">'+escapeHtml(feedback.content)+'</pre></section>':'';
-      byId("messageDetailBody").innerHTML='<dl class="message-detail-meta">'+fields.map(([label,value])=>'<div><dt>'+escapeHtml(label)+'</dt><dd>'+escapeHtml(value)+'</dd></div>').join('')+'</dl><section class="message-content-section" aria-labelledby="messagePushTitle"><h4 id="messagePushTitle">推送内容</h4><div class="message-delivery-meta"><span>接收群：商户／通道群，共 '+stats.total+' 个</span><span>推送时间：'+escapeHtml(item.time)+'（UTC+8）</span><span>群发结果：'+messageStatusTag(stats.status)+'</span></div><pre class="message-original">'+escapeHtml(messageContent(item))+'</pre><details class="message-targets"><summary>查看各接收群结果</summary><div class="table-wrap"><table class="message-target-table"><thead><tr><th>接收对象</th><th>接收群 Chat ID</th><th>发送结果</th><th>失败原因</th></tr></thead><tbody>'+messageTargets(item).map(target=>'<tr><td>'+escapeHtml(target.objects)+'</td><td class="mono">'+escapeHtml(target.chatId)+'</td><td>'+messageStatusTag(target.status)+'</td><td>'+escapeHtml(target.reason||"—")+'</td></tr>').join('')+'</tbody></table></div></details></section>'+feedbackSection;
-      messageDetailReturnFocus=button;byId("messageDetailMask").classList.add("show");byId("closeMessageDetail").focus();
-    }
-    function closeMessageDetail() { byId("messageDetailMask").classList.remove("show");if(messageDetailReturnFocus?.isConnected)messageDetailReturnFocus.focus(); }
-
     function renderConfigs() {
       byId("configRows").innerHTML = filteredConfigs.length ? filteredConfigs.map(function (item, visibleIndex) {
         const index = configData.indexOf(item);
@@ -823,12 +765,8 @@
     byId("resetMessages").addEventListener("click",resetMessages);
     byId("refreshMessages").addEventListener("click",function(){filteredMessages=messageData.slice();renderMessages();toast("TG 推送记录已刷新");});
     byId("messageGroup").addEventListener("keydown",event=>{if(event.key==="Enter")searchMessages();});
-    byId("messageRows").addEventListener("click",event=>{const button=event.target.closest("[data-message-detail]");if(button)openMessageDetail(Number(button.dataset.messageDetail),button);});
-    byId("closeMessageDetail").addEventListener("click",closeMessageDetail);byId("messageDetailDone").addEventListener("click",closeMessageDetail);
-    byId("messageDetailMask").addEventListener("click",event=>{if(event.target===byId("messageDetailMask"))closeMessageDetail();});
-    document.addEventListener("keydown",event=>{if(!byId("messageDetailMask").classList.contains("show"))return;if(event.key==="Escape"){event.preventDefault();closeMessageDetail();}if(event.key==="Tab"){const first=byId("closeMessageDetail"),last=byId("messageDetailDone");if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}}});
     byId("exportMessages").addEventListener("click",function(){
-      exportCsv("汇盛租户端-TG推送记录.csv","推送时间,推送事件,推送内容,反馈内容,反馈接收群ChatID,反馈时间",filteredMessages.map(item=>[item.time,item.type,messageContent(item),item.feedback?.content||"",item.feedback?.group||"",item.feedback?.time||""]));toast("已按当前筛选条件导出 TG 推送记录");
+      exportCsv("汇盛租户端-TG推送记录.csv","推送时间,推送事件,推送内容",filteredMessages.map(item=>[item.time,item.type,renderPushedContent(item)]));toast("已按当前筛选条件导出 TG 推送记录");
     });
 
     byId("searchConfigs").addEventListener("click", searchConfigs);
@@ -1231,5 +1169,6 @@
     renderMessages();
     renderConfigs();
   </script>
+
 </body>
 </html>
