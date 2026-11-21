@@ -72,15 +72,45 @@
       if (delta < 0n && after < 0n && !w.allowNegative) throw new Error('未开启允许负余额，不能调减为负数');
       return { amount: exact(amount), change: exact(delta), beforeBalance: exact(w.balance), afterBalance: exact(after), reason, operator, revision: w.revision };
     }
-    function feeFacts(tenantId, month) {
+    function liveFeeFacts(tenantId, includesDate) {
       ensure(tenantId);
-      if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) throw new Error('请选择有效月份');
-      const entries = clone([...charges.values()].filter(e => e.tenantId === tenantId && e.succeededAt.slice(0,7) === month).sort((a,b) => b.deductedAt.localeCompare(a.deductedAt) || b.id.localeCompare(a.id)));
-      const ids = new Set(entries.map(e => e.orderId));
-      const knownPending = [...pending.values()].filter(e => e.tenantId === tenantId && e.succeededAt.slice(0,7) === month).map(e => ({id:e.orderId,tenantId,direction:e.direction,status:'成功',amount:e.orderAmount,completedAt:e.succeededAt}));
-      const missingIds = new Set(knownPending.map(o => o.id));
-      const missing = knownPending.concat((owner.__HSTenantSettlements?.sourceOrders() || []).filter(o => o.tenantId === tenantId && o.status === '成功' && ['代收','代付'].includes(o.direction) && o.completedAt.slice(0,7) === month && !ids.has(o.id) && !missingIds.has(o.id)));
+      const entries = clone([...charges.values()].filter(e => e.tenantId === tenantId && includesDate(e.succeededAt.slice(0,10))).sort((a,b) => b.deductedAt.localeCompare(a.deductedAt) || b.id.localeCompare(a.id)));
+      const knownPending = [...pending.values()].filter(e => e.tenantId === tenantId && includesDate(e.succeededAt.slice(0,10))).map(e => ({id:e.orderId,tenantId,direction:e.direction,status:'成功',amount:e.orderAmount,completedAt:e.succeededAt}));
+      const missing = knownPending.concat((owner.__HSTenantSettlements?.sourceOrders() || []).filter(order => {
+        if (order.tenantId !== tenantId || order.status !== '成功' || !['代收','代付'].includes(order.direction)) return false;
+        const key = `${tenantId}:${order.id}`;
+        // Existing wallet snapshots set the success date even if the order feed later changes it.
+        return !charges.has(key) && !pending.has(key) && includesDate(order.completedAt.slice(0,10));
+      }));
       return { entries, missing };
+    }
+    function feeFacts(tenantId, month) {
+      if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) throw new Error('请选择有效月份');
+      return liveFeeFacts(tenantId, date => date.slice(0,7) === month);
+    }
+    function validCalendarDate(date) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return false;
+      const parsed = new Date(date + 'T00:00:00Z');
+      return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0,10) === date;
+    }
+    function emptyFeeStats() {
+      const direction = () => ({ count:0, amount:0n, fee:0n, pendingCount:0 });
+      return { collection:direction(), payout:direction() };
+    }
+    function addFeeStat(stats, entry) {
+      const total = stats[entry.direction === '代收' ? 'collection' : 'payout'];
+      total.count++;
+      total.amount += parse(entry.orderAmount,2) * 1000000n;
+      if (entry.fee === null) total.pendingCount++;
+      else total.fee += parse(entry.fee);
+    }
+    function presentFeeStats(stats) {
+      const present = value => ({ count:value.count, amount:exact(value.amount), exactFee:exact(value.fee), pendingCount:value.pendingCount });
+      return {
+        collection:present(stats.collection), payout:present(stats.payout),
+        exactTotal:exact(stats.collection.fee + stats.payout.fee),
+        pendingCount:stats.collection.pendingCount + stats.payout.pendingCount
+      };
     }
     const model = {
       wallet(tenantId) { const w = ensure(tenantId); return { tenantId, currency: 'CNY', balance: exact(w.balance), allowNegative: w.allowNegative, status: w.status, profileInitialized: w.profileInitialized, revision: w.revision }; },
@@ -139,6 +169,18 @@
           return (type === 'all' || type === recordType) && (!keyword || [e.id,e.orderId].some(value => String(value || '').toLowerCase().includes(keyword))) && (!from || date >= from) && (!to || date <= to);
         });
       },
+      statisticsForRange(tenantId, from, to) {
+        if (!validCalendarDate(from) || !validCalendarDate(to)) throw new Error('请选择统计开始和结束日期');
+        if (from > to) throw new Error('统计开始日期不能晚于结束日期');
+        const { entries, missing } = liveFeeFacts(tenantId, date => date >= from && date <= to);
+        const totals = emptyFeeStats();
+        for (const entry of entries) addFeeStat(totals, entry);
+        for (const order of missing) {
+          if (order.currency && order.currency !== 'CNY') continue;
+          addFeeStat(totals, { direction: order.direction, orderAmount: order.amount, fee: null });
+        }
+        return presentFeeStats(totals);
+      },
       daily(tenantId, month, filters = {}) {
         let { entries, missing } = feeFacts(tenantId, month);
         const from = filters.from || '', to = filters.to || '';
@@ -149,23 +191,16 @@
         if (from && to && from > to) throw new Error('开始日期不能晚于结束日期');
         const saved = owner.__HSTenantSettlements?.find(tenantId, month);
         if (saved?.entries && filters.source !== 'live') { entries = saved.entries; missing = []; }
-        const empty = () => ({ count:0, amount:0n, fee:0n, pendingCount:0 });
-        const group = () => ({ collection:empty(), payout:empty() });
-        const days = new Map(), totals = group();
+        const days = new Map(), totals = emptyFeeStats();
         const facts = entries.concat(missing.map(o => ({direction:o.direction,succeededAt:o.completedAt,orderAmount:o.amount,fee:null})));
-        for (const e of facts) {
-          const date = e.succeededAt.slice(0,10), key = e.direction === '代收' ? 'collection' : 'payout';
+        for (const entry of facts) {
+          const date = entry.succeededAt.slice(0,10);
           if ((from && date < from) || (to && date > to)) continue;
-          if (!days.has(date)) days.set(date,group());
-          for (const target of [days.get(date)[key],totals[key]]) {
-            target.count++;
-            target.amount += parse(e.orderAmount,2) * 1000000n;
-            if (e.fee === null) target.pendingCount++; else target.fee += parse(e.fee);
-          }
+          if (!days.has(date)) days.set(date,emptyFeeStats());
+          addFeeStat(days.get(date), entry);
+          addFeeStat(totals, entry);
         }
-        const present = value => ({count:value.count,amount:exact(value.amount),exactFee:exact(value.fee),pendingCount:value.pendingCount});
-        const row = value => ({collection:present(value.collection),payout:present(value.payout),exactTotal:exact(value.collection.fee+value.payout.fee),pendingCount:value.collection.pendingCount+value.payout.pendingCount});
-        return { month, rows:[...days].sort(([a],[b])=>b.localeCompare(a)).map(([date,value])=>({date,...row(value)})), totals:row(totals) };
+        return { month, rows:[...days].sort(([a],[b])=>b.localeCompare(a)).map(([date,value])=>({date,...presentFeeStats(value)})), totals:presentFeeStats(totals) };
       },
       reconcile(tenantId, month) {
         const { entries, missing } = feeFacts(tenantId, month);
