@@ -1580,7 +1580,23 @@
 </style>
 
   <style id="tenant-list-operating-metrics">
-    body .tenant-list-panel .tenant-statistics-note{margin:0;padding:0 16px;color:var(--text-secondary);font-size:12px;line-height:1.7}
+    .tenant-volume-heading{display:flex;align-items:center;gap:3px}
+    .tenant-volume-heading>span:first-child{white-space:nowrap}
+    .tenant-volume-info{position:relative;display:inline-flex}
+    .tenant-volume-tooltip{display:none;position:absolute;z-index:3;top:100%;left:-32px;width:202px;padding:8px 10px;border-radius:6px;background:#173b47;color:#fff;font-size:12px;font-weight:400;line-height:1.5}
+    .tenant-volume-info:hover .tenant-volume-tooltip,.tenant-volume-info:focus-within .tenant-volume-tooltip{display:block}
+    .tenant-volume-range{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;max-width:100%;color:var(--text-secondary);font-size:12px}
+    .tenant-statistics-caption{display:inline-flex;align-items:center;gap:3px}
+    .tenant-statistics-dates{display:grid;grid-template-columns:minmax(0,154px) auto minmax(0,154px);align-items:center;gap:6px;min-width:0;max-width:100%}
+    @media(max-width:420px){.tenant-statistics-dates{grid-template-columns:minmax(0,154px)}}
+    .tenant-statistics-dates input{box-sizing:border-box;width:100%;min-width:0;min-height:34px;padding:0 7px;border:1px solid var(--border);border-radius:var(--radius-md);background:#fff;color:var(--text-primary);font:inherit;font-variant-numeric:tabular-nums}
+    .tenant-statistics-dates input[aria-invalid="true"]{border-color:#cf333b}
+    .tenant-volume-range .btn{min-height:34px;padding:0 12px}
+    .tenant-volume-error{flex-basis:100%;margin:0;color:#b4232a;font-size:12px}
+    .tenant-statistics-applied{flex-basis:100%;margin:0;color:var(--text-secondary);font-size:12px}
+    .tenant-statistics-bar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;margin:0 16px;color:var(--text-secondary);font-size:12px;line-height:1.7}
+    .tenant-statistics-note{margin:0}
+    .tenant-statistics-label{color:var(--text-primary);font-weight:500;white-space:nowrap}
     body .tenant-list-panel #tableWrap{overflow-x:auto;max-width:100%}
     body .tenant-list-panel #tableWrap>table{table-layout:fixed;width:100%;min-width:1000px}
     body .tenant-list-panel #tableWrap th,body .tenant-list-panel #tableWrap td{padding:9px 6px;font-size:12px;vertical-align:top;line-height:18px;overflow-wrap:anywhere}
@@ -1724,7 +1740,26 @@
                 <button class="btn" id="clearFilter">清空</button><button class="btn" id="exportTenants">导出</button><button class="btn primary" id="createTenantTop"><i data-lucide="plus"></i>新增租户</button>
               </div>
 
-              <p class="tenant-statistics-note" id="tenantStatisticsNote" role="status"></p>
+              <div class="tenant-statistics-bar">
+                <form class="tenant-volume-range" id="tenantVolumeForm" aria-labelledby="tenantVolumeRangeLabel" novalidate>
+                  <div class="tenant-statistics-caption">
+                    <span class="tenant-statistics-label" id="tenantVolumeRangeLabel">统计日期（UTC+8）</span>
+                    <span class="tenant-volume-info">
+                      <button type="button" class="tenant-metric-help" aria-label="统计日期说明" aria-describedby="tenantStatisticsTooltip">ⓘ</button>
+                      <span id="tenantStatisticsTooltip" class="tenant-volume-tooltip" role="tooltip">跑量与系统费使用同一日期范围，按 UTC+8 的订单成功时间统计，包含开始和结束日期。</span>
+                    </span>
+                  </div>
+                  <div class="tenant-statistics-dates">
+                    <input id="tenantVolumeFrom" type="date" min="0001-01-01" max="9999-12-31" aria-label="统计开始日期" aria-describedby="tenantVolumeError" required>
+                    <span aria-hidden="true">至</span>
+                    <input id="tenantVolumeTo" type="date" min="0001-01-01" max="9999-12-31" aria-label="统计结束日期" aria-describedby="tenantVolumeError" required>
+                  </div>
+                  <button type="submit" class="btn primary">应用</button>
+                  <p id="tenantVolumeError" class="tenant-volume-error" role="alert" hidden></p>
+                  <p id="tenantStatisticsAppliedRange" class="tenant-statistics-applied" role="status" hidden></p>
+                </form>
+                <p class="tenant-statistics-note" id="tenantStatisticsNote">系统费按计费快照汇总，剩余为当前共用系统费钱包余额</p>
+              </div>
               <div class="table-wrap" id="tableWrap">
                 <table aria-label="租户列表表格">
                   <thead>
@@ -1732,9 +1767,17 @@
                       <th>租户</th>
                       <th>状态</th>
                       <th>已开通业务</th>
-                      <th>昨日跑量（CNY）</th>
+                      <th>
+                        <div class="tenant-volume-heading">
+                          <span>跑量（CNY）</span>
+                          <span class="tenant-volume-info">
+                            <button type="button" class="tenant-metric-help" aria-label="跑量统计说明" aria-describedby="tenantVolumeTooltip">ⓘ</button>
+                            <span id="tenantVolumeTooltip" class="tenant-volume-tooltip" role="tooltip">按表格上方的统计日期范围汇总成功订单金额，以 UTC+8 的订单成功时间为准。</span>
+                          </span>
+                        </div>
+                      </th>
                       <th>系统费率</th>
-                      <th>昨日系统费（CNY）</th>
+                      <th>系统费（CNY）</th>
                       <th>剩余系统费（CNY）<button type="button" class="tenant-metric-help" aria-label="剩余系统费说明" title="代收和代付共用一个系统费钱包，显示当前剩余余额；不重复按业务展示。">ⓘ</button></th>
                       <th class="action-col">操作</th>
                     </tr>
@@ -2251,6 +2294,7 @@
       page: 1,
       pageSize: 10,
       filtered: tenants.slice(),
+      statisticsRange: null,
       currentConfirm: '高风险操作',
       currentRole: platformTenantAuthorization ? '登录账号' : '平台超管',
       editingTenantId: '',
@@ -2469,6 +2513,48 @@
       return new Date(Date.parse(today + 'T00:00:00Z') - 86400000).toISOString().slice(0,10);
     }
 
+    function tenantStatisticsRange() {
+      const date = tenantStatisticsDate();
+      return appState.statisticsRange || { from: date, to: date };
+    }
+
+    function updateTenantVolumeError(message) {
+      const error = document.getElementById('tenantVolumeError');
+      error.textContent = message;
+      error.hidden = !message;
+      ['tenantVolumeFrom', 'tenantVolumeTo'].forEach(id => {
+        const input = document.getElementById(id);
+        if (message) input.setAttribute('aria-invalid', 'true');
+        else input.removeAttribute('aria-invalid');
+      });
+    }
+
+    function updateAppliedStatisticsRange() {
+      const { from, to } = tenantStatisticsRange();
+      const matches = document.getElementById('tenantVolumeFrom').value === from
+        && document.getElementById('tenantVolumeTo').value === to;
+      const hint = document.getElementById('tenantStatisticsAppliedRange');
+      hint.hidden = matches;
+      hint.textContent = matches ? '' : `当前统计：${from} 至 ${to}`;
+    }
+
+    function applyTenantVolumeRange(event) {
+      event.preventDefault();
+      const start = document.getElementById('tenantVolumeFrom');
+      const end = document.getElementById('tenantVolumeTo');
+      const range = { from: start.value, to: end.value };
+      const invalid = !start.validity.valid ? start : !end.validity.valid ? end : null;
+      if (invalid || range.from > range.to) {
+        updateTenantVolumeError(invalid ? '请选择统计开始和结束日期' : '统计开始日期不能晚于结束日期');
+        (invalid || end).focus();
+        return;
+      }
+      updateTenantVolumeError('');
+      appState.statisticsRange = range;
+      renderRows();
+      updateAppliedStatisticsRange();
+    }
+
     function tenantStatisticsMoney(value) {
       const text = String(value), match = /^(-?)(\d+)(?:\.(\d{1,8}))?$/.exec(text);
       if (!match) throw new Error('系统费金额格式无效');
@@ -2480,12 +2566,14 @@
       return policy.mode === 'percentage' ? policy.value + '%' : 'CNY ' + policy.value + ' / 笔';
     }
 
-    function tenantListStatistics(tenant, date = tenantStatisticsDate()) {
+    function tenantListStatistics(tenant, range = tenantStatisticsRange()) {
       if (!tenantInCurrentScope(tenant)) throw new Error('无权查看该租户统计');
-      const model = window.HSFeeWallets, daily = model.daily(tenant.id,date.slice(0,7),{from:date,to:date,source:'live'}).totals;
-      return {date, collection:daily.collection, payout:daily.payout, exactTotal:daily.exactTotal,
-        rates:window.HSProviderDemo.tenantBilling(tenant.id),
-        balance:model.wallet(tenant.id).balance};
+      const model = window.HSFeeWallets;
+      return {
+        ...model.statisticsForRange(tenant.id, range.from, range.to),
+        rates: window.HSProviderDemo.tenantBilling(tenant.id),
+        balance: model.wallet(tenant.id).balance
+      };
     }
 
     function tenantStatisticsLines(collect, payout, total) {
@@ -2511,19 +2599,29 @@
 
     function tenantListExportRows() {
       if (!canExportTenantList()) throw new Error('无租户列表导出权限');
-      const date=tenantStatisticsDate();
-      const rows=[['租户名称','租户编号','联系人','状态','已开通业务','统计日期（UTC+8）','昨日代收跑量（CNY）','昨日代付跑量（CNY）','代收系统费率','代付系统费率','昨日代收已扣系统费（CNY）','昨日代付已扣系统费（CNY）','昨日已扣系统费合计（CNY）','代收待计费笔数','代付待计费笔数','当前剩余系统费（CNY，代收代付共用）']];
-      for(const tenant of appState.filtered.filter(tenantInCurrentScope)) {
-        const m=tenantListStatistics(tenant,date);
-        rows.push([tenant.name,tenant.id,tenant.contact,tenant.status,[...tenantBusinessDirections(tenant).map(d=>'CNY '+d), ...(window.HSBeautyDemo.enabled(tenant.id) ? ['美人桥'] : [])].join(' / '),date,m.collection.amount,m.payout.amount,tenantStatisticsRate(m.rates.collection),tenantStatisticsRate(m.rates.payout),m.collection.exactFee,m.payout.exactFee,m.exactTotal,m.collection.pendingCount,m.payout.pendingCount,m.balance]);
+      const range = tenantStatisticsRange();
+      const rows = [[
+        '租户名称','租户编号','联系人','状态','已开通业务','统计开始日期（UTC+8）','统计结束日期（UTC+8）',
+        '代收跑量（CNY）','代付跑量（CNY）','代收系统费率','代付系统费率',
+        '代收已扣系统费（CNY）','代付已扣系统费（CNY）','已扣系统费合计（CNY）',
+        '代收待计费笔数','代付待计费笔数','当前剩余系统费（CNY，代收代付共用）'
+      ]];
+      for (const tenant of appState.filtered.filter(tenantInCurrentScope)) {
+        const m = tenantListStatistics(tenant, range);
+        const businesses = tenantBusinessDirections(tenant).map(direction => 'CNY ' + direction);
+        if (window.HSBeautyDemo.enabled(tenant.id)) businesses.push('美人桥');
+        rows.push([
+          tenant.name,tenant.id,tenant.contact,tenant.status,businesses.join(' / '),range.from,range.to,
+          m.collection.amount,m.payout.amount,tenantStatisticsRate(m.rates.collection),tenantStatisticsRate(m.rates.payout),
+          m.collection.exactFee,m.payout.exactFee,m.exactTotal,m.collection.pendingCount,m.payout.pendingCount,m.balance
+        ]);
       }
       return rows;
     }
 
     function renderRows() {
       const rows = document.getElementById('tenantRows');
-      const statisticsDate = tenantStatisticsDate();
-      document.getElementById('tenantStatisticsNote').textContent = '昨日：' + statisticsDate + '（UTC+8） · 跑量按成功订单统计 · 系统费按计费快照汇总 · 剩余为当前共用系统费钱包余额';
+      const range = tenantStatisticsRange();
       const total = appState.filtered.length;
       const pages = Math.max(1, Math.ceil(total / appState.pageSize));
       appState.page = Math.min(appState.page, pages);
@@ -2544,7 +2642,7 @@
       }
 
       rows.innerHTML = result.filter(tenantInCurrentScope).map((tenant, index) => {
-        const statistics = tenantListStatistics(tenant,statisticsDate);
+        const statistics = tenantListStatistics(tenant,range);
         const statusAction = !permissions.canSecurity
           ? ''
           : tenant.status === '正常'
@@ -3066,7 +3164,7 @@
       });
 
       renderRows();
-      if (announce) showToast('筛选已更新', '结果已按租户、业务和状态刷新。');
+      if (announce) showToast('筛选已更新', '租户列表已按当前条件更新。');
     }
 
     function exportTenantList() {
@@ -4087,7 +4185,14 @@
 
       document.getElementById('walletAdjustSubmit').addEventListener('click', submitWalletAdjustment);
       ['walletAdjustDirection','walletAdjustAmount','walletAdjustReason'].forEach(id => document.getElementById(id).addEventListener('input', previewWalletAdjustment));
-      document.getElementById('applyFilter').addEventListener('click', applyFilters);
+      document.getElementById('applyFilter').addEventListener('click', () => applyFilters());
+      document.getElementById('tenantVolumeForm').addEventListener('submit', applyTenantVolumeRange);
+      document.getElementById('tenantVolumeForm').addEventListener('input', event => {
+        if (event.target.type === 'date') {
+          updateTenantVolumeError('');
+          updateAppliedStatisticsRange();
+        }
+      });
       document.getElementById('clearFilter').addEventListener('click', clearFilters);
       document.getElementById('globalSearch').addEventListener('input', applyFilters);
       document.getElementById('roleSelect').addEventListener('change', event => {
@@ -4151,6 +4256,10 @@
     }
 
     function init() {
+      const range = tenantStatisticsRange();
+      appState.statisticsRange = range;
+      document.getElementById('tenantVolumeFrom').value = range.from;
+      document.getElementById('tenantVolumeTo').value = range.to;
       applyFilters(false);
       renderOperationReceipt();
       bindEvents();
