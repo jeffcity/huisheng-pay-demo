@@ -10,13 +10,20 @@ assert.equal(html, await readFile(path.join(root, 'index.html'), 'utf8'));
 assert.match(html, /<title>汇盛支付统一 Demo<\/title>/);
 assert.doesNotMatch(html, /\/Users\/|file:\/\//i, '不能包含本机绝对路径');
 assert.doesNotMatch(html, /<(?:script|link)\b[^>]+(?:src|href)=["'](?:https?:|\/|\.\/assets)/i, '统一壳不能请求外部构建资源');
-for (const id of ['platform', 'tenant', 'merchant', 'beauty']) {
+for (const id of ['platform', 'tenant', 'merchant', 'address', 'beauty']) {
   const payload = html.match(new RegExp('<script id="surface-' + id + '" type="application/json">([\\s\\S]*?)<\\/script>'));
   assert.ok(payload, '缺少 ' + id);
   const document = JSON.parse(payload[1]);
   assert.match(document, /<!doctype html>/i);
   assert.doesNotMatch(document, /<(?:script|link)\b[^>]+(?:src|href)=["']\.\//i, id + ' 遗留本地资源依赖');
-  if (id === 'beauty') {
+  if (id === 'address') {
+    const sources = JSON.parse(document.match(/<script id="address-documents" type="application\/json">([\s\S]*?)<\/script>/)[1]);
+    assert.deepEqual(Object.keys(sources).sort(), ['amount-level', 'wallet-address']);
+    for (const [key, source] of Object.entries(sources)) {
+      assert.equal(source, await readFile(path.join(root, 'surfaces/address/sources', key + '.html'), 'utf8'));
+      assert.doesNotMatch(source, /LAN_SHENG|LS-|bluepay|__BP_|藍盛|蓝盛|localStorage|sessionStorage|fetch\(|XMLHttpRequest/);
+    }
+  } else if (id === 'beauty') {
     assert.match(document, /beauty-documents/);
     assert.doesNotMatch(document, /beauty-risk-library|beauty-risk\.html|骗子库/);
     assert.match(document, /当前租户未开通美人桥业务/);
@@ -38,4 +45,4 @@ for (const id of ['platform', 'tenant', 'merchant', 'beauty']) {
   }
 }
 assert.ok(Buffer.byteLength(html) < 50 * 1024 * 1024, '单文件超过项目大小门禁');
-console.log('检查通过：发布目录只有 index.html，四端源完整内联，无本机路径或跨项目构建依赖。');
+console.log('检查通过：发布目录只有 index.html，五端源完整内联，无本机路径或跨项目构建依赖。');

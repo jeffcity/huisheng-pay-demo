@@ -495,6 +495,35 @@
     .auto-blacklist-fields .policy-failure-types span{background:var(--color-primary-light);color:var(--color-primary);padding:4px 8px;border-radius:3px}
     .auto-blacklist-fields [hidden]{display:none!important}
 
+
+/* Audit search belongs only to the current tenant audit view. */
+#view-audit .audit-search-filters { display:flex; flex-wrap:wrap; gap:12px 16px; align-items:end; }
+#view-audit .audit-search-filters .field { flex:1 1 185px; min-width:0; }
+#view-audit .audit-search-filters .audit-search-time { flex:2 1 430px; }
+#view-audit .audit-search-range { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+#view-audit .audit-search-range input { flex:1 1 190px; min-width:0; }
+#view-audit .audit-search-filters input,#view-audit .audit-search-filters select { width:100%; min-width:0; }
+#view-audit #tenantAuditMerchant:disabled { background:var(--color-bg-subtle,#f5f7f8); cursor:not-allowed; }
+#view-audit .audit-search-actions { display:flex; gap:8px; }
+#view-audit .audit-search-count { padding:12px 16px; margin:0; color:var(--muted); }
+#view-audit .audit-search-empty { padding:24px; text-align:center; color:var(--muted); }
+#view-audit .table-wrap { overflow-x:auto; }
+#view-audit .tenant-audit-table { min-width:1230px; table-layout:fixed; }
+#view-audit .tenant-audit-table td,#view-audit .tenant-audit-table th { padding:10px 12px; font-size:12px; line-height:1.5; white-space:normal; overflow-wrap:anywhere; }
+#view-audit .tenant-audit-table th:nth-child(1) { width:135px; }
+#view-audit .tenant-audit-table th:nth-child(2) { width:130px; }
+#view-audit .tenant-audit-table th:nth-child(3),#view-audit .tenant-audit-table th:nth-child(4) { width:110px; }
+#view-audit .tenant-audit-table th:nth-child(5) { width:275px; }
+#view-audit .tenant-audit-table th:nth-child(6) { width:170px; }
+#view-audit .tenant-audit-table th:nth-child(7) { width:100px; }
+#view-audit .tenant-audit-table th:nth-child(8) { width:125px; }
+#view-audit .tenant-audit-table th:nth-child(9) { width:75px; }
+#view-audit .tenant-audit-table .link-btn { white-space:nowrap; }
+#view-audit .audit-cell-text { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+#view-audit #tenantAuditCount { display:flex; flex-wrap:wrap; align-items:center; justify-content:flex-end; gap:10px; }
+#view-audit #tenantAuditCount .btn { padding:4px 10px; min-height:32px; }
+#view-audit #tenantAuditPageSize { width:100px; }
+@media(max-width:600px){#view-audit .audit-search-filters .field { flex-basis:100%; }}
 </style>
 </head>
 <body>
@@ -551,7 +580,18 @@
           <div class="tenant-tabs" role="tablist" aria-label="租户配置分类"><button class="tenant-tab active" type="button" data-tenant-tab="base">基础资料</button><button class="tenant-tab" type="button" data-tenant-tab="brand">品牌配置</button><button class="tenant-tab" type="button" data-tenant-tab="access">访问域名</button><button class="tenant-tab" type="button" data-tenant-tab="authorization">授权与费率</button></div>
           <div class="tenant-tab-content active" data-tenant-panel="base"><div class="config-section-bar"><div><h3>基础资料</h3><p>租户主体信息由平台开户和审核确认，租户端只读展示。</p></div><span class="config-readonly-note">只读展示</span></div><div class="config-value-list"><div class="config-value"><span>租户名称</span><strong>汇盛东南亚</strong><small>展示在顶部租户标识和报表抬头</small></div><div class="config-value"><span>租户编号</span><strong class="mono">HS-TEN-001</strong><small>系统编号，不由租户提交变更</small></div><div class="config-value"><span>默认语言</span><strong>简体中文</strong><small>后台默认文案语言，由平台模板控制</small></div><div class="config-value"><span>平台时区</span><strong>UTC+8</strong><small>业务时间、报表和审计统一使用平台时区</small></div><div class="config-value full"><span>系统后台地址</span><strong class="mono config-copy-row">https://tenant.hs-pay.com/login <button class="icon-action" type="button" data-copy-value="https://tenant.hs-pay.com/login" aria-label="复制系统后台地址" title="复制"><i data-lucide="copy"></i></button></strong><small>这是平台为当前租户自动生成的访问子域名；商户端共享子域名请前往“访问域名”查看。</small></div></div></div>
           <div class="tenant-tab-content" data-tenant-panel="brand"><div class="config-section-bar"><div><h3>品牌展示资料</h3><p>使用图片上传与预览维护品牌资源，确认后直接发布。</p></div><button class="btn primary" data-modal="提交品牌配置"><i data-lucide="image-up"></i>维护品牌配置</button></div><div class="config-value-list"><div class="config-value"><span>租户 Logo</span><strong data-config-value="brandLogo">hs-sea-logo.svg</strong><small>用于租户端、商户端顶部展示</small></div><div class="config-value"><span>Favicon</span><strong data-config-value="brandFavicon">hs-sea.ico</strong><small>用于浏览器标签和登录页</small></div><div class="config-value"><span>品牌主色</span><strong data-config-value="brandPrimary"><i class="color-dot" style="background:#165DFF"></i>#165DFF</strong><small>按钮、链接和重点状态色</small></div><div class="config-value"><span>登录页背景</span><strong data-config-value="brandLoginBg">login-bg-20260705.png</strong><small>资源不可用时回退平台默认品牌</small></div></div></div>
-          <div class="tenant-tab-content" data-tenant-panel="access"><div class="config-section-bar"><div><h3>访问域名</h3><p>查看平台为当前租户自动生成的租户端及商户端访问子域名。</p></div><span class="config-readonly-note">只读展示</span></div><div class="notice"><i data-lucide="info"></i><div><strong>生成说明：</strong>平台创建租户时会直接生成对应子域名，租户端仅展示访问地址。</div></div><div class="access-history"><div class="access-history-head">租户端访问子域名</div><div class="table-wrap"><table class="data-table" aria-label="当前租户端访问子域名"><thead><tr><th>访问地址</th></tr></thead><tbody id="accessDomainRows"></tbody></table></div></div><div class="access-history"><div class="access-history-head">商户端共享访问子域名</div><div class="table-wrap"><table class="data-table" aria-label="当前租户商户端共享访问子域名"><thead><tr><th>访问地址</th></tr></thead><tbody id="merchantAccessDomainRows"></tbody></table></div></div><p class="muted" style="margin:14px 0 0">两类子域名都用于识别当前租户。商户端登录时，账号与密码会在该租户范围内继续识别具体商户；共享子域名供当前租户下全部商户使用。</p></div>
+          <div class="tenant-tab-content" data-tenant-panel="access"><div class="config-section-bar"><div><h3>访问域名</h3><p>查看平台为当前租户配置的访问域名。</p></div><span class="config-readonly-note">只读展示</span></div><div class="notice"><i data-lucide="info"></i><div><strong>生成说明：</strong>租户端和普通商户端的子域名由平台创建租户时生成，租户端只读展示。</div></div><div class="access-history"><div class="access-history-head">租户端访问子域名</div><div class="table-wrap"><table class="data-table" aria-label="当前租户端访问子域名"><thead><tr><th>访问地址</th></tr></thead><tbody id="accessDomainRows"></tbody></table></div></div><div class="access-history"><div class="access-history-head">商户端共享访问子域名</div><div class="table-wrap"><table class="data-table" aria-label="当前租户商户端共享访问子域名"><thead><tr><th>访问地址</th></tr></thead><tbody id="merchantAccessDomainRows"></tbody></table></div></div><p class="muted" style="margin:14px 0 0">访问域名用于识别当前租户。普通商户端共享子域名供当前租户下全部商户登录，登录时再识别具体商户。</p>
+            <section class="access-history" id="beautyAccessDomains" aria-labelledby="beautyAccessDomainsTitle" hidden>
+              <div class="access-history-head" id="beautyAccessDomainsTitle">美人桥商户端登录地址</div>
+              <div class="table-wrap">
+                <table class="data-table" aria-labelledby="beautyAccessDomainsTitle">
+                  <thead><tr><th scope="col">访问地址</th></tr></thead>
+                  <tbody id="beautyAccessDomainRows"></tbody>
+                </table>
+              </div>
+              <p class="muted" style="margin:12px 14px">当前租户的美人桥商户共用此入口，登录时使用该租户下的美人桥商户账号。</p>
+            </section>
+          </div>
           <div class="tenant-tab-content" data-tenant-panel="authorization">
             <div class="config-section-bar"><div><h3>业务授权与费率</h3><p>平台授权通道商；租户自行建立通道、配置产品及对接信息。现有租户费率只读展示。</p></div><span class="config-readonly-note">只读展示</span></div>
             <div class="table-wrap">
@@ -562,7 +602,17 @@
         </div>
       </section>
       <section class="view" id="view-audit">
-        <div class="panel"><div class="panel-head"><div><h2>操作审计</h2><p>仅展示当前租户账号、角色、登录安全、设置、品牌、资金和导出日志；审计日志永久保存。</p></div><button class="btn" data-action="有权限，二次确认后直接导出；文件带水印，24 小时有效，不限制下载次数"><i data-lucide="download"></i>导出审计日志</button></div><div class="filters"><div class="field"><label>模块</label><select><option>全部模块</option><option>账户</option><option>角色</option><option>登录安全</option><option>资金</option></select></div><div class="field"><label>动作</label><input placeholder="停用 / 授权 / 发布" /></div><div class="field"><label>操作人</label><input placeholder="admin / finance" /></div><div class="field"><label>结果</label><select><option>全部结果</option><option>成功</option><option>失败</option><option>待审核</option></select></div><div class="field"><label>时间范围</label><select><option>7 天内</option><option>30 天内</option></select></div></div><div class="table-wrap"><table class="data-table"><thead><tr><th>日志编号</th><th>模块</th><th>对象</th><th>动作</th><th>变更摘要</th><th>操作人</th><th>IP</th><th>结果</th><th>时间</th><th>操作</th></tr></thead><tbody id="auditRows"></tbody></table></div></div>
+        <div class="panel"><div class="panel-head"><div><h2>操作审计</h2><p>查看当前租户关联的平台、租户及商户操作记录。</p></div><button class="btn" data-action="有权限，二次确认后直接导出；文件带水印，24 小时有效，不限制下载次数"><i data-lucide="download"></i>导出审计日志</button></div>
+          <form id="tenantAuditSearchForm" class="filters audit-search-filters">
+            <div class="field audit-search-time"><label for="tenantAuditFrom">发生时间（UTC+8）</label><div class="audit-search-range"><input id="tenantAuditFrom" name="from" type="datetime-local" step="1" aria-label="发生开始时间（UTC+8）"><span>—</span><input id="tenantAuditTo" name="to" type="datetime-local" step="1" aria-label="发生结束时间（UTC+8）"></div></div>
+            <div class="field"><label for="tenantAuditAccount">操作账号</label><input id="tenantAuditAccount" name="account" placeholder="输入账号，支持部分查找"></div>
+            <div class="field"><label for="tenantAuditSurface">操作端</label><select id="tenantAuditSurface" name="surface"><option value="">全部</option><option>平台</option><option>租户</option><option>商户</option></select></div>
+            <div class="field"><label for="tenantAuditIp">来源 IP</label><input id="tenantAuditIp" name="sourceIp" placeholder="输入完整 IP 地址"></div>
+            <div class="field"><label for="tenantAuditMerchant">商户名称／编号</label><input id="tenantAuditMerchant" name="merchant" placeholder="选择商户操作端后填写" disabled></div>
+            <div class="audit-search-actions"><button class="btn primary" type="submit">查询</button><button class="btn" type="button" id="tenantAuditReset">重置</button></div>
+          </form>
+          <div class="table-wrap"><table class="data-table tenant-audit-table"><thead><tr><th>日志编号</th><th>操作人</th><th>操作模块</th><th>操作名</th><th>操作内容</th><th>操作时间</th><th>业务编号</th><th>操作 IP</th><th>操作</th></tr></thead><tbody id="auditRows"></tbody></table></div><p id="tenantAuditCount" class="audit-search-count" role="status"></p>
+        </div>
       </section>
     </main>
   </div>
@@ -882,11 +932,103 @@ document.addEventListener('click',event=>{
 });
 
 let audits=[['AL202607050031','账户','ops_lee','停用账号','租户管理员停用账号','security','103.88.42.18','成功','2026-07-05 10:35'],['AL202607050028','角色','TENANT_FINANCE','更新授权','新增资金导出按钮权限','admin','103.88.42.18','成功','2026-07-05 10:20'],['AL202607050019','登录安全','临时远程','新增白名单','122.224.8.18','tech_safe','103.88.42.88','成功','2026-07-05 09:40'],['AL202607050014','资金','TF202607050011','提交申请','存款 CNY 120,000.00','finance01','103.88.42.21','成功','2026-07-05 10:22'],['AL202607040088','导出','资金流水','确认导出','导出文件带水印，24 小时有效','finance01','103.88.42.21','成功','2026-07-04 18:36']];
+const tenantAuditMetadata = new Map(audits.map(row => [row[0], {tenantId:'HS-TEN-001',surface:'租户'}]));
 if (window.HSProviderDemo) {
  const m=window.HSProviderDemo;
  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
- audits.unshift(...m.audits.filter(e=>e.surface==='tenant'&&e.tenantId===m.tenantId).map(e=>[e.id,'通道管理',e.object,e.action,e.action,'tenant-admin','本地演示','成功',e.at].map(esc)));
+ const channelAudits=m.audits.filter(e=>e.surface==='tenant'&&e.tenantId===m.tenantId);
+ channelAudits.forEach(event=>tenantAuditMetadata.set(event.id,{tenantId:event.tenantId,surface:'租户'}));
+ audits.unshift(...channelAudits.map(e=>[e.id,'通道管理',e.object,e.action,e.action,'tenant-admin','本地演示','成功',e.at].map(esc)));
 }
+const tenantAuditSamples = [
+ {id:'AL-T-20261105-010',at:'2026-11-05 10:40:18',tenantId:'HS-TEN-001',surface:'商户',merchantId:'MCH-1188',merchantName:'东盛电商',account:'dongsheng.finance',module:'订单查询',object:'MCH-1188',action:'查询代付订单',summary:'查看订单当前处理结果',sourceIp:'198.51.100.61',result:'成功'},
+ {id:'AL-T-20261105-009',at:'2026-11-05 10:35:12',tenantId:'HS-TEN-001',surface:'平台',account:'platform.finance',module:'系统费',object:'HS-TEN-001',action:'设置系统费率',summary:'保存代收与代付收费配置',sourceIp:'198.51.100.10',result:'成功'},
+ {id:'AL-T-20261105-008',at:'2026-11-05 10:18:24',tenantId:'HS-TEN-001',surface:'租户',merchantId:'MCH-1188',merchantName:'东盛电商',account:'tenant.ops',module:'商户管理',object:'MCH-1188',action:'保存登录IP白名单',summary:'保存商户后台登录名单',sourceIp:'198.51.100.24',result:'成功'},
+ {id:'AL-T-20261105-007',at:'2026-11-05 09:48:32',tenantId:'HS-TEN-001',surface:'商户',merchantId:'MCH-2031',merchantName:'星河游戏',account:'xinghe.admin',module:'登录安全',object:'xinghe.admin',action:'登录失败',summary:'Google验证码错误',sourceIp:'2001:db8::31',result:'失败'}
+];
+tenantAuditSamples.forEach(sample=>tenantAuditMetadata.set(sample.id,{tenantId:sample.tenantId,surface:sample.surface,merchantId:sample.merchantId||'',merchantName:sample.merchantName||''}));
+audits.unshift(...tenantAuditSamples.map(sample=>[sample.id,sample.module,sample.object,sample.action,sample.summary,sample.account,sample.sourceIp,sample.result,sample.at]));
+const tenantAuditSearchState = {filters:{account:'',surface:'',sourceIp:'',tenant:'',merchant:'',from:'',to:''}};
+function auditSearchTime(value, endOfDay = false) {
+  const text = String(value || '').trim();
+  if (!text) return null;
+  const match = text.match(/^(\d{4})-(\d{2})-(\d{2})(?:[Tt ](\d{2}):(\d{2})(?::(\d{2}))?)?$/);
+  if (!match) return NaN;
+  const [,year,month,day,hour,minute,second] = match;
+  const h = hour === undefined ? (endOfDay ? 23 : 0) : Number(hour), m = minute === undefined ? (endOfDay ? 59 : 0) : Number(minute), sec = second === undefined ? (hour === undefined && endOfDay ? 59 : 0) : Number(second);
+  const canonical = `${year}-${month}-${day}T${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+  const ms = Date.parse(canonical + '+08:00');
+  return Number.isFinite(ms) && new Date(ms + 8*3600000).toISOString().slice(0,19) === canonical ? ms : NaN;
+}
+function auditSearchError(filters) {
+  const from = auditSearchTime(filters.from), to = auditSearchTime(filters.to,true);
+  if (Number.isNaN(from) || Number.isNaN(to)) return '请输入有效的发生时间';
+  if (from !== null && to !== null && from > to) return '开始时间不能晚于结束时间';
+  return '';
+}
+function auditSearchMatches(record, filters) {
+  const norm = value => String(value || '').trim().toLowerCase();
+  const contains = (value,query) => !norm(query) || norm(value).includes(norm(query));
+  const from = auditSearchTime(filters.from), to = auditSearchTime(filters.to,true), at = auditSearchTime(record.occurredAt);
+  if (auditSearchError(filters)) return false;
+  return contains(record.account,filters.account)
+    && (!filters.surface || record.surface === filters.surface)
+    && (!norm(filters.sourceIp) || norm(record.sourceIp) === norm(filters.sourceIp))
+    && contains(`${record.tenantName || ''} ${record.tenantId || ''}`,filters.tenant)
+    && contains(`${record.merchantName || ''} ${record.merchantId || ''}`,filters.merchant)
+    && (from === null || (Number.isFinite(at) && at >= from))
+    && (to === null || (Number.isFinite(at) && at <= to));
+}
+
+function tenantAuditIdentity(){
+ const id=window.HSProviderDemo?.tenantId||'HS-TEN-001';
+ return {id,name:window.HSProviderDemo?.tenants.find(item=>item.id===id)?.name||'汇盛东南亚'};
+}
+function tenantAuditRecordFor(row){
+ const meta=tenantAuditMetadata.get(row[0])||{},identity=tenantAuditIdentity();
+ return {occurredAt:row[8],account:row[5],surface:meta.surface||'租户',sourceIp:row[6],tenantId:meta.tenantId||'',tenantName:meta.tenantName||(meta.tenantId===identity.id?identity.name:''),merchantId:meta.merchantId||'',merchantName:meta.merchantName||''};
+}
+function tenantAuditVisibleRows(){
+ const identity=tenantAuditIdentity(),account=accounts.find(row=>row[0]==='admin@hs-pay');
+ const scope=account?tenantEffectiveScope(accountRoleNames(account),{code:account[12]||'tenant.current',merchantIds:account[13]||[]}):{code:'denied',merchantIds:[]};
+ return tenantSystemPublicAudits().filter(row=>{const record=tenantAuditRecordFor(row);return record.tenantId===identity.id&&(scope.code==='tenant.current'||(scope.code==='tenant.allowed_merchants'&&(!record.merchantId||(scope.merchantIds||[]).includes(record.merchantId))))});
+}
+function tenantAuditNormalizedFilters(filters){
+ return {...filters,tenant:'',merchant:filters.surface==='商户'?String(filters.merchant||'').trim():''};
+}
+function syncTenantAuditMerchantField(clear=false){
+ const input=document.getElementById('tenantAuditMerchant'),enabled=document.getElementById('tenantAuditSurface').value==='商户';
+ if(clear||!enabled)input.value='';
+ input.disabled=!enabled;input.placeholder=enabled?'输入商户名称或编号':'选择商户操作端后填写';
+}
+function tenantAuditFilteredRows(){
+ return tenantAuditVisibleRows().filter(row=>auditSearchMatches(tenantAuditRecordFor(row),tenantAuditNormalizedFilters(tenantAuditSearchState.filters))).sort((a,b)=>(auditSearchTime(b[8])||0)-(auditSearchTime(a[8])||0));
+}
+function tenantAuditDisplayValues(row){
+ const record=tenantAuditRecordFor(row);
+ return [row[0],record.account,row[1],row[3],row[4],row[8],row[2],row[6]];
+}
+const tenantAuditPagination={page:1,size:10};
+function renderTenantAudit(){
+ const rows=tenantAuditFilteredRows(),pages=Math.max(1,Math.ceil(rows.length/tenantAuditPagination.size));
+ tenantAuditPagination.page=Math.min(tenantAuditPagination.page,pages);
+ const start=(tenantAuditPagination.page-1)*tenantAuditPagination.size;
+ document.getElementById('auditRows').innerHTML=rows.slice(start,start+tenantAuditPagination.size).map(row=>`<tr>${tenantAuditDisplayValues(row).map((value,index)=>`<td${[0,5,6,7].includes(index)?' class="mono"':''}><span class="audit-cell-text" title="${esc(value)}">${esc(value)}</span></td>`).join('')}<td><button class="link-btn" data-modal="审计详情 ${esc(row[0])}">详情</button></td></tr>`).join('')||'<tr><td colspan="9" class="audit-search-empty">暂无符合条件的记录</td></tr>';
+ document.getElementById('tenantAuditCount').innerHTML=`<span>共 ${rows.length} 条</span><button class="btn" type="button" data-audit-prev ${tenantAuditPagination.page===1?'disabled':''}>上一页</button><span>${tenantAuditPagination.page} / ${pages}</span><button class="btn" type="button" data-audit-next ${tenantAuditPagination.page===pages?'disabled':''}>下一页</button><select aria-label="审计每页条数" id="tenantAuditPageSize">${[10,20,50].map(size=>`<option value="${size}" ${size===tenantAuditPagination.size?'selected':''}>${size}条/页</option>`).join('')}</select>`;
+}
+document.getElementById('tenantAuditCount').addEventListener('click',event=>{if(event.target.closest('[data-audit-prev]'))tenantAuditPagination.page--;else if(event.target.closest('[data-audit-next]'))tenantAuditPagination.page++;else return;renderTenantAudit()});
+document.getElementById('tenantAuditCount').addEventListener('change',event=>{if(event.target.id==='tenantAuditPageSize'){tenantAuditPagination.size=Number(event.target.value);tenantAuditPagination.page=1;renderTenantAudit()}});
+
+function submitTenantAuditSearch(){
+ const form=document.getElementById('tenantAuditSearchForm'),filters=tenantAuditNormalizedFilters(Object.fromEntries(['account','surface','sourceIp','merchant','from','to'].map(key=>[key,form.elements.namedItem(key).value.trim()])));
+ const message=auditSearchError(filters);
+ for(const key of ['from','to'])form.elements.namedItem(key).removeAttribute('aria-invalid');
+ if(message){form.elements.namedItem('to').setAttribute('aria-invalid','true');toast(message);return false}
+ tenantAuditSearchState.filters=filters;tenantAuditPagination.page=1;renderTenantAudit();return true;
+}
+document.getElementById('tenantAuditSurface').addEventListener('change',()=>syncTenantAuditMerchantField(true));
+document.getElementById('tenantAuditSearchForm').addEventListener('submit',event=>{event.preventDefault();submitTenantAuditSearch()});
+document.getElementById('tenantAuditReset').addEventListener('click',()=>{document.getElementById('tenantAuditSearchForm').reset();syncTenantAuditMerchantField();tenantAuditSearchState.filters={account:'',surface:'',sourceIp:'',tenant:'',merchant:'',from:'',to:''};tenantAuditPagination.page=1;document.querySelectorAll('#tenantAuditSearchForm [aria-invalid]').forEach(field=>field.removeAttribute('aria-invalid'));renderTenantAudit()});
 
 function tenantSystemPublicAudits(){return typeof window.__tenantSystemVisibleAudits==='function'?window.__tenantSystemVisibleAudits():audits}
 const tenantPermissionCatalog=[
@@ -964,9 +1106,10 @@ function render(){
  document.getElementById('accountRows').innerHTML=accounts.map(r=>{const protectedAccount=r[0]==='admin@hs-pay';const actions=protectedAccount?'<span class="tag blue">当前超级管理员受保护</span>':accountActionButtons(r);const roleNames=accountRoleNames(r);const roleHtml=roleNames.filter(name=>roles.some(role=>role[0]===name&&role[5]==='启用')).map(name=>`<span class="tag blue">${esc(name)}</span>`).join('')||'<span class="muted">—</span>';return `<tr data-permission-version="${r[11]}"><td class="mono">${esc(r[0])}</td><td>${esc(r[1])}</td><td><div class="role-stack">${roleHtml}</div></td><td>${tagStatus(r[4])}</td><td>${tagStatus(r[5])}</td><td class="mono">${r[6]}</td><td class="mono">${r[7]}</td><td>${actions}</td></tr>`}).join('');
  document.getElementById('roleRows').innerHTML=roles.map(r=>{const protectedRole=r[1]==='TENANT_SUPER_ADMIN';const stateAction=r[5]==='启用'?`<button class="link-btn danger-text" data-modal="停用角色 ${r[0]}">停用</button>`:`<button class="link-btn" data-modal="重新启用角色 ${r[0]}">重新启用</button>`;const actions=protectedRole?'<span class="tag blue">系统角色受保护</span>':`<button class="link-btn" data-modal="角色成员 ${r[0]}">成员</button><button class="link-btn" data-modal="角色授权 ${r[0]}">授权</button><button class="link-btn" data-modal="编辑角色 ${r[0]}">编辑</button>${stateAction}<button class="link-btn danger-text" data-modal="删除角色 ${r[0]}">删除</button>`;return `<tr><td>${r[0]}</td><td>${r[2]}<small class="muted">${esc(tenantRoleHasSensitive(r[1])?'完整敏感资料':'敏感资料脱敏')} · ${tenantRoleExportActionIds(r[1]).length} 项导出动作</small></td><td class="mono">${r[3]}</td><td>${tagStatus(r[5])}</td><td class="mono">${r[6]}</td><td>${actions}</td></tr>`}).join('');
  renderSecurityWhitelist();
- document.getElementById('auditRows').innerHTML=tenantSystemPublicAudits().map(r=>`<tr><td class="mono">${esc(r[0])}</td><td>${esc(r[1])}</td><td class="mono">${esc(r[2])}</td><td>${esc(r[3])}</td><td>${esc(r[4])}</td><td>${esc(r[5])}</td><td class="mono">${esc(r[6])}</td><td>${tagStatus(r[7])}</td><td class="mono">${esc(r[8])}</td><td><button class="link-btn" data-modal="审计详情 ${esc(r[0])}">详情</button></td></tr>`).join('');
+ renderTenantAudit();
  renderAccountRepairLimits();
  renderAccessConfig();
+ renderBeautyAccessDomains();
  renderTenantWhitelistDecision();
 }
 function switchView(name){if(!views[name])return;document.body.dataset.systemView=name;document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById('view-'+name).classList.add('active');document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===name));document.querySelectorAll('.nav-btn').forEach(b=>{if(!b.dataset.view)b.classList.remove('active')});const toggle=document.querySelector('[data-toggle-system]');if(toggle){toggle.classList.add('active');toggle.setAttribute('aria-expanded','true');document.getElementById('systemSubnav')?.classList.remove('collapsed')}document.getElementById('pageTitle').textContent=views[name].title;document.getElementById('pageDesc').textContent=views[name].desc;document.getElementById('pageDesc').hidden=!views[name].desc;const crumb=document.getElementById('crumbCurrent');if(crumb)crumb.textContent=views[name].title;window.scrollTo({top:0,behavior:'smooth'});}
@@ -1038,7 +1181,11 @@ function filterAuthMatrix(){
 }
 function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function now(){return new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date()).replaceAll('/','-')}
-function audit(module,target,action,summary,result='成功'){audits.unshift(['AL'+String(202607050100+audits.length),module,target,action,summary,'admin@hs-pay','103.88.42.18',result,now()])}
+function audit(module,target,action,summary,result='成功'){
+ const id='AL'+String(202607050100+audits.length);
+ tenantAuditMetadata.set(id,{tenantId:tenantAuditIdentity().id,surface:'租户'});
+ audits.unshift([id,module,target,action,summary,'admin@hs-pay','103.88.42.18',result,now()]);
+}
 function accountRoleNames(row){const value=row?.[3];if(Array.isArray(value))return [...new Set(value.filter(Boolean))];return String(value||'').split('、').map(name=>name.trim()).filter(Boolean)}
 function accountHasRole(row,roleName){return accountRoleNames(row).includes(roleName)}
 function setAccountRoles(row,roleNames){row[3]=[...new Set(roleNames.filter(Boolean))]}
@@ -1065,6 +1212,20 @@ function fd(form){return Object.fromEntries(new FormData(form).entries())}
 function requireVals(form,data,names){const miss=names.filter(n=>!String(data[n]||'').trim());if(miss.length){showFormError(form,'请先填写必填项：'+miss.join('、'),miss);return false}return true}
 function ipv4ToNumber(value){const parts=String(value||'').trim().split('.');if(parts.length!==4||!parts.every(part=>/^\d{1,3}$/.test(part)&&Number(part)<=255))return null;return (((Number(parts[0])<<24)>>>0)+(Number(parts[1])<<16)+(Number(parts[2])<<8)+Number(parts[3]))>>>0}
 function renderAccessConfig(){const body=document.getElementById('accessDomainRows');const merchantBody=document.getElementById('merchantAccessDomainRows');if(body)body.innerHTML=tenantAccessConfig.domains.map(item=>`<tr><td class="mono"><strong>${esc(item.value)}</strong></td></tr>`).join('');if(merchantBody)merchantBody.innerHTML=tenantAccessConfig.merchantDomains.map(item=>`<tr><td class="mono"><strong>${esc(item.value)}</strong></td></tr>`).join('')}
+const beautyAccessModel = window.HSBeautyDemo || window.top?.__HSBeautyDemo;
+function renderBeautyAccessDomains() {
+  const section = document.getElementById('beautyAccessDomains');
+  const rows = document.getElementById('beautyAccessDomainRows');
+  const tenantId = window.HSProviderDemo?.tenantId;
+  section.hidden = !tenantId || !beautyAccessModel?.enabled(tenantId);
+  const addresses = section.hidden ? [] : beautyAccessModel.portalAddresses(tenantId);
+  rows.innerHTML = section.hidden ? '' : addresses.map(address =>
+    `<tr><td class="mono"><strong>${esc(address)}</strong></td></tr>`
+  ).join('') || '<tr><td class="muted">暂无可用域名，请联系平台管理员启用。</td></tr>';
+}
+beautyAccessModel?.subscribe(id => {
+  if (id === window.HSProviderDemo?.tenantId) renderBeautyAccessDomains();
+}, window);
 let tenantAccountEditContext=null;
 function tenantRoleAssignmentField(row){
  const current=accountRoleNames(row);
@@ -1130,7 +1291,16 @@ function openApprovalTrace(title){const item=title.replace('审批轨迹 ','');c
 function openBrandCreate(){const grid=field('item','品牌项','text','','placeholder="如 登录页副标题"')+field('value','当前值 / 资源','text','','placeholder="如 login-subtitle-v2"')+selectField('endpoint','适用端',['租户端','商户端','登录页','租户端 / 商户端'],'登录页')+selectField('status','发布状态',['草稿','已发布'],'已发布')+textareaField('reason','新增说明','','placeholder="说明品牌项用途、影响页面和回滚方式"');modalShell('新增品牌项',formWrap('brand','新增品牌项并直接保存',grid,'保存品牌项'))}
 function openBrandPreview(title){const item=title.replace('品牌预览 ','');const row=brand.find(r=>r[0]===item);const swatch=(row?.[1]||'').startsWith('#')?`<span style="display:inline-block;width:44px;height:22px;border-radius:6px;border:1px solid var(--color-border);background:${esc(row[1])};vertical-align:middle;margin-right:8px"></span>`:'';const body=`<div class="modal-section"><h4>${esc(item)} 预览</h4>${tableRows([['当前值 / 资源',swatch+esc(row?.[1]||'-')],['适用端',esc(row?.[2]||'-')],['发布状态',tagStatus(row?.[3]||'草稿')],['审批要求',esc(row?.[4]||'按项确认')],['最近变更',esc(row?.[5]||'-')]])}</div><div class="modal-section"><h4>展示效果</h4><div class="notice"><i data-lucide="palette"></i><div><strong>预览说明：</strong>查看品牌项在当前租户端的展示效果。</div></div><div class="card" style="padding:14px"><strong>汇盛东南亚</strong><p class="muted">登录页 / 顶部栏 / 浏览器标识预览，按 ${esc(item)} 当前配置展示。</p></div></div><div class="modal-footer"><button class="btn primary" type="button" data-close-modal>关闭预览</button></div>`;modalShell(title,body);if(window.lucide){lucide.createIcons()}}
 function openBrandPublish(title){const item=title.replace('提交发布 ','');const row=brand.find(r=>r[0]===item);const grid=field('item','品牌项','text',item,'readonly')+field('currentValue','当前值 / 资源','text',row?.[1]||'','readonly')+field('version','发布版本','text','BR-'+Date.now().toString().slice(-6),'placeholder="如 BR-20260705-01"')+textareaField('reason','发布说明','','placeholder="说明本次发布影响范围和回滚方式"');modalShell(title,formWrap('brandPublish','品牌由租户直接发布，不设置平台审核状态',grid,'确认发布'))}
-function openAuditDetail(title){const id=title.replace('审计详情 ','');const row=audits.find(r=>r[0]===id);const body=`<div class="modal-section"><h4>审计日志详情</h4>${tableRows([['日志编号',`<span class="mono">${esc(row?.[0]||id)}</span>`],['模块',esc(row?.[1]||'-')],['对象',`<span class="mono">${esc(row?.[2]||'-')}</span>`],['动作',esc(row?.[3]||'-')],['变更摘要',esc(row?.[4]||'-')],['操作人',esc(row?.[5]||'-')],['IP',`<span class="mono">${esc(row?.[6]||'-')}</span>`],['结果',tagStatus(row?.[7]||'成功')],['时间',`<span class="mono">${esc(row?.[8]||'-')}</span>`],['留存要求','永久保存，只读不可修改或删除']])}</div><div class="modal-section"><h4>审计说明</h4><div class="notice"><i data-lucide="history"></i><div>审计详情只读不可修改；有权限的用户二次确认后可直接导出，文件带水印、24 小时有效且不限制下载次数。</div></div></div><div class="modal-footer"><button class="btn primary" type="button" data-close-modal>关闭</button></div>`;modalShell(title,body);if(window.lucide){lucide.createIcons()}}
+function openAuditDetail(title){
+ const id=title.replace('审计详情 ',''),row=tenantAuditVisibleRows().find(item=>item[0]===id);
+ if(!row){toast('当前账号无权查看该审计记录');return}
+ const record=tenantAuditRecordFor(row);
+ const metadata=tenantAuditMetadata.get(row[0])||{};
+ const pairs=[['日志编号',row[0]],['操作人',record.account],['操作模块',row[1]],['操作名',row[3]],['操作内容',row[4]],['业务编号',row[2]],['操作 IP',row[6]],['请求方法',metadata.requestMethod||'—'],['请求地址',metadata.requestUrl||'—'],['Trace ID',metadata.traceId||'—'],['操作时间',row[8]],['扩展信息',metadata.extra||'—']];
+ const association=[['操作端',record.surface],['租户',`${record.tenantName} / ${record.tenantId}`],['商户',record.merchantId?`${record.merchantName||'—'} / ${record.merchantId}`:'—']];
+ modalShell('操作日志详情',`<div class="modal-section">${tableRows(pairs.map(([label,value])=>[label,esc(value)]))}</div><div class="modal-section"><h4>关联信息</h4>${tableRows(association.map(([label,value])=>[label,esc(value)]))}</div><div class="modal-footer"><button class="btn primary" type="button" data-close-modal>关闭</button></div>`);
+
+}
 function openSecurityLoginRecords(ip){const row=security.find(r=>r[1]===ip);const records=securityLoginRecords[row?.[0]]||[];const recordRows=records.length?records.map(r=>`<tr><td class="mono">${esc(r[0])}</td><td class="mono">${esc(r[1])}</td><td>${esc(r[2])}</td><td>${tagStatus(r[3])}</td></tr>`).join(''):`<tr><td colspan="4" class="muted">暂无登录记录</td></tr>`;const body=`<div class="modal-section"><h4>白名单信息</h4>${tableRows([['白名单名称',esc(row?.[0]||'-')],['IP',`<span class="mono">${esc(ip)}</span>`],['状态',tagStatus(row?.[2]||'停用')]])}</div><div class="modal-section"><h4>最近登录记录</h4><div class="table-wrap"><table class="data-table" style="min-width:660px"><thead><tr><th>登录时间</th><th>来源 IP</th><th>登录账号</th><th>结果</th></tr></thead><tbody>${recordRows}</tbody></table></div></div><div class="modal-footer"><button class="btn primary" type="button" data-close-modal>关闭</button></div>`;modalShell(`登录记录：${ip}`,body)}
 function openWhitelistStatusConfirm(title){const record=security.find(row=>row[0]===title.replace(/^(启用|停用)白名单 /,''));securityWhitelistUi.pending=record?{kind:'toggle',listKind:'white',rows:[{name:record[0],snapshot:JSON.stringify(record)}]}:null;const enabling=title.startsWith('启用白名单 ');const verb=enabling?'启用':'停用';const name=title.replace(`${verb}白名单 `,'');const row=security.find(r=>r[0]===name);const impact=enabling?`启用后，${esc(row?.[1]||'-')} 将加入当前租户登录白名单。`:`停用后，${esc(row?.[1]||'-')} 将不再允许用于当前租户后台登录。`;const buttonClass=enabling?'btn primary':'btn danger';const body=`<form data-form="confirm"><input type="hidden" name="title" value="${esc(title)}"><div class="notice"><i data-lucide="shield-alert"></i><div><strong>${verb}确认：</strong>${impact}</div></div><div class="form-error" data-error></div><div class="modal-section"><h4>白名单信息</h4>${tableRows([['白名单名称',esc(row?.[0]||name)],['IP',`<span class="mono">${esc(row?.[1]||'-')}</span>`],['当前状态',tagStatus(row?.[2]||'停用')],['生效范围','当前租户全部后台账号']])}</div><div class="modal-section"><h4>确认信息</h4><div class="modal-grid">${textareaField('reason','变更原因','','placeholder="请填写本次操作原因" required')}</div></div><div class="modal-footer"><button class="btn" type="button" data-close-modal>取消</button><button class="${buttonClass}" type="submit">确认${verb}</button></div></form>`;modalShell(`${verb}白名单`,body);if(window.lucide){lucide.createIcons()}}
 function openGenericForm(title){const grid=field('item','操作对象','text',title)+textareaField('reason','变更说明','请填写本次变更原因和影响范围');modalShell(title,formWrap('generic',title+'，确认后执行并写入审计记录',grid,'确认提交'))}
@@ -1159,7 +1329,7 @@ function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t
 async function copyText(value){try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(value);return true}const area=document.createElement('textarea');area.value=value;area.style.position='fixed';area.style.opacity='0';document.body.appendChild(area);area.select();const ok=document.execCommand('copy');area.remove();return ok}catch{return false}}
 document.addEventListener('click',async e=>{const copy=e.target.closest('[data-copy-value]');if(copy){const ok=await copyText(copy.dataset.copyValue);toast(ok?'已复制':'复制失败，请手动复制')}})
 const tenantMainRoutes={总览工作台:'../../00-总览/00-租户端总览设计/租户端总览设计-demo.html#home',商户管理:'../../01-商户运营/01-商户管理/租户端商户管理-demo.html#merchant-list',法币代收订单:'../../00-总览/00-租户端总览设计/租户端总览设计-demo.html#collect',授权通道:'../../00-总览/00-租户端总览设计/租户端总览设计-demo.html#channels',经营报表:'../../00-总览/00-租户端总览设计/租户端总览设计-demo.html#reports',工单协同:'../../00-总览/00-租户端总览设计/租户端总览设计-demo.html#tickets'};
-document.addEventListener('click',e=>{const main=e.target.closest('[data-main]');if(main){const route=tenantMainRoutes[main.dataset.main];if(route)window.location.href=new URL(route,window.location.href).href;return}const tenantTab=e.target.closest('[data-tenant-tab]');if(tenantTab){const key=tenantTab.dataset.tenantTab;document.querySelectorAll('.tenant-tab').forEach(b=>b.classList.toggle('active',b===tenantTab));document.querySelectorAll('.tenant-tab-content').forEach(p=>p.classList.toggle('active',p.dataset.tenantPanel===key));return}const toggle=e.target.closest('[data-toggle-system]');if(toggle){const sub=document.getElementById('systemSubnav');const expanded=toggle.getAttribute('aria-expanded')==='true';toggle.setAttribute('aria-expanded',String(!expanded));sub?.classList.toggle('collapsed',expanded);toggle.classList.add('active');return}const view=e.target.closest('[data-view]');if(view){switchView(view.dataset.view);return}const modal=e.target.closest('[data-modal]');if(modal){openModal(modal.dataset.modal);return}const close=e.target.closest('[data-close-modal]');if(close){closeModal();return}const action=e.target.closest('[data-action]');if(action){toast(action.dataset.action+'：操作已记录');return}});
+document.addEventListener('click',e=>{const main=e.target.closest('[data-main]');if(main){const route=tenantMainRoutes[main.dataset.main];if(route)window.location.href=new URL(route,window.location.href).href;return}const tenantTab=e.target.closest('[data-tenant-tab]');if(tenantTab){const key=tenantTab.dataset.tenantTab;document.querySelectorAll('.tenant-tab').forEach(b=>b.classList.toggle('active',b===tenantTab));document.querySelectorAll('.tenant-tab-content').forEach(p=>p.classList.toggle('active',p.dataset.tenantPanel===key));if(key==='access')renderBeautyAccessDomains();return}const toggle=e.target.closest('[data-toggle-system]');if(toggle){const sub=document.getElementById('systemSubnav');const expanded=toggle.getAttribute('aria-expanded')==='true';toggle.setAttribute('aria-expanded',String(!expanded));sub?.classList.toggle('collapsed',expanded);toggle.classList.add('active');return}const view=e.target.closest('[data-view]');if(view){switchView(view.dataset.view);return}const modal=e.target.closest('[data-modal]');if(modal){openModal(modal.dataset.modal);return}const close=e.target.closest('[data-close-modal]');if(close){closeModal();return}const action=e.target.closest('[data-action]');if(action){toast(action.dataset.action+'：操作已记录');return}});
 document.addEventListener('submit',e=>{
   const form=e.target.closest('form[data-form]');if(!form)return;
   const type=form.dataset.form;
@@ -1699,6 +1869,7 @@ document.addEventListener('submit',event=>{
         const sensitiveAccess = tenantUserDataAccess(roleNames).sensitive === true;
         return {
           permissionCode: permission,
+          tenantId: tenantAuditIdentity().id,
           permissionVersion: Number(account?.[11] || 1),
           dataScope: cloneSystemExportValue(effectiveScope),
           sensitiveAccess,
@@ -1708,6 +1879,7 @@ document.addEventListener('submit',event=>{
       }
 
       function currentSystemExportFilters(page, scope) {
+        if(page === '操作审计') return {page,filters:cloneSystemExportValue(tenantAuditSearchState.filters),scope};
         const viewId = page === '账户管理' ? 'view-accounts' : 'view-audit';
         const fields = [...document.querySelectorAll(`#${viewId} .filters .field`)].map((field, index) => {
           const label = field.querySelector('label')?.textContent.trim() || `条件${index + 1}`;
@@ -1720,6 +1892,7 @@ document.addEventListener('submit',event=>{
       function systemExportPermissionCovers(task) {
         if (permissions[task?.permission] !== true) return false;
         const current = currentSystemExportSecuritySnapshot(task.permission);
+        if (task.securitySnapshot?.tenantId !== current.tenantId) return false;
         const sensitiveAccessRequired = task?.sourceSensitiveAccessRequired ?? task.securitySnapshot?.sensitiveAccess === true;
         if (sensitiveAccessRequired && current.sensitiveAccess !== true) return false;
         const createdScope = task?.sourceScopeSnapshot || task.securitySnapshot?.dataScope || { code: 'tenant.current', merchantIds: [] };
@@ -1768,15 +1941,15 @@ document.addEventListener('submit',event=>{
           ? cloneSystemExportValue(sourceTask.fileDefinitionSnapshot.rowSnapshot)
           : page === '账户管理'
             ? accounts.map(row => ({ login: row[0], name: row[1], department: row[2], roles: accountRoleNames(row), status: row[4], twoFaStatus: row[5], dataScope: tenantScopeSummary(row[12], row[13]), permissionVersion: Number(row[11] || 1) }))
-            : visibleSystemAudits().map(row => ({ auditId: row[0], module: row[1], object: row[2], action: row[3], summary: row[4], operator: row[5], result: row[7], at: row[8] }));
+            : tenantAuditFilteredRows().map(row => { const record=tenantAuditRecordFor(row); return { auditId:row[0],module:row[1],object:row[2],action:row[3],summary:row[4],operator:row[5],result:row[7],at:row[8],surface:record.surface,tenantId:record.tenantId,tenantName:record.tenantName,merchantId:record.merchantId,merchantName:record.merchantName,sourceIp:record.sourceIp }; });
         const fieldSnapshot = sourceTask
           ? cloneSystemExportValue(sourceTask.fileDefinitionSnapshot.fieldSnapshot)
           : page === '账户管理'
             ? ['账号', '姓名', '部门', '角色', '状态', 'Google 2FA 状态', '数据范围', '权限版本']
-            : ['审计编号', '模块', '对象', '动作', '摘要', '操作人', '结果', '时间'];
+            : ['审计编号', '模块', '对象', '动作', '摘要', '操作账号', '结果', '发生时间（UTC+8）', '操作端', '租户编号', '租户名称', '商户编号', '商户名称', '来源 IP'];
         const redactionResult = sourceTask?.fileDefinitionSnapshot.redactionResult || securitySnapshot.fieldPolicy;
         const fileFormat = String(sourceTask?.format || format).toUpperCase();
-        const watermark = `汇盛租户 / HS-TEN-001 / ${createdAt} / ${page}`;
+        const watermark = `汇盛租户 / ${securitySnapshot.tenantId} / ${createdAt} / ${page}`;
         const contentDigest = systemExportSnapshotDigest({ fieldSnapshot, rowSnapshot, redactionResult });
         const fileDefinitionSnapshot = {
           page,
@@ -1799,7 +1972,7 @@ document.addEventListener('submit',event=>{
           permission,
           scope: sourceTask?.scope || scope,
           format: fileFormat,
-          fileName: `HS-TEN-001-${page}-${sequence}.${fileFormat.toLowerCase()}`,
+          fileName: `${securitySnapshot.tenantId}-${page}-${sequence}.${fileFormat.toLowerCase()}`,
           status: '已生成',
           createdAt,
           cutoffAt: createdAt,

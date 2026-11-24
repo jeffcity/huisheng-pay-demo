@@ -41,7 +41,7 @@ test('用户操作原因在审计列表中作为纯文本渲染',()=>{
  const payload='<img src=x onerror=alert(1)>',f=fixture();f.submit({reason:payload});assert.equal(f.errors.length,0);assert(f.audits[0][3].includes(payload));
  const renderLine=html.split('\n').find(line=>line.startsWith(" document.getElementById('auditRows').innerHTML="));
  const escLine=html.split('\n').find(line=>line.startsWith('function esc(')),tagLine=html.split('\n').find(line=>line.startsWith('function tagStatus('));
- const target={innerHTML:''};const c=vm.createContext({document:{getElementById(){return target}},tenantSystemPublicAudits:()=>[['A1','账户','finance01','重置2FA',f.audits[0][3],'admin','-','成功','今天']]});
+ const target={innerHTML:''};const c=vm.createContext({document:{getElementById(){return target}},rows:[['A1','账户','finance01','重置2FA',f.audits[0][3],'admin','-','成功','今天']],start:0,tenantAuditPagination:{size:10},tenantAuditDisplayValues:row=>[row[0],row[5],row[1],row[3],row[4],row[8],row[2],row[6]]});
  vm.runInContext(escLine+'\n'+tagLine+'\n'+renderLine,c);assert(!target.innerHTML.includes('<img'));assert(target.innerHTML.includes('&lt;img'));
 });
 

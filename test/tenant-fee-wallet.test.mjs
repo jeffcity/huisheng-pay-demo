@@ -80,7 +80,7 @@ test('平台人工调增调减保留原精度余额并写完整流水，系统�
  const f=fixture(),before=f.w.wallet('HS-TEN-001').balance,feeBefore=f.w.reconcile('HS-TEN-001','2026-07').exactTotal;
  const up=f.w.adjust('HS-TEN-001',adjustment(f));assert.equal(up.entry.beforeBalance,before);assert.equal(up.entry.afterBalance,'1036.94688');assert.equal(up.entry.operator,'Jeff / 平台超管');assert.equal(up.entry.reason,'银行到账补记');assert.match(up.entry.occurredAt,/^\d{4}-/);
  const down=f.w.adjust('HS-TEN-001',adjustment(f,'HS-TEN-001',{direction:'decrease',amount:'20.01',requestId:'adjust-request-002'}));assert.equal(down.entry.afterBalance,'1016.93688');assert.equal(down.entry.change,'-20.01');
- assert.equal(f.w.ledger('HS-TEN-001').length,6);assert.equal(f.w.entries('HS-TEN-001').length,4);assert.equal(f.w.reconcile('HS-TEN-001','2026-07').exactTotal,feeBefore);
+ assert.equal(f.w.ledger('HS-TEN-001').length,7);assert.equal(f.w.entries('HS-TEN-001').length,4);assert.equal(f.w.reconcile('HS-TEN-001','2026-07').exactTotal,feeBefore);
  const copy=f.w.ledger('HS-TEN-001');copy[0].reason='改写';assert.notEqual(f.w.ledger('HS-TEN-001')[0].reason,'改写');
 });
 test('人工调整不得使用0、负数、多余小数、无原因或无操作人，失败不写余额或流水',()=>{
@@ -115,7 +115,7 @@ test('钱包流水支持订单号/流水号包含查询和类型、日期组合�
  assert.equal(f.w.queryLedger('HS-TEN-001',{type:'collect',from:'2026-07-17',to:'2026-07-17'}).length,2);
  assert.equal(f.w.queryLedger('HS-TEN-001',{type:'payout',from:'2026-07-15',to:'2026-07-15'}).length,1);
  assert.equal(f.w.queryLedger('HS-TEN-001',{keyword:'NOT-FOUND'}).length,0);
- assert.equal(f.w.queryLedger('HS-TEN-017',{}).length,0);assert.equal(f.w.queryLedger('HS-TEN-001',{}).length,4);assert.equal(f.w.wallet('HS-TEN-001').balance,before);
+ assert.equal(f.w.queryLedger('HS-TEN-017',{}).length,0);assert.equal(f.w.queryLedger('HS-TEN-001',{}).length,5);assert.equal(f.w.wallet('HS-TEN-001').balance,before);
 });
 test('合并查询保留人工调增调减与待计费，并拒绝无效日期范围',()=>{
  const f=fixture();f.b.now=()=> '2026-10-29 12:00:00';f.w.adjust('HS-TEN-001',adjustment(f));
@@ -158,4 +158,51 @@ test('日统计拒绝无效、反向和跨统计月份日期，支持闰年日�
  assert.throws(()=>f.w.daily('HS-TEN-001','2026-02',{to:'2026-02-29'}));assert.equal(f.w.daily('HS-TEN-001','2028-02',{from:'2028-02-29'}).rows.length,0);assert.equal(JSON.stringify(f.w.wallet('HS-TEN-001')),before);
  f.w.recordSuccess(order('QUERY-DAILY-PENDING',{completedAt:'2026-07-16 12:00:00'}));f.b.setTenantBilling('HS-TEN-017',policy('percentage','5'));f.w.recordSuccess(order('QUERY-DAILY-EXACT',{completedAt:'2026-07-17 12:00:00'}));
  assert.equal(f.w.daily('HS-TEN-017','2026-07',{to:'2026-07-16'}).totals.pendingCount,1);const d=f.w.daily('HS-TEN-017','2026-07',{from:'2026-07-17'});assert.equal(d.totals.pendingCount,0);assert.equal(d.totals.exactTotal,'0.005');
+});
+
+test('已完成充值关联期初入账，待支付充值不产生余额或流水变动', () => {
+  const {w} = fixture();
+  const tenantId = 'HS-TEN-001';
+  const completed = w.rechargeOrders(tenantId).find(order => order.status === '已完成');
+  const [credit] = w.queryLedger(tenantId, {type: 'recharge'});
+  assert.equal(credit.orderId, completed.orderNo);
+  assert.equal(credit.afterBalance, completed.amount);
+  assert.equal(credit.occurredAt, completed.creditedAt);
+  assert.equal(w.rechargeOrders(tenantId).find(order => order.status === '已关闭').closeReason, '支付超时');
+
+  const before = w.wallet(tenantId).balance;
+  for (const amount of ['', '0', '-1', '1.234']) assert.throws(() => w.createRechargeOrder(tenantId, amount));
+  assert.throws(() => w.createRechargeOrder('HS-TEN-018', '1.00'), /状态/);
+  const pending = w.createRechargeOrder(tenantId, '19.2');
+  assert.equal(pending.amount, '19.20');
+  assert.equal(pending.paymentCurrency, 'USDT');
+  assert.equal(pending.status, '待支付');
+  assert.equal(w.rechargeOrders(tenantId)[0].orderNo, pending.orderNo);
+  assert.equal(w.rechargeOrders('HS-TEN-018').length, 0);
+  assert.equal(w.queryLedger(tenantId, {keyword: pending.orderNo}).length, 0);
+  assert.equal(w.wallet(tenantId).balance, before);
+});
+
+test('平台充值人工处理校验状态、凭证和租户，入账与审计各记录一次', () => {
+  const {w} = fixture();
+  const tenantId = 'HS-TEN-001';
+  const [unpaid, processing] = w.rechargeOrders(tenantId);
+  const input = {kind: 'credit', reason: '收款已核对', operator: '平台超管', proof: 'BLUEPAY-20261121-001'};
+  assert.throws(() => w.resolveRechargeOrder('HS-TEN-018', processing.orderNo, input), /订单不存在/);
+  assert.throws(() => w.resolveRechargeOrder(tenantId, processing.orderNo, {...input, kind: 'cancel'}), /仅待支付/);
+  assert.throws(() => w.resolveRechargeOrder(tenantId, processing.orderNo, {...input, proof: ''}), /收款凭证/);
+  const cancelled = w.resolveRechargeOrder(tenantId, unpaid.orderNo, {...input, kind: 'cancel'});
+  assert.equal(cancelled.status, '已取消');
+  assert.equal(w.wallet(tenantId).balance, '936.94688');
+  assert.equal(w.queryLedger(tenantId, {keyword: unpaid.orderNo}).length, 0);
+  const paid = w.resolveRechargeOrder(tenantId, processing.orderNo, input);
+  assert.equal(paid.status, '已完成');
+  assert.equal(w.wallet(tenantId).balance, '3436.94688');
+  assert.throws(() => w.resolveRechargeOrder(tenantId, processing.orderNo, input), /已处理/);
+  const fresh = w.createRechargeOrder(tenantId, '20.00');
+  assert.throws(() => w.resolveRechargeOrder(tenantId, fresh.orderNo, input), /已关联其他/);
+  const ledger = w.queryLedger(tenantId, {keyword: processing.orderNo, type: 'recharge'});
+  assert.equal(ledger.length, 1);
+  assert.equal(ledger[0].occurredAt, paid.creditedAt);
+  assert.equal(w.rechargeAudit(tenantId).length, 2);
 });

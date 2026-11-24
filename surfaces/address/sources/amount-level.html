@@ -1,0 +1,400 @@
+<!-- PROJECT: huisheng-amount-level -->
+<!-- SURFACE: ADDRESS / 支付订单管理 / 目标池金额层级配置 -->
+<!-- CHANGE: 地址归属沿用汇盛，分层配置按币种分开（USDT / TRX） -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>目标池/金额层级配置</title>
+  <style>
+    :root {
+      --primary: #409eff;
+      --primary-soft: #ecf5ff;
+      --bg: #f0f2f5;
+      --card: #fff;
+      --text: #303133;
+      --regular: #606266;
+      --muted: #909399;
+      --line: #ebeef5;
+      --border: #dcdfe6;
+      --danger: #f56c6c;
+      --success: #67c23a;
+      --warning: #e6a23c;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--text);
+      font: 14px/1.5 "Helvetica Neue", Helvetica, "PingFang SC", "Microsoft YaHei", sans-serif; }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    body.embed .chrome-only { display: none !important; }
+    .page { padding: 12px 16px 28px; }
+    .tabs-page { display: flex; gap: 0; background: #fff; border-bottom: 1px solid var(--line);
+      padding: 0 12px; height: 40px; align-items: center; }
+    .tabs-page .t { height: 40px; padding: 0 16px; border: 0; background: transparent;
+      color: var(--regular); border-bottom: 2px solid transparent; }
+    .tabs-page .t.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .owner-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+      margin-bottom: 12px; padding: 12px 14px; background: #fff; border: 1px solid var(--line); border-radius: 4px; }
+    .owner-bar .lbl { color: var(--regular); white-space: nowrap; }
+    .owner-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+    .owner-tab { height: 32px; padding: 0 14px; border: 1px solid var(--border); border-radius: 4px;
+      background: #fff; color: var(--regular); }
+    .owner-tab:hover { color: var(--primary); border-color: #c6e2ff; }
+    .owner-tab.active { color: #fff; background: var(--primary); border-color: var(--primary); }
+    .owner-tab .new { margin-left: 4px; font-size: 11px; padding: 0 5px; border-radius: 2px;
+      background: #fdf6ec; color: var(--warning); border: 1px solid #f5dab1; }
+    .owner-tab.active .new { background: rgba(255,255,255,.2); color: #fff; border-color: rgba(255,255,255,.35); }
+    .hint { flex: 1; min-width: 200px; color: #b88230; font-size: 12px; }
+    .card { background: #fff; border: 1px solid var(--line); border-radius: 4px; margin-bottom: 12px; }
+    .card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 12px 16px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+    .card-title { font-size: 15px; font-weight: 600; }
+    .card-head .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .card-body { padding: 12px 16px 16px; }
+    .subline { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; color: var(--regular); }
+    .btn { height: 32px; padding: 0 14px; border: 1px solid var(--border); border-radius: 4px;
+      background: #fff; color: var(--regular); }
+    .btn:hover { color: var(--primary); border-color: #c6e2ff; background: var(--primary-soft); }
+    .btn.primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .btn.primary:hover { background: #66b1ff; border-color: #66b1ff; color: #fff; }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+    .tag { display: inline-block; height: 22px; line-height: 20px; padding: 0 7px; border-radius: 4px;
+      font-size: 12px; border: 1px solid transparent; vertical-align: middle; }
+    .tag.info { color: var(--primary); background: var(--primary-soft); border-color: #d9ecff; }
+    .tag.blue { color: var(--primary); background: var(--primary-soft); border-color: #d9ecff; }
+    .tag.green { color: var(--success); background: #f0f9eb; border-color: #e1f3d8; }
+    .tag.warn { color: var(--warning); background: #fdf6ec; border-color: #f5dab1; }
+    .tag.muted { color: var(--muted); background: #f4f4f5; border-color: #e9e9eb; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { height: 44px; padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left;
+      vertical-align: middle; font-size: 13px; }
+    th { background: #fafafa; color: var(--regular); font-weight: 500; }
+    .ctrl { height: 32px; padding: 0 10px; border: 1px solid var(--border); border-radius: 4px; width: 120px; }
+    .ctrl:focus { outline: none; border-color: var(--primary); }
+    .ctrl:disabled { background: #f5f7fa; color: var(--muted); }
+    .link { border: 0; background: none; color: var(--primary); padding: 0 4px; }
+    .link.danger { color: var(--danger); }
+    .link:disabled { color: var(--muted); cursor: not-allowed; }
+    .alert { margin-top: 12px; padding: 10px 12px; border-radius: 4px; background: #f4f4f5;
+      border: 1px solid #e9e9eb; color: var(--regular); font-size: 12px; line-height: 1.55; }
+    .alert b { color: var(--text); }
+    .th-note { display: block; font-size: 11px; color: var(--muted); font-weight: 400; margin-top: 2px; }
+    .mark-note { color: var(--muted); font-size: 12px; margin-left: 6px; }
+    .ml-1 { margin-left: 6px; }
+    .toast { position: fixed; left: 50%; top: 24px; transform: translateX(-50%) translateY(-12px);
+      z-index: 50; padding: 10px 16px; border-radius: 4px; background: #303133; color: #fff;
+      font-size: 13px; opacity: 0; pointer-events: none; transition: .18s; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .muted { color: var(--muted); font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="tabs-page chrome-only">
+    <button type="button" class="t active">目标池/金额层级配置</button>
+  </div>
+  <div class="page">
+    <div class="owner-bar">
+      <span class="lbl">配置币种</span>
+      <div class="owner-tabs" id="ownerTabs"></div>
+      <span class="hint" id="ownerHint"></span>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">金额层级配置</div>
+        <div class="actions">
+          <button type="button" class="btn" id="btnAdd">新增层级</button>
+          <button type="button" class="btn primary" id="btnSave">保存配置</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="subline">
+          <span>金额层级</span>
+          <span class="tag info" id="tierCount">当前 0 个层级</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th style="width:120px">金额层级</th>
+              <th style="min-width:160px">下限</th>
+              <th style="min-width:220px">上限</th>
+              <th style="min-width:220px">区间预览</th>
+              <th style="width:100px;text-align:center">操作</th>
+            </tr>
+          </thead>
+          <tbody id="tierBody"></tbody>
+        </table>
+        <div class="alert">
+          <b>配置保存规则：</b>区间必须连续、无重叠、无空洞；删除后自动重排 L 编号，目标池映射列表按「池类型数量 × 当前金额层级数量」同步扩展或收缩。
+          <br />USDT 与 TRX 的层级区间按币种分开保存，互不影响；地址归属仍沿用汇盛。<b>TRX 分层金额最多 2 位小数</b>，不影响订单等交易金额最多 6 位小数的口径。
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">目标池映射</div>
+          <div class="muted" id="mapSummary" style="margin-top:4px"></div>
+        </div>
+      </div>
+      <div class="card-body" style="padding-top:0">
+        <table>
+          <thead>
+            <tr>
+              <th style="min-width:180px">目标池</th>
+              <th style="min-width:220px">分层标记<span class="th-note">N=普通池，W=白名单池，Lx=金额层级</span></th>
+              <th style="min-width:220px">区间</th>
+              <th style="width:120px;text-align:center">地址总数</th>
+              <th style="width:120px;text-align:center">可用量</th>
+            </tr>
+          </thead>
+          <tbody id="mapBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const CURRENCIES = [
+      { id: "USDT", label: "USDT", prefix: "HS-USDT" },
+      { id: "TRX", label: "TRX", prefix: "HS-TRX" }
+    ];
+    const POOLS = [
+      { type: 0, code: "N", label: "普通池" },
+      { type: 1, code: "W", label: "白名单池" }
+    ];
+
+    // 各币种使用独立的层级配置。
+    const store = {
+      USDT: [
+        { lower: 0, upper: 100 },
+        { lower: 100, upper: 500 },
+        { lower: 500, upper: null }
+      ],
+      TRX: [
+        { lower: 0, upper: 50 },
+        { lower: 50, upper: 300 },
+        { lower: 300, upper: null }
+      ]
+    };
+
+    // 地址库存按币种×池×层维护；地址归属固定沿用汇盛。
+    const inventory = {
+      "USDT|0|1": { total: 40, avail: 28 },
+      "USDT|0|2": { total: 22, avail: 15 },
+      "USDT|0|3": { total: 12, avail: 8 },
+      "USDT|1|1": { total: 10, avail: 7 },
+      "USDT|1|2": { total: 6, avail: 4 },
+      "USDT|1|3": { total: 4, avail: 2 },
+      "TRX|0|1": { total: 18, avail: 12 },
+      "TRX|0|2": { total: 9, avail: 6 },
+      "TRX|0|3": { total: 5, avail: 4 },
+      "TRX|1|1": { total: 4, avail: 3 },
+      "TRX|1|2": { total: 3, avail: 2 },
+      "TRX|1|3": { total: 2, avail: 1 }
+    };
+
+    let currency = "TRX";
+    const $ = (id) => document.getElementById(id);
+    const toast = (msg) => {
+      const el = $("toast");
+      el.textContent = msg;
+      el.classList.add("show");
+      clearTimeout(toast._t);
+      toast._t = setTimeout(() => el.classList.remove("show"), 1600);
+    };
+    const fmt = (n) => Number(n).toLocaleString("en-US", { maximumFractionDigits: 2 });
+    const rangeLabel = (lower, upper, idx, last) => {
+      if (upper == null || upper === "") return `${fmt(lower)} ≤ X`;
+      // 非末层：lower ≤ X < upper；展示与线上接近
+      return `${fmt(lower)} ≤ X < ${fmt(upper)}`;
+    };
+    const currencyMeta = () => CURRENCIES.find((o) => o.id === currency);
+    const tiers = () => store[currency];
+    const layerMark = (poolCode, sortOrder) => `${currencyMeta().prefix}-${poolCode}-L${sortOrder}`;
+
+    function renderOwnerTabs() {
+      $("ownerTabs").innerHTML = CURRENCIES.map((o) => `
+        <button type="button" class="owner-tab ${o.id === currency ? "active" : ""}" data-currency="${o.id}">
+          ${o.label}
+        </button>
+      `).join("");
+      $("ownerHint").textContent = `正在编辑 ${currency} 的金额分层；地址归属固定沿用汇盛，地址仅可用于该币种`;
+    }
+
+    function renderTiers() {
+      const list = tiers();
+      $("tierCount").textContent = `当前 ${list.length} 个层级`;
+      $("tierBody").innerHTML = list.map((t, i) => {
+        const last = i === list.length - 1;
+        const upperDisabled = last && (t.upper == null || t.upper === "");
+        return `
+          <tr>
+            <td style="text-align:center">
+              <strong>L${i + 1}</strong>${last ? '<span class="tag muted ml-1">末层</span>' : ""}
+            </td>
+            <td>
+              <input class="ctrl" type="number" step="0.01" data-tier-lower="${i}" value="${t.lower}" ${i === 0 ? "disabled" : ""} />
+            </td>
+            <td>
+              <input class="ctrl" type="number" step="0.01" data-tier-upper="${i}" value="${t.upper == null ? "" : t.upper}"
+                placeholder="${last ? "空=无上限" : ""}" ${upperDisabled && false ? "disabled" : ""} />
+              ${last ? `<button type="button" class="link ml-1" data-toggle-cap="${i}">${t.upper == null || t.upper === "" ? "设上限" : "设无上限"}</button>` : ""}
+            </td>
+            <td><span class="tag info">${rangeLabel(t.lower, t.upper, i, last)}</span></td>
+            <td style="text-align:center">
+              <button type="button" class="link danger" data-del="${i}" ${list.length <= 1 ? "disabled" : ""}>删除</button>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function renderMap() {
+      const list = tiers();
+      const rows = [];
+      POOLS.forEach((p) => {
+        list.forEach((t, i) => {
+          const sort = i + 1;
+          const key = `${currency}|${p.type}|${sort}`;
+          const inv = inventory[key] || { total: 0, avail: 0 };
+          rows.push({
+            poolType: p.type,
+            poolLabel: p.label,
+            sort,
+            mark: layerMark(p.code, sort),
+            range: rangeLabel(t.lower, t.upper, i, i === list.length - 1),
+            total: inv.total,
+            avail: inv.avail
+          });
+        });
+      });
+      $("mapSummary").textContent =
+        `当前 ${POOLS.length} 个池类型，${list.length} 个金额层级，共 ${rows.length} 个目标池；标记规则 N=普通池，W=白名单池` +
+        `；前缀 ${currencyMeta().prefix}- 标识币种`;
+      $("mapBody").innerHTML = rows.map((r) => `
+        <tr>
+          <td>
+            <span class="tag ${r.poolType === 1 ? "green" : "blue"}">${r.poolLabel}</span>
+            <span class="tag info ml-1">L${r.sort}</span>
+          </td>
+          <td>
+            <strong>${r.mark}</strong>
+            <span class="mark-note">${r.poolLabel} L${r.sort}</span>
+          </td>
+          <td>${r.range}</td>
+          <td style="text-align:center">${r.total}</td>
+          <td style="text-align:center">${r.avail}</td>
+        </tr>
+      `).join("");
+    }
+
+    function render() {
+      renderOwnerTabs();
+      renderTiers();
+      renderMap();
+    }
+
+    function readTierInputs() {
+      const list = tiers();
+      list.forEach((t, i) => {
+        const lo = document.querySelector(`[data-tier-lower="${i}"]`);
+        const up = document.querySelector(`[data-tier-upper="${i}"]`);
+        if (lo && !lo.disabled) t.lower = Number(lo.value);
+        if (up) {
+          const v = up.value.trim();
+          t.upper = v === "" ? null : Number(v);
+        }
+      });
+    }
+
+    function validateTiers() {
+      readTierInputs();
+      const list = tiers();
+      if (!list.length) return "至少保留 1 个层级";
+      for (let i = 0; i < list.length; i++) {
+        const t = list[i];
+        if (Number.isNaN(t.lower)) return `L${i + 1} 下限无效`;
+        if (t.upper != null && Number.isNaN(t.upper)) return `L${i + 1} 上限无效`;
+        if (currency === "TRX" && Math.abs(t.lower * 100 - Math.round(t.lower * 100)) > 1e-9) return `TRX 分层金额最多保留 2 位小数（L${i + 1} 下限）`;
+        if (currency === "TRX" && t.upper != null && Math.abs(t.upper * 100 - Math.round(t.upper * 100)) > 1e-9) return `TRX 分层金额最多保留 2 位小数（L${i + 1} 上限）`;
+        if (t.upper != null && t.upper <= t.lower) return `L${i + 1} 上限须大于下限`;
+        if (i > 0) {
+          const prev = list[i - 1];
+          if (prev.upper == null) return `L${i} 非末层必须设置上限`;
+          if (t.lower !== prev.upper) return `L${i + 1} 下限须等于上一层上限（保持连续）`;
+        }
+      }
+      const last = list[list.length - 1];
+      if (last.upper != null && list.length > 1) {
+        // 允许末层有上限或无上限
+      }
+      return "";
+    }
+
+    function boot() {
+      if (window.__HS_ADDRESS_EMBED__ || window.__HS_ADDRESS_SURFACE__ === "ADDRESS") {
+        document.body.classList.add("embed");
+      }
+      $("ownerTabs").addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-currency]");
+        if (!btn) return;
+        readTierInputs();
+        currency = btn.getAttribute("data-currency");
+        render();
+      });
+      $("btnAdd").onclick = () => {
+        readTierInputs();
+        const list = tiers();
+        const last = list[list.length - 1];
+        if (last.upper == null) last.upper = last.lower + 100;
+        list.push({ lower: last.upper, upper: null });
+        render();
+      };
+      $("btnSave").onclick = () => {
+        const err = validateTiers();
+        if (err) { toast(err); render(); return; }
+        toast(`已保存 ${currencyMeta().label} 分层配置`);
+        render();
+      };
+      $("tierBody").addEventListener("click", (e) => {
+        const del = e.target.closest("[data-del]");
+        if (del && !del.disabled) {
+          readTierInputs();
+          const i = Number(del.getAttribute("data-del"));
+          const list = tiers();
+          if (list.length <= 1) return;
+          list.splice(i, 1);
+          // 重排连续：保持首层 lower=0，中间衔接
+          list[0].lower = 0;
+          for (let k = 1; k < list.length; k++) {
+            if (list[k - 1].upper != null) list[k].lower = list[k - 1].upper;
+          }
+          render();
+          return;
+        }
+        const cap = e.target.closest("[data-toggle-cap]");
+        if (cap) {
+          readTierInputs();
+          const i = Number(cap.getAttribute("data-toggle-cap"));
+          const t = tiers()[i];
+          if (t.upper == null || t.upper === "") t.upper = t.lower + 100;
+          else t.upper = null;
+          render();
+        }
+      });
+      $("tierBody").addEventListener("change", () => {
+        readTierInputs();
+        renderMap();
+        // refresh preview cells cheaply
+        renderTiers();
+      });
+      render();
+    }
+    boot();
+  </script>
+</body>
+</html>

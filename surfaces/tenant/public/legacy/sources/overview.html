@@ -21031,10 +21031,55 @@
     .system-fee-amount strong { font-size: 30px; line-height: 1.25; letter-spacing: -.4px; }
     .tenant-fee-wallet { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; padding: 22px 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
     .tenant-fee-wallet h2 { margin: 0; font-size: 15px; font-weight: 600; }
+    #actionModal[data-system-fee-recharge] {
+      width: min(480px, calc(100% - 24px));
+      height: auto;
+      max-height: calc(100vh - 24px);
+      max-height: calc(100dvh - 24px);
+      border-radius: 10px;
+    }
+    #actionModal[data-system-fee-recharge] .modal-head,
+    #actionModal[data-system-fee-recharge] .modal-foot { flex: none; }
+    #actionModal[data-system-fee-recharge] .modal-body { min-height: 0; }
+    #actionModal[data-system-fee-recharge] #modalCancel[hidden] { display: none; }
+    #systemFeeRechargeForm { display: grid; gap: 16px; }
+    .system-fee-recharge-balance {
+      display: grid; gap: 6px; padding: 14px 16px; border-radius: 8px;
+      background: var(--primary-light); color: var(--text-secondary);
+    }
+    .system-fee-recharge-balance strong { color: var(--text); font-size: 22px; overflow-wrap: anywhere; }
+    .system-fee-recharge-amount { position: relative; }
+    .system-fee-recharge-amount .input { width: 100%; padding-right: 52px; }
+    .system-fee-recharge-amount > span { position: absolute; inset-inline-end: 12px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); }
+    .system-fee-recharge-help, .system-fee-recharge-error { margin: 0; font-size: 12px; line-height: 1.5; }
+    .system-fee-recharge-help { color: var(--text-secondary); }
+    .system-fee-recharge-error { color: var(--danger); }
+    #systemFeeRechargeProgress {
+      border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; background: var(--surface-soft);
+    }
+    .system-fee-recharge-status { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+    .system-fee-recharge-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(145px, 100%), 1fr)); gap: 10px 16px; margin: 12px 0 0; }
+    .system-fee-recharge-summary dt { margin-bottom: 4px; color: var(--text-secondary); font-size: 12px; }
+    .system-fee-recharge-summary dd { margin: 0; overflow-wrap: anywhere; }
+    .system-fee-payment-details { display: grid; gap: 12px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+    .system-fee-payment-address, .system-fee-payment-qr { display: grid; gap: 8px; align-content: start; }
+    .system-fee-payment-address code { overflow-wrap: anywhere; user-select: all; }
+    .system-fee-payment-address button { justify-self: start; }
+    .system-fee-payment-qr { justify-items: center; margin: 0; color: var(--text-secondary); font-size: 12px; }
+    .system-fee-payment-qr svg { display: block; width: 135px; max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 6px; }
+    @container (min-width: 340px) {
+      .system-fee-payment-details { grid-template-columns: 135px minmax(0, 1fr); gap: 12px; }
+    }
+    #systemFeeRechargeProgress { container-type: inline-size; }
+    .system-fee-recharge-pay { display: block; margin-top: 5px; }
     .system-fee-ledger-count { margin: 0; padding: 12px 18px; color: var(--text-secondary); font-size: 12px; }
     .system-fee-ledger th, .system-fee-ledger td { padding: 10px !important; font-size: 12px; }
     .system-fee-ledger { min-width: 1600px !important; }
     .system-fee-ledger .mono { white-space: nowrap; }
+    .wallet-recent-ledger .rich-table.system-fee-recharge-table { min-width: 650px; }
+    .system-fee-recharge-table .mono { white-space: nowrap; }
+    .system-fee-recharge-table th:nth-child(2), .system-fee-recharge-table td:nth-child(2) { text-align: right; }
+
     .system-fee-daily { min-width: 1050px !important; }
     .system-fee-daily th, .system-fee-daily td { padding: 10px !important; font-size: 12px; white-space: nowrap; text-align: right; }
     .system-fee-daily th:first-child { text-align: left; }
@@ -25898,8 +25943,8 @@
     let walletTransferUiSequence = 1;
     let walletLastTransferReceipt = null;
     const walletRoleProfiles = {
-      admin: { label: "超级管理员", canTransfer: true, canExport: true },
-      finance: { label: "财务（可划转）", canTransfer: true, canExport: true },
+      admin: { label: "超级管理员", canTransfer: true, canExport: true, canRecharge: true },
+      finance: { label: "财务（可划转）", canTransfer: true, canExport: true, canRecharge: true },
       operations: { label: "运营（只读）", canTransfer: false, canExport: false },
       readonly: { label: "只读角色", canTransfer: false, canExport: false }
     };
@@ -25919,7 +25964,7 @@
         "tenant.dashboard.export", "tenant.collect.cancel", "tenant.collect.export", "tenant.collect.makeup", "tenant.collect.ip_block",
         "tenant.refund.review", "tenant.refund.export", "tenant.payout.review", "tenant.payout.select_channel", "tenant.payout.cancel", "tenant.payout.export",
         "tenant.payout.makeup", "tenant.payout.reorder", "tenant.payout.reverse", "tenant.order.query", "tenant.channel_incident.notify", "tenant.channel_authorization.export", "tenant.wallet_transfer.create",
-        "tenant.platform_wallet.export", "tenant.wallet_transfer.export", "tenant.fund_application.create", "tenant.withdrawal_account.manage",
+        "tenant.platform_wallet.export", "tenant.system_fee.recharge", "tenant.wallet_transfer.export", "tenant.fund_application.create", "tenant.withdrawal_account.manage",
         "tenant.fund_application.withdraw", "tenant.fund_application.export", "tenant.ledger.export",
         "tenant.reconciliation.notify_platform", "tenant.reconciliation.export", "tenant.report.export", "tenant.ticket.manage",
         "tenant.ticket.export", "tenant.notification.resend", "tenant.notification.export", "tenant.sensitive.view"
@@ -27652,12 +27697,41 @@
       return `<section class="wallet-recent-ledger" aria-label="钱包流水"><div class="wallet-section-head"><h2>钱包流水</h2></div>
         <form id="tenantWalletLedgerSearch" class="wallet-ledger-search">
           <label>订单号／流水号<input class="input" name="keyword" placeholder="输入订单号或流水号" value="${cell(filters.keyword)}"></label>
-          <label>流水类型<select class="input" name="type">${[['all','全部类型'],['collect','代收系统费'],['payout','代付系统费'],['increase','人工调增'],['decrease','人工调减']].map(([value,label])=>`<option value="${value}" ${filters.type===value?'selected':''}>${label}</option>`).join('')}</select></label>
+          <label>流水类型<select class="input" name="type">${[['all','全部类型'],['collect','代收系统费'],['payout','代付系统费'],['increase','人工调增'],['decrease','人工调减'],['recharge','充值到账']].map(([value,label])=>`<option value="${value}" ${filters.type===value?'selected':''}>${label}</option>`).join('')}</select></label>
           <label>开始日期<input class="input" name="from" type="date" value="${cell(filters.from)}"></label>
           <label>结束日期<input class="input" name="to" type="date" value="${cell(filters.to)}"></label>
           <div class="wallet-ledger-search-actions"><button class="btn btn-primary" type="submit">查询</button><button class="btn" type="button" data-action="wallet-ledger-reset">重置</button></div>
         </form>
         <div class="table-wrap"><table class="rich-table system-fee-ledger"><thead><tr>${['流水单号','类型','原订单号 / 成功时间','原始订单金额（CNY）','计费方式 / 费率快照','变动金额（CNY）','扣费/调整时间（UTC+8）','变动前余额（CNY）','变动后余额（CNY）','操作人 / 原因','状态'].map(t=>`<th>${t}</th>`).join('')}</tr></thead><tbody>${entries.map(e=>`<tr><td class="mono">${cell(e.id)}</td><td>${e.type === '系统费' ? cell(e.direction)+'系统费' : cell(e.type)}</td><td><strong class="mono">${cell(e.orderId)}</strong>${e.succeededAt ? `<div class="muted mono">${cell(e.succeededAt)}</div>` : ''}</td><td class="mono">${cell(e.orderAmount)}</td><td>${e.type !== '系统费' ? '—' : !e.policy ? '未设置' : e.policy.mode === 'percentage' ? `交易百分比<br>${cell(e.policy.value)}%` : `按单笔<br>CNY ${cell(e.policy.value)} / 笔`}</td><td class="mono"><strong>${e.change === null ? '待计费' : cell(e.change)}</strong></td><td class="mono">${cell(e.occurredAt || '—')}</td><td class="mono">${cell(e.beforeBalance)}</td><td class="mono">${cell(e.afterBalance)}</td><td>${cell(e.operator)}<div class="muted">${cell(e.reason || '—')}</div></td><td>${cell(e.status)}</td></tr>`).join('') || '<tr><td colspan="11"><div class="empty-state">暂无符合条件的流水</div></td></tr>'}</tbody></table></div><p class="system-fee-ledger-count" role="status">共 ${entries.length} 条</p></section>`;
+    }
+
+    function renderSystemFeeRechargeOrders() {
+      const orders = window.HSFeeWallets?.rechargeOrders(currentTenantAccount.tenantId) || [];
+      const canPay = hasTenantActionPermission("tenant.system_fee.recharge");
+      const rows = orders.map(order => `
+        <tr>
+          <td class="mono">${escapeHtml(order.orderNo)}</td>
+          <td class="mono">${escapeHtml(order.amount)}</td>
+          <td>${escapeHtml(order.paymentCurrency)}</td>
+          <td>
+            <span class="tag tag-${escapeHtml(order.tone)}">${escapeHtml(order.status)}</span>
+            ${order.closeReason ? `<div class="muted">${escapeHtml(order.closeReason)}</div>` : ''}
+            ${canPay && order.status === "待支付" ? `<button class="btn system-fee-recharge-pay" type="button" data-action="system-fee-recharge" data-recharge-order="${escapeHtml(order.orderNo)}">继续支付</button>` : ''}
+          </td>
+          <td class="mono">${escapeHtml(order.createdAt)}</td>
+          <td class="mono">${escapeHtml(order.creditedAt || '—')}</td>
+        </tr>`).join('');
+      return `
+        <section class="wallet-recent-ledger" id="systemFeeRechargeOrders" aria-labelledby="systemFeeRechargeTitle">
+          <div class="wallet-section-head"><h2 id="systemFeeRechargeTitle">充值订单</h2></div>
+          <div class="table-wrap">
+            <table class="rich-table system-fee-recharge-table" aria-labelledby="systemFeeRechargeTitle">
+              <thead><tr>${['充值订单号','充值金额（CNY）','支付币种','订单状态','创建时间（UTC+8）','到账时间（UTC+8）'].map(label => `<th scope="col">${label}</th>`).join('')}</tr></thead>
+              <tbody>${rows || '<tr><td colspan="6"><div class="empty-state">暂无充值订单</div></td></tr>'}</tbody>
+            </table>
+          </div>
+          <p class="system-fee-ledger-count" role="status">共 ${orders.length} 条</p>
+        </section>`;
     }
 
     function renderSystemFeeDaily() {
@@ -27717,13 +27791,17 @@
             <div><h1 class="page-title">系统费</h1></div>
             <div class="page-actions"><button class="btn" type="button" data-action="refresh-page"><i data-lucide="refresh-cw"></i>刷新</button></div>
           </section>
-          <section class="tenant-fee-wallet" aria-label="租户统一钱包"><div><h2>租户钱包余额</h2><div class="system-fee-amount"><span>CNY</span><strong>${escapeHtml(wallet?.balance || "0.00")}</strong></div></div></section>
+          <section class="tenant-fee-wallet" aria-label="租户统一钱包">
+            <div><h2>租户钱包余额</h2><div class="system-fee-amount"><span>CNY</span><strong>${escapeHtml(wallet?.balance || "0.00")}</strong></div></div>
+            ${hasTenantActionPermission("tenant.system_fee.recharge") ? '<button class="btn btn-primary" type="button" data-action="system-fee-recharge">充值</button>' : ''}
+          </section>
           <section class="system-fee-period" aria-label="系统费统计月份">
             <label for="tenantSystemFeeMonth">统计月份（UTC+8）</label><input class="input" id="tenantSystemFeeMonth" type="month" value="${escapeHtml(state.systemFeeMonth)}">
           </section>
           <section class="system-fee-summary" aria-label="代收和代付系统费统计">${card("代收")}${card("代付")}</section>
           ${renderSystemFeeDaily()}
           ${renderSystemFeeLedger()}
+          ${renderSystemFeeRechargeOrders()}
         </section>
       `;
     }
@@ -28008,6 +28086,7 @@
       if (kind === "recreate-payout") return "tenant.payout.reorder";
       if (kind === "reverse-payout") return "tenant.payout.reverse";
       if (kind === "internal-transfer") return "tenant.wallet_transfer.create";
+      if (kind === "system-fee-recharge") return "tenant.system_fee.recharge";
       if (["create-deposit", "create-withdrawal", "manual-credit", "manual-debit", "confirm-deposit-paid", "append-proof", "copy-funds"].includes(kind)) return "tenant.fund_application.create";
       if (kind === "add-withdraw-account") return "tenant.withdrawal_account.manage";
       if (kind === "cancel-funds") return "tenant.fund_application.withdraw";
@@ -29963,6 +30042,7 @@
       let confirmText = "确认";
       let body = "";
       let selfReviewBlocked = false;
+      let rechargeOrder = null;
 
       if (kind === "export") {
         title = "导出当前视图";
@@ -30186,6 +30266,36 @@
             <input type="hidden" id="transferIdempotencyKey" value="${requestKey}">
             <input type="hidden" id="transferExpectedSourceVersion"><input type="hidden" id="transferExpectedTargetVersion">
           </div>`;
+      } else if (kind === "system-fee-recharge") {
+        const requestedOrder = trigger.dataset.rechargeOrder;
+        if (requestedOrder) {
+          rechargeOrder = window.HSFeeWallets.rechargeOrders(currentTenantAccount.tenantId)
+            .find(order => order.orderNo === requestedOrder && order.status === "待支付");
+          if (!rechargeOrder) {
+            showToast("订单状态已变化，请刷新后查看");
+            return;
+          }
+        }
+        title = "系统费充值";
+        confirmText = "创建充值订单";
+        const balance = window.HSFeeWallets.wallet(currentTenantAccount.tenantId).balance;
+        body = `
+          <form id="systemFeeRechargeForm">
+            <div class="system-fee-recharge-balance">
+              <span>当前系统费钱包余额</span>
+              <strong class="mono">CNY ${escapeHtml(balance)}</strong>
+            </div>
+            <div class="field">
+              <label for="systemFeeRechargeAmount">充值金额</label>
+              <div class="system-fee-recharge-amount">
+                <input class="input" id="systemFeeRechargeAmount" inputmode="decimal" placeholder="请输入人民币金额" aria-describedby="systemFeeRechargePayment systemFeeRechargeError">
+                <span aria-hidden="true">CNY</span>
+              </div>
+              <p class="system-fee-recharge-help" id="systemFeeRechargePayment">以 USDT 转账，确认收款后按 CNY 订单金额入账。</p>
+              <p class="system-fee-recharge-error" id="systemFeeRechargeError" role="alert" hidden></p>
+            </div>
+            <div id="systemFeeRechargeProgress" role="status" aria-atomic="true" hidden></div>
+          </form>`;
       } else if (kind === "create-deposit") {
         title = "创建外部存款申请";
         confirmText = "创建待付款申请";
@@ -30343,6 +30453,8 @@
       document.getElementById("modalConfirm").textContent = confirmText;
       document.getElementById("modalConfirm").disabled = selfReviewBlocked;
       document.getElementById("modalBody").innerHTML = body;
+      document.getElementById("actionModal").toggleAttribute("data-system-fee-recharge", kind === "system-fee-recharge");
+      document.getElementById("modalCancel").hidden = false;
       document.getElementById("modalMask").classList.add("show");
       document.getElementById("modalMask").setAttribute("aria-hidden", "false");
       if (kind === "internal-transfer") setupTransferForm();
@@ -30385,6 +30497,10 @@
         choice?.addEventListener("change", refreshProductSummary);
         productChoice?.addEventListener("change", () => window.HSFormFeedback?.clear?.(productChoice));
         refreshProductSummary();
+      }
+      if (rechargeOrder) {
+        showSystemFeeRechargePayment(rechargeOrder);
+        return;
       }
       const firstControl = document.querySelector("#modalBody input, #modalBody select, #modalBody textarea");
       (firstControl || document.getElementById("modalConfirm")).focus();
@@ -30445,14 +30561,20 @@
 
     function handleTenantOperationConfirm() {
       if (!pendingAction) return;
+      const operation = pendingAction;
       const button = document.getElementById("modalConfirm");
+      if (button.disabled) return;
+      if (operation.rechargeOrder) {
+        closeActionModal();
+        return;
+      }
       const originalText = button.textContent;
       button.disabled = true;
       button.textContent = "提交中…";
       const restore = () => {
-        if (!button.isConnected) return;
+        if (!button.isConnected || pendingAction !== operation || operation.rechargeOrder) return;
         button.disabled = false;
-        if (pendingAction) button.textContent = originalText;
+        button.textContent = originalText;
       };
       const outcome = tenantOperationControl.nextOutcome;
       tenantOperationControl.nextOutcome = "success";
@@ -30513,6 +30635,51 @@
       if (message) showToast(message);
     }
 
+    // Generated QR for the non-payable local demo address.
+    const systemFeeRechargeDemoQr = {"size":37,"path":"M4,4h1v1h-1zM5,4h1v1h-1zM6,4h1v1h-1zM7,4h1v1h-1zM8,4h1v1h-1zM9,4h1v1h-1zM10,4h1v1h-1zM15,4h1v1h-1zM19,4h1v1h-1zM20,4h1v1h-1zM22,4h1v1h-1zM24,4h1v1h-1zM26,4h1v1h-1zM27,4h1v1h-1zM28,4h1v1h-1zM29,4h1v1h-1zM30,4h1v1h-1zM31,4h1v1h-1zM32,4h1v1h-1zM4,5h1v1h-1zM10,5h1v1h-1zM21,5h1v1h-1zM22,5h1v1h-1zM26,5h1v1h-1zM32,5h1v1h-1zM4,6h1v1h-1zM6,6h1v1h-1zM7,6h1v1h-1zM8,6h1v1h-1zM10,6h1v1h-1zM12,6h1v1h-1zM13,6h1v1h-1zM15,6h1v1h-1zM16,6h1v1h-1zM18,6h1v1h-1zM20,6h1v1h-1zM23,6h1v1h-1zM24,6h1v1h-1zM26,6h1v1h-1zM28,6h1v1h-1zM29,6h1v1h-1zM30,6h1v1h-1zM32,6h1v1h-1zM4,7h1v1h-1zM6,7h1v1h-1zM7,7h1v1h-1zM8,7h1v1h-1zM10,7h1v1h-1zM12,7h1v1h-1zM13,7h1v1h-1zM15,7h1v1h-1zM16,7h1v1h-1zM20,7h1v1h-1zM21,7h1v1h-1zM22,7h1v1h-1zM23,7h1v1h-1zM26,7h1v1h-1zM28,7h1v1h-1zM29,7h1v1h-1zM30,7h1v1h-1zM32,7h1v1h-1zM4,8h1v1h-1zM6,8h1v1h-1zM7,8h1v1h-1zM8,8h1v1h-1zM10,8h1v1h-1zM12,8h1v1h-1zM13,8h1v1h-1zM16,8h1v1h-1zM17,8h1v1h-1zM18,8h1v1h-1zM19,8h1v1h-1zM23,8h1v1h-1zM24,8h1v1h-1zM26,8h1v1h-1zM28,8h1v1h-1zM29,8h1v1h-1zM30,8h1v1h-1zM32,8h1v1h-1zM4,9h1v1h-1zM10,9h1v1h-1zM12,9h1v1h-1zM14,9h1v1h-1zM15,9h1v1h-1zM16,9h1v1h-1zM17,9h1v1h-1zM18,9h1v1h-1zM19,9h1v1h-1zM20,9h1v1h-1zM22,9h1v1h-1zM26,9h1v1h-1zM32,9h1v1h-1zM4,10h1v1h-1zM5,10h1v1h-1zM6,10h1v1h-1zM7,10h1v1h-1zM8,10h1v1h-1zM9,10h1v1h-1zM10,10h1v1h-1zM12,10h1v1h-1zM14,10h1v1h-1zM16,10h1v1h-1zM18,10h1v1h-1zM20,10h1v1h-1zM22,10h1v1h-1zM24,10h1v1h-1zM26,10h1v1h-1zM27,10h1v1h-1zM28,10h1v1h-1zM29,10h1v1h-1zM30,10h1v1h-1zM31,10h1v1h-1zM32,10h1v1h-1zM12,11h1v1h-1zM17,11h1v1h-1zM19,11h1v1h-1zM4,12h1v1h-1zM6,12h1v1h-1zM7,12h1v1h-1zM8,12h1v1h-1zM9,12h1v1h-1zM10,12h1v1h-1zM13,12h1v1h-1zM14,12h1v1h-1zM18,12h1v1h-1zM19,12h1v1h-1zM21,12h1v1h-1zM23,12h1v1h-1zM24,12h1v1h-1zM26,12h1v1h-1zM27,12h1v1h-1zM28,12h1v1h-1zM29,12h1v1h-1zM30,12h1v1h-1zM5,13h1v1h-1zM6,13h1v1h-1zM9,13h1v1h-1zM11,13h1v1h-1zM12,13h1v1h-1zM15,13h1v1h-1zM16,13h1v1h-1zM19,13h1v1h-1zM20,13h1v1h-1zM23,13h1v1h-1zM26,13h1v1h-1zM27,13h1v1h-1zM28,13h1v1h-1zM29,13h1v1h-1zM30,13h1v1h-1zM31,13h1v1h-1zM4,14h1v1h-1zM7,14h1v1h-1zM8,14h1v1h-1zM9,14h1v1h-1zM10,14h1v1h-1zM15,14h1v1h-1zM16,14h1v1h-1zM21,14h1v1h-1zM27,14h1v1h-1zM29,14h1v1h-1zM6,15h1v1h-1zM8,15h1v1h-1zM9,15h1v1h-1zM13,15h1v1h-1zM16,15h1v1h-1zM18,15h1v1h-1zM20,15h1v1h-1zM24,15h1v1h-1zM25,15h1v1h-1zM26,15h1v1h-1zM27,15h1v1h-1zM28,15h1v1h-1zM29,15h1v1h-1zM4,16h1v1h-1zM5,16h1v1h-1zM6,16h1v1h-1zM9,16h1v1h-1zM10,16h1v1h-1zM12,16h1v1h-1zM20,16h1v1h-1zM23,16h1v1h-1zM27,16h1v1h-1zM8,17h1v1h-1zM12,17h1v1h-1zM13,17h1v1h-1zM15,17h1v1h-1zM17,17h1v1h-1zM18,17h1v1h-1zM19,17h1v1h-1zM22,17h1v1h-1zM24,17h1v1h-1zM25,17h1v1h-1zM28,17h1v1h-1zM29,17h1v1h-1zM30,17h1v1h-1zM31,17h1v1h-1zM4,18h1v1h-1zM5,18h1v1h-1zM6,18h1v1h-1zM8,18h1v1h-1zM9,18h1v1h-1zM10,18h1v1h-1zM11,18h1v1h-1zM12,18h1v1h-1zM14,18h1v1h-1zM17,18h1v1h-1zM18,18h1v1h-1zM19,18h1v1h-1zM20,18h1v1h-1zM21,18h1v1h-1zM24,18h1v1h-1zM26,18h1v1h-1zM28,18h1v1h-1zM29,18h1v1h-1zM30,18h1v1h-1zM6,19h1v1h-1zM11,19h1v1h-1zM12,19h1v1h-1zM13,19h1v1h-1zM14,19h1v1h-1zM16,19h1v1h-1zM17,19h1v1h-1zM19,19h1v1h-1zM22,19h1v1h-1zM23,19h1v1h-1zM31,19h1v1h-1zM4,20h1v1h-1zM8,20h1v1h-1zM9,20h1v1h-1zM10,20h1v1h-1zM12,20h1v1h-1zM15,20h1v1h-1zM16,20h1v1h-1zM18,20h1v1h-1zM19,20h1v1h-1zM21,20h1v1h-1zM22,20h1v1h-1zM24,20h1v1h-1zM25,20h1v1h-1zM27,20h1v1h-1zM28,20h1v1h-1zM29,20h1v1h-1zM30,20h1v1h-1zM4,21h1v1h-1zM5,21h1v1h-1zM6,21h1v1h-1zM11,21h1v1h-1zM19,21h1v1h-1zM20,21h1v1h-1zM23,21h1v1h-1zM24,21h1v1h-1zM26,21h1v1h-1zM27,21h1v1h-1zM28,21h1v1h-1zM30,21h1v1h-1zM31,21h1v1h-1zM4,22h1v1h-1zM6,22h1v1h-1zM7,22h1v1h-1zM9,22h1v1h-1zM10,22h1v1h-1zM11,22h1v1h-1zM12,22h1v1h-1zM13,22h1v1h-1zM14,22h1v1h-1zM16,22h1v1h-1zM21,22h1v1h-1zM24,22h1v1h-1zM25,22h1v1h-1zM27,22h1v1h-1zM29,22h1v1h-1zM4,23h1v1h-1zM6,23h1v1h-1zM7,23h1v1h-1zM8,23h1v1h-1zM9,23h1v1h-1zM11,23h1v1h-1zM15,23h1v1h-1zM16,23h1v1h-1zM18,23h1v1h-1zM20,23h1v1h-1zM22,23h1v1h-1zM24,23h1v1h-1zM25,23h1v1h-1zM26,23h1v1h-1zM29,23h1v1h-1zM31,23h1v1h-1zM4,24h1v1h-1zM10,24h1v1h-1zM11,24h1v1h-1zM12,24h1v1h-1zM13,24h1v1h-1zM14,24h1v1h-1zM21,24h1v1h-1zM24,24h1v1h-1zM25,24h1v1h-1zM26,24h1v1h-1zM27,24h1v1h-1zM28,24h1v1h-1zM29,24h1v1h-1zM30,24h1v1h-1zM12,25h1v1h-1zM16,25h1v1h-1zM17,25h1v1h-1zM18,25h1v1h-1zM19,25h1v1h-1zM22,25h1v1h-1zM23,25h1v1h-1zM24,25h1v1h-1zM28,25h1v1h-1zM30,25h1v1h-1zM4,26h1v1h-1zM5,26h1v1h-1zM6,26h1v1h-1zM7,26h1v1h-1zM8,26h1v1h-1zM9,26h1v1h-1zM10,26h1v1h-1zM14,26h1v1h-1zM16,26h1v1h-1zM17,26h1v1h-1zM18,26h1v1h-1zM19,26h1v1h-1zM22,26h1v1h-1zM23,26h1v1h-1zM24,26h1v1h-1zM26,26h1v1h-1zM28,26h1v1h-1zM30,26h1v1h-1zM4,27h1v1h-1zM10,27h1v1h-1zM12,27h1v1h-1zM13,27h1v1h-1zM14,27h1v1h-1zM15,27h1v1h-1zM16,27h1v1h-1zM17,27h1v1h-1zM19,27h1v1h-1zM24,27h1v1h-1zM28,27h1v1h-1zM29,27h1v1h-1zM32,27h1v1h-1zM4,28h1v1h-1zM6,28h1v1h-1zM7,28h1v1h-1zM8,28h1v1h-1zM10,28h1v1h-1zM12,28h1v1h-1zM15,28h1v1h-1zM16,28h1v1h-1zM18,28h1v1h-1zM24,28h1v1h-1zM25,28h1v1h-1zM26,28h1v1h-1zM27,28h1v1h-1zM28,28h1v1h-1zM29,28h1v1h-1zM32,28h1v1h-1zM4,29h1v1h-1zM6,29h1v1h-1zM7,29h1v1h-1zM8,29h1v1h-1zM10,29h1v1h-1zM12,29h1v1h-1zM13,29h1v1h-1zM14,29h1v1h-1zM15,29h1v1h-1zM17,29h1v1h-1zM20,29h1v1h-1zM22,29h1v1h-1zM24,29h1v1h-1zM4,30h1v1h-1zM6,30h1v1h-1zM7,30h1v1h-1zM8,30h1v1h-1zM10,30h1v1h-1zM12,30h1v1h-1zM14,30h1v1h-1zM15,30h1v1h-1zM18,30h1v1h-1zM19,30h1v1h-1zM20,30h1v1h-1zM21,30h1v1h-1zM22,30h1v1h-1zM26,30h1v1h-1zM27,30h1v1h-1zM28,30h1v1h-1zM31,30h1v1h-1zM4,31h1v1h-1zM10,31h1v1h-1zM14,31h1v1h-1zM22,31h1v1h-1zM23,31h1v1h-1zM25,31h1v1h-1zM28,31h1v1h-1zM31,31h1v1h-1zM4,32h1v1h-1zM5,32h1v1h-1zM6,32h1v1h-1zM7,32h1v1h-1zM8,32h1v1h-1zM9,32h1v1h-1zM10,32h1v1h-1zM12,32h1v1h-1zM14,32h1v1h-1zM15,32h1v1h-1zM17,32h1v1h-1zM18,32h1v1h-1zM19,32h1v1h-1zM20,32h1v1h-1zM21,32h1v1h-1zM22,32h1v1h-1zM23,32h1v1h-1zM27,32h1v1h-1zM28,32h1v1h-1zM29,32h1v1h-1zM30,32h1v1h-1z"};
+
+    function showSystemFeeRechargePayment(order) {
+      const payment = window.HSFeeWallets.rechargePayment(currentTenantAccount.tenantId, order.orderNo);
+      pendingAction.rechargeOrder = order;
+      const amount = document.getElementById("systemFeeRechargeAmount");
+      amount.readOnly = true;
+      amount.value = order.amount;
+      document.getElementById("systemFeeRechargePayment").hidden = true;
+      const progress = document.getElementById("systemFeeRechargeProgress");
+      const qr = systemFeeRechargeDemoQr;
+      progress.innerHTML = `
+        <div class="system-fee-recharge-status">
+          <strong>订单已创建</strong>
+          <span class="tag tag-${escapeHtml(order.tone)}">${escapeHtml(order.status)}</span>
+        </div>
+        <dl class="system-fee-recharge-summary">
+          <div><dt>充值订单号</dt><dd class="mono">${escapeHtml(order.orderNo)}</dd></div>
+          <div><dt>充值金额</dt><dd class="mono">CNY ${escapeHtml(order.amount)}</dd></div>
+          ${payment ? `<div><dt>应付金额</dt><dd class="mono">${escapeHtml(payment.amount)} USDT</dd></div>
+          <div><dt>公链网络</dt><dd>${escapeHtml(payment.network)}</dd></div>` : ''}
+        </dl>
+        ${payment ? `<div class="system-fee-payment-details">
+          <figure class="system-fee-payment-qr">
+            <svg role="img" aria-label="演示收款地址二维码" data-qr-payload="${escapeHtml(payment.address)}" viewBox="0 0 ${qr.size} ${qr.size}" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+              <rect width="100%" height="100%" fill="white"/><path d="${qr.path}" fill="#111"/>
+            </svg>
+            <figcaption>收款地址二维码</figcaption>
+          </figure>
+          <div class="system-fee-payment-address">
+            <strong>收款地址</strong>
+            <code class="mono" id="systemFeeReceivingAddress">${escapeHtml(payment.address)}</code>
+            <button class="btn" type="button" data-action="copy-system-fee-address">复制地址</button>
+            <p class="system-fee-recharge-help">演示地址，请勿转账。演示汇率 1 USDT ≈ ${escapeHtml(payment.rate)} CNY。</p>
+          </div>
+        </div>` : '<p class="system-fee-recharge-help">收款信息暂不可用。</p>'}`;
+      progress.hidden = false;
+      document.getElementById("modalCancel").hidden = true;
+      const confirm = document.getElementById("modalConfirm");
+      confirm.textContent = "关闭";
+      confirm.disabled = false;
+      confirm.focus();
+    }
+
     function confirmActionModal() {
       if (!pendingAction) return;
       const { kind, trigger, row, pageName, exportScope } = pendingAction;
@@ -30525,6 +30692,31 @@
       if (confirmBox && !confirmBox.checked) {
         showToast("请先完成二次确认");
         confirmBox.focus();
+        return;
+      }
+
+      if (kind === "system-fee-recharge") {
+        const amount = document.getElementById("systemFeeRechargeAmount");
+        const feedback = document.getElementById("systemFeeRechargeError");
+        feedback.hidden = true;
+        amount.removeAttribute("aria-invalid");
+        if (parseCnyInput(amount.value) === null) {
+          feedback.hidden = false;
+          feedback.textContent = "请输入大于 0 的金额，最多两位小数。";
+          amount.setAttribute("aria-invalid", "true");
+          amount.focus();
+          return;
+        }
+        let order;
+        try {
+          order = window.HSFeeWallets.createRechargeOrder(currentTenantAccount.tenantId, amount.value);
+        } catch (error) {
+          feedback.hidden = false;
+          feedback.textContent = error.message;
+          return;
+        }
+        showSystemFeeRechargePayment(order);
+        document.getElementById("systemFeeRechargeOrders").outerHTML = renderSystemFeeRechargeOrders();
         return;
       }
 
@@ -31695,7 +31887,7 @@
           syncTenantNotificationProjection();
           renderNavPage("通知中心");
           showToast("已标记当前运营告警为已读；其他用户阅读状态和业务事实未改变");
-        } else if (["select-channel", "review-refund", "review-payout", "notify-channel", "show-sensitive", "resubmit-guidance", "notice-retry", "cancel-order", "cancel-payout-order", "manual-order-repair", "block-ip", "recreate-payout", "reverse-payout", "export", "internal-transfer", "create-deposit", "create-withdrawal", "manual-credit", "manual-debit", "confirm-deposit-paid", "append-proof", "cancel-funds", "add-withdraw-account", "notify-recon", "copy-funds", "create-ticket", "create-related-ticket", "ticket-reply", "ticket-supplement", "ticket-unresolved", "ticket-cancel", "confirm-ticket-resolution"].includes(action)) {
+        } else if (["select-channel", "review-refund", "review-payout", "notify-channel", "show-sensitive", "resubmit-guidance", "notice-retry", "cancel-order", "cancel-payout-order", "manual-order-repair", "block-ip", "recreate-payout", "reverse-payout", "export", "internal-transfer", "system-fee-recharge", "create-deposit", "create-withdrawal", "manual-credit", "manual-debit", "confirm-deposit-paid", "append-proof", "cancel-funds", "add-withdraw-account", "notify-recon", "copy-funds", "create-ticket", "create-related-ticket", "ticket-reply", "ticket-supplement", "ticket-unresolved", "ticket-cancel", "confirm-ticket-resolution"].includes(action)) {
           if (document.getElementById("drawer").classList.contains("show")) closeDrawer();
           openActionModal(action, actionButton);
         } else if (action === "manage-withdraw-accounts") {
@@ -31871,6 +32063,12 @@
         } else if (action === "copy-channel") {
           const copied = await copyText(tenantVisibleRowSummary(actionButton));
           showToast(copied ? "已复制通道摘要，仅包含租户可见的授权和健康信息" : "复制失败，请手动复制当前可见通道信息");
+        } else if (action === "copy-system-fee-address") {
+          const address = document.getElementById("systemFeeReceivingAddress");
+          if (!address) return;
+          const copied = await copyText(address.textContent);
+          showToast(copied ? "已复制收款地址" : "复制失败，请手动复制收款地址");
+          if (actionButton.isConnected) actionButton.focus();
         } else if (action === "copy-payment") {
           const copied = await copyText(tenantVisibleRowSummary(actionButton));
           showToast(copied ? "已复制本订单付款信息和有效期，不包含其他订单资料" : "复制失败，请手动复制当前可见付款信息");
@@ -31975,6 +32173,11 @@
     });
 
     document.addEventListener("submit", (event) => {
+      if (event.target.id === "systemFeeRechargeForm") {
+        event.preventDefault();
+        document.getElementById("modalConfirm").click();
+        return;
+      }
       if (event.target.id === "tenantSystemFeeDailySearch") {
         event.preventDefault();
         const filters = Object.fromEntries(['from','to'].map(key => [key, event.target.elements.namedItem(key).value]));
@@ -32021,6 +32224,8 @@
         currentTenantAccount.canExport = profile.canExport;
         if (profile.canTransfer) currentTenantAccount.actionPermissions.add("tenant.wallet_transfer.create");
         else currentTenantAccount.actionPermissions.delete("tenant.wallet_transfer.create");
+        if (profile.canRecharge) currentTenantAccount.actionPermissions.add("tenant.system_fee.recharge");
+        else currentTenantAccount.actionPermissions.delete("tenant.system_fee.recharge");
         tenantExportPermissionCodes.forEach(code => profile.canExport ? currentTenantAccount.actionPermissions.add(code) : currentTenantAccount.actionPermissions.delete(code));
         renderNavPage("平台钱包");
         showToast(`已切换为${profile.label}`);

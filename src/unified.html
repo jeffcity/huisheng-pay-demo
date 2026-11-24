@@ -24,7 +24,7 @@
     .workspace iframe{display:block;border:0;width:100%;height:100%;background:var(--canvas)}
     .status{position:absolute;inset:0;display:grid;place-content:center;gap:14px;text-align:center;background:var(--canvas);color:var(--muted);font-size:14px;z-index:1}
     .status[hidden]{display:none}.status button{padding:10px 16px;background:var(--surface);border:1px solid var(--line);border-radius:6px;color:var(--primary);cursor:pointer;font:inherit}
-    @media(max-width:650px){.unified-demo{grid-template-rows:96px minmax(0,1fr)}.topbar{padding:0 12px;gap:0;flex-wrap:wrap}.brand{height:48px;width:100%;font-size:15px}.brand-mark{width:27px;height:27px}.tabs{height:38px;margin-bottom:10px;flex:1}.tabs button{flex:1;min-width:0;height:30px;padding:0 12px}}
+    @media(max-width:650px){.unified-demo{grid-template-rows:96px minmax(0,1fr)}.topbar{padding:0 12px;gap:0;flex-wrap:wrap}.brand{height:48px;width:100%;font-size:15px}.brand-mark{width:27px;height:27px}.tabs{height:38px;margin-bottom:10px;flex:1}.tabs button{flex:1;min-width:0;height:30px;padding:0 5px;white-space:nowrap}}
     @media(prefers-reduced-motion:reduce){*{transition:none!important}}
   </style>
 </head>
@@ -36,6 +36,7 @@
         <button id="tab-platform" role="tab" type="button" data-surface="platform" aria-controls="surface-panel" aria-selected="false">平台端</button>
         <button id="tab-tenant" role="tab" type="button" data-surface="tenant" aria-controls="surface-panel" aria-selected="false" tabindex="-1">租户端</button>
         <button id="tab-merchant" role="tab" type="button" data-surface="merchant" aria-controls="surface-panel" aria-selected="false" tabindex="-1">商户端</button>
+        <button id="tab-address" role="tab" type="button" data-surface="address" aria-controls="surface-panel" aria-selected="false" tabindex="-1">地址池</button>
         <button id="tab-beauty" role="tab" type="button" data-surface="beauty" aria-controls="surface-panel" aria-selected="false" tabindex="-1">美人桥商户端</button>
       </nav>
     </header>

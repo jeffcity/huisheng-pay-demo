@@ -1946,21 +1946,26 @@ body[data-current-page="audit"] .audit-filter-row { display:flex; flex-wrap:wrap
 body[data-current-page="audit"] #filters .field { display:flex; align-items:center; flex:1 1 190px; gap:10px; min-width:0; }
 body[data-current-page="audit"] #filters label { flex-shrink:0; margin:0; font-weight:500; white-space:nowrap; }
 body[data-current-page="audit"] #filters .filter-control { min-width:0; width:100%; height:34px; }
-body[data-current-page="audit"] #filters .audit-date-field { flex:1.5 1 360px; }
-body[data-current-page="audit"] .audit-date-range { display:flex; align-items:center; gap:8px; min-width:0; width:100%; }
+body[data-current-page="audit"] #filters .audit-date-field { flex:2 1 540px; }
+body[data-current-page="audit"] .audit-date-range { display:flex; flex-wrap:wrap; align-items:center; gap:8px; min-width:0; width:100%; }
 body[data-current-page="audit"] #filters .page-actions { display:flex; flex-wrap:wrap; gap:8px; margin:0; justify-content:flex-start; }
+body[data-current-page="audit"] .audit-date-range .filter-control { flex:1 1 200px; }
 body[data-current-page="audit"] #filters .btn { min-height:34px; padding:6px 14px; }
-body[data-current-page="audit"] table { min-width:1120px; table-layout:fixed; }
-body[data-current-page="audit"] th,body[data-current-page="audit"] td { padding:9px 7px; font-size:12px; line-height:1.5; white-space:normal; overflow-wrap:anywhere; }
-body[data-current-page="audit"] th:nth-child(1) { width:155px; }
-body[data-current-page="audit"] th:nth-child(2) { width:132px; }
-body[data-current-page="audit"] th:nth-child(3) { width:125px; }
-body[data-current-page="audit"] th:nth-child(4) { width:145px; }
-body[data-current-page="audit"] th:nth-child(5),body[data-current-page="audit"] th:nth-child(6) { width:160px; }
-body[data-current-page="audit"] th:nth-child(7),body[data-current-page="audit"] th:nth-child(8) { width:66px; }
-body[data-current-page="audit"] th:nth-child(9) { width:112px; }
-body[data-current-page="audit"] th:nth-child(10) { width:50px; }
-body[data-current-page="audit"] .audit-tenant { display:grid; gap:3px; }
+body[data-current-page="audit"] #tableWrap table { min-width:1100px; table-layout:fixed; }
+body[data-current-page="audit"] #tableWrap th,body[data-current-page="audit"] #tableWrap td { padding:10px 12px; font-size:12px; line-height:1.5; white-space:normal; overflow-wrap:anywhere; }
+body[data-current-page="audit"] #tableWrap th:nth-child(1) { width:140px; }
+body[data-current-page="audit"] #tableWrap th:nth-child(2) { width:165px; }
+body[data-current-page="audit"] #tableWrap th:nth-child(3) { width:175px; }
+body[data-current-page="audit"] #tableWrap th:nth-child(4) { width:235px; }
+body[data-current-page="audit"] #tableWrap th:nth-child(5) { width:170px; }
+body[data-current-page="audit"] #tableWrap th:nth-child(6),body[data-current-page="audit"] #tableWrap th:nth-child(7) { width:65px; }
+body[data-current-page="audit"] #tableWrap th:nth-child(8) { width:125px; }
+body[data-current-page="audit"] #tableWrap th:nth-child(9) { width:75px; }
+body[data-current-page="audit"] .audit-cell-text { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+body[data-current-page="audit"] .audit-linked-field[hidden] { display:none !important; }
+body[data-current-page="audit"] .audit-actor-cell { display:grid; gap:3px; }
+body[data-current-page="audit"] .audit-actor-cell .mono { font-size:11px; white-space:nowrap; }
+body[data-current-page="audit"] #filters input:disabled { background:var(--color-bg-subtle,#f5f7f8); cursor:not-allowed; }
 @media(max-width:600px) { body[data-current-page="audit"] #filters .field { flex-basis:100%; } body[data-current-page="audit"] #filters .audit-date-field { flex-wrap:wrap; } }
 </style>
 </head>
@@ -5078,8 +5083,8 @@ body[data-current-page="audit"] .audit-tenant { display:grid; gap:3px; }
           ['失败操作', '19', '保留错误摘要', 'red'],
           ['可修改日志', '0', '永久不可变更', 'green']
         ],
-        filters: ['关键词', '操作账号', '动作分类', '对象类型', '动作明细', '对象编号', 'UTC+8 开始日期', 'UTC+8 结束日期'],
-        columns: ['日志编号', '发生时间', '租户', '操作账号 / 层级', '动作', '对象', '结果', '风险', '来源 IP', '操作'],
+        filters: ['操作账号', '操作端', '来源 IP', '租户', '商户', '发生开始时间（UTC+8）', '发生结束时间（UTC+8）'],
+        columns: ['日志编号', '发生时间', '操作账号 / 层级', '动作', '对象', '结果', '风险', '来源 IP', '操作'],
         rows: [
           ['AL-20260717-01509', '2026-07-17 08:22:40', 'platform.finance / 平台', '通过并执行人工加款', '资金申请 / PA202607170006', '成功', '高风险', '10.12.9.20'],
           ['AL-20260717-01426', '2026-07-17 08:15:20', 'platform.finance / 平台', '通过并执行人工扣款', '资金申请 / PA202607170005', '成功', '高风险', '10.12.9.20'],
@@ -5501,7 +5506,7 @@ body[data-current-page="audit"] .audit-tenant { display:grid; gap:3px; }
       ['HS-TEN-017|代收退款', { reportDateUtc8: '2026-07-17', formalCount: 328, terminalCount: 316, successCount: 302, failedCount: 10, cancelledCount: 4, processingCount: 10, exceptionCount: 2, successAmount: 1304200, platformFee: 3212, feeFormed: true, channelCost: 4209, platformProfit: -997 }]
     ]);
     const pageSourceContext = {};
-    const platformPagination = Object.fromEntries(Object.keys(pages).map((id) => [id, { page: 1, pageSize: 3 }]));
+    const platformPagination = Object.fromEntries(Object.keys(pages).map((id) => [id, { page: 1, pageSize: id === 'audit' ? 10 : 3 }]));
     const platformListState = Object.fromEntries(Object.keys(pages).map((id) => [id, { status: 'ok', lastSuccess: '2026-07-17 16:28:30', errorId: '', lastRows: [] }]));
     const platformOperationControl = { nextOutcome: 'success', sequence: 1, pending: null };
     const platformFactCounts = { fundsPending: 33, auditToday: 18206 };
@@ -5525,6 +5530,9 @@ body[data-current-page="audit"] .audit-tenant { display:grid; gap:3px; }
       ['AL-20260717-11622', { operatorAccount: 'unknown', operatorScope: '平台', actionCategory: '登录与账号安全', objectType: '平台账号', objectId: 'finance.ops', platformOrderId: '', relatedApplicationId: '', requestId: 'REQ-20260717-11622', traceId: 'TRACE-20260717-S011622', targetPage: '', targetIdentifier: '' }]
     ]);
     const platformTenantAuditSamples = [
+      { id:'AL-MCH-20261105-0010', at:'2026-11-05 10:40:18', tenantId:'HS-TEN-001', surface:'商户', merchantId:'MCH-1188', merchantName:'东盛电商', account:'dongsheng.finance', action:'查询代付订单', category:'订单查询', objectType:'商户订单', objectId:'MCH-1188', result:'成功', risk:'一般', ip:'198.51.100.61' },
+      { id:'AL-PLT-20261105-0009', at:'2026-11-05 10:35:12', tenantId:'HS-TEN-001', surface:'平台', account:'platform.finance', action:'设置租户系统费率', category:'租户管理', objectType:'租户', objectId:'HS-TEN-001', result:'成功', risk:'敏感', ip:'198.51.100.10' },
+      { id:'AL-MCH-20261105-0008', at:'2026-11-05 09:15:24', tenantId:'HS-TEN-017', surface:'商户', merchantId:'MCH-5017', merchantName:'蓝盛商户', account:'lansheng.admin', action:'登录失败：验证码错误', category:'登录安全', objectType:'商户账号', objectId:'lansheng.admin', result:'失败', risk:'高风险', ip:'203.0.113.71' },
       { id:'AL-TEN-20261105-0006', at:'2026-11-05 10:18:24', tenantId:'HS-TEN-001', account:'tenant.ops', action:'保存商户后台登录 IP 白名单', category:'商户管理', objectType:'商户登录白名单', objectId:'MCH-1188', result:'成功', risk:'高风险', ip:'198.51.100.24' },
       { id:'AL-TEN-20261105-0005', at:'2026-11-05 10:12:06', tenantId:'HS-TEN-017', account:'tenant.finance', action:'查询代付日终统计', category:'日终统计', objectType:'代付日终', objectId:'2026-11-04', result:'成功', risk:'一般', ip:'203.0.113.18' },
       { id:'AL-TEN-20261105-0004', at:'2026-11-05 09:48:32', tenantId:'HS-TEN-001', account:'tenant.admin', action:'修改代付下单 IP 白名单', category:'代付商户管理', objectType:'代付下单白名单', objectId:'MCH-2031', result:'失败', risk:'高风险', ip:'198.51.100.24' },
@@ -5533,11 +5541,11 @@ body[data-current-page="audit"] .audit-tenant { display:grid; gap:3px; }
       { id:'AL-TEN-20261105-0001', at:'2026-11-05 09:05:16', tenantId:'HS-TEN-017', account:'tenant.ops', action:'停用通知机器人', category:'通知中心', objectType:'通知机器人', objectId:'BOT-NOTIFY-002', result:'成功', risk:'敏感', ip:'203.0.113.18' }
     ];
     platformTenantAuditSamples.forEach(sample => platformAuditMeta.set(sample.id, {
-      tenantId:sample.tenantId, operatorAccount:sample.account, operatorScope:'租户',
+      tenantId:sample.tenantId, operatorAccount:sample.account, operatorScope:sample.surface || '租户', merchantId:sample.merchantId || '', merchantName:sample.merchantName || '',
       actionCategory:sample.category, objectType:sample.objectType, objectId:sample.objectId,
       requestId:`REQ-${sample.id}`, traceId:`TRACE-${sample.id}`, targetPage:'', targetIdentifier:''
     }));
-    pages.audit.rows.unshift(...platformTenantAuditSamples.map(sample => [sample.id,sample.at,`${sample.account} / 租户`,sample.action,`${sample.objectType} / ${sample.objectId}`,sample.result,sample.risk,sample.ip]));
+    pages.audit.rows.unshift(...platformTenantAuditSamples.map(sample => [sample.id,sample.at,`${sample.account} / ${sample.surface || '租户'}`,sample.action,`${sample.objectType} / ${sample.objectId}`,sample.result,sample.risk,sample.ip]));
     let platformLatestReceipt = null;
     let platformFundCorrectionSequence = 1002;
     let platformLedgerSequence = 9902;
@@ -6218,7 +6226,7 @@ body[data-current-page="audit"] .audit-tenant { display:grid; gap:3px; }
     }
 
     function platformFilterInputType(pageId, index) {
-      const dateIndices = { home: [0, 3], report: [2, 3], wallets: [3, 4], funds: [8, 9], orders: [10, 11], ledger: [9, 10], audit: [6, 7] };
+      const dateIndices = { home: [0, 3], report: [2, 3], wallets: [3, 4], funds: [8, 9], orders: [10, 11], ledger: [9, 10], audit: [5, 6] };
       return dateIndices[pageId]?.includes(index) ? 'date' : 'text';
     }
 
@@ -6276,7 +6284,7 @@ body[data-current-page="audit"] .audit-tenant { display:grid; gap:3px; }
 
       renderContextPanel(id);
 
-      document.getElementById('tableTools').innerHTML = id === 'audit' ? '<span class="muted">模拟数据 · 含平台与租户操作</span>' : `
+      document.getElementById('tableTools').innerHTML = id === 'audit' ? '<span class="muted">模拟数据 · 平台／租户／商户操作</span>' : `
         <button class="btn ghost" data-reset-filters>${iconButton('refresh')}重置</button>
         <button class="btn" data-export-page="${id}">${iconButton('export')}导出</button>
       `;
@@ -6353,10 +6361,7 @@ body[data-current-page="audit"] .audit-tenant { display:grid; gap:3px; }
         const fundMeta = pageId === 'funds' ? platformFundMeta.get(row[0]) || {} : null;
         const orderMeta = pageId === 'orders' ? platformOrderQueryMetaFor(row) : null;
         if (pageId === 'audit') {
-          const tenant = platformAuditTenantFor(row);
-          return `<tr data-row="${rowIndex}">${platformAuditDisplayValues(row).map((value,index) => index === 2
-            ? `<td><div class="audit-tenant"><strong>${escapeHtml(tenant.name)}</strong><span class="mono muted">${escapeHtml(tenant.id || '—')}</span></div></td>`
-            : `<td${[0,1,8].includes(index) ? ' class="mono"' : ''}>${[6,7].includes(index) ? `<span class="pill ${statusClass(value)}">${escapeHtml(value)}</span>` : escapeHtml(value)}</td>`).join('')}<td><button class="link-btn" data-detail="${rowIndex}">详情</button></td></tr>`;
+          return `<tr data-row="${rowIndex}">${platformAuditDisplayValues(row).map((value,index) => `<td${[0,1,7].includes(index) ? ' class="mono"' : ''}>${[5,6].includes(index) ? `<span class="pill ${statusClass(value)}">${escapeHtml(value)}</span>` : index === 2 ? `<div class="audit-actor-cell"><span class="audit-cell-text" title="${escapeHtml(value.split('\n')[0])}">${escapeHtml(value.split('\n')[0])}</span>${value.includes('\n') ? `<span class="mono muted">${escapeHtml(value.split('\n')[1])}</span>` : ''}</div>` : `<span class="audit-cell-text" title="${escapeHtml(value)}">${escapeHtml(value)}</span>`}</td>`).join('')}<td><button class="link-btn" data-detail="${rowIndex}">详情</button></td></tr>`;
         }
         return `
         <tr data-row="${rowIndex}">
@@ -6607,42 +6612,104 @@ body[data-current-page="audit"] .audit-tenant { display:grid; gap:3px; }
       ].map(value => String(value || '').trim()).filter(Boolean))];
     }
 
+    function auditSearchTime(value, endOfDay = false) {
+      const text = String(value || '').trim();
+      if (!text) return null;
+      const match = text.match(/^(\d{4})-(\d{2})-(\d{2})(?:[Tt ](\d{2}):(\d{2})(?::(\d{2}))?)?$/);
+      if (!match) return NaN;
+      const [,year,month,day,hour,minute,second] = match;
+      const h = hour === undefined ? (endOfDay ? 23 : 0) : Number(hour), m = minute === undefined ? (endOfDay ? 59 : 0) : Number(minute), sec = second === undefined ? (hour === undefined && endOfDay ? 59 : 0) : Number(second);
+      const canonical = `${year}-${month}-${day}T${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+      const ms = Date.parse(canonical + '+08:00');
+      return Number.isFinite(ms) && new Date(ms + 8*3600000).toISOString().slice(0,19) === canonical ? ms : NaN;
+    }
+    function auditSearchError(filters) {
+      const from = auditSearchTime(filters.from), to = auditSearchTime(filters.to,true);
+      if (Number.isNaN(from) || Number.isNaN(to)) return '请输入有效的发生时间';
+      if (from !== null && to !== null && from > to) return '开始时间不能晚于结束时间';
+      return '';
+    }
+    function auditSearchMatches(record, filters) {
+      const norm = value => String(value || '').trim().toLowerCase();
+      const contains = (value,query) => !norm(query) || norm(value).includes(norm(query));
+      const from = auditSearchTime(filters.from), to = auditSearchTime(filters.to,true), at = auditSearchTime(record.occurredAt);
+      if (auditSearchError(filters)) return false;
+      return contains(record.account,filters.account)
+        && (!filters.surface || record.surface === filters.surface)
+        && (!norm(filters.sourceIp) || norm(record.sourceIp) === norm(filters.sourceIp))
+        && contains(`${record.tenantName || ''} ${record.tenantId || ''}`,filters.tenant)
+        && contains(`${record.merchantName || ''} ${record.merchantId || ''}`,filters.merchant)
+        && (from === null || (Number.isFinite(at) && at >= from))
+        && (to === null || (Number.isFinite(at) && at <= to));
+    }
+
     function platformAuditTenantFor(row) {
       const id = platformAuditTenantIdForRow(row);
       const tenant = pages.tenants.rows.find(item => item[0] === id);
       return { id: id === 'PLATFORM_GLOBAL' ? '' : id, name: tenant?.[1] || (id === 'PLATFORM_GLOBAL' ? '平台' : '—') };
     }
 
+    function platformAuditRecordFor(row) {
+      const meta = platformAuditMetaFor(row), tenant = platformAuditTenantFor(row);
+      const orderMeta = [meta.platformOrderId,meta.objectId,meta.targetIdentifier].map(id => platformOrderQueryMeta.get(id)).find(item => item && (!tenant.id || item.tenantId === tenant.id));
+      const merchantId = meta.merchantId || orderMeta?.merchantId || (/^MCH-\d+$/.test(meta.objectId || '') ? meta.objectId : '');
+      const knownMerchants = {'MCH-1188':'东盛电商','MCH-2031':'星河游戏','MCH-2209':'北辰游戏'};
+      return {occurredAt:row[1],account:meta.operatorAccount || String(row[2] || '').split(' / ')[0],surface:meta.operatorScope || String(row[2] || '').split(' / ').at(-1),sourceIp:row[7],tenantId:tenant.id,tenantName:tenant.name === '—' ? '' : tenant.name,merchantId,merchantName:meta.merchantName || orderMeta?.merchantName || knownMerchants[merchantId] || ''};
+    }
+
+    function platformAuditActorIdentity(record) {
+      if (record.surface === '租户') return `租户编号：${record.tenantId || '—'}`;
+      if (record.surface === '商户') return `商户编号：${record.merchantId || '—'}`;
+      return '';
+    }
+
+    function platformAuditNormalizedFilters(values) {
+      const result = [...values];
+      if (result[1] !== '租户') result[3] = '';
+      if (result[1] !== '商户') result[4] = '';
+      return result;
+    }
+
     function platformAuditDisplayValues(row) {
-      const tenant = platformAuditTenantFor(row);
-      return [row[0],row[1],tenant.id ? `${tenant.name} / ${tenant.id}` : tenant.name,...row.slice(2)];
+      const record = platformAuditRecordFor(row);
+      const identity = platformAuditActorIdentity(record);
+      return [row[0],row[1],`${record.account} / ${record.surface || '—'}${identity ? `\n${identity}` : ''}`,...row.slice(3)];
     }
 
     function platformAuditMatchesFilters(row, filters) {
-      const [keyword, account, category, objectType, detail, objectId, start, end] = filters.map(value => String(value || '').trim().toLowerCase());
-      const meta = platformAuditMetaFor(row);
-      const contains = (value, query) => !query || String(value || '').toLowerCase().includes(query);
-      const keywordText = [...platformAuditIdentifiersFor(row),row[3],row[4],meta.actionCategory,meta.objectType].join(' ');
-      return contains(keywordText,keyword)
-        && (!account || String(meta.operatorAccount || '').toLowerCase() === account)
-        && contains(meta.actionCategory,category) && contains(meta.objectType,objectType)
-        && contains(row[3],detail) && contains(meta.objectId,objectId)
-        && inUtc8DateRange(row[1],start,end);
+      const [account,surface,sourceIp,tenant,merchant,from,to] = platformAuditNormalizedFilters(filters);
+      return auditSearchMatches(platformAuditRecordFor(row),{account,surface,sourceIp,tenant,merchant,from,to});
     }
 
     function renderPlatformAuditFilters() {
-      const values = filterState.audit;
-      const accounts = [...new Set(platformExportRowsCoveredByScope('audit',pages.audit.rows,currentPlatformAccount.dataScope).map(row => platformAuditMetaFor(row).operatorAccount).filter(Boolean))].sort();
+      const values = platformAuditNormalizedFilters(filterState.audit);
       const input = (index,label,placeholder) => `<div class="field"><label for="pageFilter${index}">${label}</label><input class="filter-control" id="pageFilter${index}" data-page-filter="${index}" value="${escapeHtml(values[index] || '')}" placeholder="${placeholder}"></div>`;
       return `<div class="audit-filter-row">
-        ${input(0,'关键词','对象 / 订单 / 业务编号 / 动作')}
-        <div class="field"><label for="pageFilter1">操作账号</label><select class="filter-control" id="pageFilter1" data-page-filter="1"><option value="">全部</option>${accounts.map(account => `<option value="${escapeHtml(account)}" ${values[1] === account ? 'selected' : ''}>${escapeHtml(account)}</option>`).join('')}</select></div>
-        ${input(2,'动作分类','操作模块')}${input(3,'对象类型','操作名')}${input(4,'动作明细','操作内容')}
+        <div class="field audit-date-field"><label for="pageFilter5">发生时间（UTC+8）</label><div class="audit-date-range"><input class="filter-control" aria-label="发生开始时间（UTC+8）" type="datetime-local" step="1" id="pageFilter5" data-page-filter="5" value="${escapeHtml(values[5] || '')}"><span>—</span><input class="filter-control" aria-label="发生结束时间（UTC+8）" type="datetime-local" step="1" id="pageFilter6" data-page-filter="6" value="${escapeHtml(values[6] || '')}"></div></div>
+        ${input(0,'操作账号','输入账号，支持部分查找')}
+        <div class="field"><label for="pageFilter1">操作端</label><select class="filter-control" id="pageFilter1" data-page-filter="1"><option value="">全部</option>${['平台','租户','商户'].map(value => `<option value="${value}" ${values[1] === value ? 'selected' : ''}>${value}</option>`).join('')}</select></div>
       </div><div class="audit-filter-row">
-        ${input(5,'对象编号','业务编号')}
-        <div class="field audit-date-field"><label for="pageFilter6">UTC+8 时间</label><div class="audit-date-range"><input class="filter-control" aria-label="UTC+8 开始日期" type="date" id="pageFilter6" data-page-filter="6" value="${escapeHtml(values[6] || '')}"><span>—</span><input class="filter-control" aria-label="UTC+8 结束日期" type="date" id="pageFilter7" data-page-filter="7" value="${escapeHtml(values[7] || '')}"></div></div>
-        <div class="page-actions"><button class="btn primary" data-apply-filters>查询日志</button><button class="btn" data-reset-filters>重置</button><button class="btn" data-export-page="audit">审计导出</button></div>
+        ${input(2,'来源 IP','输入完整 IP 地址')}
+        <div class="field audit-linked-field" id="auditTenantField" ${values[1] !== '租户' ? 'hidden' : ''}><label for="pageFilter3">租户名称／编号</label><input class="filter-control" id="pageFilter3" data-page-filter="3" value="${escapeHtml(values[3] || '')}" placeholder="输入租户名称或编号" ${values[1] !== '租户' ? 'disabled' : ''}></div>
+        <div class="field audit-linked-field" id="auditMerchantField" ${values[1] !== '商户' ? 'hidden' : ''}><label for="pageFilter4">商户名称／编号</label><input class="filter-control" id="pageFilter4" data-page-filter="4" value="${escapeHtml(values[4] || '')}" placeholder="输入商户名称或编号" ${values[1] !== '商户' ? 'disabled' : ''}></div>
+        <div class="field audit-linked-field" id="auditEntityHint" ${['租户','商户'].includes(values[1]) ? 'hidden' : ''}><label for="auditEntityPlaceholder">所属编号</label><input class="filter-control" id="auditEntityPlaceholder" disabled placeholder="${values[1] === '平台' ? '平台操作无需填写编号' : '请先选择操作端'}"></div>
+        <div class="page-actions"><button class="btn primary" data-apply-filters>查询</button><button class="btn" data-reset-filters>重置</button><button class="btn" data-export-page="audit">审计导出</button></div>
       </div>`;
+    }
+
+    function syncPlatformAuditEntityFields(clear = false) {
+      const surface = document.getElementById('pageFilter1')?.value || '';
+      for (const [kind,index,id] of [['租户',3,'auditTenantField'],['商户',4,'auditMerchantField']]) {
+        const input = document.getElementById(`pageFilter${index}`), field = document.getElementById(id);
+        if (!input || !field) continue;
+        if (clear || surface !== kind) input.value = '';
+        input.disabled = surface !== kind;
+        field.hidden = surface !== kind;
+      }
+      const hint = document.getElementById('auditEntityHint');
+      if (hint) hint.hidden = ['租户','商户'].includes(surface);
+      const placeholder = document.getElementById('auditEntityPlaceholder');
+      if (placeholder) placeholder.placeholder = surface === '平台' ? '平台操作无需填写编号' : '请先选择操作端';
     }
 
     function platformHomeTargetFilters(target, extraFilters = {}) {
@@ -6653,7 +6720,7 @@ body[data-current-page="audit"] .audit-tenant { display:grid; gap:3px; }
         ledger: { 1: tenant, 6: businessDirection, 9: startDate, 10: endDate },
         funds: { 1: tenant, 8: startDate, 9: endDate },
         wallets: { 0: tenant, 3: startDate, 4: endDate },
-        audit: { 6: startDate, 7: endDate }
+        audit: { 5: startDate ? `${startDate}T00:00:00` : '', 6: endDate ? `${endDate}T23:59:59` : '' }
       };
       return Object.fromEntries(Object.entries({ ...(mappings[target] || {}), ...extraFilters }).filter(([, value]) => String(value || '').trim()));
     }
@@ -6740,7 +6807,7 @@ body[data-current-page="audit"] .audit-tenant { display:grid; gap:3px; }
         const reportRows = platformExportRowsCoveredByScope('report', platformHomeReportRows(), currentPlatformAccount.dataScope);
         return platformHomeOverviewRows(reportRows, currentPlatformAccount.dataScope);
       }
-      const rawValues = (filterState[pageId] || []).map(value => value.trim().toLowerCase());
+      const rawValues = (filterState[pageId] || []).map(value => pageId === 'audit' ? value.trim() : value.trim().toLowerCase());
       const values = rawValues.filter(Boolean);
       const queueRows = pageId === 'funds' && activeFundQueue !== '全部'
         ? page.rows.filter(row => row[2] === activeFundQueue)
@@ -6867,8 +6934,16 @@ body[data-current-page="audit"] .audit-tenant { display:grid; gap:3px; }
       };
     }
 
-    function capturePageFilters() {
-      filterState[currentPage] = pages[currentPage].filters.map((_, index) => document.querySelector(`[data-page-filter="${index}"]`)?.value.trim() || '');
+    function capturePageFilters({ applyAudit = false } = {}) {
+      if (currentPage === 'audit' && !applyAudit) return true;
+      const values = pages[currentPage].filters.map((_, index) => document.querySelector(`[data-page-filter="${index}"]`)?.value.trim() || '');
+      if (currentPage === 'audit') {
+        const message = auditSearchError({from:values[5],to:values[6]});
+        [5,6].forEach(index => document.querySelector(`[data-page-filter="${index}"]`)?.removeAttribute('aria-invalid'));
+        if (message) { const field = document.querySelector('[data-page-filter="6"]'); field?.setAttribute('aria-invalid','true'); field?.focus(); showToast(message); return false; }
+      }
+      filterState[currentPage] = currentPage === 'audit' ? platformAuditNormalizedFilters(values) : values;
+      return true;
     }
 
     function validatePlatformOrderAmountFilters() {
@@ -6902,7 +6977,14 @@ body[data-current-page="audit"] .audit-tenant { display:grid; gap:3px; }
     }
 
     function validatePlatformDateFilters(pageId = currentPage) {
-      const dateIndices = { home: [0, 3], report: [2, 3], wallets: [3, 4], funds: [8, 9], orders: [10, 11], ledger: [9, 10], audit: [6, 7] };
+      if (pageId === 'audit') {
+        const values = filterState.audit;
+        const message = auditSearchError({from:values[5],to:values[6]});
+        [5,6].forEach(index => document.querySelector(`[data-page-filter="${index}"]`)?.removeAttribute('aria-invalid'));
+        if (message) { const field = document.querySelector('[data-page-filter="6"]'); field?.setAttribute('aria-invalid','true'); field?.focus(); showToast(message); return false; }
+        return true;
+      }
+      const dateIndices = { home: [0, 3], report: [2, 3], wallets: [3, 4], funds: [8, 9], orders: [10, 11], ledger: [9, 10], audit: [5, 6] };
       const indices = dateIndices[pageId];
       if (!indices) return true;
       const [startIndex, endIndex] = indices;
@@ -6929,7 +7011,7 @@ body[data-current-page="audit"] .audit-tenant { display:grid; gap:3px; }
     }
 
     function updateCurrentTable({ announce = true } = {}) {
-      capturePageFilters();
+      if (capturePageFilters({applyAudit:true}) === false) return null;
       if (!validatePlatformOrderAmountFilters() || !validatePlatformDateFilters()) return null;
       const page = pages[currentPage];
       const rows = filteredRowsForPage(currentPage);
@@ -6953,7 +7035,8 @@ body[data-current-page="audit"] .audit-tenant { display:grid; gap:3px; }
         : currentPage === 'report'
           ? ['', '', '2026-07-17', '2026-07-17']
           : pages[currentPage].filters.map(() => '');
-      document.querySelectorAll('[data-page-filter]').forEach((input, index) => { input.value = filterState[currentPage][index] || ''; });
+      document.querySelectorAll('[data-page-filter]').forEach((input, index) => { input.value = filterState[currentPage][index] || ''; input.removeAttribute('aria-invalid'); });
+      if (currentPage === 'audit') syncPlatformAuditEntityFields();
       const rows = filteredRowsForPage(currentPage);
       if (currentPage === 'home') {
         renderPage('home');
@@ -7898,6 +7981,8 @@ body[data-current-page="audit"] .audit-tenant { display:grid; gap:3px; }
         audit: `
           ${section('审计事件', shared)}
           ${section('请求上下文', renderKv([
+            ['租户', `${platformAuditRecordFor(row).tenantName || '—'} / ${platformAuditRecordFor(row).tenantId || '—'}`],
+            ['商户', `${platformAuditRecordFor(row).merchantName || '—'} / ${platformAuditRecordFor(row).merchantId || '—'}`],
             ['动作分类', auditMeta?.actionCategory || '-'],
             ['对象类型 / 编号', `${auditMeta?.objectType || '-'} / ${auditMeta?.objectId || '-'}`],
             ['关联申请 / 平台订单', `${auditMeta?.relatedApplicationId || '不适用'} / ${auditMeta?.platformOrderId || '不适用'}`],
@@ -7990,6 +8075,15 @@ body[data-current-page="audit"] .audit-tenant { display:grid; gap:3px; }
       drawer.classList.add('open');
       drawer.setAttribute('aria-hidden', 'false');
       window.setTimeout(() => (platformDrawerFocusable()[0] || drawer).focus(), 0);
+    }
+
+    function openPlatformAuditReference(auditId) {
+      if (!canAccessPlatformPage('audit')) { showToast('当前账号没有审计日志权限'); return; }
+      const row = platformExportRowsCoveredByScope('audit',pages.audit.rows,currentPlatformAccount.dataScope).find(item => item[0] === String(auditId));
+      if (!row) { showToast('未找到有权查看的关联审计记录'); return; }
+      filterState.audit = pages.audit.filters.map(() => '');
+      renderPage('audit');
+      openDrawer(pages.audit.rows.indexOf(row));
     }
 
     function openDrawer(rowIndex) {
@@ -8664,6 +8758,7 @@ body[data-current-page="audit"] .audit-tenant { display:grid; gap:3px; }
         showToast('当前账号没有目标页面权限，未加载任何数据');
         return;
       }
+      if (target === 'audit' && filter) { openPlatformAuditReference(filter); return; }
       capturePageFilters();
       const returnPage = currentPage;
       const pendingScroll = platformPendingSourcePosition?.pageId === returnPage ? platformPendingSourcePosition.scrollY : window.scrollY;
@@ -8908,8 +9003,7 @@ body[data-current-page="audit"] .audit-tenant { display:grid; gap:3px; }
       const receiptAudit = event.target.closest('[data-platform-receipt-audit]');
       if (receiptAudit) {
         const auditId = receiptAudit.dataset.platformReceiptAudit;
-        filterState.audit = pages.audit.filters.map((_, index) => index === 0 ? auditId : '');
-        renderPage('audit');
+        openPlatformAuditReference(auditId);
         return;
       }
       const operationQuery = event.target.closest('[data-platform-operation-query]');
@@ -9133,7 +9227,7 @@ body[data-current-page="audit"] .audit-tenant { display:grid; gap:3px; }
         if (specialButton.dataset.special === 'order-search') openOrderSearch();
         if (specialButton.dataset.special === 'audit-search') {
           const count = updateCurrentTable({ announce: false });
-          showToast(`已按当前筛选查询永久审计日志，共 ${count} 条结果`);
+          if (count !== null) showToast(`已按当前筛选查询永久审计日志，共 ${count} 条结果`);
         }
         if (specialButton.dataset.special === 'ticket-refresh') {
           renderPage('tickets');
@@ -9810,6 +9904,7 @@ body[data-current-page="audit"] .audit-tenant { display:grid; gap:3px; }
     });
 
     document.addEventListener('change', event => {
+      if (currentPage === 'audit' && event.target.id === 'pageFilter1') { syncPlatformAuditEntityFields(true); return; }
       if (event.target.matches('[data-business-evidence]')) {
         applyBusinessEvidenceFeedback(event.target, validateBusinessEvidenceInput(event.target));
         return;
@@ -9855,6 +9950,7 @@ body[data-current-page="audit"] .audit-tenant { display:grid; gap:3px; }
           }
         }
       }
+      if (currentPage === 'audit' && event.key === 'Enter' && event.target.matches('[data-page-filter]')) { event.preventDefault(); updateCurrentTable(); return; }
       const metric = event.target.closest('[data-home-metric]');
       if (!metric || !['Enter', ' '].includes(event.key)) return;
       event.preventDefault();

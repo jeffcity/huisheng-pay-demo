@@ -1,4 +1,4 @@
-// 模块注册表：41 个模块 → 14 个业务源文件 + 1 个内联鉴权守卫 + hash 路由。
+// 模块注册表：42 个模块 → 14 个业务源文件 + 1 个内联鉴权守卫 + hash 路由。
 import modules from './legacy/modules.json';
 
 export const MODULES = modules;
@@ -36,6 +36,7 @@ export const NAV_GROUPS = [
       { module: 'merchant-payout-change', label: '商户代付流水记录', level: 3 },
       { module: 'merchant-payout-prepay-change', label: '商户代付预付记录', level: 3 },
       { module: 'merchant-collect-prepay-change', label: '商户代收预付记录', level: 3 },
+      { module: 'system-fee-records', label: '系统费记录', level: 3 },
     ]},
   ], items: []},
   { title: '审计模块', items: [

@@ -101,12 +101,27 @@ test('美人桥登录地址按租户生成并由网址解析租户，未授权�
  for(const address of ['https://unknown.example/login','https://tenant-001.merchant.hs-pay.com/login','http://tenant-001.beauty.hs-pay.com/login','https://tenant-001.beauty.hs-pay.com:444/login'])assert.throws(()=>m.resolvePortal(address));
  m.setEnabled('HS-TEN-001',false);assert.equal(m.portalAddress('HS-TEN-001'),'');assert.throws(()=>m.resolvePortal(a));assert.equal(m.resolvePortal(b),'HS-TEN-018');
 });
-test('商户概览仅在当前租户开通时显示只读美人桥地址',()=>{
- const source=read('surfaces/tenant/public/legacy/sources/merchants.html'),a=source.indexOf('    function renderMerchantBeautyLogin('),b=source.indexOf('    function renderOverview(',a);
- const f=windowFixture(),context=vm.createContext({window:f.window,merchantProfileTenantId:'HS-TEN-001',escapeHtml:s=>s});vm.runInContext(source.slice(a,b),context);
- assert.equal(context.renderMerchantBeautyLogin(),'');f.model.setEnabled('HS-TEN-018',true);assert.equal(context.renderMerchantBeautyLogin(),'');f.model.setEnabled('HS-TEN-001',true);
- const html=context.renderMerchantBeautyLogin();assert.match(html,/美人桥商户端登录地址/);assert.match(html,/tenant-001.beauty.hs-pay.com/);assert.match(html,/readonly/);assert.doesNotMatch(html,/tenant-018/);
- f.model.setEnabled('HS-TEN-001',false);assert.equal(context.renderMerchantBeautyLogin(),'');
+test('访问域名页签仅展示当前已开通租户的可用美人桥地址，普通商户详情无该区块',()=>{
+ const source=read('surfaces/tenant/public/legacy/sources/system.html');
+ assert.match(source, /data-tenant-panel="access"[\s\S]*id="beautyAccessDomains"/);
+ assert.doesNotMatch(read('surfaces/tenant/public/legacy/sources/merchants.html'), /merchantBeautyLogin/);
+ const start=source.indexOf('function renderBeautyAccessDomains('),end=source.indexOf('beautyAccessModel?.subscribe(',start);
+ const f=windowFixture(), provider={tenantId:'HS-TEN-001'};
+ const elements={beautyAccessDomains:{},beautyAccessDomainRows:{}};
+ const context=vm.createContext({window:{HSProviderDemo:provider},beautyAccessModel:f.model,document:{getElementById:id=>elements[id]},esc:value=>value});
+ vm.runInContext(source.slice(start,end),context);
+ const render=()=>context.renderBeautyAccessDomains();
+ render();assert.equal(elements.beautyAccessDomains.hidden,true);
+ f.model.setEnabled('HS-TEN-018',true);render();assert.equal(elements.beautyAccessDomainRows.innerHTML,'');
+ f.model.setEnabled('HS-TEN-001',true);render();assert.equal(elements.beautyAccessDomains.hidden,false);
+ assert.match(elements.beautyAccessDomainRows.innerHTML,/tenant-001\.beauty/);
+ assert.doesNotMatch(elements.beautyAccessDomainRows.innerHTML,/tenant-018/);
+ const domain=f.model.portalDomains('HS-TEN-001')[0];
+ f.model.changePortalDomain('HS-TEN-001',domain.id,'停用域名');render();
+ assert.match(elements.beautyAccessDomainRows.innerHTML,/暂无可用域名/);
+ provider.tenantId='HS-TEN-018';render();assert.match(elements.beautyAccessDomainRows.innerHTML,/tenant-018\.beauty/);
+ f.model.setEnabled('HS-TEN-018',false);render();
+ assert.equal(elements.beautyAccessDomains.hidden,true);assert.equal(elements.beautyAccessDomainRows.innerHTML,'');
 });
 
 test('美人桥域名独立新增启停解绑，多域名地址投影与解析同步',()=>{

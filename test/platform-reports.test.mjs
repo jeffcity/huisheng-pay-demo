@@ -89,6 +89,10 @@ test('新报表权限可解析登录目标，旧报表权限不再产生旧目�
   const url=new URL(result.target.href,'http://127.0.0.1:4174/index.html');assert.equal(url.pathname,'/index.html');assert.equal(url.searchParams.get('platformPage'),route);assert.equal(url.hash,'#'+route);
  }
  for(const permission of ['platform.report.view','platform.ledger.view']){context.fact={status:'active',factStatus:'current',permissionVersion:1,menuVersion:1,roles:[{enabled:true,pagePermissions:[permission]}]};assert.equal(vm.runInContext('resolvePlatformLoginRouteFromFact(fact)',context).routeResult,'no_page');}
+ context.fact={status:'active',factStatus:'current',permissionVersion:1,menuVersion:1,roles:[{enabled:true,pagePermissions:['platform.system_fee_record.view']}]};
+ const systemFeeRoute=vm.runInContext('resolvePlatformLoginRouteFromFact(fact)',context);
+ assert.equal(systemFeeRoute.target.id,'system-fee-records');
+ assert.match(systemFeeRoute.target.href,/platformPage=system-fee-records#system-fee-records$/);
  assert(read('src/App.jsx').includes("get('platformPage')"));
 });
 

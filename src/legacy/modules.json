@@ -311,6 +311,18 @@
     "navId": "merchant-collect-prepay-change",
     "subgroup": "账户记录"
   },
+  "system-fee-records": {
+    "label": "系统费记录",
+    "code": "06-13",
+    "group": "06 报表模块",
+    "description": "按租户查询系统费钱包流水及充值订单",
+    "sourceName": "平台端 · 账户记录",
+    "sourceKey": "tenants",
+    "initialHash": "system-fee-records",
+    "pagePermission": "platform.system_fee_record.view",
+    "navId": "system-fee-records",
+    "subgroup": "账户记录"
+  },
   "orders": {
     "label": "全局订单查询",
     "code": "08-01",
