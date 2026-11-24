@@ -20769,6 +20769,185 @@
       flex: 0 0 auto;
     }
 
+    /* PAYOUT_DETAIL_LOCAL_REVIEW_START */
+    .payout-order-detail {
+      outline: 2px solid var(--danger, #dc3545);
+      outline-offset: 5px;
+      border-radius: 8px;
+    }
+    /* PAYOUT_DETAIL_LOCAL_REVIEW_END */
+
+    .payout-order-detail {
+      display: grid;
+      gap: 14px;
+      color: var(--text);
+    }
+
+    .payout-detail-section {
+      min-width: 0;
+      padding: 14px 16px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .payout-detail-section > h4 {
+      margin: -14px -16px 12px;
+      padding: 10px 16px;
+      background: #f4f7f8;
+      border-bottom: 1px solid var(--border);
+      border-radius: 8px 8px 0 0;
+      font-size: 15px;
+      line-height: 20px;
+    }
+
+    .payout-detail-fields {
+      margin: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 155px), 1fr));
+      gap: 12px 18px;
+    }
+
+    .payout-detail-fields dt {
+      margin-bottom: 3px;
+      color: #526674;
+      font-size: 12px;
+      line-height: 16px;
+    }
+
+    .payout-detail-fields dd {
+      margin: 0;
+      font-size: 13px;
+      line-height: 19px;
+      font-variant-numeric: tabular-nums;
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+    }
+
+    .payout-detail-long,
+    .payout-detail-notes .payout-detail-fields > div {
+      grid-column: 1 / -1;
+    }
+
+    .payout-detail-disclosure {
+      border-top: 1px solid var(--border);
+      margin-top: 12px;
+      padding-top: 10px;
+    }
+
+    .payout-detail-disclosure summary {
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .payout-detail-disclosure[open] summary {
+      margin-bottom: 12px;
+    }
+
+    .payout-detail-group {
+      margin-top: 14px;
+    }
+
+    .payout-detail-group h5 {
+      margin: 0 0 8px;
+      font-size: 13px;
+    }
+
+    .payout-detail-attempts,
+    .payout-detail-timeline {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .payout-detail-attempts {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .payout-detail-attempt {
+      border: 1px solid #cedade;
+      border-radius: 8px;
+      padding: 0 14px 14px;
+    }
+
+    .payout-detail-attempt > header {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      padding: 8px 14px;
+      margin: 0 -14px 12px;
+      background: #edf4f5;
+      color: #204852;
+      border-radius: 7px 7px 0 0;
+      border-bottom: 1px solid #dce6e8;
+    }
+
+    .payout-detail-attempt .payout-detail-long {
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+    }
+
+    .payout-detail-note {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 18px;
+    }
+
+    .payout-detail-timeline li {
+      display: grid;
+      grid-template-columns: minmax(0, 138px) minmax(0, 1fr);
+      gap: 2px 12px;
+      align-items: baseline;
+      position: relative;
+      margin-left: 5px;
+      padding: 0 0 14px 16px;
+      border-inline-start: 1px solid var(--border);
+      overflow-wrap: anywhere;
+    }
+
+    .payout-detail-timeline li:last-child {
+      padding-bottom: 0;
+      border-color: transparent;
+    }
+
+    .payout-detail-timeline li::before {
+      content: "";
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      top: 5px;
+      left: -5px;
+      border-radius: 50%;
+      background: #215663;
+    }
+
+    .payout-detail-timeline time {
+      color: #526674;
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .payout-detail-timeline p {
+      grid-column: 2;
+      margin: 0;
+      color: #526674;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 460px) {
+      .payout-detail-timeline li {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .payout-detail-timeline p {
+        grid-column: 1;
+      }
+    }
+
     .modal-mask {
       position: fixed;
       inset: 0;
@@ -21031,6 +21210,26 @@
     .system-fee-amount strong { font-size: 30px; line-height: 1.25; letter-spacing: -.4px; }
     .tenant-fee-wallet { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; padding: 22px 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
     .tenant-fee-wallet h2 { margin: 0; font-size: 15px; font-weight: 600; }
+    #actionModal[data-payout-operation] {
+      width: min(680px, calc(100% - 24px));
+      height: auto;
+      max-height: calc(100% - 24px);
+    }
+    .payout-action-content { outline: none; }
+    .payout-action-content .field + .field { margin-top: 12px; }
+    #actionModal[data-payout-operation]:has(#payoutTargetStatus) {
+      width: min(900px, calc(100% - 24px));
+    }
+    #actionModal .payout-action-content textarea.input {
+      box-sizing: border-box;
+      width: 100%;
+      height: auto;
+      min-height: 6em !important;
+      line-height: 1.5;
+      padding: 8px 10px;
+      resize: vertical;
+    }
+
     #actionModal[data-system-fee-recharge] {
       width: min(480px, calc(100% - 24px));
       height: auto;
@@ -26959,8 +27158,8 @@
       </details>`;
     }
 
-    function bluePayoutActionCell({ repair = true } = {}) {
-      return `<div class="cell-actions"><button class="btn-link" type="button" data-action="blue-payout-detail">详情</button>${repair ? `<button class="btn-link" type="button" data-action="manual-order-repair">补单</button>` : ""}</div>`;
+    function bluePayoutActionCell({ repair = true, rejected = false, notifyFailed = false } = {}) {
+      return `<div class="cell-actions"><button class="btn-link" type="button" data-action="blue-payout-detail">详情</button>${repair ? `<button class="btn-link" type="button" data-action="manual-order-repair">补单</button>` : ""}${notifyFailed ? '<button class="btn-link" type="button" data-action="payout-callback-preview">手动回调</button>' : ""}${rejected ? '<button class="btn-link" type="button" data-action="payout-status-preview">操作</button>' : ""}</div>`;
     }
 
     function blueTenantOrderManagementPage(pageName) {
@@ -27198,12 +27397,12 @@
             "bank",
             `<strong class="mono">5,000.00</strong>`,
             `<div class="stack">${blueOrderTag("已驳回", "orange")}<span class="negative">代付下单未受理</span></div>`,
-            blueOrderTag("通知成功", "green"),
+            blueOrderTag("通知失败", "red"),
             `<span>租户代付钱包余额不足</span>`,
             "BridgePay",
             "BridgePay CNY 代付",
             tenantBusinessOrderTimeCell("HS-P-260717-000219"),
-            bluePayoutActionCell({ repair: false })
+            bluePayoutActionCell({ repair: false, rejected: true, notifyFailed: true })
           ],
           [
             `<input class="checkbox-cell" type="checkbox" aria-label="选择订单 HS-P-260715-000172">`,
@@ -28093,7 +28292,8 @@
       if (kind === "notify-channel") return "tenant.channel_incident.notify";
       if (kind === "notify-recon") return "tenant.reconciliation.notify_platform";
       if (["create-ticket", "create-related-ticket", "ticket-reply", "ticket-supplement", "ticket-unresolved", "ticket-cancel", "confirm-ticket-resolution"].includes(kind)) return "tenant.ticket.manage";
-      if (kind === "notice-retry") return "tenant.notification.resend";
+      if (kind === "payout-status-preview") return "tenant.payout.makeup";
+      if (kind === "notice-retry" || kind === "payout-callback-preview") return "tenant.notification.resend";
       if (kind === "show-sensitive") return "tenant.sensitive.view";
       return "";
     }
@@ -29254,6 +29454,113 @@
       return `<button class="btn btn-primary" type="button" data-action="detail-source" data-target="${escapeHtml(target)}" data-filter="${escapeHtml(filter)}" data-filter-index="${index}"><i data-lucide="arrow-right"></i>${escapeHtml(label)}</button>`;
     }
 
+    const tenantPayoutDetailFixtures = new Map([
+      ["HS-P-260717-000336", {
+        createdAt: "2026-07-16 23:56:10",
+        review: { time: "2026-07-16 23:57:05", operator: "租户操作员", result: "审核通过" },
+        priorAttempts: [{
+          provider: "BridgePay",
+          channel: "BridgePay CNY 代付",
+          channelOrderNo: "BP20260716000336",
+          submittedAt: "2026-07-16 23:57:30",
+          callbackAt: "2026-07-17 00:02:16",
+          queriedAt: "2026-07-17 00:04:20",
+          operator: "系统路由",
+          status: "已拒绝",
+          tone: "red",
+          reason: "通道额度不足，确认未出款"
+        }]
+      }]
+    ]);
+    const tenantPayoutResubmissions = new Map();
+
+    function tenantPayoutResubmissionsFor(systemOrderNo) {
+      return tenantPayoutResubmissions.get(currentTenantAccount.tenantId)?.get(systemOrderNo) || [];
+    }
+
+    function recordTenantPayoutResubmission(systemOrderNo, attempt) {
+      const tenantId = currentTenantAccount.tenantId;
+      if (!tenantPayoutResubmissions.has(tenantId)) tenantPayoutResubmissions.set(tenantId, new Map());
+      tenantPayoutResubmissions.get(tenantId).set(systemOrderNo, [...tenantPayoutResubmissionsFor(systemOrderNo), attempt]);
+    }
+
+    function payoutDetailFields(pairs) {
+      return '<dl class="payout-detail-fields">' + pairs.map(([label, value, fullWidth]) => (fullWidth ? '<div class="payout-detail-long"><dt>' : '<div><dt>') + escapeHtml(label) + '</dt><dd>' + escapeHtml(value || "—") + '</dd></div>').join("") + '</dl>';
+    }
+
+    function tenantPayoutChannelHistory(systemOrderNo, current) {
+      const { channelOrderNo, provider, channel, status, reason } = current;
+      const times = tenantBusinessOrderTimesFor(systemOrderNo);
+      const fixture = tenantPayoutDetailFixtures.get(systemOrderNo);
+      const attempts = [...(fixture?.priorAttempts || [])];
+      if (channelOrderNo !== "-") {
+        const paid = status.includes("已打款");
+        const failed = status.includes("代付下单失败");
+        attempts.push({
+          channelOrderNo, provider, channel,
+          status: paid ? "出款成功" : failed ? "下单失败" : "待确认",
+          tone: paid ? "green" : failed ? "red" : "orange",
+          submittedAt: times.submittedAt,
+          paidAt: times.paidAt,
+          callbackAt: times.channelCallbackAt,
+          operator: "租户操作员",
+          reason
+        });
+      }
+      attempts.push(...tenantPayoutResubmissionsFor(systemOrderNo));
+      return { attempts, times, createdAt: fixture?.createdAt, review: fixture?.review };
+    }
+
+    function tenantPayoutEvents(history, notifyStatus) {
+      const events = [];
+      const add = (time, title, detail) => {
+        if (time) events.push({ time, title, detail });
+      };
+      add(history.createdAt, "创建系统订单");
+      if (history.review) add(history.review.time, history.review.result, history.review.operator);
+      history.attempts.forEach((attempt, index) => {
+        const label = "第 " + (index + 1) + " 次代付";
+        const detail = [attempt.channel, attempt.channelOrderNo || attempt.attemptId].filter(Boolean).join(" · ");
+        const switched = index > 0 && history.attempts[index - 1].channel !== attempt.channel;
+        const submitTitle = switched ? "切换通道并提交" : "提交通道";
+        add(attempt.submittedAt, label + " · " + submitTitle, detail);
+        add(attempt.paidAt, label + " · 实际出款成功", detail);
+        add(attempt.callbackAt, label + " · 通道回调" + (attempt.status === "待确认" ? "" : " · " + attempt.status),
+          [detail, attempt.reason !== "-" ? attempt.reason : ""].filter(Boolean).join(" · "));
+        add(attempt.queriedAt, label + " · 主动查单 · " + attempt.status, detail);
+      });
+      if (!history.attempts.some(attempt => attempt.submittedAt === history.times.submittedAt)) {
+        add(history.times.submittedAt, "提交系统订单");
+      }
+      add(history.times.merchantNotifyAt, "通知商户 · " + notifyStatus);
+      return events.sort((a, b) => a.time.localeCompare(b.time));
+    }
+
+    function payoutDetailAttempts(attempts) {
+      if (!attempts.length) return '<p class="payout-detail-note">暂无通道代付记录。</p>';
+      return '<ol class="payout-detail-attempts">' + attempts.map((attempt, index) => {
+        const pairs = [
+          ["通道商", attempt.provider], ["交易通道", attempt.channel],
+          ["通道订单号", attempt.channelOrderNo || "待通道返回"], ["提交时间", attempt.submittedAt],
+          ["操作人", attempt.operator]
+        ];
+        if (attempt.callbackAt) pairs.push(["通道回调时间", attempt.callbackAt]);
+        if (attempt.queriedAt) pairs.push(["最后查询时间", attempt.queriedAt]);
+        if (attempt.attemptId) pairs.push(["执行尝试编号", attempt.attemptId]);
+        pairs.push(["驳回描述", attempt.reason, true]);
+        return '<li class="payout-detail-attempt"><header><strong>第 ' + (index + 1) + ' 次代付</strong>' +
+          blueOrderTag(attempt.status, attempt.tone) + '</header>' + payoutDetailFields(pairs) + '</li>';
+      }).join("") + '</ol>';
+    }
+
+    function payoutDetailTimeline(events) {
+      if (!events.length) return '<p class="payout-detail-note">暂无流转日志。</p>';
+      return '<ol class="payout-detail-timeline">' + events.map(event =>
+        '<li><time>' + escapeHtml(event.time) + '</time><strong>' + escapeHtml(event.title) + '</strong>' +
+        (event.detail ? '<p>' + escapeHtml(event.detail) + '</p>' : '') + '</li>'
+      ).join("") + '</ol>';
+    }
+
     function openOperationalDetail(action, trigger) {
       const row = trigger.closest("tr");
       if (!row) return;
@@ -29357,53 +29664,75 @@
         const merchantNo = merchantParts[1] || "-";
         title = `系统订单号：${systemOrderNo}`;
         intro = "";
-        body += detailSection("订单信息", "", [
-          ["系统订单号", systemOrderNo],
-          ["订单 ID", `ID-${systemOrderNo.slice(-6)}`],
-          ["商户 ID", merchantNo.replace(/\D/g, "") || "-"],
-          ["商户号", merchantNo],
-          ["商户名", merchantName],
-          ["通道订单号", channelOrderNo],
-          ["商户订单号", merchantOrderNo],
-          ["类型", value(4)],
-          ["交易金额", value(5)],
-          ["实际金额", value(6).includes("已打款") ? value(5) : "-"],
-          ["商户手续费", "0.00"],
-          ["通道手续费", "0.00"],
-          ["商户代理返佣", "0.00"],
-          ["通道代理返佣", "0.00"],
-          ["订单成本", "0.00"],
-          ["订单利润", "0.00"],
-          ...tenantBusinessOrderTimePairs(systemOrderNo).map(([label,value]) => [`${label}时间`, `${value || "—"} · UTC+8`]),
-          ["交易通道", value(10)],
-          ["通道商", value(9)],
-          ["提交地址", "https://channel.example.test/payout"]
-        ]);
-        body += detailSection("打款详情", "", [
+        const status = value(6);
+        const notifyStatus = value(7);
+        const reason = value(8);
+        const provider = value(9);
+        const channel = row.cells[10]?.firstChild?.textContent.trim() || value(10);
+        const history = tenantPayoutChannelHistory(systemOrderNo, { channelOrderNo, provider, channel, status, reason });
+        const systemFields = [
+          ["系统订单号", systemOrderNo], ["订单 ID", "ID-" + systemOrderNo.slice(-6)], ["类型", value(4)],
+          ["交易金额", value(5)], ["实际金额", status.includes("已打款") ? value(5) : "-"],
+          ["下单状态", status.includes("异常") ? "下单失败" : "-"],
+          ["支付状态", row.cells[6].innerText.trim()], ["通知状态", notifyStatus]
+        ];
+        const merchantFields = [
+          ["商户名", merchantName], ["商户号", merchantNo],
+          ["商户 ID", merchantNo.replace(/\D/g, "") || "-"], ["商户订单号", merchantOrderNo]
+        ];
+        const feeFields = [
+          ["商户手续费", "0.00"], ["通道手续费", "0.00"], ["订单成本", "0.00"],
+          ["商户代理返佣", "0.00"], ["通道代理返佣", "0.00"], ["订单利润", "0.00"]
+        ];
+        const recipientFields = [
           ["银行名称", "中国银行"],
           ["支行名称", "-"],
           ["支行银联号", "-"],
           ["收款卡号码", "6222 **** 2031"],
           ["收款人姓名", "王**"],
           ["打款金额", value(5)]
-        ]);
-        body += detailSection("状态与返回", "", [
-          ["下单状态", value(6).includes("异常") ? "下单失败" : "-"],
-          ["支付状态", value(6)],
-          ["通知状态", value(7)],
-          ["驳回描述", value(8)],
-          ["备注", "-"],
-          ["请求返回内容", "-"],
-          ["回调返回内容", "-"],
-          ["查询返回内容", "-"],
-          ["请求 / 查询回复", "-"]
-        ]);
-        body += detailSection("下单历史", "", [
-          ["最近下单", `${tenantBusinessOrderTimesFor(systemOrderNo).submittedAt || "—"} · 租户操作员 · ${value(9)} / ${value(10)}`]
-        ]);
-        actions = value(6).includes("已打款")
-          ? `<button class="btn btn-primary" type="button" data-action="detail-reverse-payout" data-order="${escapeHtml(systemOrderNo)}"><i data-lucide="rotate-ccw"></i>冲销订单</button>`
-          : "";
+        ];
+        const timeFields = tenantBusinessOrderTimePairs(systemOrderNo).map(([label, time]) => [label + "时间", time || "—"]);
+        const reviewFields = history.review ? [
+          ["审核结果", history.review.result],
+          ["审核人", history.review.operator],
+          ["审核时间", history.review.time]
+        ] : [];
+        const latestAttempt = history.attempts.at(-1);
+        const recentOrder = latestAttempt
+          ? [latestAttempt.submittedAt || "—", latestAttempt.operator, latestAttempt.provider + " / " + latestAttempt.channel].join(" · ")
+          : (history.times.submittedAt || "—") + " · 租户操作员 · " + provider + " / " + channel;
+        const channelFields = [
+          ["提交地址", "https://channel.example.test/payout"], ["最近下单", recentOrder]
+        ];
+        if (channelOrderNo === "-") {
+          channelFields.unshift(["通道商", provider], ["交易通道", channel], ["通道订单号", channelOrderNo]);
+        }
+        const returnFields = [
+          ["请求返回内容", "-"], ["回调返回内容", "-"], ["查询返回内容", "-"], ["请求 / 查询回复", "-"]
+        ];
+        body += `
+          <div class="payout-order-detail">
+            <section class="payout-detail-section"><h4>系统订单</h4>${payoutDetailFields(systemFields)}</section>
+            <section class="payout-detail-section"><h4>商户信息</h4>${payoutDetailFields(merchantFields)}</section>
+            <section class="payout-detail-section"><h4>打款详情</h4>${payoutDetailFields(recipientFields)}</section>
+            <section class="payout-detail-section"><h4>费用明细（CNY）</h4>${payoutDetailFields(feeFields)}</section>
+            <section class="payout-detail-section payout-detail-notes"><h4>描述与备注</h4>${payoutDetailFields([["驳回描述", reason], ["备注", "-"]])}</section>
+            <section class="payout-detail-section">
+              <h4>通道信息</h4>
+              <p class="payout-detail-note">共 ${history.attempts.length} 次代付尝试（UTC+8）</p>
+              ${payoutDetailAttempts(history.attempts)}
+              ${payoutDetailFields(channelFields)}
+              <details class="payout-detail-disclosure payout-detail-notes"><summary>通道返回与查询</summary>${payoutDetailFields(returnFields)}</details>
+            </section>
+            <section class="payout-detail-section">
+              <h4>订单流转日志</h4>
+              <div class="payout-detail-group"><h5>关键时间（UTC+8）</h5>${payoutDetailFields(timeFields)}</div>
+              ${reviewFields.length ? '<div class="payout-detail-group"><h5>审核记录</h5>' + payoutDetailFields(reviewFields) + '</div>' : ""}
+              <div class="payout-detail-group"><h5>事件明细（UTC+8）</h5>${payoutDetailTimeline(tenantPayoutEvents(history, notifyStatus))}</div>
+            </section>
+          </div>`;
+        actions = '<button class="btn" type="button" data-action="close-drawer">关闭</button>';
       } else if (action === "payout-detail") {
         const [requestNo, platformNo] = splitPrimarySecondary(value(0));
         const orderSnapshot = tenantOrderChannelSnapshots.get(requestNo);
@@ -30044,7 +30373,27 @@
       let selfReviewBlocked = false;
       let rechargeOrder = null;
 
-      if (kind === "export") {
+      if (kind === "payout-status-preview" || kind === "payout-callback-preview") {
+        const statusEdit = kind === "payout-status-preview";
+        if (pageName !== "法币代付订单" || !(statusEdit ? rowCellText(row, 6).includes("已驳回") : rowCellText(row, 7) === "通知失败")) return;
+        const numbers = [...row.cells[2].querySelectorAll(".mono")].map(node => node.textContent.trim());
+        const ids = [["系统订单号", rowCellText(row, 1)], ["商户订单号", numbers[1]], ["通道订单号", numbers[0]]];
+        const identifiers = ids.map(([label, id]) => `<div><dt>${label}</dt><dd>${escapeHtml(id || "—")} ${id && id !== "-" ? blueCopyButton(id) : ""}</dd></div>`).join("");
+        title = statusEdit ? "修改订单状态" : "手动回调";
+        confirmText = statusEdit ? "确认提交" : "确认回调";
+        body = `<div class="payout-order-detail payout-action-content">
+          <section class="payout-detail-section"><h4>订单信息</h4><dl class="payout-detail-fields">${identifiers}</dl></section>
+          ${statusEdit ? `<section class="payout-detail-section"><h4>打款详情</h4>${payoutDetailFields([
+            ["银行名称", "中国银行"], ["收款人姓名", "王**"], ["收款卡号码", "6222 **** 2031"], ["交易金额（CNY）", rowCellText(row, 5)]
+          ])}</section>
+          <section class="payout-detail-section"><h4>状态修改</h4>
+            <label class="field"><span>状态</span><select class="select" id="payoutTargetStatus" required><option value="">请选择</option>${["未打款","打款中","已打款","已驳回","异常","IP封禁"].map(state => '<option>' + state + '</option>').join("")}</select></label>
+            <label class="field"><span>驳回原因</span><textarea class="input" rows="4"></textarea></label>
+            <label class="field"><span>查询通道</span><textarea class="input" rows="4"></textarea></label>
+            <label class="field"><span>查询回复</span><textarea class="input" rows="4"></textarea></label>
+          </section>` : `<section class="payout-detail-section"><h4>商户通知</h4>${payoutDetailFields([["支付状态",row.cells[6].innerText.trim()],["通知状态",rowCellText(row,7)]])}<p>重新向商户发送本笔订单的结果？</p></section>`}
+        </div>`;
+      } else if (kind === "export") {
         title = "导出当前视图";
         confirmText = "确认并生成";
         body = `
@@ -30453,6 +30802,7 @@
       document.getElementById("modalConfirm").textContent = confirmText;
       document.getElementById("modalConfirm").disabled = selfReviewBlocked;
       document.getElementById("modalBody").innerHTML = body;
+      document.getElementById("actionModal").toggleAttribute("data-payout-operation", kind === "payout-status-preview" || kind === "payout-callback-preview");
       document.getElementById("actionModal").toggleAttribute("data-system-fee-recharge", kind === "system-fee-recharge");
       document.getElementById("modalCancel").hidden = false;
       document.getElementById("modalMask").classList.add("show");
@@ -30686,6 +31036,13 @@
       const requiredPermission = tenantPermissionForAction(kind, pageName, trigger);
       if (!hasTenantActionPermission(requiredPermission)) {
         blockTenantPermission(requiredPermission);
+        return;
+      }
+      if (kind === "payout-status-preview" || kind === "payout-callback-preview") {
+        const selector = document.getElementById("payoutTargetStatus");
+        if (selector && !selector.reportValidity()) return;
+        closeActionModal();
+        showToast(selector ? "状态修改演示完成，所选状态为" + selector.value : "手动回调演示完成");
         return;
       }
       const confirmBox = document.getElementById("confirmBusinessAction");
@@ -31472,7 +31829,8 @@
       }
 
       if (kind === "recreate-payout") {
-        const nextAmount = parseMoney(row.cells[2]?.textContent);
+        const isBusinessOrder = trigger.dataset.action === "blue-payout-detail";
+        const nextAmount = parseMoney(row.cells[isBusinessOrder ? 5 : 2]?.textContent);
         const admission = window.HSFeeWallets?.canAccept(currentTenantAccount.tenantId, { direction: "代付", amount: Number.isFinite(nextAmount) ? nextAmount.toFixed(2) : undefined });
         if (admission && !admission.allowed) { showToast(admission.reason); return; }
         const reason = document.getElementById("reorderReason")?.value.trim() || "";
@@ -31483,17 +31841,35 @@
           document.getElementById("reorderReason")?.focus();
           return;
         }
+        const systemOrderNo = isBusinessOrder ? rowCellText(row, 1) : tenantRowReference(row);
         const originalStatus = row.cells[6]?.textContent.trim() || "";
-        if (/处理中|成功|待提交通道/.test(originalStatus) && !originalStatus.includes("异常")) {
+        const hasPendingAttempt = isBusinessOrder && tenantPayoutResubmissionsFor(systemOrderNo).some(attempt => attempt.status === "处理中");
+        const blocked = isBusinessOrder
+          ? hasPendingAttempt || /已打款|处理中|成功|待提交通道|等待通道最终结果/.test(originalStatus)
+          : /处理中|成功|待提交通道/.test(originalStatus) && !originalStatus.includes("异常");
+        if (blocked) {
           showTenantOperationFeedback({ tone: "error", title: "当前状态不能重新下单", message: `原订单当前为${originalStatus}，存在重复出款风险；本次没有建立新的执行尝试。` });
           return;
         }
         const attemptNo = `REORDER-${String(tenantOperationControl.businessSequence++).padStart(6, "0")}`;
         row.cells[6].innerHTML = `${row.cells[6].innerHTML}<div><span class="tag tag-orange">重新下单处理中</span></div>`;
         row.cells[10].innerHTML = `${row.cells[10].innerHTML}<div class="stack"><span class="mono muted">${attemptNo}</span><span class="muted">${channel} · 独立执行尝试</span></div>`;
-        trigger.textContent = "已重新下单";
-        trigger.disabled = true;
-        const auditId = recordTenantFact({ title: "代付重新下单已提交", object: tenantRowReference(row), status: `${attemptNo} · ${requestKey} · ${channel}`, target: "法币代付订单", action: "重新下单" });
+        if (!isBusinessOrder) {
+          trigger.textContent = "已重新下单";
+          trigger.disabled = true;
+        }
+        if (isBusinessOrder) {
+          recordTenantPayoutResubmission(systemOrderNo, {
+            attemptId: attemptNo,
+            provider: channel.split(" ")[0],
+            channel,
+            submittedAt: tenantNow(),
+            operator: currentTenantAccount.name,
+            status: "处理中",
+            tone: "orange"
+          });
+        }
+        const auditId = recordTenantFact({ title: "代付重新下单已提交", object: systemOrderNo, status: `${attemptNo} · ${requestKey} · ${channel}`, target: "法币代付订单", action: "重新下单" });
         closeActionModal();
         showToast(`已建立新的执行尝试 ${attemptNo}；原订单永久保留，审计 ${auditId}`);
         return;
@@ -31841,20 +32217,6 @@
             return;
           }
           openActionModal("recreate-payout", rowTrigger);
-        } else if (action === "detail-reverse-payout") {
-          const orderNo = actionButton.dataset.order || "";
-          const sourceRow = moduleTableRows().find((item) => rowCellText(item, 1) === orderNo);
-          const rowTrigger = sourceRow?.querySelector('[data-action="blue-payout-detail"]');
-          if (!rowTrigger) {
-            showToast("未找到原代付订单，本次未建立冲销记录");
-            return;
-          }
-          if (!hasTenantActionPermission("tenant.payout.reverse")) {
-            blockTenantPermission("tenant.payout.reverse");
-            return;
-          }
-          closeDrawer();
-          openActionModal("reverse-payout", rowTrigger);
         } else if (action === "retry-list") {
           retryTenantList();
         } else if (action === "page-prev" || action === "page-next") {
@@ -31887,7 +32249,7 @@
           syncTenantNotificationProjection();
           renderNavPage("通知中心");
           showToast("已标记当前运营告警为已读；其他用户阅读状态和业务事实未改变");
-        } else if (["select-channel", "review-refund", "review-payout", "notify-channel", "show-sensitive", "resubmit-guidance", "notice-retry", "cancel-order", "cancel-payout-order", "manual-order-repair", "block-ip", "recreate-payout", "reverse-payout", "export", "internal-transfer", "system-fee-recharge", "create-deposit", "create-withdrawal", "manual-credit", "manual-debit", "confirm-deposit-paid", "append-proof", "cancel-funds", "add-withdraw-account", "notify-recon", "copy-funds", "create-ticket", "create-related-ticket", "ticket-reply", "ticket-supplement", "ticket-unresolved", "ticket-cancel", "confirm-ticket-resolution"].includes(action)) {
+        } else if (["payout-status-preview", "payout-callback-preview", "select-channel", "review-refund", "review-payout", "notify-channel", "show-sensitive", "resubmit-guidance", "notice-retry", "cancel-order", "cancel-payout-order", "manual-order-repair", "block-ip", "recreate-payout", "reverse-payout", "export", "internal-transfer", "system-fee-recharge", "create-deposit", "create-withdrawal", "manual-credit", "manual-debit", "confirm-deposit-paid", "append-proof", "cancel-funds", "add-withdraw-account", "notify-recon", "copy-funds", "create-ticket", "create-related-ticket", "ticket-reply", "ticket-supplement", "ticket-unresolved", "ticket-cancel", "confirm-ticket-resolution"].includes(action)) {
           if (document.getElementById("drawer").classList.contains("show")) closeDrawer();
           openActionModal(action, actionButton);
         } else if (action === "manage-withdraw-accounts") {
