@@ -4,6 +4,38 @@
   try { if (window.top.document) owner = window.top; } catch (_) {}
   if (!owner.__HSFeeWallets) {
     const scale = 100000000n, wallets = new Map(), charges = new Map(), pending = new Map(), adjustments = new Map();
+    const openingRecharge = {
+      tenantId: 'HS-TEN-001',
+      orderNo: 'SFRC-20260714-0001',
+      amount: '1000.00',
+      paymentCurrency: 'USDT',
+      status: '已完成',
+      tone: 'green',
+      createdAt: '2026-07-14 09:00:00',
+      creditedAt: '2026-07-14 09:03:12'
+    };
+    const systemFeeRechargeOrderFixtures = [
+      { tenantId: 'HS-TEN-001', orderNo: 'SFRC-20261121-0003', amount: '1000.00', paymentCurrency: 'USDT', status: '待支付', tone: 'orange', createdAt: '2026-11-21 10:24:30' },
+      { tenantId: 'HS-TEN-001', orderNo: 'SFRC-20261121-0002', amount: '2500.00', paymentCurrency: 'USDT', status: '处理中', tone: 'blue', createdAt: '2026-11-21 10:16:08' },
+      { tenantId: 'HS-TEN-001', orderNo: 'SFRC-20261120-0001', amount: '500.00', paymentCurrency: 'USDT', status: '已关闭', tone: 'gray', createdAt: '2026-11-20 18:32:19', closeReason: '支付超时' },
+      openingRecharge
+    ];
+    const rechargeOrdersStorageKey = 'hs.demo.system-fee-recharge-orders';
+    let createdRechargeOrders = [], savedRechargeActions = [];
+    const rechargeActions = new Map(), rechargeCredits = new Map();
+    try {
+      const saved = JSON.parse(owner.sessionStorage.getItem(rechargeOrdersStorageKey));
+      if (Array.isArray(saved)) createdRechargeOrders = saved;
+      if (Array.isArray(saved?.orders)) createdRechargeOrders = saved.orders;
+      if (Array.isArray(saved?.actions)) savedRechargeActions = saved.actions;
+    } catch (_) {}
+    function saveRechargeState() {
+      try {
+        owner.sessionStorage.setItem(rechargeOrdersStorageKey, JSON.stringify({
+          orders: createdRechargeOrders, actions: [...rechargeActions.values()]
+        }));
+      } catch (_) {}
+    }
     const clone = value => JSON.parse(JSON.stringify(value));
     const parse = (value, precision = 8) => {
       const text = String(value ?? '').trim();
@@ -11,6 +43,7 @@
       const [whole, fraction = ''] = text.split('.');
       return BigInt(whole + fraction.padEnd(precision, '0'));
     };
+    const parseCny = value => parse(value, 2) * (scale / 100n);
     const exact = value => {
       const negative = value < 0n, n = negative ? -value : value;
       const fraction = String(n % scale).padStart(8, '0').replace(/0+$/, '').padEnd(2, '0');
@@ -23,7 +56,7 @@
     function ensure(tenantId) {
       const known = owner.__HSProviderDemo?.tenants.some(t => t.id === tenantId) || owner.__HSTenantSettlements?.tenants.some(t => t.id === tenantId);
       if (!known) throw new Error('租户不存在');
-      if (!wallets.has(tenantId)) wallets.set(tenantId, { balance: tenantId === 'HS-TEN-001' ? 1000n * scale : 0n, allowNegative: false, status: ({'HS-TEN-018':'审核中','HS-TEN-029':'停用','HS-TEN-061':'关闭'})[tenantId] || '正常', profileInitialized: false, revision: 0 });
+      if (!wallets.has(tenantId)) wallets.set(tenantId, { balance: tenantId === openingRecharge.tenantId ? parseCny(openingRecharge.amount) : 0n, allowNegative: false, status: ({'HS-TEN-018':'审核中','HS-TEN-029':'停用','HS-TEN-061':'关闭'})[tenantId] || '正常', profileInitialized: false, revision: 0 });
       return wallets.get(tenantId);
     }
     function policyFor(tenantId, direction) {
@@ -112,7 +145,94 @@
         pendingCount:stats.collection.pendingCount + stats.payout.pendingCount
       };
     }
+    function rechargeStatus(order) {
+      const action = rechargeActions.get(order.orderNo);
+      if (!action || action.tenantId !== order.tenantId) return order;
+      if (action.kind === 'cancel') return { ...order, status: '已取消', tone: 'gray', closeReason: action.reason };
+      return { ...order, status: '已完成', tone: 'green', creditedAt: action.occurredAt, closeReason: '' };
+    }
+
+    function applyRechargeAction(tenantId, orderNo, input, occurredAt) {
+      const order = [...createdRechargeOrders, ...systemFeeRechargeOrderFixtures].find(item => item?.tenantId === tenantId && item.orderNo === orderNo);
+      const { kind } = input;
+      const reason = String(input.reason || '').trim();
+      const proof = String(input.proof || '').trim();
+      const operator = String(input.operator || '').trim();
+      if (!order || rechargeActions.has(orderNo)) throw new Error('订单不存在或已处理，请刷新列表');
+      if (!reason || !operator) throw new Error('请填写处理原因');
+      const wallet = ensure(tenantId);
+      if (wallet.status === '关闭') throw new Error('该租户已关闭');
+      const operation = { tenantId, orderNo, kind, reason, operator, occurredAt };
+      if (kind === 'cancel') {
+        if (order.status !== '待支付') throw new Error('仅待支付订单可取消');
+      } else if (kind === 'credit') {
+        if (!['待支付', '处理中', '已关闭'].includes(order.status)) throw new Error('当前订单状态无法确认到账');
+        if (!proof) throw new Error('请填写蓝盛交易号或收款凭证编号');
+        if ([...rechargeActions.values()].some(action => action.proof?.toLowerCase() === proof.toLowerCase())) throw new Error('该收款凭证已关联其他充值订单');
+        const amount = parseCny(order.amount);
+        const afterBalance = wallet.balance + amount;
+        rechargeCredits.set(orderNo, {
+          id: 'SFR-' + orderNo.slice(5), tenantId, orderId: orderNo, orderAmount: order.amount,
+          type: '充值到账', direction: 'recharge', currency: 'CNY', change: order.amount,
+          beforeBalance: exact(wallet.balance), afterBalance: exact(afterBalance), occurredAt,
+          operator, reason, status: '已入账', sequence: wallet.revision + 1
+        });
+        wallet.balance = afterBalance;
+        wallet.revision++;
+        operation.proof = proof;
+      } else {
+        throw new Error('处理方式无效');
+      }
+      rechargeActions.set(orderNo, operation);
+      return rechargeStatus(order);
+    }
+
+    // Fixed local estimate for the demo. Production uses the order's quoted USDT amount and assigned address.
+    const demoCnyPerUsdt = '7.20';
     const model = {
+      rechargePayment(tenantId, orderNo) {
+        const order = this.rechargeOrders(tenantId).find(item => item.orderNo === orderNo && item.status === '待支付');
+        if (!order) return null;
+        const rate = parse(demoCnyPerUsdt, 2);
+        const usdtCents = (parse(order.amount, 2) * 100n + rate - 1n) / rate;
+        return {
+          amount: exact(usdtCents * (scale / 100n)),
+          network: 'TRON（TRC20）',
+          address: 'TDEMO9zP4kX7vM2qR5sL8nC1wF6aB3h',
+          rate: demoCnyPerUsdt
+        };
+      },
+      rechargeOrders(tenantId) {
+        return clone([...createdRechargeOrders, ...systemFeeRechargeOrderFixtures].filter(order => order?.tenantId === tenantId).map(rechargeStatus));
+      },
+      createRechargeOrder(tenantId, amount) {
+        if (ensure(tenantId).status !== '正常') throw new Error('当前租户状态无法发起充值');
+        const cny = parseCny(amount);
+        if (cny <= 0n) throw new Error('充值金额必须大于 0');
+        const createdAt = owner.__HSProviderDemo.now();
+        const date = createdAt.slice(0, 10).replaceAll('-', '');
+        const sequence = String(systemFeeRechargeOrderFixtures.length + createdRechargeOrders.length + 1).padStart(4, '0');
+        const order = {
+          tenantId,
+          orderNo: `SFRC-${date}-${sequence}`,
+          amount: exact(cny),
+          paymentCurrency: 'USDT',
+          status: '待支付',
+          tone: 'orange',
+          createdAt
+        };
+        createdRechargeOrders.unshift(order);
+        saveRechargeState();
+        return clone(order);
+      },
+      resolveRechargeOrder(tenantId, orderNo, input) {
+        const order = applyRechargeAction(tenantId, orderNo, input, owner.__HSProviderDemo.now());
+        saveRechargeState();
+        return clone(order);
+      },
+      rechargeAudit(tenantId) {
+        return clone([...rechargeActions.values()].reverse().filter(action => action.tenantId === tenantId));
+      },
       wallet(tenantId) { const w = ensure(tenantId); return { tenantId, currency: 'CNY', balance: exact(w.balance), allowNegative: w.allowNegative, status: w.status, profileInitialized: w.profileInitialized, revision: w.revision }; },
       setAllowNegative(tenantId, allowed) { if (typeof allowed !== 'boolean') throw new Error('请选择有效的负余额设置'); ensure(tenantId).allowNegative = allowed; },
       syncTenantProfile(tenant) { const w = ensure(tenant.id); w.status = String(tenant.status || '正常'); w.profileInitialized = true; },
@@ -152,11 +272,20 @@
       ledger(tenantId) {
         ensure(tenantId);
         const fees = this.entries(tenantId).map(e => ({...e, type:'系统费', change: e.fee === '0.00' ? '0.00' : '-' + e.fee, occurredAt: e.deductedAt, operator:'系统', reason:''}));
-        return clone(fees.concat([...adjustments.values()].filter(e => e.tenantId === tenantId)).sort((a,b)=>b.sequence - a.sequence));
+        const entries = fees.concat([...adjustments.values(), ...rechargeCredits.values()].filter(e => e.tenantId === tenantId));
+        if (tenantId === openingRecharge.tenantId) {
+          entries.push({
+            id: 'SFR-000001', tenantId, orderId: openingRecharge.orderNo, orderAmount: openingRecharge.amount,
+            type: '充值到账', direction: 'recharge', currency: 'CNY', change: openingRecharge.amount,
+            beforeBalance: '0.00', afterBalance: openingRecharge.amount, occurredAt: openingRecharge.creditedAt,
+            operator: '系统', status: '已入账', sequence: 0
+          });
+        }
+        return clone(entries.sort((a,b)=>b.sequence - a.sequence));
       },
       queryLedger(tenantId, filters = {}) {
         const keyword = String(filters.keyword || '').trim().toLowerCase(), type = filters.type || 'all';
-        if (!['all','collect','payout','increase','decrease'].includes(type)) throw new Error('请选择有效的流水类型');
+        if (!['all','collect','payout','increase','decrease','recharge'].includes(type)) throw new Error('请选择有效的流水类型');
         const from = filters.from || '', to = filters.to || '';
         for (const date of [from,to].filter(Boolean)) {
           if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(Date.parse(date + 'T00:00:00Z')) || new Date(date + 'T00:00:00Z').toISOString().slice(0,10) !== date) throw new Error('请选择有效的记录日期');
@@ -217,6 +346,9 @@
     // Historical demonstration charges reference actual successful seed orders. Current fee settings stay unchanged.
     for (const order of [...(owner.__HSTenantSettlements?.sourceOrders() || [])].sort((a,b)=>a.completedAt.localeCompare(b.completedAt))) {
       if (order.tenantId === 'HS-TEN-001' && order.status === '成功' && ['代收','代付'].includes(order.direction)) post(order, { mode: order.direction === '代收' ? 'percentage' : 'perTransaction', value: order.direction === '代收' ? '0.4501' : '2.00' });
+    }
+    for (const action of savedRechargeActions) {
+      try { applyRechargeAction(action.tenantId, action.orderNo, action, action.occurredAt); } catch (_) {}
     }
   }
   window.HSFeeWallets = owner.__HSFeeWallets;

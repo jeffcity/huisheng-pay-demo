@@ -49,7 +49,7 @@ export default function App() {
     const target = MODULES[moduleId] || MODULES.home;
     const sourceGuard = frameRef.current?.contentWindow?.HSPlatformAuthRouteGuard;
     if (target.subgroup && sourceGuard?.isAuthRouteMode()) {
-      const navigation = sourceGuard.createAuthorizedNavigation({ href: window.location.pathname + '?platformPage=' + encodeURIComponent(moduleId) + '#' + moduleId, pagePermission: 'platform.report.' + moduleId + '.view' });
+      const navigation = sourceGuard.createAuthorizedNavigation({ href: window.location.pathname + '?platformPage=' + encodeURIComponent(moduleId) + '#' + moduleId, pagePermission: target.pagePermission || 'platform.report.' + moduleId + '.view' });
       if (!navigation.ok) { setError('当前账号无目标报表权限或登录状态已变化'); return; }
       window.top.location.assign(navigation.href);
       return;

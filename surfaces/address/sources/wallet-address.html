@@ -1,0 +1,580 @@
+<!-- PROJECT: huisheng-wallet-address -->
+<!-- SURFACE: ADDRESS / 支付订单管理 / 钱包地址管理 -->
+<!-- CHANGE: 地址归属沿用「汇盛」，以币种锁定地址用途 -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>钱包地址管理</title>
+  <style>
+    :root {
+      --primary: #409eff;
+      --primary-soft: #ecf5ff;
+      --bg: #f0f2f5;
+      --card: #fff;
+      --text: #303133;
+      --regular: #606266;
+      --muted: #909399;
+      --line: #ebeef5;
+      --border: #dcdfe6;
+      --danger: #f56c6c;
+      --success: #67c23a;
+      --tag-blue-bg: #ecf5ff;
+      --tag-blue: #409eff;
+      --tag-green-bg: #f0f9eb;
+      --tag-green: #67c23a;
+      --tag-red-bg: #fef0f0;
+      --tag-red: #f56c6c;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--text);
+      font: 14px/1.5 "Helvetica Neue", Helvetica, "PingFang SC", "Microsoft YaHei", sans-serif; }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    body.embed .chrome-only { display: none !important; }
+    .app { min-height: 100vh; }
+    .tabs { height: 40px; display: flex; align-items: center; gap: 0; padding: 0 12px;
+      background: #fff; border-bottom: 1px solid var(--line); }
+    .tab { height: 40px; padding: 0 16px; border: 0; background: transparent; color: var(--regular);
+      border-bottom: 2px solid transparent; }
+    .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .page { padding: 12px 16px 24px; }
+    .panel { background: var(--card); border-radius: 4px; border: 1px solid var(--line); }
+    .filters { display: grid; grid-template-columns: repeat(4, minmax(180px, 1fr)); gap: 12px 16px;
+      padding: 16px 16px 8px; }
+    .f { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .f label { flex: 0 0 auto; color: var(--regular); white-space: nowrap; }
+    .ctrl { flex: 1; min-width: 0; height: 32px; padding: 0 10px; border: 1px solid var(--border);
+      border-radius: 4px; color: var(--text); background: #fff; }
+    .ctrl:focus { outline: none; border-color: var(--primary); }
+    .ctrl:disabled, .ctrl.is-disabled { background: #f5f7fa; color: var(--muted); cursor: not-allowed; }
+    .filter-actions { display: flex; justify-content: flex-end; gap: 8px; padding: 0 16px 14px; }
+    .btn { height: 32px; padding: 0 15px; border: 1px solid var(--border); border-radius: 4px;
+      background: #fff; color: var(--regular); }
+    .btn:hover { color: var(--primary); border-color: #c6e2ff; background: var(--primary-soft); }
+    .btn.primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .btn.primary:hover { background: #66b1ff; border-color: #66b1ff; color: #fff; }
+    .btn.plain-primary { color: var(--primary); border-color: #b3d8ff; background: var(--primary-soft); }
+    .toolbar { display: flex; gap: 8px; padding: 0 16px 12px; }
+    .table-wrap { overflow: auto; border-top: 1px solid var(--line); }
+    table { width: 100%; min-width: 2200px; border-collapse: collapse; }
+    th, td { height: 44px; padding: 8px 12px; border-bottom: 1px solid var(--line); text-align: left;
+      white-space: nowrap; vertical-align: middle; font-size: 13px; }
+    th { background: #fafafa; color: var(--regular); font-weight: 500; position: sticky; top: 0; z-index: 1; }
+    tbody tr:hover { background: #f5f7fa; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+    .tag { display: inline-block; padding: 0 7px; height: 22px; line-height: 20px; border-radius: 4px;
+      border: 1px solid transparent; font-size: 12px; }
+    .tag.blue { color: var(--tag-blue); background: var(--tag-blue-bg); border-color: #d9ecff; }
+    .tag.green { color: var(--tag-green); background: var(--tag-green-bg); border-color: #e1f3d8; }
+    .tag.red { color: var(--tag-red); background: var(--tag-red-bg); border-color: #fde2e2; }
+    .tag.new { margin-left: 4px; color: #e6a23c; background: #fdf6ec; border-color: #f5dab1; font-size: 11px; }
+    .link { border: 0; background: none; color: var(--primary); padding: 0 4px; }
+    .link:hover { text-decoration: underline; }
+    .layer-cell { display: flex; flex-direction: column; gap: 2px; line-height: 1.3; }
+    .layer-cell b { font-weight: 600; }
+    .layer-cell small { color: var(--muted); font-size: 12px; }
+    .pager { display: flex; justify-content: flex-end; align-items: center; gap: 10px;
+      padding: 12px 16px; color: var(--muted); font-size: 13px; }
+    .mask { position: fixed; inset: 0; z-index: 100; display: none; align-items: flex-start;
+      justify-content: center; padding: 48px 16px; background: rgba(0,0,0,.45); overflow: auto; }
+    .mask.show { display: flex; }
+    .modal { width: min(920px, 100%); background: #fff; border-radius: 4px;
+      box-shadow: 0 12px 32px rgba(0,0,0,.18); display: flex; flex-direction: column; max-height: calc(100vh - 80px); }
+    .modal-head { display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px; border-bottom: 1px solid var(--line); }
+    .modal-head h3 { margin: 0; font-size: 16px; font-weight: 600; }
+    .modal-x { border: 0; background: none; font-size: 18px; color: var(--muted); line-height: 1; padding: 4px; }
+    .modal-body { padding: 18px 24px 8px; overflow: auto; }
+    .modal-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 12px 20px 16px;
+      border-top: 1px solid var(--line); }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; }
+    .form-item { display: grid; grid-template-columns: 108px 1fr; align-items: start; gap: 8px; min-width: 0; }
+    .form-item.full { grid-column: 1 / -1; }
+    .form-item label { text-align: right; color: var(--regular); line-height: 32px; padding-right: 4px; }
+    .form-item label .req { color: var(--danger); margin-right: 2px; }
+    .form-item .field { min-width: 0; }
+    .form-item .ctrl, .form-item textarea { width: 100%; }
+    .form-item textarea { min-height: 84px; padding: 8px 10px; border: 1px solid var(--border);
+      border-radius: 4px; resize: vertical; }
+    .form-item textarea:focus { outline: none; border-color: var(--primary); }
+    .form-item .ctrl.focus-ring { border-color: var(--primary); box-shadow: 0 0 0 1px rgba(64,158,255,.2); }
+    .hint { margin: 0 0 12px; padding: 8px 12px; background: #fdf6ec; border: 1px solid #f5dab1;
+      border-radius: 4px; color: #b88230; font-size: 12px; }
+    .err { color: var(--danger); font-size: 12px; margin-top: 4px; display: none; }
+    .err.show { display: block; }
+    .toast { position: fixed; left: 50%; top: 24px; transform: translateX(-50%) translateY(-12px);
+      z-index: 200; padding: 10px 16px; border-radius: 4px; background: #303133; color: #fff;
+      font-size: 13px; opacity: 0; pointer-events: none; transition: .18s; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    @media (max-width: 900px) {
+      .filters { grid-template-columns: 1fr 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="tabs chrome-only">
+      <button type="button" class="tab active">钱包地址管理</button>
+    </div>
+    <div class="page">
+      <div class="panel">
+        <div class="filters" id="filters">
+          <div class="f"><label>名称</label><input class="ctrl" id="f-name" placeholder="请输入名称" /></div>
+          <div class="f"><label>商户号</label><input class="ctrl" id="f-merchant" placeholder="请输入商户号" /></div>
+          <div class="f"><label>币种</label>
+            <select class="ctrl" id="f-currency">
+              <option value="">请选择币种</option>
+              <option>USDT</option>
+              <option>BTC</option>
+              <option>TRX</option>
+            </select>
+          </div>
+          <div class="f"><label>协议类型</label>
+            <select class="ctrl" id="f-protocol">
+              <option value="">请选择协议类型</option>
+              <option>TRON</option>
+              <option>TRC20</option>
+              <option>ERC20</option>
+            </select>
+          </div>
+          <div class="f"><label>状态</label>
+            <select class="ctrl" id="f-status">
+              <option value="">全部状态</option>
+              <option value="1">正常</option>
+              <option value="0">禁用</option>
+            </select>
+          </div>
+          <div class="f"><label>收款地址</label><input class="ctrl" id="f-address" placeholder="请输入收款地址" /></div>
+          <div class="f"><label>地址归属</label>
+            <select class="ctrl" id="f-owner"></select>
+          </div>
+          <div class="f"><label>池类型</label>
+            <select class="ctrl" id="f-pool">
+              <option value="">请选择池类型</option>
+              <option value="0">普通池</option>
+              <option value="1">白名单池</option>
+            </select>
+          </div>
+        </div>
+        <div class="filter-actions">
+          <button type="button" class="btn" id="btn-reset">重置</button>
+          <button type="button" class="btn primary" id="btn-search">搜索</button>
+        </div>
+        <div class="toolbar">
+          <button type="button" class="btn plain-primary" id="btn-add">新增地址</button>
+          <button type="button" class="btn plain-primary" id="btn-export">导出数据</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>地址归属</th>
+                <th>地址池标识</th>
+                <th>分层标记</th>
+                <th>池类型</th>
+                <th>名称</th>
+                <th>商户号</th>
+                <th>币种</th>
+                <th>收款钱包地址</th>
+                <th>协议类型</th>
+                <th>状态</th>
+                <th>占用量</th>
+                <th>占用金额</th>
+                <th>可用量</th>
+                <th>使用率</th>
+                <th>审核状态</th>
+                <th>备注</th>
+                <th>创建时间</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+        <div class="pager"><span id="page-info">共 0 条</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mask" id="mask" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="modalTitle">新增地址</h3>
+        <button type="button" class="modal-x" id="btn-close" aria-label="关闭">×</button>
+      </div>
+      <div class="modal-body">
+        <p class="hint">TRX 地址归属选择 <b>汇盛</b>。地址按币种单独维护；选择 TRX 后协议固定为 <b>TRON</b>，且该地址不可用于 USDT。</p>
+        <div class="form-grid">
+          <div class="form-item full">
+            <label><span class="req">*</span>名称</label>
+            <div class="field">
+              <input class="ctrl" id="m-name" placeholder="请输入名称" />
+              <div class="err" id="e-name">请输入名称</div>
+            </div>
+          </div>
+          <div class="form-item">
+            <label><span class="req">*</span>币种</label>
+            <div class="field">
+              <select class="ctrl" id="m-currency">
+                <option value="USDT">USDT</option>
+                <option value="BTC">BTC</option>
+                <option value="TRX">TRX</option>
+              </select>
+              <div class="err" id="e-currency">请选择币种</div>
+            </div>
+          </div>
+          <div class="form-item">
+            <label><span class="req">*</span>协议类型</label>
+            <div class="field">
+              <select class="ctrl" id="m-protocol">
+                <option value="TRON">TRON</option>
+                <option value="TRC20">TRC20</option>
+                <option value="ERC20">ERC20</option>
+              </select>
+              <div class="err" id="e-protocol">请选择协议类型</div>
+            </div>
+          </div>
+          <div class="form-item">
+            <label><span class="req">*</span>地址归属</label>
+            <div class="field">
+              <select class="ctrl focus-ring" id="m-owner"></select>
+              <div class="err" id="e-owner">请选择地址归属</div>
+            </div>
+          </div>
+          <div class="form-item">
+            <label>池类型</label>
+            <div class="field">
+              <select class="ctrl" id="m-pool" disabled>
+                <option value="">请选择池类型</option>
+                <option value="0">普通池</option>
+                <option value="1">白名单池</option>
+              </select>
+              <div class="err" id="e-pool">请选择池类型</div>
+            </div>
+          </div>
+          <div class="form-item">
+            <label>分层标记</label>
+            <div class="field">
+              <select class="ctrl" id="m-layer" disabled>
+                <option value="">请先选择池类型</option>
+              </select>
+              <div class="err" id="e-layer">请选择分层标记</div>
+            </div>
+          </div>
+          <div class="form-item">
+            <label>地址池标识</label>
+            <div class="field">
+              <input class="ctrl" id="m-sign" placeholder="请输入地址池标识" disabled />
+            </div>
+          </div>
+          <div class="form-item full">
+            <label><span class="req">*</span>收款钱包地址</label>
+            <div class="field">
+              <textarea id="m-address" placeholder="请输入收款钱包地址（不允许空格）" rows="3"></textarea>
+              <div class="err" id="e-address">请输入收款钱包地址</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button type="button" class="btn" id="btn-cancel">取消</button>
+        <button type="button" class="btn primary" id="btn-ok">确定</button>
+      </div>
+    </div>
+  </div>
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const OWNERS = [
+      { value: "HUI_SHENG", label: "汇盛" },
+      { value: "MEI_REN_BRIDGE", label: "美人桥" },
+      { value: "HUI_SHENG_MERCHANT", label: "汇盛商户代付充值" }
+    ];
+    const OWNER_LABEL = Object.fromEntries(OWNERS.map((o) => [o.value, o.label]));
+    // 池类型联动维持既有归属规则；TRX / USDT 地址和分层标记均由币种字段隔离。
+    const LAYERS_BY_OWNER = {
+      HUI_SHENG: {
+        0: [
+          { code: "N-L1", desc: "0≤X" },
+          { code: "N-L2", desc: "100≤X<500" },
+          { code: "N-L3", desc: "500≤X" }
+        ],
+        1: [
+          { code: "W-L1", desc: "0≤X" },
+          { code: "W-L2", desc: "200≤X" }
+        ]
+      }
+    };
+
+    let rows = [
+      { owner: "HUI_SHENG_MERCHANT", sign: "", layer: "", pool: null, name: "汇盛商户代付充值", merchantId: "", currency: "USDT", address: "DEMO-USDT-TRC20-001", protocol: "TRC20", status: 1, used: 0, occ: 0, avail: 1, rate: 0, audit: 2, remark: "演示商户备注", time: "2026/07/20 10:12:03" },
+      { owner: "HUI_SHENG_MERCHANT", sign: "", layer: "", pool: null, name: "汇盛商户代付充值", merchantId: "", currency: "USDT", address: "DEMO-USDT-TRC20-001", protocol: "TRC20", status: 1, used: 0, occ: 0, avail: 1, rate: 0, audit: 2, remark: "充值1", time: "2026/07/18 09:00:11" },
+      { owner: "HUI_SHENG", sign: "", layer: "HS-USDT-N-L1", pool: 0, name: "汇盛", merchantId: "", currency: "USDT", address: "DEMO-USDT-TRC20-001", protocol: "TRC20", status: 1, used: 2, occ: 3, avail: 8, rate: 20, audit: 2, remark: "测试", time: "2026/07/15 14:22:40" },
+      { owner: "HUI_SHENG", sign: "", layer: "HS-TRX-N-L1", pool: 0, name: "汇盛-TRX主池", merchantId: "", currency: "TRX", address: "DEMO-TRX-TRON-001", protocol: "TRON", status: 1, used: 1, occ: 1, avail: 12, rate: 7.69, audit: 2, remark: "TRX 专用地址（不可用于 USDT）", time: "2026/08/10 18:30:00", isNew: true }
+    ];
+
+    const $ = (id) => document.getElementById(id);
+    const htmlText = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    })[char]);
+    const toast = (msg) => {
+      const el = $("toast");
+      el.textContent = msg;
+      el.classList.add("show");
+      clearTimeout(toast._t);
+      toast._t = setTimeout(() => el.classList.remove("show"), 1800);
+    };
+
+    function fillOwnerSelect(sel, withEmpty) {
+      sel.innerHTML = "";
+      if (withEmpty) {
+        const o = document.createElement("option");
+        o.value = "";
+        o.textContent = "请选择地址归属";
+        sel.appendChild(o);
+      }
+      OWNERS.forEach((item) => {
+        const o = document.createElement("option");
+        o.value = item.value;
+        o.textContent = item.isNew ? `${item.label}（新增）` : item.label;
+        sel.appendChild(o);
+      });
+    }
+
+    function ownerNeedsPool(v) { return v === "HUI_SHENG"; }
+    function ownerIsMeiRen(v) { return v === "MEI_REN_BRIDGE"; }
+    function layersFor(owner, pool, currency) {
+      const bag = LAYERS_BY_OWNER[owner];
+      if (!bag) return [];
+      const prefix = currency === "TRX" ? "HS-TRX" : currency === "USDT" ? "HS-USDT" : "HS";
+      return (bag[pool] || []).map((item) => ({ value: `${prefix}-${item.code}`, desc: item.desc }));
+    }
+
+    function syncModalDeps() {
+      const owner = $("m-owner").value;
+      const poolEl = $("m-pool");
+      const layerEl = $("m-layer");
+      const signEl = $("m-sign");
+      const needPool = ownerNeedsPool(owner);
+      const mei = ownerIsMeiRen(owner);
+
+      poolEl.disabled = !needPool;
+      if (!needPool) poolEl.value = "";
+      const pool = poolEl.value;
+      const layerOn = needPool && (pool === "0" || pool === "1");
+      layerEl.disabled = !layerOn;
+      if (!layerOn) {
+        layerEl.innerHTML = '<option value="">请先选择池类型</option>';
+      } else {
+        const cur = layerEl.value;
+        const opts = layersFor(owner, pool, $("m-currency").value);
+        layerEl.innerHTML = '<option value="">请选择分层标记</option>' +
+          opts.map((x) => `<option value="${x.value}">${x.value}（${x.desc}）</option>`).join("");
+        if ([...layerEl.options].some((o) => o.value === cur)) layerEl.value = cur;
+      }
+      signEl.disabled = !mei;
+      if (!mei) signEl.value = "";
+
+    }
+
+    function clearErr() {
+      ["name", "currency", "protocol", "owner", "pool", "layer", "address"].forEach((k) => {
+        $("e-" + k).classList.remove("show");
+      });
+    }
+
+    function validate() {
+      clearErr();
+      let ok = true;
+      const show = (id) => { $(id).classList.add("show"); ok = false; };
+      if (!$("m-name").value.trim()) show("e-name");
+      if (!$("m-currency").value) show("e-currency");
+      if (!$("m-protocol").value) show("e-protocol");
+      if ($("m-currency").value === "TRX" && $("m-protocol").value !== "TRON") {
+        $("e-protocol").textContent = "TRX 地址协议必须为 TRON";
+        show("e-protocol");
+      }
+      if (!$("m-owner").value) show("e-owner");
+      const owner = $("m-owner").value;
+      if (ownerNeedsPool(owner)) {
+        if ($("m-pool").value === "") show("e-pool");
+        if ($("m-layer").value === "") show("e-layer");
+      }
+      const addr = $("m-address").value;
+      if (!addr.trim()) show("e-address");
+      else if (/\s/.test(addr)) {
+        $("e-address").textContent = "收款钱包地址不允许空格";
+        show("e-address");
+      } else if ($("m-protocol").value === "ERC20") {
+        const t = addr.trim();
+        if (!t.startsWith("0x") || t.length !== 42) {
+          $("e-address").textContent = "ERC-20协议地址必须以'0x'开头且共42位";
+          show("e-address");
+        }
+      } else {
+        $("e-address").textContent = "请输入收款钱包地址";
+      }
+      if (addr.trim() && rows.some((r) => r.address === addr.trim() && r.currency !== $("m-currency").value)) {
+        $("e-address").textContent = "同一地址不能同时绑定不同币种";
+        show("e-address");
+      }
+      return ok;
+    }
+
+    function openModal(prefillOwner, prefillCurrency = "TRX") {
+      $("m-name").value = "";
+      $("m-currency").value = prefillCurrency;
+      $("m-protocol").value = prefillCurrency === "TRX" ? "TRON" : "TRC20";
+      $("m-owner").value = prefillOwner || "";
+      $("m-pool").value = "";
+      $("m-sign").value = "";
+      $("m-address").value = "";
+      clearErr();
+      syncModalDeps();
+      $("mask").classList.add("show");
+    }
+
+    function closeModal() { $("mask").classList.remove("show"); }
+
+    function poolTag(pool) {
+      if (pool === 0) return '<span class="tag blue">普通池</span>';
+      if (pool === 1) return '<span class="tag green">白名单池</span>';
+      return "-";
+    }
+
+    function statusTag(s) {
+      return s === 1
+        ? '<span class="tag green">正常</span>'
+        : '<span class="tag red">禁用</span>';
+    }
+
+    function auditTag(a) {
+      if (a === 2) return '<span class="tag green">审核通过</span>';
+      if (a === 3) return '<span class="tag red">审核驳回</span>';
+      return "-";
+    }
+
+    function layerCell(r) {
+      if (!ownerNeedsPool(r.owner) || !r.layer) return "-";
+      const desc = layersFor(r.owner, r.pool).find((x) => x.value === r.layer)?.desc || "";
+      return `<div class="layer-cell"><b>${htmlText(r.layer)}</b>${desc ? `<small>${htmlText(desc)}</small>` : ""}</div>`;
+    }
+
+    function render() {
+      const name = $("f-name").value.trim();
+      const merchant = $("f-merchant").value.trim();
+      const currency = $("f-currency").value;
+      const protocol = $("f-protocol").value;
+      const status = $("f-status").value;
+      const address = $("f-address").value.trim();
+      const owner = $("f-owner").value;
+      const pool = $("f-pool").value;
+
+      const list = rows.filter((r) => {
+        if (name && !r.name.includes(name)) return false;
+        if (merchant && !(r.merchantId || "").includes(merchant)) return false;
+        if (currency && r.currency !== currency) return false;
+        if (protocol && r.protocol !== protocol) return false;
+        if (status !== "" && String(r.status) !== status) return false;
+        if (address && !r.address.includes(address)) return false;
+        if (owner && r.owner !== owner) return false;
+        if (pool !== "" && String(r.pool) !== pool) return false;
+        return true;
+      });
+
+      $("tbody").innerHTML = list.map((r) => `
+        <tr>
+          <td>${htmlText(OWNER_LABEL[r.owner] || r.owner || "-")}</td>
+          <td>${htmlText(r.sign || "-")}</td>
+          <td>${layerCell(r)}</td>
+          <td>${poolTag(r.pool)}</td>
+          <td>${htmlText(r.name)}</td>
+          <td>${htmlText(r.merchantId || "-")}</td>
+          <td>${htmlText(r.currency)}</td>
+          <td class="mono">${htmlText(r.address)}</td>
+          <td>${htmlText(r.protocol)}</td>
+          <td>${statusTag(r.status)}</td>
+          <td>${r.used ?? "-"}</td>
+          <td>${r.occ > 0 ? `<button type="button" class="link">${r.occ}</button>` : "0"}</td>
+          <td>${r.avail ?? "-"}</td>
+          <td>${r.rate == null ? "-" : Number(r.rate).toFixed(2) + "%"}</td>
+          <td>${auditTag(r.audit)}</td>
+          <td>${htmlText(r.remark || "-")}</td>
+          <td>${r.time || "-"}</td>
+          <td><button type="button" class="link" data-edit>编辑</button></td>
+        </tr>
+      `).join("");
+      $("page-info").textContent = `共 ${list.length} 条`;
+    }
+
+    function boot() {
+      if (window.__HS_ADDRESS_EMBED__ || window.__HS_ADDRESS_SURFACE__ === "ADDRESS") {
+        document.body.classList.add("embed");
+      }
+      fillOwnerSelect($("f-owner"), true);
+      fillOwnerSelect($("m-owner"), true);
+      $("btn-add").onclick = () => openModal("HUI_SHENG");
+      $("btn-export").onclick = () => toast("已导出");
+      $("btn-search").onclick = render;
+      $("btn-reset").onclick = () => {
+        ["f-name", "f-merchant", "f-address"].forEach((id) => $(id).value = "");
+        ["f-currency", "f-protocol", "f-status", "f-owner", "f-pool"].forEach((id) => $(id).value = "");
+        render();
+      };
+      $("btn-close").onclick = closeModal;
+      $("btn-cancel").onclick = closeModal;
+      $("mask").addEventListener("click", (e) => { if (e.target === $("mask")) closeModal(); });
+      $("m-owner").onchange = syncModalDeps;
+      $("m-currency").onchange = () => {
+        if ($("m-currency").value === "TRX") $("m-protocol").value = "TRON";
+        syncModalDeps();
+      };
+      $("m-pool").onchange = syncModalDeps;
+      $("m-address").addEventListener("input", () => {
+        // strip spaces as user types hint (validation still blocks remaining spaces)
+      });
+      $("btn-ok").onclick = () => {
+        if (!validate()) return;
+        const owner = $("m-owner").value;
+        const pool = $("m-pool").value === "" ? null : Number($("m-pool").value);
+        rows = [{
+          owner,
+          sign: ownerIsMeiRen(owner) ? $("m-sign").value.trim() : "",
+          layer: ownerNeedsPool(owner) ? $("m-layer").value : "",
+          pool: ownerNeedsPool(owner) ? pool : null,
+          name: $("m-name").value.trim(),
+          merchantId: "",
+          currency: $("m-currency").value,
+          address: $("m-address").value.trim(),
+          protocol: $("m-protocol").value,
+          status: 1,
+          used: 0,
+          occ: 0,
+          avail: 1,
+          rate: 0,
+          audit: 2,
+          remark: $("m-currency").value === "TRX" ? "TRX 专用地址（不可用于 USDT）" : "",
+          time: new Date().toISOString().slice(0, 19).replace("T", " ").replace(/-/g, "/"),
+          isNew: $("m-currency").value === "TRX"
+        }, ...rows];
+        closeModal();
+        render();
+        toast("已新增地址");
+      };
+      $("tbody").addEventListener("click", (e) => {
+        if (e.target.matches("[data-edit]")) {
+          openModal();
+          toast("请修改地址信息");
+        }
+      });
+
+      render();
+    }
+
+    boot();
+  </script>
+</body>
+</html>

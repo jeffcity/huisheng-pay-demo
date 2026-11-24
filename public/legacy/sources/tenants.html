@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>汇盛支付平台端控制台 - 租户管理</title>
-  <script src="../platform-auth-route-guard.js" data-platform-route-targets='{"":"platform.tenant.view"}'></script>
+  <script src="../platform-auth-route-guard.js" data-platform-route-targets='{"":"platform.tenant.view","system-fee-records":"platform.system_fee_record.view"}'></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@500;600&family=Fira+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -1611,6 +1611,14 @@
     body .tenant-list-panel #tableWrap .action-link{font-size:12px}.tenant-business-tags{display:grid;gap:4px;justify-items:start}
     .tenant-metric-help{font:inherit;color:var(--text-secondary);background:transparent;border:0;padding:0 2px;cursor:help}
   </style>
+  <style>
+    #tenantRechargeOrders { display: grid; gap: 12px; min-width: 0; }
+    #systemFeeRecords[hidden], #tenantListLayout[hidden] { display: none !important; }
+    #systemFeeRecords .filter-bar { margin-bottom: 12px; }
+    #systemFeeRecords .table-wrap { overflow-x: auto; }
+    #systemFeeRecords table, #tenantRechargeOrders table { white-space: nowrap; }
+    .system-recharge-actions { display: flex; gap: 10px; }
+  </style>
 </head>
 <body>
   <div class="app-shell">
@@ -1707,7 +1715,22 @@
 
         <div class="operation-receipt" id="operationReceipt" role="status" aria-live="polite"></div>
 
-        <div class="layout-grid">
+        <section class="panel" id="systemFeeRecords" aria-labelledby="systemFeeRecordsTitle" hidden>
+          <div class="panel-header"><h2 id="systemFeeRecordsTitle">系统费记录</h2></div>
+          <div class="panel-body">
+            <div class="detail-tabs" role="group" aria-label="记录类型">
+              <button type="button" class="detail-tab active" aria-pressed="true" data-fee-record-view="ledger">系统费流水</button>
+              <button type="button" class="detail-tab" aria-pressed="false" data-fee-record-view="recharge">充值订单</button>
+            </div>
+            <div class="filter-bar">
+              <div class="field"><label for="feeRecordsTenant">租户</label><select id="feeRecordsTenant"><option value="">全部租户</option></select></div>
+              <div class="field"><label for="feeRecordsKeyword">订单号 / 流水号</label><input id="feeRecordsKeyword" type="search" placeholder="请输入编号"></div>
+            </div>
+            <div id="feeRecordsResult"></div>
+          </div>
+        </section>
+
+        <div class="layout-grid" id="tenantListLayout">
           <section class="panel tenant-list-panel">
             <div class="panel-header">
               <h2>租户列表</h2>
@@ -2942,6 +2965,19 @@
       const form = document.getElementById('confirmForm');
       const actionBtn = document.getElementById('confirmActionBtn');
 
+      if (appState.rechargeAction) {
+        const credit = appState.rechargeAction.kind === 'credit';
+        document.getElementById('confirmDetail').textContent = detail;
+        form.innerHTML =
+          (credit ? '<div class="field wide"><label for="rechargeProof">蓝盛交易号 / 收款凭证编号</label><input id="rechargeProof" maxlength="100"></div>' : '') +
+          '<div class="field wide"><label for="confirmReason">处理原因</label><textarea id="confirmReason" maxlength="300"></textarea></div>' +
+          '<div class="field wide"><label for="confirmOperator2fa">当前操作人 Google 验证码</label><input id="confirmOperator2fa" inputmode="numeric" maxlength="6" autocomplete="one-time-code"></div>' +
+          '<label class="wide"><input type="checkbox" id="rechargeVerified"> ' +
+          (credit ? '已核对收款凭证、订单和金额' : '已核对该订单未收款') + '</label>';
+        actionBtn.className = credit ? 'btn primary' : 'btn danger';
+        actionBtn.textContent = credit ? '确认到账' : '确认取消订单';
+        return;
+      }
       if (renderDomainConfirmForm(title, form, actionBtn)) return;
       if (renderIpConfirmForm(title, form, actionBtn)) return;
 
@@ -3205,7 +3241,8 @@
     }
 
     function renderDetailSections(tenant) {
-      const tenantAuditRows = auditEvents.filter(event => event.tenant === tenant.name || event.object.includes(tenant.id));
+      const tenantAuditRows = [...rechargeAuditRows(tenant), ...auditEvents.filter(event => event.tenant === tenant.name || event.object.includes(tenant.id))]
+        .sort((a, b) => b.time.localeCompare(a.time));
       const permissions = getPermissions();
       const closed = tenant.status === '关闭';
       const stopped = tenant.status === '停用';
@@ -3306,8 +3343,135 @@
       target.innerHTML = '<div class="detail-section-heading"><h3>租户钱包</h3><div class="tag-row"><button class="btn" data-wallet-refresh>刷新</button>' + adjustButton + '</div></div>' +
         '<div class="kv-grid">' + kv('钱包余额（CNY）', '<span class="mono">' + esc(wallet?.balance) + '</span>') + kv('允许负余额', (wallet?.allowNegative ? '已开启' : '未开启') + settingsButton) + '</div>' +
         '<h3>钱包流水</h3><div class="table-wrap"><table aria-label="租户钱包流水"><thead><tr><th>流水号 / 时间（UTC+8）</th><th>类型</th><th>变动金额（CNY）</th><th>变动前余额（CNY）</th><th>变动后余额（CNY）</th><th>关联订单</th><th>操作人 / 原因</th></tr></thead><tbody>' +
-        entries.map(e => '<tr><td class="mono">' + esc(e.id) + '<div class="cell-sub">' + esc(e.occurredAt) + '</div></td><td>' + esc(e.type) + '</td><td class="mono">' + esc(e.change) + '</td><td class="mono">' + esc(e.beforeBalance) + '</td><td class="mono">' + esc(e.afterBalance) + '</td><td>' + esc(e.orderId) + (e.orderId ? '<div class="cell-sub">' + esc(e.direction) + ' · CNY ' + esc(e.orderAmount) + '</div>' : '') + '</td><td>' + esc(e.operator) + '<div class="cell-sub">' + esc(e.reason || '—') + '</div></td></tr>').join('') +
-        (entries.length ? '' : '<tr><td colspan="7">暂无流水</td></tr>') + '</tbody></table></div>';
+        entries.map(e => '<tr><td class="mono">' + esc(e.id) + '<div class="cell-sub">' + esc(e.occurredAt) + '</div></td><td>' + esc(e.type) + '</td><td class="mono">' + esc(e.change) + '</td><td class="mono">' + esc(e.beforeBalance) + '</td><td class="mono">' + esc(e.afterBalance) + '</td><td>' + esc(e.orderId) + (e.orderId ? '<div class="cell-sub">' + (e.type === '系统费' ? esc(e.direction) + ' · ' : '') + 'CNY ' + esc(e.orderAmount) + '</div>' : '') + '</td><td>' + esc(e.operator) + '<div class="cell-sub">' + esc(e.reason || '—') + '</div></td></tr>').join('') +
+        (entries.length ? '' : '<tr><td colspan="7">暂无流水</td></tr>') + '</tbody></table></div>' +
+        '<section id="tenantRechargeOrders" aria-labelledby="tenantRechargeOrdersTitle"><div class="detail-section-heading"><h3 id="tenantRechargeOrdersTitle">充值订单</h3></div>' +
+        renderRechargeOrderTable((model?.rechargeOrders(tenant.id) || []).map(order => ({ order, tenant }))) + '</section>';
+    }
+
+    function canHandleRecharge(tenant) {
+      return tenantInCurrentScope(tenant) && getPermissions().canAdjustWallet && tenant.status !== '关闭';
+    }
+
+    function rechargeActionAllowed(order, kind) {
+      if (kind === 'cancel') return order.status === '待支付';
+      return kind === 'credit' && ['待支付', '处理中', '已关闭'].includes(order.status);
+    }
+
+    function renderRechargeOrderTable(records, showTenant = false) {
+      const rows = records.map(({ order, tenant }) => {
+        const actions = canHandleRecharge(tenant)
+          ? [['cancel', '取消订单'], ['credit', '人工确认到账']].filter(([kind]) => rechargeActionAllowed(order, kind)).map(([kind, label]) =>
+              `<button type="button" class="action-link" data-recharge-action="${kind}" data-recharge-tenant="${escapeHtml(tenant.id)}" data-recharge-order="${escapeHtml(order.orderNo)}">${label}</button>`).join('')
+          : '';
+        return `
+          <tr>
+            ${showTenant ? `<td>${escapeHtml(tenant.name)}<div class="cell-sub">${escapeHtml(tenant.id)}</div></td>` : ''}
+            <td class="mono">${escapeHtml(order.orderNo)}</td>
+            <td class="mono">${escapeHtml(order.amount)}</td>
+            <td>${escapeHtml(order.paymentCurrency)}</td>
+            <td>${tag(escapeHtml(order.status), escapeHtml(order.tone))}${order.closeReason ? `<div class="cell-sub">${escapeHtml(order.closeReason)}</div>` : ''}</td>
+            <td>${actions ? `<div class="system-recharge-actions">${actions}</div>` : '—'}</td>
+            <td class="mono">${escapeHtml(order.createdAt)}</td>
+            <td class="mono">${escapeHtml(order.creditedAt || '—')}</td>
+          </tr>`;
+      }).join('');
+      return `
+        <div class="table-wrap">
+          <table aria-label="充值订单">
+            <thead><tr>${showTenant ? '<th scope="col">租户</th>' : ''}<th scope="col">充值订单号</th><th scope="col">充值金额（CNY）</th><th scope="col">支付币种</th><th scope="col">订单状态</th><th scope="col">操作</th><th scope="col">创建时间（UTC+8）</th><th scope="col">到账时间（UTC+8）</th></tr></thead>
+            <tbody>${rows || `<tr><td colspan="${showTenant ? 8 : 7}" class="table-empty">暂无充值订单</td></tr>`}</tbody>
+          </table>
+        </div>`;
+    }
+
+    function rechargeAuditRows(tenant) {
+      if (!getPermissions().canAudit) return [];
+      return (window.HSFeeWallets?.rechargeAudit(tenant.id) || []).map(record => ({
+        operator: record.operator,
+        result: '成功',
+        tone: 'green',
+        action: record.kind === 'credit' ? '人工确认充值到账' : '取消充值订单',
+        object: record.orderNo,
+        reason: record.proof ? record.reason + ' · 收款凭证 ' + record.proof : record.reason,
+        ip: '—',
+        role: '平台操作',
+        time: record.occurredAt
+      }));
+    }
+
+    function renderSystemFeeRecords() {
+      const records = document.getElementById('systemFeeRecords');
+      if (records.hidden) return;
+      const result = document.getElementById('feeRecordsResult');
+      if (platformTenantAuthorization && !platformTenantAuthorization.pagePermissions.includes('platform.system_fee_record.view')) {
+        result.textContent = '当前账号无系统费记录查看权限';
+        return;
+      }
+      const scope = tenants.filter(tenantInCurrentScope);
+      const filter = document.getElementById('feeRecordsTenant');
+      const currentTenant = filter.value;
+      filter.replaceChildren(new Option('全部租户', ''), ...scope.map(tenant => new Option(tenant.name + ' / ' + tenant.id, tenant.id)));
+      filter.value = scope.some(tenant => tenant.id === currentTenant) ? currentTenant : '';
+      const keyword = document.getElementById('feeRecordsKeyword').value.trim().toLowerCase();
+      const includesKeyword = (...values) => values.some(value => String(value || '').toLowerCase().includes(keyword));
+      const visibleTenants = scope.filter(tenant => !filter.value || tenant.id === filter.value);
+      const wallet = window.HSFeeWallets;
+      if (records.querySelector('[data-fee-record-view="recharge"]').getAttribute('aria-pressed') === 'true') {
+        const orders = visibleTenants.flatMap(tenant => wallet.rechargeOrders(tenant.id).map(order => ({ order, tenant })))
+          .filter(({ order }) => includesKeyword(order.orderNo))
+          .sort((a, b) => b.order.createdAt.localeCompare(a.order.createdAt));
+        result.innerHTML = renderRechargeOrderTable(orders, true);
+        return;
+      }
+      const rows = visibleTenants.flatMap(tenant => wallet.ledger(tenant.id).map(entry => ({ entry, tenant })))
+        .filter(({ entry }) => includesKeyword(entry.id, entry.orderId))
+        .sort((a, b) => b.entry.occurredAt.localeCompare(a.entry.occurredAt))
+        .map(({ entry, tenant }) => `<tr>
+          <td>${escapeHtml(tenant.name)}<div class="cell-sub">${escapeHtml(tenant.id)}</div></td>
+          <td class="mono">${escapeHtml(entry.id)}</td>
+          <td>${escapeHtml(entry.type === '系统费' ? entry.direction + '系统费' : entry.type)}</td>
+          <td class="mono">${escapeHtml(entry.change)}</td>
+          <td class="mono">${escapeHtml(entry.beforeBalance)}</td>
+          <td class="mono">${escapeHtml(entry.afterBalance)}</td>
+          <td class="mono">${escapeHtml(entry.orderId || '—')}</td>
+          <td class="mono">${escapeHtml(entry.occurredAt)}</td>
+        </tr>`).join('');
+      result.innerHTML = `<div class="table-wrap"><table aria-label="系统费流水">
+        <thead><tr><th>租户</th><th>流水号</th><th>类型</th><th>变动金额（CNY）</th><th>变动前余额（CNY）</th><th>变动后余额（CNY）</th><th>关联订单</th><th>变动时间（UTC+8）</th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="8" class="table-empty">暂无系统费流水</td></tr>'}</tbody>
+      </table></div>`;
+    }
+
+    function openRechargeAction(control) {
+      const { rechargeTenant, rechargeOrder, rechargeAction } = control.dataset;
+      const tenant = tenants.find(item => item.id === rechargeTenant);
+      if (!canHandleRecharge(tenant)) { showToast('无权处理该租户的充值订单', ''); return; }
+      const order = window.HSFeeWallets.rechargeOrders(tenant.id).find(item => item.orderNo === rechargeOrder);
+      if (!order || !rechargeActionAllowed(order, rechargeAction)) { showToast('订单状态已变化，请刷新', ''); return; }
+      appState.rechargeAction = { orderNo: order.orderNo, kind: rechargeAction };
+      const credit = rechargeAction === 'credit';
+      const detail = tenant.name + ' / ' + order.orderNo + ' · CNY ' + order.amount + '。' +
+        (credit ? '请先核对蓝盛收款凭证与订单金额，确认后按原订单金额入账。' : '请先确认订单未收款。取消后订单终止并记录原因。');
+      openConfirm(credit ? '人工确认充值到账' : '取消充值订单', detail, tenant.id);
+    }
+
+    function submitRechargeAction(tenant) {
+      const pending = appState.rechargeAction;
+      if (!canHandleRecharge(tenant)) { showFormError('confirmFormError', '无权处理该租户的充值订单'); return; }
+      const reason = document.getElementById('confirmReason').value.trim();
+      const code = document.getElementById('confirmOperator2fa').value.trim();
+      const proof = document.getElementById('rechargeProof')?.value.trim();
+      if (!reason || !/^\d{6}$/.test(code)) { showFormError('confirmFormError', '请填写处理原因和 6 位 Google 验证码'); return; }
+      if (!document.getElementById('rechargeVerified').checked) { showFormError('confirmFormError', '请先确认收款核对结果'); return; }
+      try {
+        const order = window.HSFeeWallets.resolveRechargeOrder(tenant.id, pending.orderNo, { kind: pending.kind, reason, proof, operator: walletOperator() });
+        closeConfirm();
+        if (!document.getElementById('tenantListLayout').hidden) renderRows();
+        if (document.getElementById('tenantDetailModal').classList.contains('open')) renderDetailSections(tenant);
+        renderSystemFeeRecords();
+        showToast('充值订单' + order.status, order.orderNo);
+      } catch (error) { showFormError('confirmFormError', error.message); }
     }
 
     function openWalletAdjustment(tenantId) {
@@ -3487,6 +3651,7 @@
       document.getElementById('modalBackdrop').classList.remove('open');
       dialog.classList.remove('open');
       dialog.setAttribute('aria-hidden', 'true');
+      appState.rechargeAction = null;
       restoreTenantDialogFocus(dialog, '[data-open="' + (appState.confirmTenantId || appState.selectedTenant?.id || '') + '"]');
     }
 
@@ -3729,6 +3894,11 @@
       }
       if (tenant.status === '关闭') {
         showFormError('confirmFormError', '该租户已关闭，只能查看历史资料，本次操作未执行。');
+        return;
+      }
+
+      if (appState.rechargeAction) {
+        submitRechargeAction(tenant);
         return;
       }
 
@@ -4100,6 +4270,17 @@
           return;
         }
 
+        const rechargeButton = event.target.closest('[data-recharge-action]');
+        if (rechargeButton) { openRechargeAction(rechargeButton); return; }
+        const feeRecordView = event.target.closest('[data-fee-record-view]');
+        if (feeRecordView) {
+          document.querySelectorAll('[data-fee-record-view]').forEach(button => {
+            button.classList.toggle('active', button === feeRecordView);
+            button.setAttribute('aria-pressed', String(button === feeRecordView));
+          });
+          renderSystemFeeRecords();
+          return;
+        }
         const walletSettingsBtn = event.target.closest('[data-wallet-settings]');
         if (walletSettingsBtn) { openTenantModal('edit', walletSettingsBtn.dataset.walletSettings, true); return; }
         const walletAdjustBtn = event.target.closest('[data-wallet-adjust]');
@@ -4183,6 +4364,8 @@
         }
       });
 
+      document.getElementById('feeRecordsTenant').addEventListener('change', renderSystemFeeRecords);
+      document.getElementById('feeRecordsKeyword').addEventListener('input', renderSystemFeeRecords);
       document.getElementById('walletAdjustSubmit').addEventListener('click', submitWalletAdjustment);
       ['walletAdjustDirection','walletAdjustAmount','walletAdjustReason'].forEach(id => document.getElementById(id).addEventListener('input', previewWalletAdjustment));
       document.getElementById('applyFilter').addEventListener('click', () => applyFilters());
@@ -4197,9 +4380,14 @@
       document.getElementById('globalSearch').addEventListener('input', applyFilters);
       document.getElementById('roleSelect').addEventListener('change', event => {
         appState.currentRole = event.target.value;
+        if (!document.getElementById('systemFeeRecords').hidden) {
+          renderSystemFeeRecords();
+          return;
+        }
         applyFilters(false);
         if (!tenantInCurrentScope(appState.selectedTenant)) appState.selectedTenant = appState.filtered[0] || null;
-        renderDetailSections(appState.selectedTenant);
+        if (appState.selectedTenant) renderDetailSections(appState.selectedTenant);
+        renderSystemFeeRecords();
         showToast('角色视角已切换', '当前按 ' + appState.currentRole + ' 展示可操作入口。');
       });
       document.getElementById('keywordFilter').addEventListener('keydown', event => {
@@ -4260,12 +4448,16 @@
       appState.statisticsRange = range;
       document.getElementById('tenantVolumeFrom').value = range.from;
       document.getElementById('tenantVolumeTo').value = range.to;
-      applyFilters(false);
+      const initialRoute = window.__UNIFIED_DEMO_HASH || window.location.hash.replace('#', '');
+      if (initialRoute !== 'system-fee-records') applyFilters(false);
       renderOperationReceipt();
       bindEvents();
       applyPlatformTenantAuthorization();
-      const initialRoute = window.__UNIFIED_DEMO_HASH || window.location.hash.replace('#', '');
-      if (initialRoute.startsWith('detail-')) {
+      if (initialRoute === 'system-fee-records') {
+        document.getElementById('tenantListLayout').hidden = true;
+        document.getElementById('systemFeeRecords').hidden = false;
+        renderSystemFeeRecords();
+      } else if (initialRoute.startsWith('detail-')) {
         openDetailModal(tenants[0].id);
         activateDetailTab(initialRoute === 'detail-wallet' ? 'overview' : initialRoute.replace('detail-', ''));
       } else if (initialRoute === 'create') {

@@ -1,0 +1,24 @@
+{
+  "origin": "蓝盛统一Demo地址池端",
+  "pages": [
+    {
+      "source": "src/pages/钱包地址管理/钱包地址管理-demo.html",
+      "sourceSha256": "78e08bd8f2da3a1f91741c88832ab43cc8fcf361ea6373c8c4caaef67fb994a7",
+      "target": "surfaces/address/sources/wallet-address.html",
+      "targetSha256": "9a1894149974d3bb793ab54fccde5a4dca5c376e849520f9cb1f0ae984b3e47b"
+    },
+    {
+      "source": "src/pages/目标池金额层级配置/目标池金额层级配置-demo.html",
+      "sourceSha256": "a2fcd1cb2683a498dbcc693eef69e89eab144b86bf5a7542af2f4560ef0ccb33",
+      "target": "surfaces/address/sources/amount-level.html",
+      "targetSha256": "8f2cedcf42519d0b35317fd78987d809b1b2a1e23419f62b4bab020310d30881"
+    }
+  ],
+  "adaptations": [
+    "品牌及归属改为汇盛",
+    "地址层级标识前缀改为HS",
+    "嵌入全局标识改为汇盛地址池专用",
+    "发布使用虚构的地址及联系备注，列表按文本显示录入值"
+  ],
+  "state": "沿用原页面内存演示状态；无共享存储、接口或运行时依赖"
+}

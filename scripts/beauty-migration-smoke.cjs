@@ -31,9 +31,34 @@ const {resolve}=require('node:path');
  await domainsFrame.$eval('#beautyDomainRows [data-domain-id="'+systemDomainId+'"][data-domain-action="启用域名"]',e=>e.click());await domainConfirm();
  await domainsFrame.$eval('#beautyDomainSection',e=>e.scrollIntoView({block:'center'}));await domainsFrame.waitForFunction(()=>getComputedStyle(document.querySelector('#confirmModal')).opacity==='0'&&!document.querySelector('#toastStack .toast'));await page.screenshot({path:resolve(require('node:os').tmpdir(),'hs-beauty-domain-management.jpg'),type:'jpeg',quality:85});
  await domainsFrame.$eval('#beautyDomainRows [data-domain-id="'+customDomainId+'"][data-domain-action="解绑域名"]',e=>e.click());await domainConfirm();assert.equal((await domainsFrame.evaluate(()=>window.HSBeautyDemo.portalDomains('HS-TEN-001'))).length,1);
- t=await surface('tenant');await menu(t,'商户管理');let addressFrame=await content(t,'[data-detail="MCH-1188"]');await addressFrame.click('[data-detail="MCH-1188"]');await addressFrame.waitForSelector('#merchantBeautyLoginAddress');assert.equal(await addressFrame.$eval('#merchantBeautyLoginAddress',e=>e.readOnly),true);assert.equal(await addressFrame.$eval('#merchantBeautyLoginAddress',e=>e.value),'https://tenant-001.beauty.hs-pay.com/login');await addressFrame.$eval('#merchantBeautyLoginAddress',e=>e.scrollIntoView({block:'center'}));await addressFrame.waitForFunction(()=>document.querySelector('#modal').getAnimations().every(a=>a.playState!=='running'));await page.screenshot({path:resolve(require('node:os').tmpdir(),'hs-beauty-merchant-login-address.jpg'),type:'jpeg',quality:85});await addressFrame.click('#modalClose');
- // Changing a grant refreshes only the address slot, preserving basic-form drafts.
- await addressFrame.click('[data-detail="MCH-1188"]');await addressFrame.$eval('#merchantBasicName',e=>{e.value='尚未保存的名称'});await page.evaluate(()=>window.__HSBeautyDemo.setEnabled('HS-TEN-001',false));await addressFrame.waitForFunction(()=>!document.querySelector('#merchantBeautyLoginAddress'));assert.equal(await addressFrame.$eval('#merchantBasicName',e=>e.value),'尚未保存的名称');await page.evaluate(()=>window.__HSBeautyDemo.setEnabled('HS-TEN-001',true));await addressFrame.waitForSelector('#merchantBeautyLoginAddress');await addressFrame.click('#modalClose');
+ t=await surface('tenant');await menu(t,'商户管理');
+ const merchantFrame=await content(t,'[data-detail="MCH-1188"]');
+ await merchantFrame.click('[data-detail="MCH-1188"]');
+ await merchantFrame.waitForSelector('#merchantBasicName');
+ assert.equal(await merchantFrame.$('#merchantBeautyLoginField'),null);
+ assert.match(await merchantFrame.$eval('#merchantBasicName',e=>e.closest('.form-grid').innerText),/商户后台登录地址/);
+ await merchantFrame.click('#modalClose');
+ await menu(t,'租户配置');
+ const addressFrame=await content(t,'[data-tenant-tab="access"]');
+ assert.ok(await addressFrame.$eval('#beautyAccessDomains',e=>e.closest('[data-tenant-panel]').dataset.tenantPanel==='access'));
+ await addressFrame.click('[data-tenant-tab="access"]');
+ await addressFrame.waitForSelector('#beautyAccessDomains',{visible:true});
+ assert.equal(await addressFrame.$eval('#beautyAccessDomainRows td',e=>e.textContent),'https://tenant-001.beauty.hs-pay.com/login');
+ assert.equal(await addressFrame.$$eval('#beautyAccessDomains input, #beautyAccessDomains button',els=>els.length),0);
+ const extraId=await page.evaluate(()=>window.__HSBeautyDemo.addPortalDomain('HS-TEN-001','beauty-second.example.com').id);
+ assert.equal(await addressFrame.$$eval('#beautyAccessDomainRows tr',els=>els.length),1);
+ await page.evaluate(id=>window.__HSBeautyDemo.changePortalDomain('HS-TEN-001',id,'启用域名'),extraId);
+ await addressFrame.waitForFunction(()=>document.querySelectorAll('#beautyAccessDomainRows tr').length===2);
+ await page.evaluate(id=>window.__HSBeautyDemo.changePortalDomain('HS-TEN-001',id,'解绑域名'),extraId);
+ await page.evaluate(id=>window.__HSBeautyDemo.changePortalDomain('HS-TEN-001',id,'停用域名'),systemDomainId);
+ await addressFrame.waitForFunction(()=>document.querySelector('#beautyAccessDomainRows').textContent.includes('暂无可用域名'));
+ await page.evaluate(id=>window.__HSBeautyDemo.changePortalDomain('HS-TEN-001',id,'启用域名'),systemDomainId);
+ await page.evaluate(()=>window.__HSBeautyDemo.setEnabled('HS-TEN-001',false));
+ await addressFrame.waitForFunction(()=>document.querySelector('#beautyAccessDomains').hidden&&!document.querySelector('#beautyAccessDomainRows').textContent);
+ await page.evaluate(()=>window.__HSBeautyDemo.setEnabled('HS-TEN-001',true));
+ await addressFrame.waitForSelector('#beautyAccessDomains',{visible:true});
+ await addressFrame.$eval('#beautyAccessDomains',e=>e.scrollIntoView({block:'center'}));
+ await page.screenshot({path:resolve(require('node:os').tmpdir(),'hs-beauty-tenant-access-domain.jpg'),type:'jpeg',quality:90});
  t=await surface('tenant');for(const label of ['订单管理','商户管理','钱包管理','统计报表']){await menu(t,label,true);await t.waitForFunction(label=>document.querySelector('iframe')?.title.endsWith(' · '+label),{},label);const f=await content(t,'body');await f.waitForFunction(()=>document.body.innerText.trim().length>100);assert.equal(await t.$$eval('iframe',xs=>xs.length),1)}
  assert.equal(await t.evaluate(()=>document.body.innerText.includes('骗子库')),false);
  // Existing wallet -> ledger navigation remains in the same tenant surface.
@@ -60,6 +85,6 @@ const {resolve}=require('node:path');
  await p.click('[data-business-module]');const platform=await(await page.$('#surface-panel>iframe')).contentFrame();await platform.waitForFunction(()=>document.querySelector('iframe')?.title.endsWith(' · 通道商授权'));
  for(const width of [1029,390]){await page.setViewport({width,height:959});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);assert.equal(await page.$eval('#tab-beauty',e=>e.getBoundingClientRect().right<=innerWidth),true)}
  assert.deepEqual(errors,[]);
- console.log('BEAUTY_MIGRATION_PASS 授权开停、未授权菜单/直接路由/商户端、四个后台与三个商户页面、双租户读写隔离及骗子库排除、开通后商户概览地址及授权联动、平台域名新增启停解绑与共享地址同步、返回平台初始化、单活跃iframe及窄屏');
+ console.log('BEAUTY_MIGRATION_PASS 授权开停、未授权菜单/直接路由/商户端、四个后台与三个商户页面、双租户读写隔离及骗子库排除、租户配置访问域名与开通停用联动、平台域名新增启停解绑与共享地址同步、返回平台初始化、单活跃iframe及窄屏');
  }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exitCode=1});
