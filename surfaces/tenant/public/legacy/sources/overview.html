@@ -29455,12 +29455,18 @@
     }
 
     const tenantPayoutDetailFixtures = new Map([
+      ["HS-P-260715-000172", { submissionOrderNo: "HS-S-260715-000741" }],
+      ["HS-P-260717-000298", { submissionOrderNo: "HS-S-260717-001406" }],
+      ["HS-P-260717-002134", { submissionOrderNo: "HS-S-260717-001583" }],
+      ["HS-P-260717-000251", { submissionOrderNo: "HS-S-260717-001547" }],
       ["HS-P-260717-000336", {
+        submissionOrderNo: "HS-S-260717-001308",
         createdAt: "2026-07-16 23:56:10",
         review: { time: "2026-07-16 23:57:05", operator: "租户操作员", result: "审核通过" },
         priorAttempts: [{
           provider: "BridgePay",
           channel: "BridgePay CNY 代付",
+          submissionOrderNo: "HS-S-260716-001205",
           channelOrderNo: "BP20260716000336",
           submittedAt: "2026-07-16 23:57:30",
           callbackAt: "2026-07-17 00:02:16",
@@ -29493,11 +29499,12 @@
       const times = tenantBusinessOrderTimesFor(systemOrderNo);
       const fixture = tenantPayoutDetailFixtures.get(systemOrderNo);
       const attempts = [...(fixture?.priorAttempts || [])];
-      if (channelOrderNo !== "-") {
+      if (fixture?.submissionOrderNo || channelOrderNo !== "-") {
         const paid = status.includes("已打款");
         const failed = status.includes("代付下单失败");
         attempts.push({
-          channelOrderNo, provider, channel,
+          submissionOrderNo: fixture?.submissionOrderNo,
+          channelOrderNo: channelOrderNo === "-" ? "" : channelOrderNo, provider, channel,
           status: paid ? "出款成功" : failed ? "下单失败" : "待确认",
           tone: paid ? "green" : failed ? "red" : "orange",
           submittedAt: times.submittedAt,
@@ -29520,7 +29527,11 @@
       if (history.review) add(history.review.time, history.review.result, history.review.operator);
       history.attempts.forEach((attempt, index) => {
         const label = "第 " + (index + 1) + " 次代付";
-        const detail = [attempt.channel, attempt.channelOrderNo || attempt.attemptId].filter(Boolean).join(" · ");
+        const detail = [
+          attempt.channel,
+          attempt.submissionOrderNo && "提交通道的系统单号 " + attempt.submissionOrderNo,
+          attempt.channelOrderNo && "通道订单号 " + attempt.channelOrderNo
+        ].filter(Boolean).join(" · ");
         const switched = index > 0 && history.attempts[index - 1].channel !== attempt.channel;
         const submitTitle = switched ? "切换通道并提交" : "提交通道";
         add(attempt.submittedAt, label + " · " + submitTitle, detail);
@@ -29541,7 +29552,8 @@
       return '<ol class="payout-detail-attempts">' + attempts.map((attempt, index) => {
         const pairs = [
           ["通道商", attempt.provider], ["交易通道", attempt.channel],
-          ["通道订单号", attempt.channelOrderNo || "待通道返回"], ["提交时间", attempt.submittedAt],
+          ["提交通道的系统单号", attempt.submissionOrderNo], ["通道订单号", attempt.channelOrderNo || "待通道返回"],
+          ["提交时间", attempt.submittedAt],
           ["操作人", attempt.operator]
         ];
         if (attempt.callbackAt) pairs.push(["通道回调时间", attempt.callbackAt]);
@@ -31861,6 +31873,7 @@
         if (isBusinessOrder) {
           recordTenantPayoutResubmission(systemOrderNo, {
             attemptId: attemptNo,
+            submissionOrderNo: "HS-S-" + attemptNo.slice("REORDER-".length),
             provider: channel.split(" ")[0],
             channel,
             submittedAt: tenantNow(),
