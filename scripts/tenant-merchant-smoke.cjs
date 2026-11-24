@@ -571,9 +571,20 @@ const puppeteer = require('puppeteer-core');
     console.log('MERCHANT_CREATE_PASS 新增无类型及上级选择、默认无上级关系、操作人2FA置底与验证、一次性密码及交付内容');
     await merchantPage('main');
     const moreAction = async (action,id='MCH-1188') => {
-      // Resize closes this menu. Flush viewport layout and its resize event before opening it.
-      await frame.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
-      await frame.click(`[data-merchant-more="${id}"]`);await frame.click(`[data-merchant-more-action="${action}"]`);
+      const trigger = `[data-merchant-more="${id}"]`;
+      const item = `#merchantMoreMenu [data-merchant-more-action="${action}"]`;
+      // A resize of the nested frame dismisses the menu. Reopen only when
+      // Puppeteer lost its target before dispatching the menu-item click.
+      for (let attempt = 1; ; attempt++) {
+        await frame.locator(trigger).click();
+        try {
+          await frame.click(item);
+          return;
+        } catch (error) {
+          const lostTarget = /Node is detached from document|No element found for selector/.test(error.message);
+          if (!lostTarget || attempt >= 3 || await frame.$('#merchantMoreMenu')) throw error;
+        }
+      }
     };
     await frame.click('[data-merchant-more="MCH-1188"]');
     assert.deepEqual(await frame.$$eval('#merchantMoreMenu button',els=>els.map(el=>el.textContent)),['修改','服务费配置','编辑密码','查看密钥','设置汇率','通道测试','调整预付服务费','解绑','删除']);
