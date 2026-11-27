@@ -74,7 +74,8 @@ const documents = {
 const template = await readFile(path.join(root, 'src/unified.html'), 'utf8');
 const payload = Object.entries(documents).map(([id, html]) =>
   `<script id="surface-${id}" type="application/json">${json(html)}</script>`).join('\n');
-const html = template.replace('<!-- SURFACE_DOCUMENTS -->', () => payload);
+const demoCashier = await readFile(path.join(root, 'surfaces/tenant/src/recharge-cashier-demo.html'), 'utf8');
+const html = template.replace('<!-- CASHIER_DOCUMENT -->', () => `<script id="demo-recharge-cashier" type="application/json">${json(demoCashier)}</script>`).replace('<!-- SURFACE_DOCUMENTS -->', () => payload);
 // dist 只保存生成物，清理旧多文件构建资源。
 await rm(path.join(root, 'dist'), { recursive: true, force: true });
 await mkdir(path.join(root, 'dist'), { recursive: true });

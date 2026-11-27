@@ -206,3 +206,23 @@ test('平台充值人工处理校验状态、凭证和租户，入账与审计�
   assert.equal(ledger[0].occurredAt, paid.creditedAt);
   assert.equal(w.rechargeAudit(tenantId).length, 2);
 });
+
+test('充值锁定 CNY 汇率及应收金额，修改来源不重算历史订单', () => {
+  const {w} = fixture();
+  const tenant = 'HS-TEN-001';
+  const legacy = w.rechargeOrders(tenant)[0];
+  assert.equal(legacy.receivable, '138.89');
+  const first = w.createRechargeOrder(tenant, '729.53');
+  assert.equal(first.exchangeRate, '7.2953');
+  assert.equal(first.receivable, '100.00');
+  assert.throws(() => w.saveRate('CNY', '未知来源', '0'));
+  assert.throws(() => w.saveRate('CNY', '币安（Binance）', '-1'));
+  w.saveRate('CNY', '币安（Binance）', '0.1502');
+  const second = w.createRechargeOrder(tenant, '730.00');
+  assert.equal(second.exchangeRate, '7.3000');
+  for (const order of [first, second, legacy]) {
+    const cashier = w.rechargePayment(tenant, order.orderNo);
+    assert.equal(cashier.amount, order.receivable);
+    assert.equal(cashier.rate, order.exchangeRate);
+  }
+});

@@ -187,23 +187,77 @@
       return rechargeStatus(order);
     }
 
-    // Fixed local estimate for the demo. Production uses the order's quoted USDT amount and assigned address.
-    const demoCnyPerUsdt = '7.20';
+    // Quoted CNY, VND or USDT per USDT. Sources are local Demo fixtures.
+    const quoteSources = {
+      CNY: { '欧易（OKX）': '7.1523', '币安（Binance）': '7.1498' },
+      VND: { 'XE 汇率网': '26150.00', 'Wise 汇率': '26148.50' },
+      USDT: { 'USDT 固定汇率': '1.0000' }
+    };
+    const rateSettingsKey = 'hs.demo.recharge-rate-settings';
+    let rateSettings = {
+      CNY: { source: '欧易（OKX）', floating: '0.1430' },
+      VND: { source: 'XE 汇率网', floating: '523.00' }
+    };
+    function currencyQuote(currency, source, floating) {
+      const base = quoteSources[currency]?.[source];
+      if (typeof base !== 'string') throw new Error('报价不可用，请选择有效的汇率来源');
+      const digits = currency === 'VND' ? 2 : 4;
+      const units = parse(floating, digits);
+      const divisor = 10n ** BigInt(digits);
+      const format = value => String(value / divisor) + '.' + String(value % divisor).padStart(digits, '0');
+      return { currency, source, base, floating: format(units), effective: format(parse(base, digits) + units) };
+    }
+    try {
+      const saved = JSON.parse(owner.sessionStorage.getItem(rateSettingsKey));
+      for (const currency of Object.keys(quoteSources)) {
+        if (saved?.[currency]) rateSettings[currency] = currencyQuote(currency, saved[currency].source, saved[currency].floating);
+      }
+    } catch (_) {}
+    function saveRate(currency, source, floating) {
+      const row = currencyQuote(currency, source, floating);
+      rateSettings[currency] = { source, floating: row.floating };
+      try { owner.sessionStorage.setItem(rateSettingsKey, JSON.stringify(rateSettings)); } catch (_) {}
+    }
+    function rechargeQuote(amount, rate) {
+      // Preserve the cashier's upward rounding to USDT cents.
+      const denominator = parse(rate);
+      const numerator = parse(amount, 2) * scale;
+      const cents = (numerator + denominator - 1n) / denominator;
+      return { exchangeRate: rate, receivable: exact(cents * (scale / 100n)) };
+    }
+    // Offline stand-in for the provider's per-order URL. One document URL per Demo session.
+    let demoCashierBase;
+    function rechargeCashierUrl(order) {
+      if (order.cashierUrl) return order.cashierUrl;
+      if (!demoCashierBase) {
+        const template = owner.document?.getElementById?.('demo-recharge-cashier');
+        if (!template) return null;
+        demoCashierBase = owner.URL.createObjectURL(new owner.Blob([JSON.parse(template.textContent)], { type: 'text/html;charset=utf-8' }));
+      }
+      return demoCashierBase + '#order=' + encodeURIComponent(order.orderNo) + '&amount=' + encodeURIComponent(order.receivable);
+    }
     const model = {
+      rateSources() { return clone(quoteSources); },
+      configuredRates() {
+        return Object.entries(rateSettings).map(([currency, row]) => currencyQuote(currency, row.source, row.floating));
+      },
+      previewRate: currencyQuote,
+      saveRate,
       rechargePayment(tenantId, orderNo) {
         const order = this.rechargeOrders(tenantId).find(item => item.orderNo === orderNo && item.status === '待支付');
         if (!order) return null;
-        const rate = parse(demoCnyPerUsdt, 2);
-        const usdtCents = (parse(order.amount, 2) * 100n + rate - 1n) / rate;
         return {
-          amount: exact(usdtCents * (scale / 100n)),
-          network: 'TRON（TRC20）',
-          address: 'TDEMO9zP4kX7vM2qR5sL8nC1wF6aB3h',
-          rate: demoCnyPerUsdt
+          amount: order.receivable,
+          cashierUrl: rechargeCashierUrl(order),
+          rate: order.exchangeRate
         };
       },
       rechargeOrders(tenantId) {
-        return clone([...createdRechargeOrders, ...systemFeeRechargeOrderFixtures].filter(order => order?.tenantId === tenantId).map(rechargeStatus));
+        return clone([...createdRechargeOrders, ...systemFeeRechargeOrderFixtures].filter(order => order?.tenantId === tenantId).map(order => {
+          // Orders created before configurable quotes used the fixed 7.20 rate.
+          const snapshot = order.exchangeRate ? order : { ...order, ...rechargeQuote(order.amount, '7.20') };
+          return rechargeStatus(snapshot);
+        }));
       },
       createRechargeOrder(tenantId, amount) {
         if (ensure(tenantId).status !== '正常') throw new Error('当前租户状态无法发起充值');
@@ -216,6 +270,7 @@
           tenantId,
           orderNo: `SFRC-${date}-${sequence}`,
           amount: exact(cny),
+          ...rechargeQuote(exact(cny), currencyQuote('CNY', rateSettings.CNY.source, rateSettings.CNY.floating).effective),
           paymentCurrency: 'USDT',
           status: '待支付',
           tone: 'orange',
@@ -223,7 +278,7 @@
         };
         createdRechargeOrders.unshift(order);
         saveRechargeState();
-        return clone(order);
+        return { ...clone(order), cashierUrl: rechargeCashierUrl(order) };
       },
       resolveRechargeOrder(tenantId, orderNo, input) {
         const order = applyRechargeAction(tenantId, orderNo, input, owner.__HSProviderDemo.now());

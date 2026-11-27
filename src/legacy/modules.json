@@ -99,6 +99,16 @@
     "initialHash": "detail-audit",
     "navId": "tenant-list"
   },
+  "exchange-rates": {
+    "label": "汇率配置",
+    "code": "FX-01",
+    "group": "汇率配置",
+    "description": "虚拟币充值的报价来源、浮动汇率及有效汇率",
+    "sourceName": "平台端汇率配置",
+    "sourceKey": "exchange-rates",
+    "initialHash": "exchange-rates",
+    "navId": "exchange-rates"
+  },
   "business": {
     "label": "通道商授权",
     "code": "02-01",
