@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>汇率配置</title>
+<style>
+:root{--accent:#245665;--ink:#172a32;--muted:#536b77;--line:#e2e9ec;font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;color:var(--ink)}
+*{box-sizing:border-box}body{margin:0;padding:16px;background:#f3f6f7}.card,dialog{background:white;border:1px solid var(--line);border-radius:9px}.head,footer,.controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.head,footer{justify-content:space-between;padding:15px 18px}.head{border-bottom:1px solid var(--line)}h2{font-size:16px;margin:0}p{color:var(--muted);margin:3px 0 0;font-size:13px}select,button,input{font:inherit;border:1px solid #cad5d9;border-radius:6px;background:white;color:var(--ink);padding:6px 10px;min-height:34px}button{cursor:pointer}button:hover{background:#edf3f5}button.primary{color:white;background:var(--accent);border-color:var(--accent)}button.primary:hover{background:#193f4b}:focus-visible{outline:2px solid var(--accent);outline-offset:2px}.scroll{overflow-x:auto}table{width:100%;border-collapse:collapse;text-align:left;white-space:nowrap;font-variant-numeric:tabular-nums}td,th{padding:11px 14px;border-bottom:1px solid var(--line)}th{font-size:12px;color:var(--muted);background:#f6f8f9}tbody tr:last-child td{border-bottom:0}td:nth-child(n+3):nth-child(-n+5),th:nth-child(n+3):nth-child(-n+5){text-align:right}.status{background:#e6f4ec;color:#216b40;padding:2px 7px;border-radius:4px;font-size:12px}.edit{color:var(--accent);border:0;background:transparent;font-weight:600}dialog{padding:0;width:min(420px,94vw);max-height:90vh;color:inherit}dialog::backdrop{background:#172a3266}.fields{padding:16px 18px;display:grid;gap:14px}.fields label{display:grid;gap:5px}output{font-variant-numeric:tabular-nums;font-weight:600}footer{border-top:1px solid var(--line);justify-content:flex-end}#notice{margin:12px 0}#error{color:#ab3333}
+.controls[hidden],#notice:empty,#error:empty{display:none}
+</style></head>
+<body>
+<section class="card"><div class="head"><div><h2>币种汇率</h2><p>每 1 USDT 对应的币种金额。系统费充值在下单时锁定 CNY 有效汇率。</p></div>
+<form id="add" class="controls"><select id="currency" aria-label="可新增币种"></select><button class="primary">新增币种</button></form></div>
+<div class="scroll"><table><thead><tr><th>币种</th><th>汇率来源</th><th>基准汇率</th><th>浮动汇率</th><th>有效汇率</th><th>报价状态</th><th>操作</th></tr></thead><tbody id="rows"></tbody></table></div></section>
+<p role="status" id="notice"></p>
+<dialog id="editor" aria-labelledby="editTitle"><form id="editForm"><div class="head"><h2 id="editTitle"></h2></div><div class="fields">
+<label>汇率来源<select id="source"></select></label><label>基准汇率<output id="base"></output></label>
+<label>浮动汇率<input id="floating" type="number" min="0" inputmode="decimal" required></label>
+<label>有效汇率<output id="effective" aria-live="polite"></output></label><p>有效汇率 = 基准汇率 + 浮动汇率</p><p id="error" role="alert"></p></div>
+<footer><button type="button" id="cancel">取消</button><button class="primary">保存</button></footer></form></dialog>
+<script>
+const api = window.HSFeeWallets;
+const sources = api.rateSources();
+const el = id => document.getElementById(id);
+let editing;
+function render() {
+  const rows = api.configuredRates();
+  el('rows').replaceChildren(...rows.map(row => {
+    const tr = document.createElement('tr');
+    for (const value of [row.currency, row.source, row.base, row.floating, row.effective]) tr.insertCell().textContent = value;
+    const status = document.createElement('span');
+    status.className = 'status';
+    status.textContent = '已获取';
+    tr.insertCell().append(status);
+    const edit = document.createElement('button');
+    edit.className = 'edit';
+    edit.textContent = '编辑';
+    edit.setAttribute('aria-label','编辑 ' + row.currency + ' 汇率');
+    edit.onclick = () => openEditor(row);
+    tr.insertCell().append(edit);
+    return tr;
+  }));
+  const available = Object.keys(sources).filter(currency => !rows.some(row => row.currency === currency));
+  el('currency').replaceChildren(...available.map(currency => new Option(currency,currency)));
+  el('add').hidden = !available.length;
+}
+function preview() {
+  const source = el('source').value;
+  el('base').textContent = sources[editing][source] + ' ' + editing;
+  try {
+    const row = api.previewRate(editing, source, el('floating').value);
+    el('effective').textContent = row.effective + ' ' + editing;
+    el('error').textContent = '';
+  } catch {
+    el('effective').textContent = '—';
+    el('error').textContent = '请输入有效的非负浮动汇率。';
+  }
+}
+function openEditor(row) {
+  editing = row.currency;
+  el('editTitle').textContent = '编辑 ' + editing + ' 汇率';
+  el('source').replaceChildren(...Object.keys(sources[editing]).map(name => new Option(name,name)));
+  el('source').value = row.source;
+  el('floating').step = editing === 'VND' ? '0.01' : '0.0001';
+  el('floating').value = row.floating;
+  preview();
+  el('editor').showModal();
+}
+el('source').onchange = preview;
+el('floating').oninput = preview;
+el('cancel').onclick = () => el('editor').close();
+el('editForm').onsubmit = event => {
+  event.preventDefault();
+  try { api.saveRate(editing,el('source').value,el('floating').value); }
+  catch (error) { el('error').textContent = error.message; return; }
+  el('editor').close();
+  render();
+  el('rows').querySelector('[aria-label="编辑 ' + editing + ' 汇率"]').focus();
+  el('notice').textContent = editing + ' 汇率已保存';
+};
+el('add').onsubmit = event => {
+  event.preventDefault();
+  const currency = el('currency').value;
+  if (!currency) return;
+  api.saveRate(currency,Object.keys(sources[currency])[0],'0');
+  render();
+  el('notice').textContent = '已新增 ' + currency;
+};
+render();
+</script></body></html>

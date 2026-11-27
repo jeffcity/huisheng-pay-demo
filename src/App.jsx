@@ -21,7 +21,7 @@ const SubMenu = Menu.SubMenu;
 const ItemGroup = Menu.ItemGroup;
 
 const MODULE_ICON = {
-  home: <IconHome />, 'tenant-list': <IconUser />, business: <IconApps />,
+  home: <IconHome />, 'tenant-list': <IconUser />, business: <IconApps />, 'exchange-rates': <IconSettings />,
   'tenant-create': <IconUser />,
   wallets: <IconStorage />, funds: <IconCalendarClock />, 'channel-vendors': <IconBranch />,
   'tenant-daily-report': <IconCalendar />, 'channel-daily-report': <IconCalendar />,
