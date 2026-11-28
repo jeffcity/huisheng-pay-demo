@@ -1757,6 +1757,7 @@
                     <option value="all">全部业务</option>
                     <option value="法币业务">法币业务</option>
                     <option value="美人桥业务">美人桥业务</option>
+                    <option value="USDT代收">USDT 代收</option>
                   </select>
                 </div>
                 <button class="btn primary" id="applyFilter"><i data-lucide="sliders-horizontal"></i>筛选</button>
@@ -2632,6 +2633,7 @@
       for (const tenant of appState.filtered.filter(tenantInCurrentScope)) {
         const m = tenantListStatistics(tenant, range);
         const businesses = tenantBusinessDirections(tenant).map(direction => 'CNY ' + direction);
+        if (window.top?.HSAddressPortal?.info(tenant.id).usdt) businesses.push('USDT 代收');
         if (window.HSBeautyDemo.enabled(tenant.id)) businesses.push('美人桥');
         rows.push([
           tenant.name,tenant.id,tenant.contact,tenant.status,businesses.join(' / '),range.from,range.to,
@@ -2676,7 +2678,7 @@
         return '<tr data-index="' + index + '">' +
           '<td><div class="tenant-cell"><strong>' + tenant.name + '</strong><span class="mono">' + tenant.id + (tenant.contact ? ' / ' + escapeHtml(tenant.contact) : '') + '</span>' + '</div></td>' +
           '<td>' + tag(tenant.status, tenant.statusTone) + '</td>' +
-          '<td><div class="tenant-business-tags">' + tenantBusinessDirections(tenant).map(d => tag('CNY ' + d, 'blue')).join('') + (window.HSBeautyDemo.enabled(tenant.id) ? tag('美人桥', 'blue') : '') + '</div></td>' +
+          '<td><div class="tenant-business-tags">' + tenantBusinessDirections(tenant).map(d => tag('CNY ' + d, 'blue')).join('') + (window.top?.HSAddressPortal?.info(tenant.id).usdt ? tag('USDT 代收','blue') : '') + (window.HSBeautyDemo.enabled(tenant.id) ? tag('美人桥', 'blue') : '') + '</div></td>' +
           tenantStatisticsCells(statistics) +
           '<td class="action-col"><div class="table-actions">' +
             '<button class="action-link" data-open="' + tenant.id + '">详情</button>' +
@@ -2731,6 +2733,18 @@
           '<button class="btn" data-business-module>去业务开通</button></div></td></tr>';
       }).join('');
       const enabled = window.HSBeautyDemo.enabled(tenant.id);
+      const portal = window.top.HSAddressPortal;
+      const address = portal.info(tenant.id);
+      const addressAction = (address.usdt ? '停用' : '开通') + 'USDT代收业务';
+      const usdtRow = '<tr id="usdtAuthorizationRow"><td>USDT 代收</td><td>USDT</td><td>' + tag(address.usdt ? '已授权' : '未授权', address.usdt ? 'green' : 'gray') +
+        '</td><td>—</td><td>租户地址管理后台</td><td>—</td><td>' + (canManage ? '<button class="btn" data-confirm="'+addressAction+'" data-confirm-tenant="'+tenant.id+'">'+(address.usdt?'停用':'开通')+'</button>' : '—') + '</td></tr>';
+      let addressAccess = '';
+      if (canManage && (enabled || address.usdt)) {
+        const url=escapeHtml(portal.url(tenant.id));
+        addressAccess = sectionTitle('地址管理后台') + (address.login
+          ? '<p>管理员账号　<strong>'+escapeHtml(address.login)+'</strong></p><p>专属登录地址　<a target="_blank" rel="noopener" href="'+url+'">'+url+'</a></p>'
+          : '<button class="btn" data-confirm="生成地址后台登录资料" data-confirm-tenant="'+tenant.id+'">生成管理员登录资料</button>');
+      }
       const beauty = '<tr id="beautyAuthorizationRow"><td>美人桥</td><td>—</td><td>' + tag(enabled ? '已授权' : '未授权', enabled ? 'green' : 'gray') + '</td><td>—</td><td>美人桥业务</td><td>' + escapeHtml(tenant.beautyUpdatedAt || '—') + '</td><td><div class="table-actions">' +
         (canManage ? '<button class="btn" data-confirm="' + (enabled ? '停用' : '开通') + '美人桥业务" data-confirm-tenant="' + tenant.id + '">' + (enabled ? '停用' : '开通') + '</button>' : disabledButton(enabled ? '停用' : '开通', 'shield', '当前角色或租户状态不允许操作')) + '</div></td></tr>';
       const channels = grants.flatMap(g => model.grantDirections(tenant.id,g.providerId).map(direction => {
@@ -2738,7 +2752,7 @@
         return '<tr><td>法币' + direction + '</td><td>' + escapeHtml(provider?.name || g.providerId) + ' / ' + escapeHtml(g.providerId) + '</td><td>当前租户</td><td>' + tag(g.status,'green') + '</td></tr>';
       })).join('');
       return '<div class="detail-section-heading"><h3>业务开通</h3><span class="cell-sub">业务开通情况与已授权通道；变更会写入审计</span></div>' +
-        '<div class="table-wrap"><table aria-label="业务开通"><thead><tr><th>业务</th><th>币种</th><th>授权状态</th><th>授权通道</th><th>归属模块</th><th>最近变更</th><th>操作</th></tr></thead><tbody>' + rows + beauty + '</tbody></table></div>' +
+        '<div class="table-wrap"><table aria-label="业务开通"><thead><tr><th>业务</th><th>币种</th><th>授权状态</th><th>授权通道</th><th>归属模块</th><th>最近变更</th><th>操作</th></tr></thead><tbody>' + rows + usdtRow + beauty + '</tbody></table></div>' + addressAccess +
         sectionTitle('已授权通道') + '<div class="table-wrap"><table aria-label="已授权通道"><thead><tr><th>业务</th><th>通道</th><th>授权范围</th><th>状态</th></tr></thead><tbody>' + (channels || '<tr><td colspan="4" class="table-empty">暂无授权通道</td></tr>') + '</tbody></table></div>' +
         '<div class="notice">停用/重新开通需二次确认并记录审计；复杂通道变更请到业务开通模块。</div>';
     }
@@ -3093,6 +3107,11 @@
           '<label for="confirmOperator2fa">当前操作人 2FA 验证码</label>' +
           '<input id="confirmOperator2fa" inputmode="numeric" maxlength="6" placeholder="6 位验证码" autocomplete="one-time-code">' +
         '</div>';
+      if (['开通USDT代收业务','停用USDT代收业务','生成地址后台登录资料'].includes(title)) {
+        document.getElementById('confirmReason').value='';
+        document.getElementById('confirmDetail').textContent=title.startsWith('停用')?'停用该租户的 USDT 地址管理权限，保留历史记录。':'首次开通将同时生成该租户专属地址后台的登录资料。';
+        return;
+      }
       if (title === '开通美人桥业务' || title === '停用美人桥业务') {
         document.getElementById('confirmReason').value = '';
         actionBtn.className = title.startsWith('开通') ? 'btn primary' : 'btn danger';
@@ -3195,7 +3214,7 @@
         const text = [tenant.id, tenant.name, tenant.contact, tenant.domain].join(' ').toLowerCase();
         const okSearch = !search || text.includes(search);
         const okStatus = status === 'all' || tenant.status === status;
-        const okBusiness = business === 'all' || (business === '美人桥业务' ? window.HSBeautyDemo.enabled(tenant.id) : tenant.businessTypes.includes(business));
+        const okBusiness = business === 'all' || (business === 'USDT代收' ? window.top?.HSAddressPortal?.info(tenant.id).usdt : business === '美人桥业务' ? window.HSBeautyDemo.enabled(tenant.id) : tenant.businessTypes.includes(business));
         return tenantInCurrentScope(tenant) && okSearch && okStatus && okBusiness;
       });
 
@@ -3643,7 +3662,7 @@
       if (!dialog.classList.contains('open')) return;
       clearFormError('confirmFormError');
       document.getElementById('confirmForm').querySelectorAll('input[type="password"], input[inputmode="numeric"], input[autocomplete="one-time-code"], input[id*="2fa" i]').forEach(input => { input.value = ''; });
-      if (appState.currentConfirm === '租户创建结果') {
+      if (['租户创建结果','地址后台登录资料'].includes(appState.currentConfirm)) {
         document.getElementById('confirmForm').innerHTML = '';
         document.getElementById('confirmDetail').textContent = '创建结果已关闭，一次性密码不再显示。';
         appState.currentConfirm = '高风险操作';
@@ -3883,7 +3902,7 @@
     }
 
     function applyTenantConfirm() {
-      if (appState.currentConfirm === '审计详情' || appState.currentConfirm === '租户创建结果' || appState.currentConfirm === '查看域名') {
+      if (appState.currentConfirm === '审计详情' || appState.currentConfirm === '租户创建结果' || appState.currentConfirm === '地址后台登录资料' || appState.currentConfirm === '查看域名') {
         closeConfirm();
         return;
       }
@@ -4136,17 +4155,40 @@
         return;
       }
 
-      if (appState.currentConfirm === '开通美人桥业务' || appState.currentConfirm === '停用美人桥业务') {
+      const addressAction=appState.currentConfirm;
+      if (['开通美人桥业务','停用美人桥业务','开通USDT代收业务','停用USDT代收业务','生成地址后台登录资料'].includes(addressAction)) {
         if (!getPermissions().canBusinessAuth || !tenantInCurrentScope(tenant)) {
-          otpField.value = '';
-          showFormError('confirmFormError', '当前账号无权变更该租户的美人桥授权，本次未修改状态。');
-          return;
+          showFormError('confirmFormError','当前账号无权变更该租户的业务授权。'); return;
         }
-        const enabled = appState.currentConfirm === '开通美人桥业务';
-        tenant.beautyUpdatedAt = platformNow();
-        window.HSBeautyDemo.setEnabled(tenant.id, enabled);
-        finishTenantAction(tenant, { action: appState.currentConfirm, detail: enabled ? '该租户已开通美人桥业务' : '该租户美人桥业务已停用，历史数据保留', reason });
-        return;
+        const legacy=addressAction==='生成地址后台登录资料';
+        if (legacy && !window.HSBeautyDemo.enabled(tenant.id)) return;
+        const biz=addressAction.includes('USDT')?'usdt':'beauty';
+        const active=!addressAction.startsWith('停用');
+        const portal=window.top.HSAddressPortal, btn=document.getElementById('confirmActionBtn');
+        if(btn.disabled)return;
+        btn.disabled=true;
+        return completeAddressBusiness();
+        async function completeAddressBusiness() {
+          try {
+            const initial=await portal.configure(tenant.id,tenant.name,biz,active);
+            if(biz==='beauty'&&!legacy){tenant.beautyUpdatedAt=platformNow();window.HSBeautyDemo.setEnabled(tenant.id,active);}
+            finishTenantAction(tenant,{action:addressAction,detail:addressAction+'完成',reason});
+            if(initial){
+              appState.currentConfirm='地址后台登录资料';
+              appState.confirmTenantId=tenant.id;
+              document.getElementById('confirmTitle').textContent='地址后台登录资料';
+              document.getElementById('confirmHeadline').textContent=tenant.name+' · 专属地址管理后台';
+              document.getElementById('confirmDetail').textContent='请将登录资料交付给租户。初始密码仅在本次开通时展示。';
+              const url=escapeHtml(portal.url(tenant.id));
+              document.getElementById('confirmForm').innerHTML='<div class="field wide"><label>专属登录地址</label><a target="_blank" rel="noopener" href="'+url+'">'+url+'</a></div><div class="field"><label>管理员账号</label><input id="addressInitialLogin" readonly value="'+escapeHtml(initial.login)+'"></div><div class="field"><label>初始密码</label><input id="addressInitialPassword" readonly value="'+escapeHtml(initial.password)+'"></div><button class="btn" type="button" id="copyAddressCredentials">复制登录资料</button>';
+              document.getElementById('copyAddressCredentials').onclick=async()=>{try{await navigator.clipboard.writeText([portal.url(tenant.id),initial.login,initial.password].join('\n'));showToast('已复制登录资料');}catch{showToast('请选中登录资料后复制');}};
+              btn.className='btn primary';btn.textContent='完成';
+              document.getElementById('modalBackdrop').classList.add('open');
+              showTenantDialog(document.getElementById('confirmModal'));
+            }
+          } catch(err){showFormError('confirmFormError',err.message);}
+          finally{btn.disabled=false;}
+        }
       }
 
       if (appState.currentConfirm === '解禁') {
