@@ -2,56 +2,115 @@ const assert=require('node:assert/strict');
 const puppeteer=require('puppeteer-core');
 const {pathToFileURL}=require('node:url');
 const {resolve}=require('node:path');
-const {tmpdir}=require('node:os');
+
 (async()=>{
- const browser=await puppeteer.launch({executablePath:process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',headless:true,args:['--no-sandbox']});
- try{
-  const page=await browser.newPage(),errors=[],requests=[];
-  page.on('pageerror',e=>errors.push(e.message));
-  await page.setRequestInterception(true);page.on('request',r=>{if(/^https?:/.test(r.url())){requests.push(r.url());r.abort()}else r.continue()});
-  await page.setViewport({width:1440,height:1000});
-  await page.goto(pathToFileURL(resolve(__dirname,'../dist/index.html')).href+'#address',{waitUntil:'load'});
-  async function shell(){await page.waitForSelector('iframe[data-active-surface="address"]');assert.equal(await page.$$eval('#surface-panel>iframe',xs=>xs.length),1);return(await page.$('#surface-panel>iframe')).contentFrame()}
-  async function business(f,selector){await f.waitForFunction(s=>!!document.querySelector('#content iframe')?.contentDocument?.querySelector(s),{},selector);assert.equal(await f.$$eval('#content>iframe',xs=>xs.length),1);return(await f.$('#content>iframe')).contentFrame()}
-  let f=await shell(),wallet=await business(f,'#tbody tr');
-  assert.equal(await wallet.$$eval('#tbody tr',xs=>xs.length),4);
-  assert.deepEqual(await wallet.$$eval('#f-owner option',xs=>xs.map(x=>x.textContent)),['请选择地址归属','汇盛','美人桥','汇盛商户代付充值']);
-  await wallet.select('#f-currency','TRX');await wallet.click('#btn-search');assert.equal(await wallet.$$eval('#tbody tr',xs=>xs.length),1);
-  assert.match(await wallet.$eval('#tbody',e=>e.innerText),/HS-TRX-N-L1/);
-  await wallet.click('#btn-reset');assert.equal(await wallet.$$eval('#tbody tr',xs=>xs.length),4);
-  await wallet.click('#btn-add');await wallet.waitForSelector('#mask.show');
-  assert.equal(await wallet.$eval('#m-owner',e=>e.value),'HUI_SHENG');
-  await wallet.click('#btn-ok');assert.equal(await wallet.$eval('#e-name',e=>e.classList.contains('show')),true);
-  async function fill(sel,value){await wallet.$eval(sel,(e,v)=>{e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}))},value)}
-  await fill('#m-name','汇盛独立地址回归');await wallet.select('#m-pool','0');
-  await wallet.waitForFunction(()=>document.querySelector('#m-layer').options.length>1);await wallet.select('#m-layer','HS-TRX-N-L1');
-  await fill('#m-address','THuishengAddressPoolSmokeOnly1234567');await wallet.click('#btn-ok');
-  await wallet.waitForFunction(()=>!document.querySelector('#mask').classList.contains('show'));
-  assert.equal(await wallet.$$eval('#tbody tr',xs=>xs.length),5);assert.match(await wallet.$eval('#tbody tr',e=>e.innerText),/汇盛独立地址回归/);
-  await wallet.click('#btn-add');await wallet.select('#m-owner','MEI_REN_BRIDGE');
-  assert.equal(await wallet.$eval('#m-sign',e=>e.disabled),false);assert.equal(await wallet.$eval('#m-pool',e=>e.disabled),true);await wallet.click('#btn-cancel');
-  await f.click('[data-page="address-amount-level"]');assert.equal(wallet.detached,true);
-  let levels=await business(f,'#tierBody tr');assert.equal(await levels.$$eval('#tierBody tr',xs=>xs.length),3);
-  assert.match(await levels.$eval('#ownerHint',e=>e.textContent),/TRX.*汇盛/);
-  await levels.click('#btnAdd');assert.equal(await levels.$$eval('#tierBody tr',xs=>xs.length),4);
-  await levels.click('#btnSave');assert.match(await levels.$eval('#toast',e=>e.textContent),/已保存 TRX/);
-  await levels.click('[data-currency="USDT"]');assert.equal(await levels.$$eval('#tierBody tr',xs=>xs.length),3);
-  assert.match(await levels.$eval('#mapBody',e=>e.innerText),/HS-USDT/);
-  await levels.click('[data-currency="TRX"]');assert.equal(await levels.$$eval('#tierBody tr',xs=>xs.length),4);
-  // Switching surfaces destroys the old end. A fresh visit retains the original prototype reset behavior.
-  for(const id of ['tenant','merchant','beauty','platform','address']){
-   const old=f;await page.click('#tab-'+id);await page.waitForSelector('iframe[data-active-surface="'+id+'"]');assert.equal(await page.$$eval('#surface-panel>iframe',xs=>xs.length),1);if(id==='tenant')assert.equal(old.detached,true);
-  }
-  f=await shell();wallet=await business(f,'#tbody tr');assert.equal(await wallet.$$eval('#tbody tr',xs=>xs.length),4);
-  for(const width of [962,390]){
-   await page.setViewport({width,height:959});
-   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
-   assert.equal(await page.$$eval('.tabs button',xs=>xs.every(e=>{const r=e.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth})),true);
-   assert.equal(await f.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
-  }
-  await page.setViewport({width:1440,height:1000});await page.waitForFunction(()=>document.getAnimations().every(a=>a.playState!=='running'));await page.screenshot({path:resolve(tmpdir(),'hs-address-pool-wallet.png')});
-  await f.click('[data-page="address-amount-level"]');levels=await business(f,'#tierBody tr');await page.screenshot({path:resolve(tmpdir(),'hs-address-pool-levels.png')});
-  assert.deepEqual(requests,[],'地址池必须完全内联，不能访问蓝盛或其他服务');assert.deepEqual(errors,[]);
-  console.log('PASS 地址池：筛选/新增/校验/美人桥归属、币种独立层级、保存、五端卸载与窄屏、离线独立运行');
- }finally{await browser.close()}
-})().catch(e=>{console.error(e);process.exitCode=1});
+  const browser=await puppeteer.launch({executablePath:process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',headless:true,args:['--no-sandbox']});
+  try {
+    const platform=await browser.newPage(), errors=[];
+    const url=pathToFileURL(resolve(__dirname,'../dist/index.html')).href;
+    platform.on('pageerror',e=>errors.push(e.message));
+    await platform.setViewport({width:1440,height:1000});
+    await platform.goto(url+'#address');
+    await platform.waitForSelector('#tab-address[aria-selected="true"]');
+    const previewFrame=await (await platform.waitForSelector('[data-active-surface="address"]')).contentFrame();
+    await previewFrame.click('#preview');
+    await previewFrame.waitForSelector('nav [data-page="wallets"]');
+    assert.match(await previewFrame.$eval('tbody',e=>e.innerText),/DEMO-USDT-001/);
+    await previewFrame.click('[data-action=add]');
+    await previewFrame.select('dialog [name=biz]','beauty');
+    assert.ok(await previewFrame.$('dialog [name=sign]'));
+    assert.equal(await previewFrame.$('dialog [name=layer]'),null);
+    await previewFrame.click('[data-dismiss]');
+    await platform.click('#tab-platform');
+    await platform.click('#tab-address');
+    const loginFrame=await (await platform.waitForSelector('[data-active-surface="address"]')).contentFrame();
+    await loginFrame.waitForSelector('#login');
+    await platform.click('#tab-platform');
+    const shell=await (await platform.waitForSelector('[data-active-surface="platform"]')).contentFrame();
+    await shell.waitForFunction(()=>[...document.querySelectorAll('.arco-menu-item')].some(el=>el.textContent.trim()==='租户管理'));
+    await shell.evaluate(()=>[...document.querySelectorAll('.arco-menu-item')].find(el=>el.textContent.trim()==='租户管理').click());
+    await shell.waitForFunction(()=>document.querySelector('iframe')?.contentDocument?.querySelector('[data-open="HS-TEN-001"]'));
+    const tenants=await (await shell.$('iframe')).contentFrame();
+    await tenants.$eval('[data-open="HS-TEN-001"]',e=>e.click());await tenants.$eval('[data-tab="business"]',e=>e.click());
+    async function grant(selector,first) {
+      await tenants.$eval(selector+' [data-confirm]',e=>e.click());
+      await tenants.waitForFunction(()=>document.querySelector('#confirmModal').getAnimations().every(a=>a.playState!=='running'));
+      await tenants.$eval('#confirmReason',el=>{el.value='地址后台开通验收';el.dispatchEvent(new Event('input',{bubbles:true}));});
+      await tenants.$eval('#confirmOperator2fa',el=>{el.value='123456';el.dispatchEvent(new Event('input',{bubbles:true}));});
+      await tenants.$eval('#confirmActionBtn',e=>e.click());
+      await tenants.waitForFunction(s=>document.querySelector(s).innerText.includes('已授权'),{},selector);
+      if(!first)return;
+      await tenants.waitForSelector('#addressInitialLogin');
+      const credentials=await tenants.evaluate(()=>({login:document.querySelector('#addressInitialLogin').value,password:document.querySelector('#addressInitialPassword').value,url:document.querySelector('#confirmForm a').href}));
+      await tenants.$eval('#confirmActionBtn',e=>e.click());return credentials;
+    }
+    const admin=await grant('#usdtAuthorizationRow',true);
+    await grant('#beautyAuthorizationRow',false);
+    const page=await browser.newPage();page.on('pageerror',e=>errors.push(e.message));
+    await page.goto(admin.url);
+    const frame=await (await page.waitForSelector('[data-active-surface="address"]')).contentFrame();
+    async function login(a){await frame.type('[name="login"]',a.login);await frame.type('[name="password"]',a.password);await frame.click('#login button');await frame.waitForSelector('nav');}
+    const action=a=>frame.click('[data-action="'+a+'"]');
+    const menu=m=>frame.click('[data-page="'+m+'"]');
+    const submit=()=>frame.click('dialog .primary');
+    await login(admin);
+    assert.equal(await frame.$eval('#systemNavItems',e=>e.hidden),true);
+    await action('toggle-system');
+    assert.deepEqual(await frame.$$eval('#systemNavItems [data-page]',items=>items.map(e=>e.dataset.page)),['accounts','roles','menus','ip','audit']);
+    await menu('roles');await menu('ip');await menu('audit');await menu('accounts');
+    await action('toggle-system');assert.equal(await frame.$eval('#systemNavItems',e=>e.hidden),true);
+    await action('toggle-system');await action('account');
+    await frame.type('dialog [name="login"]','review01');await frame.select('dialog [name="role"]','审核员');await submit();
+    await frame.waitForSelector('dialog [name="password"]');
+    const reviewer=await frame.evaluate(()=>({login:'review01',password:document.querySelector('dialog [name=password]').value}));
+    await frame.click('[data-dismiss]');await menu('wallets');await action('add');
+    await frame.type('dialog [name=name]','回归收款地址');await frame.type('dialog [name=address]','DEMO-ADDRESS-001');await submit();
+    await frame.waitForSelector('[data-action=review-detail]');assert.equal(await frame.$('[data-action=review]'),null);await action('review-detail');
+    assert.equal(await frame.$('dialog .primary'),null);
+    await frame.click('[data-dismiss]');await menu('wallets');assert.match(await frame.$eval('tbody',e=>e.innerText),/暂无生效地址/);
+    await action('logout');await login(reviewer);
+    await action('toggle-system');
+    assert.deepEqual(await frame.$$eval('#systemNavItems [data-page]',items=>items.map(e=>e.dataset.page)),['audit']);
+    await menu('audit');await menu('review');await action('review-detail');
+    assert.equal(await frame.$('dialog select,dialog textarea,dialog .primary'),null);
+    await frame.click('[data-dismiss]');await action('review');await submit();
+    await frame.waitForFunction(()=>document.querySelector('tbody').innerText.includes('已通过'));
+    assert.equal(await frame.$('[data-action=review]'),null);
+    await action('review-detail');
+    const history=await frame.$eval('.review-history',e=>e.innerText);
+    assert.ok(history.includes(admin.login) && history.includes(reviewer.login) && history.includes('已通过'));
+    assert.equal(await frame.$('dialog .primary'),null);
+    await frame.click('[data-dismiss]');
+    await menu('wallets');assert.match(await frame.$eval('tbody',e=>e.innerText),/DEMO-ADDRESS-001/);
+    await frame.select('#owner','beauty');assert.doesNotMatch(await frame.$eval('tbody',e=>e.innerText),/DEMO-ADDRESS-001/);
+    await action('logout');await login(admin);await menu('wallets');await action('edit');
+    await frame.$eval('dialog [name=address]',e=>e.value='DEMO-ADDRESS-002');await submit();
+    await frame.waitForSelector('[data-action=review-detail]');await menu('wallets');
+    assert.match(await frame.$eval('tbody',e=>e.innerText),/DEMO-ADDRESS-001/);
+    await action('logout');await login(reviewer);await menu('review');await action('review');
+    await frame.select('dialog [name=decision]','驳回');await frame.type('dialog [name=reason]','地址需重新核对');await submit();
+    await frame.waitForFunction(()=>document.querySelector('tbody').innerText.includes('已驳回'));
+    await menu('wallets');assert.match(await frame.$eval('tbody',e=>e.innerText),/DEMO-ADDRESS-001/);
+    await action('logout');await login(admin);await menu('levels');
+    const levels=await (await frame.waitForSelector('.levels')).contentFrame();
+    await levels.waitForSelector('#mapBody tr');
+    await levels.click('#btnAdd');await levels.click('#btnSave');await levels.waitForFunction(()=>document.querySelector('#toast').textContent.includes('已保存'));
+    await menu('wallets');await menu('levels');
+    const saved=await (await frame.waitForSelector('.levels')).contentFrame();
+    assert.equal(await saved.$$eval('#tierBody tr',rs=>rs.length),4);
+    // Open a second independent tenant in the same browser profile.
+    const second=await platform.evaluate(async()=>{
+      const api=window.HSAddressPortal, id='HS-TEN-018';
+      return {...await api.configure(id,'北辰支付','usdt',true),url:api.url(id)};
+    });
+    await page.goto(second.url);
+    const other=await (await page.waitForSelector('[data-active-surface="address"]')).contentFrame();
+    await other.type('[name=login]',admin.login);await other.type('[name=password]',admin.password);await other.click('#login button');
+    await other.waitForFunction(()=>document.querySelector('.error').textContent.includes('账号或密码错误'));
+    await other.$eval('[name=login]',e=>e.value='');await other.$eval('[name=password]',e=>e.value='');
+    await other.type('[name=login]',second.login);await other.type('[name=password]',second.password);await other.click('#login button');await other.waitForSelector('nav');
+    assert.deepEqual(await other.$$eval('#owner option',opts=>opts.map(o=>o.value)),['','usdt']);assert.match(await other.$eval('tbody',e=>e.innerText),/暂无生效地址/);
+    await page.setViewport({width:390,height:840});assert(await other.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+    assert.deepEqual(errors,[]);console.log('PASS 专属地址后台：开通交付、独立登录、租户与业务隔离、账号分权、申请复核、变更驳回、层级保存和窄屏');
+  } finally {await browser.close();}
+})().catch(e=>{console.error(e);process.exitCode=1;});

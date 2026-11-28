@@ -59,26 +59,36 @@ for (const [id, [key, boot]] of Object.entries(beautyRoutes)) {
 const beautyModel = await readFile(path.join(root, 'src/beauty-model.js'), 'utf8');
 const beautyDocument = beautySource.replace('<!-- BEAUTY_PAYLOAD -->', () => `<script>${script(beautyModel)};window.prepareBeautyDocument=${script(prepareBeautyDocument.toString())};</script><script id="beauty-documents" type="application/json">${json(beautyDocuments)}</script>`);
 const addressDocuments = {};
-for (const key of ['wallet-address', 'amount-level']) {
+for (const key of ['amount-level']) {
   addressDocuments[key] = await readFile(path.join(root, 'surfaces/address/sources', key + '.html'), 'utf8');
 }
+const addressUi = await readFile(path.join(root, 'surfaces/address/portal-ui.js'), 'utf8');
+const addressModel = await readFile(path.join(root, 'src/address-portal.js'), 'utf8');
 const addressDocument = (await readFile(path.join(root, 'surfaces/address/demo.html'), 'utf8'))
-  .replace('<!-- ADDRESS_PAYLOAD -->', () => `<script id="address-documents" type="application/json">${json(addressDocuments)}</script>`);
+  .replace('<!-- ADDRESS_PAYLOAD -->', () => `<script id="address-documents" type="application/json">${json(addressDocuments)}</script>`)
+  .replace('<!-- ADDRESS_UI -->', () => `<script>${script(addressUi)}</script>`);
+const classicSources = {
+  'wallet-address': await readFile(path.join(root,'surfaces/address/sources/wallet-address.html'),'utf8'),
+  'amount-level': await readFile(path.join(root,'surfaces/address/classic/amount-level.html'),'utf8')
+};
+const classicAddress = (await readFile(path.join(root,'surfaces/address/classic/demo.html'),'utf8'))
+  .replace('<!-- ADDRESS_PAYLOAD -->', () => `<script id="address-documents" type="application/json">${json(classicSources)}</script>`);
 const documents = {
   platform: await bundleSurface(root, '汇盛支付平台端'),
   tenant: await bundleSurface(path.join(root, 'surfaces/tenant'), '汇盛支付租户端'),
   merchant: merchantDocument,
   address: addressDocument,
+  'address-classic': classicAddress,
   beauty: beautyDocument
 };
 const template = await readFile(path.join(root, 'src/unified.html'), 'utf8');
 const payload = Object.entries(documents).map(([id, html]) =>
   `<script id="surface-${id}" type="application/json">${json(html)}</script>`).join('\n');
 const demoCashier = await readFile(path.join(root, 'surfaces/tenant/src/recharge-cashier-demo.html'), 'utf8');
-const html = template.replace('<!-- CASHIER_DOCUMENT -->', () => `<script id="demo-recharge-cashier" type="application/json">${json(demoCashier)}</script>`).replace('<!-- SURFACE_DOCUMENTS -->', () => payload);
+const html = template.replace('<!-- CASHIER_DOCUMENT -->', () => `<script id="demo-recharge-cashier" type="application/json">${json(demoCashier)}</script>`).replace('<!-- ADDRESS_MODEL -->', () => `<script>${script(addressModel)}</script>`).replace('<!-- SURFACE_DOCUMENTS -->', () => payload);
 // dist 只保存生成物，清理旧多文件构建资源。
 await rm(path.join(root, 'dist'), { recursive: true, force: true });
 await mkdir(path.join(root, 'dist'), { recursive: true });
 await writeFile(path.join(root, 'index.html'), html);
 await writeFile(path.join(root, 'dist/index.html'), html);
-console.log(`统一 Demo：五端已打包到一个 index.html（${(Buffer.byteLength(html) / 1024 / 1024).toFixed(1)} MB），运行时仅挂载当前端。`);
+console.log(`统一 Demo：各端已打包到一个 index.html（${(Buffer.byteLength(html) / 1024 / 1024).toFixed(1)} MB），运行时仅挂载当前端。`);

@@ -127,7 +127,7 @@
         </table>
         <div class="alert">
           <b>配置保存规则：</b>区间必须连续、无重叠、无空洞；删除后自动重排 L 编号，目标池映射列表按「池类型数量 × 当前金额层级数量」同步扩展或收缩。
-          <br />USDT 与 TRX 的层级区间按币种分开保存，互不影响；地址归属仍沿用汇盛。<b>TRX 分层金额最多 2 位小数</b>，不影响订单等交易金额最多 6 位小数的口径。
+          <br />当前租户的 USDT 代收地址按池类型及金额层级分配。
         </div>
       </div>
     </div>
@@ -158,46 +158,17 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    const CURRENCIES = [
-      { id: "USDT", label: "USDT", prefix: "HS-USDT" },
-      { id: "TRX", label: "TRX", prefix: "HS-TRX" }
-    ];
-    const POOLS = [
-      { type: 0, code: "N", label: "普通池" },
-      { type: 1, code: "W", label: "白名单池" }
-    ];
-
-    // 各币种使用独立的层级配置。
-    const store = {
-      USDT: [
-        { lower: 0, upper: 100 },
-        { lower: 100, upper: 500 },
-        { lower: 500, upper: null }
-      ],
-      TRX: [
-        { lower: 0, upper: 50 },
-        { lower: 50, upper: 300 },
-        { lower: 300, upper: null }
-      ]
-    };
-
-    // 地址库存按币种×池×层维护；地址归属固定沿用汇盛。
-    const inventory = {
-      "USDT|0|1": { total: 40, avail: 28 },
-      "USDT|0|2": { total: 22, avail: 15 },
-      "USDT|0|3": { total: 12, avail: 8 },
-      "USDT|1|1": { total: 10, avail: 7 },
-      "USDT|1|2": { total: 6, avail: 4 },
-      "USDT|1|3": { total: 4, avail: 2 },
-      "TRX|0|1": { total: 18, avail: 12 },
-      "TRX|0|2": { total: 9, avail: 6 },
-      "TRX|0|3": { total: 5, avail: 4 },
-      "TRX|1|1": { total: 4, avail: 3 },
-      "TRX|1|2": { total: 3, avail: 2 },
-      "TRX|1|3": { total: 2, avail: 1 }
-    };
-
-    let currency = "TRX";
+    const context = window.addressLevels;
+    const CURRENCIES = [{ id:"USDT", label:"USDT", prefix:"HS-USDT" }];
+    const POOLS = [{type:0,code:"N",label:"普通池"},{type:1,code:"W",label:"白名单池"}];
+    const store = {USDT:structuredClone(context.tiers)};
+    const inventory = {};
+    for (const a of context.addresses) {
+      const key = 'USDT|' + (a.pool === '普通池' ? 0 : 1) + '|' + a.layer;
+      const row = inventory[key] ||= {total:0,avail:0};
+      row.total++; if (a.enabled!==false) row.avail++;
+    }
+    let currency = 'USDT';
     const $ = (id) => document.getElementById(id);
     const toast = (msg) => {
       const el = $("toast");
@@ -222,7 +193,7 @@
           ${o.label}
         </button>
       `).join("");
-      $("ownerHint").textContent = `正在编辑 ${currency} 的金额分层；地址归属固定沿用汇盛，地址仅可用于该币种`;
+      $("ownerHint").textContent = `${context.editable ? '当前租户的代收配置' : '当前账号只读'}`;
     }
 
     function renderTiers() {
@@ -296,6 +267,9 @@
       renderOwnerTabs();
       renderTiers();
       renderMap();
+      if (!context.editable) {
+        document.querySelectorAll('#tierBody input, #tierBody button, #btnSave, #btnAdd').forEach(el=>el.disabled=true);
+      }
     }
 
     function readTierInputs() {
@@ -336,7 +310,7 @@
     }
 
     function boot() {
-      if (window.__HS_ADDRESS_EMBED__ || window.__HS_ADDRESS_SURFACE__ === "ADDRESS") {
+      if (context) {
         document.body.classList.add("embed");
       }
       $("ownerTabs").addEventListener("click", (e) => {
@@ -354,9 +328,10 @@
         list.push({ lower: last.upper, upper: null });
         render();
       };
-      $("btnSave").onclick = () => {
+      $("btnSave").onclick = async () => {
         const err = validateTiers();
         if (err) { toast(err); render(); return; }
+        try { await context.save(tiers()); } catch(error) { toast(error.message); return; }
         toast(`已保存 ${currencyMeta().label} 分层配置`);
         render();
       };

@@ -37,12 +37,13 @@ function authorizationFixture() {
   let permitted=true, scoped=true;
   const source=read('public/legacy/sources/tenants.html');
   const script=source.slice(source.indexOf('    function applyTenantConfirm('),source.indexOf('    function bindEvents('));
-  const context=vm.createContext({window:{HSBeautyDemo:{setEnabled:(...args)=>changes.push(args)}},appState:{currentConfirm:'开通美人桥业务'},document:{getElementById:id=>fields.get(id)},currentTenantForAction:()=>tenant,getPermissions:()=>({canBusinessAuth:permitted}),tenantInCurrentScope:()=>scoped,showFormError:(id,text)=>errors.push(text),platformNow:()=> '2026-11-16 12:00:00',finishTenantAction:(t,r)=>receipts.push(r)});
+  fields.set('confirmActionBtn',{disabled:false});
+  const context=vm.createContext({window:{top:{HSAddressPortal:{configure:async()=>null}},HSBeautyDemo:{setEnabled:(...args)=>changes.push(args)}},appState:{currentConfirm:'开通美人桥业务'},document:{getElementById:id=>fields.get(id)},currentTenantForAction:()=>tenant,getPermissions:()=>({canBusinessAuth:permitted}),tenantInCurrentScope:()=>scoped,showFormError:(id,text)=>errors.push(text),platformNow:()=> '2026-11-16 12:00:00',finishTenantAction:(t,r)=>receipts.push(r)});
   vm.runInContext(script,context);return {tenant,fields,changes,errors,receipts,scope:v=>scoped=v,permission:v=>permitted=v,apply:()=>vm.runInContext('applyTenantConfirm()',context)};
 }
-test('授权提交复验按钮权限、租户范围、状态及验证，失败不改授权或写成功审计',()=>{
+test('授权提交复验按钮权限、租户范围、状态及验证，失败不改授权或写成功审计',async()=>{
  for(const kind of ['permission','scope','closed','reason','otp']){const f=authorizationFixture();if(kind==='permission')f.permission(false);if(kind==='scope')f.scope(false);if(kind==='closed')f.tenant.status='关闭';if(kind==='reason')f.fields.get('confirmReason').value='';if(kind==='otp')f.fields.get('confirmOperator2fa').value='';f.apply();assert.equal(f.changes.length,0,kind);assert.equal(f.receipts.length,0,kind);assert.equal(f.errors.length,1,kind)}
- const f=authorizationFixture();f.apply();assert.equal(f.changes.length,1);assert.equal(f.changes[0][0],'HS-TEN-001');assert.equal(f.changes[0][1],true);assert.equal(f.receipts.length,1);assert.doesNotMatch(JSON.stringify(f.receipts),/123456/);
+ const f=authorizationFixture();await f.apply();assert.equal(f.changes.length,1);assert.equal(f.changes[0][0],'HS-TEN-001');assert.equal(f.changes[0][1],true);assert.equal(f.receipts.length,1);assert.doesNotMatch(JSON.stringify(f.receipts),/123456/);
 });
 test('迁移表保持新旧入口分离，四个业务菜单和钱包内部跳转均有注册',()=>{
  const modules=JSON.parse(read('surfaces/tenant/src/legacy/modules.json'));
